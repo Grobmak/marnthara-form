@@ -28,6 +28,12 @@ label{font-size:12px;color:var(--muted);display:block;margin:6px 0 4px}
 details.room>summary{list-style:none}
 details.room>summary::-webkit-details-marker{display:none}
 summary{user-select:none}
+.chev{display:inline-block;transition:transform .2s}
+details[open] .chev{transform:rotate(180deg)}
+details[open] [data-room-brief]{display:none}
+[data-room-brief]{display:inline-block;margin-left:6px;padding:.2rem .5rem;border:1px solid var(--line);border-radius:.5rem;background:#0d0e12;color:var(--muted)}
+[data-room-brief] .num{color:var(--primary);font-weight:600}
+.room-head input[name="room_name"]{flex:0 0 50%;}
 </style>
 </head>
 <body>
@@ -61,8 +67,10 @@ summary{user-select:none}
 <template id="roomTpl">
   <details class="card room" data-room open>
     <summary class="room-head">
+      <button type="button" class="btn btn-icon" data-act="toggle-room" title="พับ/กาง">▾</button>
       <label class="small" style="margin:0">ห้อง</label>
       <input class="field" type="text" name="room_name" placeholder="เช่น ห้อง 01" required>
+      <span class="small" data-room-brief>จุด 0 • ชุด 0 • ราคา 0 บาท</span>
       <span class="sp"></span>
       <button type="button" class="btn btn-icon btn-danger" data-act="del-room" title="ลบห้อง">✕</button>
     </summary>
@@ -167,7 +175,7 @@ summary{user-select:none}
 </template>
 
 <script>
-const WEBHOOK_URL = "https://hook.eu2.make.com/xul3fhuh96ybgfm2omdt2e74ejybxjoj";
+const WEBHOOK_URL = "https://hook.eu2.make.com/PUT-YOUR-HOOK-HERE";
 const roomsEl = document.getElementById('rooms');
 const orderForm = document.getElementById('orderForm');
 orderForm.action = WEBHOOK_URL;
@@ -232,6 +240,8 @@ function recalcAll(){
     const style = room.querySelector('select[name="style"]').value;
     if(style === 'ลอน') pricePerM += 300;
     let roomSum = 0;
+    let roomUnits = 0;
+    const points = room.querySelectorAll('[data-set]').length;
     room.querySelectorAll('[data-set]').forEach(set=>{
       const w = toNum(set.querySelector('input[name="width_m"]').value);
       const hasSheer = set.querySelector('input[name="has_sheer"]').checked;
@@ -251,9 +261,14 @@ function recalcAll(){
       if(tEl) tEl.textContent = total.toLocaleString('th-TH');
       if(qEl) qEl.textContent = `จำนวน ${qtyUnits.toLocaleString('th-TH')} ชุด`;
       roomSum += total;
+      roomUnits += qtyUnits;
       allSets += qtyUnits;
     });
     room.querySelector('[data-room-total]').textContent = roomSum.toLocaleString('th-TH')+' บาท';
+    const brief = room.querySelector('[data-room-brief]');
+    if(brief){
+      brief.innerHTML = `จุด <span class="num">${points.toLocaleString('th-TH')}</span> • ชุด <span class="num">${roomUnits.toLocaleString('th-TH')}</span> • ราคา <span class="price">${roomSum.toLocaleString('th-TH')}</span> บาท`;
+    }
     grand += roomSum;
   });
   document.getElementById('grandTotal').textContent = grand.toLocaleString('th-TH')+' บาท';
@@ -271,6 +286,11 @@ document.addEventListener('click', e=>{
   if(act==='add-set') addSet(b.closest('[data-room]'));
   if(act==='del-room') delRoom(b);
   if(act==='del-set') delSet(b);
+  if(act==='toggle-room'){
+    const d = b.closest('details');
+    if(d) d.open = !d.open;
+    recalcAll();
+  }
 });
 
 document.addEventListener('input', e=>{
