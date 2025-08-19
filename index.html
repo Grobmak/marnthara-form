@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Marnthara Input</title>
 <style>
-:root{--bg:#111215;--fg:#e7e7ea;--line:#2f2f33;--muted:#b8b8bf;--danger:#ff5a5f;--primary:#3a82f7;--secondary:#2ebd85;}
+:root{--bg:#111215;--fg:#e7e7ea;--line:#2f2f33;--muted:#b8b8bf;--danger:#ff5a5f;--primary:#3a82f7;--secondary:#2ebd85;--room1:#1a1b20;--room2:#20222a;--room3:#252830}
 *{box-sizing:border-box}
 body{margin:0;padding:16px;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial}
 h1{font-size:18px;margin:0 0 12px}
@@ -25,6 +25,9 @@ label{font-size:12px;color:var(--muted);display:block;margin:6px 0 4px}
 .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
 .total{border-top:1px solid var(--line);padding-top:10px;margin-top:12px;display:flex;justify-content:space-between;align-items:center}
 .hidden{display:none}
+details.room>summary{list-style:none}
+details.room>summary::-webkit-details-marker{display:none}
+summary{user-select:none}
 </style>
 </head>
 <body>
@@ -56,13 +59,13 @@ label{font-size:12px;color:var(--muted);display:block;margin:6px 0 4px}
 <iframe name="hiddenFrame" class="hidden"></iframe>
 
 <template id="roomTpl">
-  <div class="card room" data-room>
-    <div class="room-head">
+  <details class="card room" data-room open>
+    <summary class="room-head">
       <label class="small" style="margin:0">ห้อง</label>
       <input class="field" type="text" name="room_name" placeholder="เช่น ห้อง 01" required>
       <span class="sp"></span>
       <button type="button" class="btn btn-icon btn-danger" data-act="del-room" title="ลบห้อง">✕</button>
-    </div>
+    </summary>
 
     <div class="row">
       <div>
@@ -100,7 +103,7 @@ label{font-size:12px;color:var(--muted);display:block;margin:6px 0 4px}
         <label>ผ้า</label>
         <select class="field" name="fabric" required>
           <option value="" hidden>เลือก</option>
-          <option>ทึบ</option><option>โปร่ง</option>
+          <option>ทึบ</option><option>โปร่ง</option><option>ทึบ&โปร่ง</option>
         </select>
       </div>
       <div>
@@ -122,13 +125,14 @@ label{font-size:12px;color:var(--muted);display:block;margin:6px 0 4px}
       <div class="small">ราคารวมของห้องนี้</div>
       <div class="price" data-room-total>0 บาท</div>
     </div>
-  </div>
+  </details>
 </template>
 
 <template id="setTpl">
   <div class="card set" data-set>
     <div class="room-head" style="margin-bottom:4px">
-      <strong data-set-title>ชุดที่ 01</strong>
+      <strong data-set-title>จุดที่ 01</strong>
+      <span class="small" data-set-units>จำนวน 0 ชุด</span>
       <span class="sp"></span>
       <button type="button" class="btn btn-icon btn-danger" data-act="del-set" title="ลบชุด">−</button>
     </div>
@@ -142,8 +146,22 @@ label{font-size:12px;color:var(--muted);display:block;margin:6px 0 4px}
         <input class="field" name="height_m" type="number" step="0.01" inputmode="decimal" placeholder="เช่น 2.80" required>
       </div>
     </div>
+    <div class="row">
+      <div>
+        <label><input type="checkbox" name="has_sheer"> มีผ้าโปร่ง</label>
+      </div>
+      <div data-sheer-wrap class="hidden">
+        <label>ราคาผ้าโปร่ง (ต่อเมตร)</label>
+        <select class="field" name="sheer_price_per_m">
+          <option value="" hidden>เลือก</option>
+          <option value="1000">1,000</option>
+          <option value="1100">1,100</option>
+          <option value="1200">1,200</option>
+        </select>
+      </div>
+    </div>
     <div class="small" style="margin-top:8px">
-      สูตร: ราคา/ม. × ความกว้าง  →  ราคาชุดนี้: <span class="price" data-set-price>0</span> บาท
+      ทึบ: <span class="price" data-price-opaque>0</span> บาท • โปร่ง: <span class="price" data-price-sheer>0</span> บาท • รวม: <span class="price" data-set-price>0</span> บาท
     </div>
   </div>
 </template>
@@ -166,6 +184,8 @@ function addRoom() {
   const frag = document.getElementById('roomTpl').content.cloneNode(true);
   const room = frag.querySelector('[data-room]');
   room.dataset.index = roomCount;
+  const bgColors = ["var(--room1)","var(--room2)","var(--room3)"];
+  room.style.background = bgColors[(roomCount-1)%bgColors.length];
   roomsEl.appendChild(frag);
   addSet(roomsEl.querySelector('[data-room]:last-of-type'));
   renumber(); recalcAll();
@@ -199,7 +219,7 @@ function renumber() {
     [...room.querySelectorAll('[data-set]')].forEach((set) => {
       setCount++;
       const lbl = set.querySelector('[data-set-title]');
-      if (lbl) lbl.textContent = `ชุดที่ ${String(setCount).padStart(2,'0')}`;
+      if (lbl) lbl.textContent = `จุดที่ ${String(setCount).padStart(2,'0')}`;
     });
   });
 }
@@ -210,18 +230,28 @@ function recalcAll(){
   [...document.querySelectorAll('[data-room]')].forEach(room=>{
     let pricePerM = toNum(room.querySelector('select[name="price_per_m"]').value);
     const style = room.querySelector('select[name="style"]').value;
-    if(style === 'ลอน'){
-      pricePerM += 300;
-    }
+    if(style === 'ลอน') pricePerM += 300;
     let roomSum = 0;
     room.querySelectorAll('[data-set]').forEach(set=>{
       const w = toNum(set.querySelector('input[name="width_m"]').value);
-      const setPrice = Math.round(pricePerM * w);
-      set.querySelector('[data-set-price]').textContent = setPrice.toLocaleString('th-TH');
-      roomSum += setPrice;
-      if(setPrice > 0){
-        allSets++;
-      }
+      const hasSheer = set.querySelector('input[name="has_sheer"]').checked;
+      const sheerWrap = set.querySelector('[data-sheer-wrap]');
+      if (sheerWrap) sheerWrap.classList.toggle('hidden', !hasSheer);
+      const sheerPerM = hasSheer ? toNum(set.querySelector('[name="sheer_price_per_m"]').value) : 0;
+      const opaque = Math.round(pricePerM * w);
+      const sheer = hasSheer ? Math.round(sheerPerM * w) : 0;
+      const total = opaque + (hasSheer ? sheer : 0);
+      const qtyUnits = (opaque > 0 ? 1 : 0) + (hasSheer && sheer > 0 ? 1 : 0);
+      const oEl = set.querySelector('[data-price-opaque]');
+      const sEl = set.querySelector('[data-price-sheer]');
+      const tEl = set.querySelector('[data-set-price]');
+      const qEl = set.querySelector('[data-set-units]');
+      if(oEl) oEl.textContent = opaque.toLocaleString('th-TH');
+      if(sEl) sEl.textContent = sheer.toLocaleString('th-TH');
+      if(tEl) tEl.textContent = total.toLocaleString('th-TH');
+      if(qEl) qEl.textContent = `จำนวน ${qtyUnits.toLocaleString('th-TH')} ชุด`;
+      roomSum += total;
+      allSets += qtyUnits;
     });
     room.querySelector('[data-room-total]').textContent = roomSum.toLocaleString('th-TH')+' บาท';
     grand += roomSum;
@@ -235,6 +265,8 @@ document.getElementById('addRoomBtn').addEventListener('click', addRoom);
 document.addEventListener('click', e=>{
   const b = e.target.closest('[data-act]');
   if(!b) return;
+  e.preventDefault();
+  e.stopPropagation();
   const act = b.dataset.act;
   if(act==='add-set') addSet(b.closest('[data-room]'));
   if(act==='del-room') delRoom(b);
@@ -242,7 +274,11 @@ document.addEventListener('click', e=>{
 });
 
 document.addEventListener('input', e=>{
-  if(e.target.matches('input[name="width_m"], select[name="price_per_m"], select[name="style"]')) recalcAll();
+  if(e.target.matches('input[name="width_m"], select[name="price_per_m"], select[name="style"], select[name="sheer_price_per_m"]')) recalcAll();
+});
+
+document.addEventListener('change', e=>{
+  if(e.target.matches('input[name="has_sheer"], select[name="sheer_price_per_m"]')) recalcAll();
 });
 
 addRoom();
@@ -261,9 +297,7 @@ orderForm.addEventListener('submit', (e)=>{
   document.querySelectorAll('[data-room]').forEach(room=>{
     let pricePerM = toNum(room.querySelector('select[name="price_per_m"]').value);
     const style = room.querySelector('select[name="style"]').value;
-    if(style === 'ลอน'){
-      pricePerM += 300;
-    }
+    if(style === 'ลอน') pricePerM += 300;
     const roomObj = {
       room_name: room.querySelector('input[name="room_name"]').value || '',
       price_per_m: pricePerM,
@@ -276,12 +310,15 @@ orderForm.addEventListener('submit', (e)=>{
     room.querySelectorAll('[data-set]').forEach((set)=>{
       const w = toNum(set.querySelector('input[name="width_m"]').value);
       const h = toNum(set.querySelector('input[name="height_m"]').value);
-      const price = Math.round(pricePerM * w);
-      roomObj.sets.push({ width_m: w, height_m: h, price });
+      const hasSheer = set.querySelector('input[name="has_sheer"]').checked;
+      const sheerPerM = hasSheer ? toNum(set.querySelector('[name="sheer_price_per_m"]').value) : 0;
+      const opaque = Math.round(pricePerM * w);
+      const sheer = hasSheer ? Math.round(sheerPerM * w) : 0;
+      const price = opaque + (hasSheer ? sheer : 0);
+      const units = (opaque > 0 ? 1 : 0) + (hasSheer && sheer > 0 ? 1 : 0);
+      roomObj.sets.push({ width_m: w, height_m: h, has_sheer: hasSheer, sheer_price_per_m: sheerPerM, price_opaque: opaque, price_sheer: sheer, price, units });
       totalTHB += price;
-      if(price > 0){
-        allSets++;
-      }
+      allSets += units;
     });
 
     roomsData.push(roomObj);
