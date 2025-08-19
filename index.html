@@ -40,6 +40,9 @@ details[open] [data-room-brief]{display:none}
 .room-head input[name="room_name"]{flex:0 0 50%}
 .badge{border:1px solid var(--line);border-radius:.4rem;padding:.05rem .35rem}
 .actions-split{justify-content:space-between}
+.actions-note{align-items:center}
+.actions-note .note{color:var(--muted)}
+.actions .sp{flex:1}
 </style>
 </head>
 <body>
@@ -111,13 +114,12 @@ details[open] [data-room-brief]{display:none}
           <option value="" hidden>เลือก</option>
           <option>ลอน</option><option>ตาไก่</option><option>จีบ</option>
         </select>
-        <div class="small">ลอน +300/ม.</div>
       </div>
     </div>
 
     <div class="row">
       <div>
-        <label>ผ้า</label>
+        <label>ผ้า (ค่าเริ่มต้นสำหรับจุดใหม่)</label>
         <select class="field" name="fabric" required>
           <option value="" hidden>เลือก</option>
           <option>ทึบ</option><option>โปร่ง</option><option>ทึบ&โปร่ง</option>
@@ -134,7 +136,9 @@ details[open] [data-room-brief]{display:none}
 
     <div data-sets></div>
 
-    <div class="actions">
+    <div class="actions actions-note">
+      <div class="small note">หมายเหตุ: ลอน +300/ม. • สูง>2.5ม. +200/ม. • ผ้าเลือกต่อจุด</div>
+      <span class="sp"></span>
       <button type="button" class="btn btn-xs" data-act="add-set">+ เพิ่มชุด</button>
     </div>
 
@@ -152,6 +156,7 @@ details[open] [data-room-brief]{display:none}
       <span class="small" data-set-units>จำนวน 0 ชุด</span>
       <button type="button" class="btn btn-icon" data-act="dup-set" title="ก็อปจุด">⧉</button>
       <span class="sp"></span>
+      <button type="button" class="btn btn-xs" data-act="clear-set">clear</button>
       <button type="button" class="btn btn-icon btn-danger" data-act="del-set" title="ลบชุด">−</button>
     </div>
     <div class="row">
@@ -166,7 +171,12 @@ details[open] [data-room-brief]{display:none}
     </div>
     <div class="row">
       <div>
-        <label><input type="checkbox" name="has_sheer"> มีผ้าโปร่ง</label>
+        <label>ชนิดผ้าของจุดนี้</label>
+        <select class="field" name="fabric_variant">
+          <option>ทึบ</option>
+          <option>โปร่ง</option>
+          <option>ทึบ&โปร่ง</option>
+        </select>
       </div>
       <div data-sheer-wrap class="hidden">
         <label>ราคาผ้าโปร่ง (ต่อเมตร)</label>
@@ -185,7 +195,8 @@ details[open] [data-room-brief]{display:none}
 </template>
 
 <script>
-const WEBHOOK_URL = "https://hook.eu2.make.com/PUT-YOUR-HOOK-HERE";
+const APP_VERSION = "input-ui/2025-08-19-r9";
+const WEBHOOK_URL = "https://hook.eu2.make.com/xul3fhuh96ybgfm2omdt2e74ejybxjoj";
 const STORAGE_KEY = "marnthara.input.v1";
 
 const roomsEl = document.getElementById('rooms');
@@ -197,6 +208,7 @@ const copyBtn = document.getElementById('copyJsonBtn');
 let roomCount = 0;
 
 function toNum(v){ const n = parseFloat(v); return Number.isFinite(n) ? n : 0; }
+function clamp01(n){ return Math.max(0, toNum(n)); }
 function fmt(n){ return n.toLocaleString('th-TH'); }
 function debounce(fn, ms=120){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
 
@@ -219,14 +231,13 @@ function addRoom(prefill){
   }
 
   if(prefill && prefill.sets && prefill.sets.length){
-    prefill.sets.forEach((s,i)=> addSet(created, s));
+    prefill.sets.forEach((s)=> addSet(created, s));
   }else{
     addSet(created);
   }
 
   renumber();
   recalcAll();
-  syncFabricSheer(created);
 }
 
 function addSet(roomEl, prefill){
@@ -235,18 +246,27 @@ function addSet(roomEl, prefill){
   setsWrap.appendChild(frag);
   const created = setsWrap.querySelector('[data-set]:last-of-type');
 
+  const defFab = roomEl.querySelector('select[name="fabric"]').value;
+  const mapDefault = (v)=> v||'ทึบ';
+
+  const fvSel = created.querySelector('select[name="fabric_variant"]');
+  fvSel.value = prefill?.fabric_variant || mapDefault(defFab);
+
   if(prefill){
     created.querySelector('input[name="width_m"]').value = prefill.width_m ?? "";
     created.querySelector('input[name="height_m"]').value = prefill.height_m ?? "";
-    const chk = created.querySelector('input[name="has_sheer"]');
-    chk.checked = !!prefill.has_sheer;
-    if(chk.checked){
-      created.querySelector('[data-sheer-wrap]').classList.remove('hidden');
-      created.querySelector('select[name="sheer_price_per_m"]').value = prefill.sheer_price_per_m || "";
-    }
+    created.querySelector('select[name="sheer_price_per_m"]').value = prefill.sheer_price_per_m || "";
   }
+
+  toggleSetFabricUI(created);
   renumber();
   recalcAll();
+}
+
+function toggleSetFabricUI(set){
+  const variant = set.querySelector('select[name="fabric_variant"]').value;
+  const showSheer = (variant === 'โปร่ง' || variant === 'ทึบ&โปร่ง');
+  set.querySelector('[data-sheer-wrap]').classList.toggle('hidden', !showSheer);
 }
 
 function delRoom(btn){
@@ -264,7 +284,6 @@ function delSet(btn){
 function dupRoom(btn){
   const src = btn.closest('[data-room]');
   const data = serializeRoom(src);
-  // ทำชื่อระบุว่า copy
   if(data.room_name) data.room_name = data.room_name + " (copy)";
   addRoom(data);
 }
@@ -272,8 +291,33 @@ function dupRoom(btn){
 function dupSet(btn){
   const set = btn.closest('[data-set]');
   const room = btn.closest('[data-room]');
-  const data = serializeSet(set);
+  const data = serializeSet(set, room.querySelectorAll('[data-set]').length);
   addSet(room, data);
+}
+
+function clearSet(btn){
+  const set = btn.closest('[data-set]');
+  const room = btn.closest('[data-room]');
+  const defFab = room.querySelector('select[name="fabric"]').value || 'ทึบ';
+  set.querySelector('input[name="width_m"]').value = '';
+  set.querySelector('input[name="height_m"]').value = '';
+  const fvSel = set.querySelector('select[name="fabric_variant"]');
+  if(fvSel) fvSel.value = defFab || 'ทึบ';
+  const sheerSel = set.querySelector('select[name="sheer_price_per_m"]');
+  if(sheerSel) sheerSel.value = '';
+  toggleSetFabricUI(set);
+  recalcAll();
+  saveSoon();
+}
+
+function clearRoom(btn){
+  const room = btn.closest('[data-room]');
+  room.querySelectorAll('select').forEach(sel=> sel.value='');
+  const wrap = room.querySelector('[data-sets]');
+  wrap.innerHTML='';
+  addSet(room);
+  recalcAll();
+  saveSoon();
 }
 
 function renumber(){
@@ -289,11 +333,8 @@ function renumber(){
   });
 }
 
-function basePricePerM(room){
-  let ppm = toNum(room.querySelector('select[name="price_per_m"]').value);
-  const style = room.querySelector('select[name="style"]').value;
-  if(style === 'ลอน') ppm += 300;
-  return ppm;
+function basePricePerMRaw(room){
+  return toNum(room.querySelector('select[name="price_per_m"]').value);
 }
 
 function recalcAll(){
@@ -301,36 +342,41 @@ function recalcAll(){
   let allSets = 0;
 
   [...document.querySelectorAll('[data-room]')].forEach(room=>{
-    const ppm = basePricePerM(room);
+    const baseRaw = basePricePerMRaw(room);
+    const style = room.querySelector('select[name="style"]').value;
+    const stylePlus = (style === 'ลอน') ? 300 : 0;
+
     let roomSum = 0;
     let roomUnits = 0;
     const points = room.querySelectorAll('[data-set]').length;
 
     room.querySelectorAll('[data-set]').forEach(set=>{
-      const w = toNum(set.querySelector('input[name="width_m"]').value);
-      // height ม. เก็บ payload แต่ไม่ใช้ราคาตอนนี้
-      const hasSheer = set.querySelector('input[name="has_sheer"]').checked;
-      const sheerWrap = set.querySelector('[data-sheer-wrap]');
-      if (sheerWrap) sheerWrap.classList.toggle('hidden', !hasSheer);
-      const sheerPerM = hasSheer ? toNum(set.querySelector('[name="sheer_price_per_m"]').value) : 0;
+      const w = clamp01(set.querySelector('input[name="width_m"]').value);
+      const h = clamp01(set.querySelector('input[name="height_m"]').value);
+      const heightPlus = (h > 2.5) ? 200 : 0;
 
-      const opaque = Math.round(ppm * w);
-      const sheer = hasSheer ? Math.round(sheerPerM * w) : 0;
-      const total = opaque + (hasSheer ? sheer : 0);
-      const units = (opaque > 0 ? 1 : 0) + (hasSheer && sheer > 0 ? 1 : 0);
+      const variant = set.querySelector('select[name="fabric_variant"]').value;
+      const hasOpaque = variant !== 'โปร่ง';
+      const hasSheer  = variant !== 'ทึบ';
 
-      const oEl = set.querySelector('[data-price-opaque]');
-      const sEl = set.querySelector('[data-price-sheer]');
-      const tEl = set.querySelector('[data-set-price]');
-      const qEl = set.querySelector('[data-set-units]');
-      if(oEl) oEl.textContent = fmt(opaque);
-      if(sEl) sEl.textContent = fmt(sheer);
-      if(tEl) tEl.textContent = fmt(total);
-      if(qEl) qEl.textContent = `จำนวน ${fmt(units)} ชุด`;
+      const sheerBase = hasSheer ? clamp01(set.querySelector('[name="sheer_price_per_m"]').value) : 0;
+
+      const opaquePerM = hasOpaque ? (baseRaw + stylePlus + heightPlus) : 0;
+      const sheerPerM  = hasSheer  ? (sheerBase + stylePlus + heightPlus) : 0;
+
+      const opaque = Math.round(opaquePerM * w);
+      const sheer  = Math.round(sheerPerM * w);
+      const total  = opaque + sheer;
+      const units  = (opaque > 0 ? 1 : 0) + (sheer > 0 ? 1 : 0);
+
+      set.querySelector('[data-price-opaque]').textContent = fmt(opaque);
+      set.querySelector('[data-price-sheer]').textContent  = fmt(sheer);
+      set.querySelector('[data-set-price]').textContent    = fmt(total);
+      set.querySelector('[data-set-units]').textContent    = `จำนวน ${fmt(units)} ชุด`;
 
       roomSum += total;
       roomUnits += units;
-      allSets += units;
+      allSets  += units;
     });
 
     const rt = room.querySelector('[data-room-total]');
@@ -348,41 +394,30 @@ function recalcAll(){
   document.getElementById('setCount').textContent = fmt(allSets)+' ชุด';
 }
 
-function syncFabricSheer(room){
-  const fabric = room.querySelector('select[name="fabric"]').value;
-  const forceSheer = (fabric === 'ทึบ&โปร่ง');
-  room.querySelectorAll('[data-set]').forEach(set=>{
-    const chk = set.querySelector('input[name="has_sheer"]');
-    chk.disabled = forceSheer;
-    if(forceSheer){ chk.checked = true; }
-    set.querySelector('[data-sheer-wrap]').classList.toggle('hidden', !chk.checked);
-  });
-}
-
-function serializeSet(set){
-  return {
-    width_m: toNum(set.querySelector('input[name="width_m"]').value),
-    height_m: toNum(set.querySelector('input[name="height_m"]').value),
-    has_sheer: set.querySelector('input[name="has_sheer"]').checked,
-    sheer_price_per_m: toNum(set.querySelector('[name="sheer_price_per_m"]').value)
-  };
+function serializeSet(set, idx=0){
+  const width  = clamp01(set.querySelector('input[name="width_m"]').value);
+  const height = clamp01(set.querySelector('input[name="height_m"]').value);
+  const fabric_variant = set.querySelector('select[name="fabric_variant"]').value;
+  const hasSheer = fabric_variant !== 'ทึบ';
+  const sheer_price_per_m = hasSheer ? clamp01(set.querySelector('[name="sheer_price_per_m"]').value) : 0;
+  return { point_idx: idx+1, width_m: width, height_m: height, fabric_variant, sheer_price_per_m };
 }
 
 function serializeRoom(room){
-  const ppmRaw = toNum(room.querySelector('select[name="price_per_m"]').value);
+  const ppmRaw = basePricePerMRaw(room);
   const style = room.querySelector('select[name="style"]').value;
-  const ppm = basePricePerM(room);
-  const data = {
+  const stylePlus = (style === 'ลอน') ? 300 : 0;
+  const fabric = room.querySelector('select[name="fabric"]').value;
+  return {
+    room_id: Number(room.dataset.index) || null,
     room_name: room.querySelector('input[name="room_name"]').value || '',
     price_per_m_raw: ppmRaw,
-    price_per_m: ppm,
+    price_per_m: ppmRaw + stylePlus, // เฉพาะทึบต่อเมตร (ฐาน)
     style,
-    fabric: room.querySelector('select[name="fabric"]').value || '',
+    fabric_default: fabric || '', // ใช้เป็นดีฟอลต์ตอนสร้างจุดใหม่
     open_type: room.querySelector('select[name="open_type"]').value || '',
-    sets: []
+    sets: [...room.querySelectorAll('[data-set]')].map((set,i)=> serializeSet(set,i))
   };
-  room.querySelectorAll('[data-set]').forEach(set=> data.sets.push(serializeSet(set)));
-  return data;
 }
 
 function buildPayload(){
@@ -391,34 +426,51 @@ function buildPayload(){
   let allSets = 0;
 
   document.querySelectorAll('[data-room]').forEach(room=>{
-    const ppm = basePricePerM(room);
-    const roomObj = {
-      room_name: room.querySelector('input[name="room_name"]').value || '',
-      price_per_m: ppm,
-      style: room.querySelector('select[name="style"]').value || '',
-      fabric: room.querySelector('select[name="fabric"]').value || '',
-      open_type: room.querySelector('select[name="open_type"]').value || '',
-      sets: []
-    };
+    const baseRaw = basePricePerMRaw(room);
+    const style = room.querySelector('select[name="style"]').value;
+    const stylePlus = (style === 'ลอน') ? 300 : 0;
 
-    room.querySelectorAll('[data-set]').forEach(set=>{
-      const w = toNum(set.querySelector('input[name="width_m"]').value);
-      const h = toNum(set.querySelector('input[name="height_m"]').value);
-      const hasSheer = set.querySelector('input[name="has_sheer"]').checked;
-      const sheerPerM = hasSheer ? toNum(set.querySelector('[name="sheer_price_per_m"]').value) : 0;
-      const opaque = Math.round(ppm * w);
-      const sheer = hasSheer ? Math.round(sheerPerM * w) : 0;
-      const price = opaque + (hasSheer ? sheer : 0);
-      const units = (opaque > 0 ? 1 : 0) + (hasSheer && sheer > 0 ? 1 : 0);
-      roomObj.sets.push({ width_m:w, height_m:h, has_sheer:hasSheer, sheer_price_per_m:sheerPerM, price_opaque:opaque, price_sheer:sheer, price, units });
+    const roomObj = serializeRoom(room);
+    roomObj.sets = [];
+
+    room.querySelectorAll('[data-set]').forEach((set,i)=>{
+      const w = clamp01(set.querySelector('input[name="width_m"]').value);
+      const h = clamp01(set.querySelector('input[name="height_m"]').value);
+      const heightPlus = (h > 2.5) ? 200 : 0;
+
+      const variant = set.querySelector('select[name="fabric_variant"]').value;
+      const hasOpaque = variant !== 'โปร่ง';
+      const hasSheer  = variant !== 'ทึบ';
+      const sheerBase = hasSheer ? clamp01(set.querySelector('[name="sheer_price_per_m"]').value) : 0;
+
+      const opaquePerM = hasOpaque ? (baseRaw + stylePlus + heightPlus) : 0;
+      const sheerPerM  = hasSheer  ? (sheerBase + stylePlus + heightPlus) : 0;
+
+      const price_opaque = Math.round(opaquePerM * w);
+      const price_sheer  = Math.round(sheerPerM * w);
+      const price        = price_opaque + price_sheer;
+      const units        = (price_opaque > 0 ? 1 : 0) + (price_sheer > 0 ? 1 : 0);
+
+      roomObj.sets.push({
+        point_idx:i+1, width_m:w, height_m:h, fabric_variant:variant,
+        price_per_m_opaque:opaquePerM, price_per_m_sheer:sheerPerM,
+        price_opaque, price_sheer, price, units
+      });
+
       totalTHB += price;
-      allSets += units;
+      allSets  += units;
     });
 
     roomsData.push(roomObj);
   });
 
-  return { total_thb: totalTHB, total_sets: allSets, rooms: roomsData };
+  return {
+    app_version: APP_VERSION,
+    generated_at: new Date().toISOString(),
+    total_thb: totalTHB,
+    total_sets: allSets,
+    rooms: roomsData
+  };
 }
 
 function saveState(){
@@ -451,10 +503,12 @@ document.addEventListener('click', e=>{
   e.stopPropagation();
   const act = b.dataset.act;
   if(act==='add-set'){ addSet(b.closest('[data-room]')); saveSoon(); }
-  if(act==='del-room'){ if(!confirm('ลบห้องนี้ทั้งหมด?')) return; delRoom(b); }
-  if(act==='del-set'){ if(!confirm('ลบจุดนี้?')) return; delSet(b); }
+  if(act==='del-room'){ let ok=true; try{ ok = (typeof window!=="undefined" && typeof window.confirm==='function') ? confirm('ลบห้องนี้ทั้งหมด?') : true; }catch(e){ ok=true; } if(!ok) return; delRoom(b); }
+  if(act==='del-set'){ let ok=true; try{ ok = (typeof window!=="undefined" && typeof window.confirm==='function') ? confirm('ลบจุดนี้?') : true; }catch(e){ ok=true; } if(!ok) return; delSet(b); }
   if(act==='dup-room'){ dupRoom(b); saveSoon(); }
   if(act==='dup-set'){ dupSet(b); saveSoon(); }
+  if(act==='clear-set'){ let ok=true; try{ ok = (typeof window!=="undefined" && typeof window.confirm==='function') ? confirm('ล้างข้อมูลจุดนี้?') : true; }catch(e){ ok=true; } if(!ok) return; clearSet(b); }
+  if(act==='clear-room'){ let ok=true; try{ ok = (typeof window!=="undefined" && typeof window.confirm==='function') ? confirm('ล้างข้อมูลห้องนี้?') : true; }catch(e){ ok=true; } if(!ok) return; clearRoom(b); }
   if(act==='toggle-room'){
     const d = b.closest('details');
     if(d) d.open = !d.open;
@@ -463,15 +517,14 @@ document.addEventListener('click', e=>{
 });
 
 document.addEventListener('input', e=>{
-  if(e.target.matches('input[name="width_m"], input[name="height_m"], select[name="price_per_m"], select[name="style"], select[name="sheer_price_per_m"], input[name="room_name"]')){
+  if(e.target.matches('input[name="width_m"], input[name="height_m"], select[name="price_per_m"], select[name="style"], select[name="sheer_price_per_m"], input[name="room_name"], select[name="fabric_variant"]')){
+    if(e.target.name === 'fabric_variant') toggleSetFabricUI(e.target.closest('[data-set]'));
     recalcSoon(); saveSoon();
   }
 });
 
 document.addEventListener('change', e=>{
-  if(e.target.matches('input[name="has_sheer"], select[name="sheer_price_per_m"], select[name="fabric"], select[name="open_type"]')){
-    const room = e.target.closest('[data-room]');
-    if(e.target.matches('select[name="fabric"]')) syncFabricSheer(room);
+  if(e.target.matches('select[name="fabric"], select[name="open_type"]')){
     recalcAll(); saveSoon();
   }
 });
@@ -482,7 +535,7 @@ copyBtn.addEventListener('click', ()=>{
   navigator.clipboard?.writeText(str).then(()=> alert('คัดลอก JSON แล้ว'));
 });
 
-addRoom(); // default ifไม่มี state
+addRoom();
 if(loadState()===false){ recalcAll(); }
 
 orderForm.addEventListener('submit', (e)=>{
