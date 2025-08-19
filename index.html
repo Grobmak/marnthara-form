@@ -1,198 +1,140 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Marnthara Multi-Room Order</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Marnthara Order</title>
 <style>
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:12px;max-width:860px}
-  h1{font-size:20px;margin:8px 0}
-  .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-  label{font-size:14px;flex:1 1 180px}
-  input,select,button{font-size:16px;padding:8px;width:100%}
-  .card{border:1px solid #ddd;border-radius:10px;padding:12px;margin:8px 0;background:#fff}
-  .muted{color:#666;font-size:13px}
-  .right{display:flex;justify-content:flex-end}
-  .total{font-weight:700;font-size:18px}
-  .room-header{display:flex;gap:8px;align-items:center}
-  .room-list{margin-bottom:12px}
+:root{--line:#2f2f33;--muted:#c9c9cf;--danger:#ff5a5f}
+*{box-sizing:border-box} body{margin:0;padding:16px;color:#e6e6e6;
+background:#121216;font-family:system-ui,Segoe UI,Roboto,Arial}
+h1{font-size:18px;margin:0 0 12px}
+.card{border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{width:100%;padding:.55rem .7rem;border:1px solid var(--line);
+border-radius:.6rem;background:transparent;color:inherit}
+label{font-size:12px;color:#b9b9bf;display:block;margin:8px 0 6px}
+.btn{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--line);
+background:transparent;color:var(--muted);border-radius:.5rem;font-weight:500;
+transition:opacity .15s ease;cursor:pointer}
+.btn:hover{opacity:.85}
+.btn-xs{padding:.2rem .45rem;font-size:.85rem;line-height:1.1}
+.btn-icon{width:1.8rem;height:1.8rem;padding:0;display:inline-grid;place-items:center}
+.btn-danger{border-color:var(--danger);color:var(--danger)}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.room-header{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.room-header .spacer{flex:1}
+hr{border:none;border-top:1px solid var(--line);margin:12px 0}
+.hidden{display:none}
 </style>
 </head>
 <body>
-<h1>Marnthara — ใบสั่งงาน (หลายห้อง)</h1>
 
-<div class="right">
-  <button id="addRoom">+ เพิ่มห้อง</button>
-</div>
+<h1>สั่งงานม่าน</h1>
 
-<div id="rooms" class="room-list"></div>
+<!-- IMPORTANT: ใส่ Webhook URL ของ Make ตรง action -->
+<form id="orderForm"
+      action="https://hook.eu2.make.com/xul3fhuh96ybgfm2omdt2e74ejybxjoj"
+      method="post" target="hiddenFrame">
 
-<div class="card">
-  <div class="row">
-    <div class="total">ราคารวมทั้งหมด: <span id="grand">0</span> บาท</div>
-  </div>
-  <div class="muted">สูตร: ราคา/ม. = ราคาผ้า/ม. + ค่ารูปแบบ(+300 เมื่อเป็น ลอน). ชุด : กว้าง(ม.) × ราคา/ม.</div>
-</div>
-
-<div class="right">
-  <button id="submit">ส่งไป Make → Notion</button>
-</div>
-
-<script>
-const MAKE_WEBHOOK = "https://hook.eu2.make.com/xul3fhuh96ybgfm2omdt2e74ejybxjoj"; // ← แทนด้วย webhook จริง
-let roomCounter = 0;
-
-function fabricRateOptionsHTML(){
-  let html = '<option value="">เลือก</option>';
-  for(let r=1000;r<=2500;r+=100){
-    html += `<option value="${r}">${r}</option>`;
-  }
-  return html;
-}
-
-function addRoom(){
-  roomCounter++;
-  const rid = String(roomCounter).padStart(2,'0');
-  const wrap = document.createElement('div');
-  wrap.className = 'card room';
-  wrap.dataset.rid = rid;
-  wrap.innerHTML = `
+  <div class="card" id="room-01">
     <div class="room-header">
-      <strong>ห้อง ${rid}</strong>
-      <label style="flex:1">
-        ประเภทห้อง
-        <select class="roomType">
-          <option value="">เลือก</option>
-          <option>นอน</option><option>โถง</option><option>นั่งเล่น</option><option>ครัว</option><option>อื่นๆ</option>
-        </select>
-      </label>
-      <label style="flex:1">
-        ชื่อห้อง (ถ้าต้องการ)
-        <input class="roomLabel" placeholder="เช่น ห้องนอนใหญ่"/>
-      </label>
-      <button class="removeRoom">ลบห้อง</button>
+      <strong>ห้อง 01</strong>
+      <label for="room_name" style="margin:0">ชื่อห้อง</label>
+      <input id="room_name" name="room_name" class="field" type="text"
+             inputmode="text" placeholder="เช่น ห้องนอน 1" />
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-icon btn-danger"
+              data-action="del-room" data-target="#room-01"
+              aria-label="ลบห้อง">✕</button>
     </div>
-    <div class="sets"></div>
-    <div class="right" style="margin-top:8px">
-      <button class="addSet">+ เพิ่มชุดติดตั้ง</button>
-    </div>
-  `;
-  document.getElementById('rooms').appendChild(wrap);
 
-  wrap.querySelector('.removeRoom').onclick = () => { wrap.remove(); recalc(); };
-  wrap.querySelector('.addSet').onclick = ()=> addSet(wrap);
-  addSet(wrap);
-}
-
-function addSet(roomEl){
-  const setsDiv = roomEl.querySelector('.sets');
-  const sidx = setsDiv.children.length + 1;
-  const setCard = document.createElement('div');
-  setCard.className = 'card';
-  setCard.style.margin = '8px 0';
-  setCard.innerHTML = `
     <div class="row">
-      <label>สไตล์
-        <select class="style">
-          <option value="">เลือก</option>
+      <div>
+        <label for="room_type">ประเภทห้อง</label>
+        <select id="room_type" name="room_type" class="field" required>
+          <option value="" hidden>เลือก</option>
+          <option>นอน</option><option>โถง</option>
+          <option>นั่งเล่น</option><option>ครัว</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="open_type">รูปแบบเปิดผ้า</label>
+        <select id="open_type" name="open_type" class="field" required>
+          <option value="" hidden>เลือก</option>
+          <option>แยกกลาง</option>
+          <option>สไลด์เดี่ยว</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="style_type">สไตล์</label>
+        <select id="style_type" name="style_type" class="field" required>
+          <option value="" hidden>เลือก</option>
           <option>ลอน</option><option>ตาไก่</option><option>จีบ</option>
         </select>
-      </label>
-      <label>ชนิดผ้า
-        <select class="fabricKind">
-          <option value="">เลือก</option>
+      </div>
+
+      <div>
+        <label for="fabric_type">ชนิดผ้า</label>
+        <select id="fabric_type" name="fabric_type" class="field" required>
+          <option value="" hidden>เลือก</option>
           <option>ทึบ</option><option>โปร่ง</option>
         </select>
-      </label>
-      <label>ราคาผ้า/เมตร
-        <select class="fabricRate">
-          ${fabricRateOptionsHTML()}
-        </select>
-      </label>
+      </div>
     </div>
+
     <div class="row">
-      <label>กว้าง (ม.)
-        <input type="number" step="0.01" min="0" class="width" placeholder="เช่น 3.50"/>
-      </label>
-      <label>สูง (ม.)
-        <input type="number" step="0.01" min="0" class="height" placeholder="เช่น 2.80"/>
-      </label>
-      <label>หมายเหตุ
-        <input class="note" placeholder="เช่น หน้าต่าง 2 บาน"/>
-      </label>
+      <div>
+        <label for="width_m">กว้าง (ม.)</label>
+        <input id="width_m" name="width_m" class="field" type="number"
+               step="0.01" inputmode="decimal" placeholder="เช่น 3.50" required />
+      </div>
+      <div>
+        <label for="height_m">สูง (ม.)</label>
+        <input id="height_m" name="height_m" class="field" type="number"
+               step="0.01" inputmode="decimal" placeholder="เช่น 2.80" required />
+      </div>
     </div>
-    <div class="row">
-      <div>ราคาชุดนี้: <strong><span class="lineTotal">0</span> บาท</strong></div>
-      <div class="muted">คิด = กว้าง × (ราคาผ้า/ม. + ค่ารูปแบบ)</div>
+
+    <label for="notes">หมายเหตุ</label>
+    <textarea id="notes" name="notes" class="field" rows="2"
+              placeholder="เช่น หน้าต่าง 2 บาน"></textarea>
+
+    <div class="actions">
+      <button type="button" class="btn btn-xs btn-danger"
+              data-action="del-set" data-target="#room-01">ลบชุด</button>
     </div>
-    <div class="right"><button class="removeSet">ลบชุด</button></div>
-  `;
-  setsDiv.appendChild(setCard);
+  </div>
 
-  setCard.querySelector('.removeSet').onclick = ()=> { setCard.remove(); recalc(); };
-  setCard.addEventListener('input', recalc);
-  recalc();
-}
+  <hr />
+  <div class="actions">
+    <button type="submit" class="btn btn-xs">ส่งไปคำนวณ</button>
+  </div>
+</form>
 
-function styleSurcharge(style){
-  return style === 'ลอน' ? 300 : 0;
-}
+<!-- กันหน้าเปลี่ยนตอน POST ไป Make -->
+<iframe name="hiddenFrame" class="hidden"></iframe>
 
-function recalc(){
-  let grand = 0;
-  document.querySelectorAll('#rooms .card.room').forEach(room=>{
-    room.querySelectorAll('.sets .card').forEach(set=>{
-      const w = parseFloat(set.querySelector('.width').value || '0');
-      const rate = parseFloat(set.querySelector('.fabricRate').value || '0');
-      const style = set.querySelector('.style').value || '';
-      const unit = (isFinite(rate) ? rate : 0) + styleSurcharge(style);
-      const line = Math.round(w * unit);
-      set.querySelector('.lineTotal').textContent = isFinite(line) ? line : 0;
-      grand += isFinite(line) ? line : 0;
-    });
-  });
-  document.getElementById('grand').textContent = grand;
-}
+<script>
+/* ลบ card ตามปุ่ม */
+document.addEventListener('click', (e)=>{
+  const b = e.target.closest('button[data-action]'); if(!b) return;
+  const sel = b.dataset.target; const el = sel && document.querySelector(sel);
+  if(!el) return;
+  if(b.dataset.action==='del-room' || b.dataset.action==='del-set'){ el.remove(); }
+});
 
-async function submitForm(){
-  const rooms = [];
-  document.querySelectorAll('#rooms .card.room').forEach(room=>{
-    const type = room.querySelector('.roomType').value || '';
-    const label = room.querySelector('.roomLabel').value || '';
-    const sets = [];
-    room.querySelectorAll('.sets .card').forEach(set=>{
-      const style = set.querySelector('.style').value || '';
-      const fabricKind = set.querySelector('.fabricKind').value || '';
-      const rate = parseFloat(set.querySelector('.fabricRate').value || '0');
-      const width = parseFloat(set.querySelector('.width').value || '0');
-      const height = parseFloat(set.querySelector('.height').value || '0');
-      const note = set.querySelector('.note').value || '';
-      const unit = (isFinite(rate) ? rate : 0) + styleSurcharge(style);
-      const price = Math.round(width * unit);
-      sets.push({style,fabricKind,rate,width,height,note,unit_price_per_m:unit,price});
-    });
-    if(sets.length>0) rooms.push({type,label,sets});
-  });
-  if(rooms.length===0){ alert('ยังไม่มีชุดติดตั้งใด ๆ'); return; }
-  const total = rooms.flatMap(r=>r.sets).reduce((s,x)=>s+x.price,0);
-  const payload = {rooms, total_price: total, submitted_at: new Date().toISOString()};
-  try{
-    const res = await fetch(MAKE_WEBHOOK, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    if(!res.ok) throw new Error('send failed');
-    alert('ส่งเรียบร้อย');
-  }catch(e){
-    console.error(e);
-    alert('ส่งไม่สำเร็จ ดู console หรือ network');
+/* เตือนถ้าไม่ได้ตั้ง Webhook URL */
+(function(){
+  const f=document.getElementById('orderForm');
+  if(f.action.includes('PUT-YOUR-HOOK-HERE')){
+    alert('ยังไม่ได้ตั้ง Webhook URL ของ Make ใน form.action');
   }
-}
-
-document.getElementById('addRoom').onclick = addRoom;
-document.getElementById('submit').onclick = submitForm;
-addRoom();
+})();
 </script>
 </body>
 </html>
