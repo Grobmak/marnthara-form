@@ -31,7 +31,8 @@ label{font-size:12px;color:var(--muted);display:block;margin:6px 0 4px}
 .hidden{display:none}
 details.room>summary{list-style:none}
 details.room>summary::-webkit-details-marker{display:none}
-summary{user-select:none}
+summary{user-select:none; pointer-events:none}
+summary *{pointer-events:auto}
 .chev{display:inline-block;transition:transform .2s}
 details[open] .chev{transform:rotate(180deg)}
 details[open] [data-room-brief]{display:none}
@@ -195,9 +196,16 @@ details[open] [data-room-brief]{display:none}
 </template>
 
 <script>
-const APP_VERSION = "input-ui/2025-08-19-r9";
+const APP_VERSION = "input-ui/2025-08-19-r10";
 const WEBHOOK_URL = "https://hook.eu2.make.com/xul3fhuh96ybgfm2omdt2e74ejybxjoj";
 const STORAGE_KEY = "marnthara.input.v1";
+
+const PRICING = {
+  style_surcharge: { 'ลอน': 300, 'ตาไก่': 0, 'จีบ': 0 },
+  height: { threshold: 2.5, add_per_m: 200 }
+};
+const stylePlus  = s => PRICING.style_surcharge[s] ?? 0;
+const heightPlus = h => h > PRICING.height.threshold ? PRICING.height.add_per_m : 0;
 
 const roomsEl = document.getElementById('rooms');
 const orderForm = document.getElementById('orderForm');
@@ -322,7 +330,7 @@ function clearRoom(btn){
 
 function renumber(){
   [...document.querySelectorAll('[data-room]')].forEach((room, rIdx) => {
-    const input = room.querySelector('input[name="room_name"]');
+    const input = room.querySelector('input[name=\"room_name\"]');
     if(input && !input.value) input.placeholder = `ห้อง ${String(rIdx+1).padStart(2,'0')}`;
     let setCount = 0;
     [...room.querySelectorAll('[data-set]')].forEach((set) => {
@@ -334,7 +342,7 @@ function renumber(){
 }
 
 function basePricePerMRaw(room){
-  return toNum(room.querySelector('select[name="price_per_m"]').value);
+  return toNum(room.querySelector('select[name=\"price_per_m\"]').value);
 }
 
 function recalcAll(){
@@ -343,26 +351,26 @@ function recalcAll(){
 
   [...document.querySelectorAll('[data-room]')].forEach(room=>{
     const baseRaw = basePricePerMRaw(room);
-    const style = room.querySelector('select[name="style"]').value;
-    const stylePlus = (style === 'ลอน') ? 300 : 0;
+    const style = room.querySelector('select[name=\"style\"]').value;
+    const sPlus = stylePlus(style);
 
     let roomSum = 0;
     let roomUnits = 0;
     const points = room.querySelectorAll('[data-set]').length;
 
     room.querySelectorAll('[data-set]').forEach(set=>{
-      const w = clamp01(set.querySelector('input[name="width_m"]').value);
-      const h = clamp01(set.querySelector('input[name="height_m"]').value);
-      const heightPlus = (h > 2.5) ? 200 : 0;
+      const w = clamp01(set.querySelector('input[name=\"width_m\"]').value);
+      const h = clamp01(set.querySelector('input[name=\"height_m\"]').value);
+      const hPlus = heightPlus(h);
 
-      const variant = set.querySelector('select[name="fabric_variant"]').value;
+      const variant = set.querySelector('select[name=\"fabric_variant\"]').value;
       const hasOpaque = variant !== 'โปร่ง';
       const hasSheer  = variant !== 'ทึบ';
 
-      const sheerBase = hasSheer ? clamp01(set.querySelector('[name="sheer_price_per_m"]').value) : 0;
+      const sheerBase = hasSheer ? clamp01(set.querySelector('[name=\"sheer_price_per_m\"]').value) : 0;
 
-      const opaquePerM = hasOpaque ? (baseRaw + stylePlus + heightPlus) : 0;
-      const sheerPerM  = hasSheer  ? (sheerBase + stylePlus + heightPlus) : 0;
+      const opaquePerM = hasOpaque ? (baseRaw + sPlus + hPlus) : 0;
+      const sheerPerM  = hasSheer  ? (sheerBase + sPlus + hPlus) : 0;
 
       const opaque = Math.round(opaquePerM * w);
       const sheer  = Math.round(sheerPerM * w);
@@ -384,7 +392,7 @@ function recalcAll(){
 
     const brief = room.querySelector('[data-room-brief]');
     if(brief){
-      brief.innerHTML = `จุด <span class="num">${fmt(points)}</span> • ชุด <span class="num">${fmt(roomUnits)}</span> • ราคา <span class="price">${fmt(roomSum)}</span> บาท`;
+      brief.innerHTML = `จุด <span class=\"num\">${fmt(points)}</span> • ชุด <span class=\"num\">${fmt(roomUnits)}</span> • ราคา <span class=\"price\">${fmt(roomSum)}</span> บาท`;
     }
 
     grand += roomSum;
@@ -395,27 +403,27 @@ function recalcAll(){
 }
 
 function serializeSet(set, idx=0){
-  const width  = clamp01(set.querySelector('input[name="width_m"]').value);
-  const height = clamp01(set.querySelector('input[name="height_m"]').value);
-  const fabric_variant = set.querySelector('select[name="fabric_variant"]').value;
+  const width  = clamp01(set.querySelector('input[name=\"width_m\"]').value);
+  const height = clamp01(set.querySelector('input[name=\"height_m\"]').value);
+  const fabric_variant = set.querySelector('select[name=\"fabric_variant\"]').value;
   const hasSheer = fabric_variant !== 'ทึบ';
-  const sheer_price_per_m = hasSheer ? clamp01(set.querySelector('[name="sheer_price_per_m"]').value) : 0;
+  const sheer_price_per_m = hasSheer ? clamp01(set.querySelector('[name=\"sheer_price_per_m\"]').value) : 0;
   return { point_idx: idx+1, width_m: width, height_m: height, fabric_variant, sheer_price_per_m };
 }
 
 function serializeRoom(room){
   const ppmRaw = basePricePerMRaw(room);
-  const style = room.querySelector('select[name="style"]').value;
-  const stylePlus = (style === 'ลอน') ? 300 : 0;
-  const fabric = room.querySelector('select[name="fabric"]').value;
+  const style = room.querySelector('select[name=\"style\"]').value;
+  const sPlus2 = stylePlus(style);
+  const fabric = room.querySelector('select[name=\"fabric\"]').value;
   return {
     room_id: Number(room.dataset.index) || null,
-    room_name: room.querySelector('input[name="room_name"]').value || '',
+    room_name: room.querySelector('input[name=\"room_name\"]').value || '',
     price_per_m_raw: ppmRaw,
-    price_per_m: ppmRaw + stylePlus, // เฉพาะทึบต่อเมตร (ฐาน)
+    price_per_m: ppmRaw + sPlus2,
     style,
-    fabric_default: fabric || '', // ใช้เป็นดีฟอลต์ตอนสร้างจุดใหม่
-    open_type: room.querySelector('select[name="open_type"]').value || '',
+    fabric_default: fabric || '',
+    open_type: room.querySelector('select[name=\"open_type\"]').value || '',
     sets: [...room.querySelectorAll('[data-set]')].map((set,i)=> serializeSet(set,i))
   };
 }
@@ -427,24 +435,24 @@ function buildPayload(){
 
   document.querySelectorAll('[data-room]').forEach(room=>{
     const baseRaw = basePricePerMRaw(room);
-    const style = room.querySelector('select[name="style"]').value;
-    const stylePlus = (style === 'ลอน') ? 300 : 0;
+    const style = room.querySelector('select[name=\"style\"]').value;
+    const sPlus = stylePlus(style);
 
     const roomObj = serializeRoom(room);
     roomObj.sets = [];
 
     room.querySelectorAll('[data-set]').forEach((set,i)=>{
-      const w = clamp01(set.querySelector('input[name="width_m"]').value);
-      const h = clamp01(set.querySelector('input[name="height_m"]').value);
-      const heightPlus = (h > 2.5) ? 200 : 0;
+      const w = clamp01(set.querySelector('input[name=\"width_m\"]').value);
+      const h = clamp01(set.querySelector('input[name=\"height_m\"]').value);
+      const hPlus = heightPlus(h);
 
-      const variant = set.querySelector('select[name="fabric_variant"]').value;
+      const variant = set.querySelector('select[name=\"fabric_variant\"]').value;
       const hasOpaque = variant !== 'โปร่ง';
       const hasSheer  = variant !== 'ทึบ';
-      const sheerBase = hasSheer ? clamp01(set.querySelector('[name="sheer_price_per_m"]').value) : 0;
+      const sheerBase = hasSheer ? clamp01(set.querySelector('[name=\"sheer_price_per_m\"]').value) : 0;
 
-      const opaquePerM = hasOpaque ? (baseRaw + stylePlus + heightPlus) : 0;
-      const sheerPerM  = hasSheer  ? (sheerBase + stylePlus + heightPlus) : 0;
+      const opaquePerM = hasOpaque ? (baseRaw + sPlus + hPlus) : 0;
+      const sheerPerM  = hasSheer  ? (sheerBase + sPlus + hPlus) : 0;
 
       const price_opaque = Math.round(opaquePerM * w);
       const price_sheer  = Math.round(sheerPerM * w);
@@ -535,8 +543,9 @@ copyBtn.addEventListener('click', ()=>{
   navigator.clipboard?.writeText(str).then(()=> alert('คัดลอก JSON แล้ว'));
 });
 
-addRoom();
-if(loadState()===false){ recalcAll(); }
+const AUTO_RESTORE = false;
+const restored = AUTO_RESTORE && loadState();
+recalcAll();
 
 orderForm.addEventListener('submit', (e)=>{
   const payload = buildPayload();
@@ -552,3 +561,4 @@ orderForm.addEventListener('submit', (e)=>{
 </script>
 </body>
 </html>
+
