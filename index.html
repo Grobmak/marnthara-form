@@ -17,7 +17,6 @@
         --room2: #20222a;
         --room3: #252830;
         --accent-dark: #2f2f33;
-        --error: #ff5a5f;
       }
       * {
         box-sizing: border-box;
@@ -63,9 +62,6 @@
         background: #000;
         color: inherit;
       }
-      .field:invalid {
-        border-color: var(--error);
-      }
       .small {
         font-size: 12px;
         color: var(--muted);
@@ -92,14 +88,11 @@
         color: var(--primary);
         border-radius: 0.5rem;
         font-weight: 500;
-        transition: opacity 0.15s ease, background-color 0.2s ease, transform 0.1s ease;
+        transition: opacity 0.15s ease;
         cursor: pointer;
       }
       .btn:hover {
         opacity: 0.85;
-      }
-      .btn:active {
-        transform: scale(0.98);
       }
       .btn-xs {
         padding: 0.2rem 0.45rem;
@@ -116,9 +109,6 @@
       .btn-danger {
         border-color: var(--danger);
         color: var(--danger);
-      }
-      .btn-danger:hover {
-        background-color: #ff5a5f1a;
       }
       .actions {
         display: flex;
@@ -177,14 +167,12 @@
         color: var(--secondary);
       }
       .room-head input[name="room_name"] {
-        flex: 1;
-        min-width: 0;
+        flex: 0 0 50%;
       }
       .badge {
         border: 1px solid var(--line);
         border-radius: 0.4rem;
         padding: 0.05rem 0.35rem;
-        flex-shrink: 0;
       }
       .actions-split {
         justify-content: space-between;
@@ -248,52 +236,16 @@
         border: 1px solid #2f2f33;
         margin-bottom: 8px;
       }
-      .error-msg {
-        color: var(--error);
-        font-size: 12px;
-        margin-top: 4px;
-        display: none;
-      }
-      .field:invalid + .error-msg,
-      .field.is-invalid + .error-msg {
-        display: block;
-      }
     </style>
   </head>
   <body>
     <div class="header">
       <h1>Marnthara</h1>
       <div class="actions">
-        <button
-          type="button"
-          class="btn btn-xs"
-          id="addRoomBtn"
-          aria-label="เพิ่มห้องใหม่"
-        >
+        <button type="button" class="btn btn-xs" id="addRoomBtn">
           + เพิ่มห้อง
         </button>
-        <button
-          type="button"
-          class="btn btn-xs"
-          id="saveStateBtn"
-          aria-label="บันทึกข้อมูล"
-        >
-          บันทึก 💾
-        </button>
-        <button
-          type="button"
-          class="btn btn-xs"
-          id="loadStateBtn"
-          aria-label="โหลดข้อมูลที่บันทึกไว้"
-        >
-          โหลด 📂
-        </button>
-        <button
-          type="button"
-          class="btn btn-xs btn-danger"
-          id="clearAllBtn"
-          aria-label="ล้างข้อมูลทั้งหมด"
-        >
+        <button type="button" class="btn btn-xs btn-danger" id="clearAllBtn">
           ล้างทั้งหมด 🗑️
         </button>
       </div>
@@ -303,48 +255,33 @@
       <input type="hidden" name="payload" id="payload" />
       <div id="rooms"></div>
       <div class="actions actions-split">
-        <button
-          type="button"
-          class="btn btn-xs"
-          id="copyJsonBtn"
-          aria-label="คัดลอกข้อมูล JSON"
-        >
+        <button type="button" class="btn btn-xs" id="copyJsonBtn">
           คัดลอก JSON
         </button>
-        <button
-          type="submit"
-          class="btn btn-xs"
-          aria-label="ส่งข้อมูลไปคำนวณ"
-        >
-          ส่งไปคำนวณ
-        </button>
+        <button type="submit" class="btn btn-xs">ส่งไปคำนวณ</button>
       </div>
     </form>
 
     <div class="sticky-footer">
       <div class="summary-item">
         <div class="summary-label">ราคารวม</div>
-        <div class="summary-value price" id="grandTotal" aria-live="polite">
-          0
-        </div>
+        <div class="summary-value price" id="grandTotal">0</div>
       </div>
       <div class="summary-item">
         <div class="summary-label">จำนวนชุด</div>
-        <div class="summary-value" id="setCount" aria-live="polite">0</div>
+        <div class="summary-value" id="setCount">0</div>
       </div>
       <div class="summary-item">
         <div class="summary-label">ผ้าทึบที่ใช้</div>
-        <div class="summary-value" id="grandFabric" aria-live="polite">0</div>
+        <div class="summary-value" id="grandFabric">0</div>
       </div>
       <div class="summary-item">
         <div class="summary-label">ผ้าโปร่งที่ใช้</div>
-        <div class="summary-value" id="grandSheerFabric" aria-live="polite">
-          0
-        </div>
+        <div class="summary-value" id="grandSheerFabric">0</div>
       </div>
       <div class="summary-item">
         <div class="summary-label">รางที่ใช้ (ม.)</div>
-        <div class="summary-value" id="grandTrack" aria-live="polite">0</div>
+        <div class="summary-value" id="grandTrack">0</div>
       </div>
     </div>
 
@@ -359,7 +296,6 @@
             data-act="toggle-room"
             data-label-closed="ขยาย"
             data-label-open="ย่อ"
-            aria-expanded="true"
           >
             ย่อ
           </button>
@@ -369,18 +305,14 @@
             type="text"
             name="room_name"
             placeholder="ห้อง 01"
-            aria-label="ชื่อห้อง"
+            required
           />
-          <span class="small" data-room-brief>
-            จุด <span class="num">0</span> • ชุด <span class="num">0</span> •
-            ราคา <span class="num price">0</span> บาท
-          </span>
+          <span class="small" data-room-brief>จุด 0 • ชุด 0 • ราคา 0 บาท</span>
           <button
             type="button"
             class="btn btn-icon"
             data-act="dup-room"
             title="ก็อปห้อง"
-            aria-label="คัดลอกห้อง"
           >
             ⧉
           </button>
@@ -390,7 +322,6 @@
             class="btn btn-icon btn-danger"
             data-act="del-room"
             title="ลบห้อง"
-            aria-label="ลบห้อง"
           >
             ✕
           </button>
@@ -398,8 +329,8 @@
 
         <div class="row three-col">
           <div>
-            <label for="price_per_m_0">ราคาผ้า (ต่อเมตร)</label>
-            <select class="field" name="price_per_m" id="price_per_m_0" required>
+            <label>ราคาผ้า (ต่อเมตร)</label>
+            <select class="field" name="price_per_m" required>
               <option value="" hidden>เลือก</option>
               <option value="1000">1,000</option>
               <option value="1200">1,200</option>
@@ -419,8 +350,8 @@
             </select>
           </div>
           <div>
-            <label for="style_0">สไตล์</label>
-            <select class="field" name="style" id="style_0" required>
+            <label>สไตล์</label>
+            <select class="field" name="style" required>
               <option value="" hidden>เลือก</option>
               <option>ลอน</option>
               <option>ตาไก่</option>
@@ -428,25 +359,20 @@
             </select>
           </div>
           <div>
-            <label for="open_type_0">รูปแบบเปิดผ้า</label>
-            <select class="field" name="open_type" id="open_type_0" required>
+            <label>รูปแบบเปิดผ้า</label>
+            <select class="field" name="open_type" required>
               <option value="" hidden>เลือก</option>
               <option>แยกกลาง</option>
               <option>สไลด์เดี่ยว</option>
             </select>
           </div>
         </div>
-
+        
         <div data-sets></div>
 
         <div class="total">
           <div class="small">ราคารวมของห้องนี้</div>
-          <button
-            type="button"
-            class="btn btn-xs"
-            data-act="add-set"
-            aria-label="เพิ่มชุด"
-          >
+          <button type="button" class="btn btn-xs" data-act="add-set">
             + เพิ่มชุด
           </button>
           <div class="price" data-room-total>0 บาท</div>
@@ -464,17 +390,11 @@
             class="btn btn-icon"
             data-act="dup-set"
             title="ก็อปจุด"
-            aria-label="คัดลอกจุด"
           >
             ⧉
           </button>
           <span class="sp"></span>
-          <button
-            type="button"
-            class="btn btn-xs"
-            data-act="clear-set"
-            aria-label="ล้างค่าของจุดนี้"
-          >
+          <button type="button" class="btn btn-xs" data-act="clear-set">
             clear
           </button>
           <button
@@ -482,55 +402,52 @@
             class="btn btn-icon btn-danger"
             data-act="del-set"
             title="ลบชุด"
-            aria-label="ลบชุดนี้"
           >
             −
           </button>
         </div>
         <div class="row">
           <div>
-            <label for="width_m_0_0">กว้าง (ม.)</label>
+            <label>กว้าง (ม.)</label>
             <input
               class="field"
               name="width_m"
-              type="text"
+              type="number"
+              step="0.01"
+              min="0"
               inputmode="decimal"
               placeholder="เช่น 3.50"
               required
               autocomplete="off"
             />
-            <span class="error-msg">กรุณาระบุความกว้าง</span>
           </div>
           <div>
-            <label for="height_m_0_0">สูง (ม.)</label>
+            <label>สูง (ม.)</label>
             <input
               class="field"
               name="height_m"
-              type="text"
+              type="number"
+              step="0.01"
+              min="0"
               inputmode="decimal"
               placeholder="เช่น 2.80"
               required
               autocomplete="off"
             />
-            <span class="error-msg">กรุณาระบุความสูง</span>
           </div>
         </div>
         <div class="row">
           <div>
-            <label for="fabric_variant_0_0">ชนิดผ้าของจุดนี้</label>
-            <select class="field" name="fabric_variant" id="fabric_variant_0_0">
+            <label>ชนิดผ้าของจุดนี้</label>
+            <select class="field" name="fabric_variant">
               <option>ทึบ</option>
               <option>โปร่ง</option>
               <option>ทึบ&โปร่ง</option>
             </select>
           </div>
           <div data-sheer-wrap class="hidden">
-            <label for="sheer_price_per_m_0_0">ราคาผ้าโปร่ง (ต่อเมตร)</label>
-            <select
-              class="field"
-              name="sheer_price_per_m"
-              id="sheer_price_per_m_0_0"
-            >
+            <label>ราคาผ้าโปร่ง (ต่อเมตร)</label>
+            <select class="field" name="sheer_price_per_m">
               <option value="" hidden>เลือก</option>
               <option value="1000">1,000</option>
               <option value="1100">1,100</option>
@@ -539,7 +456,6 @@
               <option value="1400">1,400</option>
               <option value="1500">1,500</option>
             </select>
-            <span class="error-msg">กรุณาเลือกราคาผ้าโปร่ง</span>
           </div>
         </div>
         <div class="small" style="margin-top: 8px">
@@ -553,13 +469,13 @@
     </template>
 
     <script>
-      const APP_VERSION = "input-ui/2025-08-19-r27";
+      const APP_VERSION = "input-ui/2025-08-19-r26";
       const WEBHOOK_URL =
         "https://hook.eu2.make.com/xul3fhuh96ybgfm2omdt2e74ejybxjoj";
       const STORAGE_KEY = "marnthara.input.v1";
 
       const PRICING = {
-        style_surcharge: { ลอน: 200, ตาไก่: 0, จีบ: 0 },
+        style_surcharge: { "ลอน": 200, "ตาไก่": 0, "จีบ": 0 },
         height: { threshold: 2.5, add_per_m: 150 },
       };
       const CALC = {
@@ -586,10 +502,8 @@
 
       const copyBtn = document.getElementById("copyJsonBtn");
       const addRoomBtn = document.getElementById("addRoomBtn");
-      const saveStateBtn = document.getElementById("saveStateBtn");
-      const loadStateBtn = document.getElementById("loadStateBtn");
       const clearAllBtn = document.getElementById("clearAllBtn");
-
+      
       let roomCount = 0;
 
       function toNum(v) {
@@ -625,14 +539,6 @@
           (roomCount - 1) % 3
         ];
         room.style.background = bg;
-        const uniqueId = `room_${Date.now()}_${roomCount}`;
-        room.querySelector('select[name="price_per_m"]').id = `price_per_m_${uniqueId}`;
-        room.querySelector('label[for^="price_per_m_"]').htmlFor = `price_per_m_${uniqueId}`;
-        room.querySelector('select[name="style"]').id = `style_${uniqueId}`;
-        room.querySelector('label[for^="style_"]').htmlFor = `style_${uniqueId}`;
-        room.querySelector('select[name="open_type"]').id = `open_type_${uniqueId}`;
-        room.querySelector('label[for^="open_type_"]').htmlFor = `open_type_${uniqueId}`;
-        
         roomsEl.appendChild(frag);
         const created = roomsEl.querySelector("[data-room]:last-of-type");
         
@@ -661,19 +567,7 @@
 
       function addSet(roomEl, prefill) {
         const setsWrap = roomEl.querySelector("[data-sets]");
-        const setCount = roomEl.querySelectorAll("[data-set]").length + 1;
         const frag = document.getElementById("setTpl").content.cloneNode(true);
-        const set = frag.querySelector("[data-set]");
-        const uniqueId = `${roomEl.dataset.index}_${setCount}`;
-        set.querySelector('input[name="width_m"]').id = `width_m_${uniqueId}`;
-        set.querySelector('label[for^="width_m_"]').htmlFor = `width_m_${uniqueId}`;
-        set.querySelector('input[name="height_m"]').id = `height_m_${uniqueId}`;
-        set.querySelector('label[for^="height_m_"]').htmlFor = `height_m_${uniqueId}`;
-        set.querySelector('select[name="fabric_variant"]').id = `fabric_variant_${uniqueId}`;
-        set.querySelector('label[for^="fabric_variant_"]').htmlFor = `fabric_variant_${uniqueId}`;
-        set.querySelector('select[name="sheer_price_per_m"]').id = `sheer_price_per_m_${uniqueId}`;
-        set.querySelector('label[for^="sheer_price_per_m_"]').htmlFor = `sheer_price_per_m_${uniqueId}`;
-
         setsWrap.appendChild(frag);
         const created = setsWrap.querySelector("[data-set]:last-of-type");
 
@@ -716,16 +610,17 @@
         if (!details) return;
         const label = details.open ? btn.dataset.labelOpen : btn.dataset.labelClosed;
         btn.textContent = label;
-        btn.setAttribute("aria-expanded", details.open);
       }
 
       function delRoom(btn) {
+        if (!confirm("คุณต้องการลบห้องนี้ใช่หรือไม่?")) return;
         btn.closest("[data-room]").remove();
         renumber();
         recalcAll();
       }
 
       function delSet(btn) {
+        if (!confirm("คุณต้องการลบชุดนี้ใช่หรือไม่?")) return;
         const room = btn.closest("[data-room]");
         btn.closest("[data-set]").remove();
         if (room.querySelectorAll("[data-set]").length === 0) addSet(room);
@@ -751,6 +646,7 @@
       }
 
       function clearSet(btn) {
+        if (!confirm("คุณต้องการล้างข้อมูลชุดนี้ใช่หรือไม่?")) return;
         const set = btn.closest("[data-set]");
         set.querySelector('input[name="width_m"]').value = "";
         set.querySelector('input[name="height_m"]').value = "";
@@ -763,6 +659,7 @@
       }
 
       function clearRoom(btn) {
+        if (!confirm("คุณต้องการล้างข้อมูลห้องนี้ใช่หรือไม่?")) return;
         const room = btn.closest("[data-room]");
         room.querySelectorAll("select").forEach((sel) => (sel.value = ""));
         const wrap = room.querySelector("[data-sets]");
@@ -772,10 +669,10 @@
       }
       
       function clearAllData() {
+        if (!confirm("คุณต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?")) return;
         roomsEl.innerHTML = "";
         roomCount = 0;
         addRoom();
-        localStorage.removeItem(STORAGE_KEY);
       }
 
       function renumber() {
@@ -858,7 +755,7 @@
 
           const brief = room.querySelector("[data-room-brief]");
           if (brief) {
-            brief.innerHTML = `จุด <span class="num">${fmt(points, 0, true)}</span> • ชุด <span class="num">${fmt(roomUnits, 0, true)}</span> • ราคา <span class="num price">${fmt(roomSum, 0, true)}</span> บาท`;
+            brief.innerHTML = `จุด <span class=\"num\">${fmt(points, 0, true)}</span> • ชุด <span class=\"num\">${fmt(roomUnits, 0, true)}</span> • ราคา <span class=\"num price\">${fmt(roomSum, 0, true)}</span> บาท`;
           }
 
           grand += roomSum;
@@ -998,153 +895,53 @@
         };
       }
 
-      function saveState() {
-        const state = {
-          rooms: [...document.querySelectorAll("[data-room]")].map(
-            serializeRoom
-          ),
-        };
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-          alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
-        } catch (e) {
-          alert("ไม่สามารถบันทึกข้อมูลได้");
+      function addRoomInitial() {
+        if (roomsEl.children.length === 0) {
+            addRoom();
         }
       }
 
-      function loadState() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) {
-            alert("ไม่พบข้อมูลที่บันทึกไว้!");
-            return false;
-          }
-          const state = JSON.parse(raw);
-          if (!state || !Array.isArray(state.rooms) || state.rooms.length === 0) {
-            alert("ข้อมูลที่บันทึกไว้ไม่ถูกต้อง!");
-            return false;
-          }
-          roomsEl.innerHTML = "";
-          roomCount = 0;
-          state.rooms.forEach((r) => addRoom(r));
-          recalcAll();
-          alert("โหลดข้อมูลเรียบร้อยแล้ว!");
-          return true;
-        } catch (e) {
-          alert("เกิดข้อผิดพลาดในการโหลดข้อมูล!");
-          return false;
+      document.addEventListener("change", (e) => {
+        const el = e.target;
+        if (el.matches('[name="fabric_variant"]')) {
+          toggleSetFabricUI(el.closest("[data-set]"));
         }
-      }
-
-      const recalcSoon = debounce(recalcAll, 50);
-
-      addRoomBtn.addEventListener("click", () => {
-        addRoom();
-        recalcAll();
+        debounce(recalcAll)();
       });
-
-      saveStateBtn.addEventListener("click", saveState);
-      loadStateBtn.addEventListener("click", loadState);
-      clearAllBtn.addEventListener("click", () => {
-        let ok = confirm("คุณต้องการลบข้อมูลทั้งหมดหรือไม่?");
-        if (ok) {
-          clearAllData();
-          alert("ล้างข้อมูลทั้งหมดแล้ว!");
-        }
-      });
-
+      document.addEventListener("input", debounce(recalcAll));
       document.addEventListener("click", (e) => {
-        const b = e.target.closest("[data-act]");
-        if (!b) return;
+        const btn = e.target.closest("button[data-act]");
+        if (!btn) return;
+        const act = btn.dataset.act;
         e.preventDefault();
-        e.stopPropagation();
-        const act = b.dataset.act;
-        if (act === "add-set") {
-          addSet(b.closest("[data-room]"));
-          recalcAll();
-        }
-        if (act === "del-room") {
-          let ok = true;
-          try {
-            ok = confirm("ลบห้องนี้ทั้งหมด?");
-          } catch (e) { ok = true; }
-          if (!ok) return;
-          delRoom(b);
-        }
-        if (act === "del-set") {
-          let ok = true;
-          try {
-            ok = confirm("ลบจุดนี้?");
-          } catch (e) { ok = true; }
-          if (!ok) return;
-          delSet(b);
-        }
-        if (act === "dup-room") {
-          dupRoom(b);
-        }
-        if (act === "dup-set") {
-          dupSet(b);
-        }
-        if (act === "clear-set") {
-          clearSet(b);
-        }
-        if (act === "toggle-room") {
-          const details = b.closest("details");
+        if (act === "del-room") delRoom(btn);
+        else if (act === "del-set") delSet(btn);
+        else if (act === "add-set") addSet(btn.closest("[data-room]"));
+        else if (act === "dup-room") dupRoom(btn);
+        else if (act === "dup-set") dupSet(btn);
+        else if (act === "clear-set") clearSet(btn);
+        else if (act === "toggle-room") {
+          const details = btn.closest("details");
           details.open = !details.open;
-          updateToggleBtnText(b);
+          updateToggleBtnText(btn);
+        }
+      });
+      document.addEventListener("submit", (e) => {
+        const form = e.target;
+        if (form.id === "orderForm") {
+          const payloadEl = form.querySelector("#payload");
+          payloadEl.value = JSON.stringify(buildPayload());
         }
       });
       
-      document.addEventListener("input", (e) => {
-        const field = e.target.closest(".field");
-        if (field) {
-          field.classList.remove("is-invalid");
-        }
-        const set = e.target.closest("[data-set]");
-        const room = e.target.closest("[data-room]");
-        if (set || room) {
-          recalcSoon();
-        }
+      addRoomBtn.addEventListener("click", () => addRoom());
+      copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(JSON.stringify(buildPayload(), null, 2));
       });
-
-      orderForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const payload = buildPayload();
-        const payloadInput = document.getElementById("payload");
-        payloadInput.value = JSON.stringify(payload);
-
-        let isValid = true;
-        const requiredFields = document.querySelectorAll('[required]');
-        requiredFields.forEach(field => {
-            if (!field.value) {
-                field.classList.add('is-invalid');
-                isValid = false;
-            } else {
-                field.classList.remove('is-invalid');
-            }
-        });
-        
-        if (isValid) {
-            orderForm.submit();
-        } else {
-            alert("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
-        }
-      });
-
-      document.getElementById('copyJsonBtn').addEventListener('click', async () => {
-        try {
-          const payload = buildPayload();
-          await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
-          alert("คัดลอก JSON แล้ว!");
-        } catch (err) {
-          alert('ไม่สามารถคัดลอกได้');
-        }
-      });
-
-      if (!loadState()) {
-        addRoom();
-      }
-
+      clearAllBtn.addEventListener("click", clearAllData);
+      
+      addRoomInitial();
+      recalcAll();
     </script>
   </body>
 </html>
