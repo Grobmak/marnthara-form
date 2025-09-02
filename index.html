@@ -23,49 +23,47 @@
       }
       body {
         margin: 0;
-        padding: 16px 16px 90px 16px;
+        padding: 16px 16px 80px 16px;
         background: var(--bg);
         color: var(--fg);
         font-family: system-ui, Segoe UI, Roboto, Arial;
-        font-size: 16px;
       }
       h1 {
-        font-size: 24px;
+        font-size: 18px;
         margin: 0;
         padding: 0;
       }
       .card {
         border: 1px solid var(--line);
         border-radius: 14px;
-        padding: 14px;
+        padding: 12px;
         margin: 12px 0;
         background: #1a1b20;
       }
       .row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        gap: 10px;
       }
       .row.three-col {
         grid-template-columns: repeat(3, 1fr);
       }
       label {
-        font-size: 14px;
+        font-size: 12px;
         color: var(--muted);
         display: block;
         margin: 6px 0 4px;
       }
       .field {
         width: 100%;
-        padding: 0.65rem 0.7rem;
+        padding: 0.55rem 0.7rem;
         border: 1px solid var(--line);
         border-radius: 0.6rem;
         background: #000;
         color: inherit;
-        font-size: 16px;
       }
       .small {
-        font-size: 14px;
+        font-size: 12px;
         color: var(--muted);
       }
       .price {
@@ -97,8 +95,8 @@
         opacity: 0.85;
       }
       .btn-xs {
-        padding: 0.3rem 0.5rem;
-        font-size: 0.9rem;
+        padding: 0.2rem 0.45rem;
+        font-size: 0.85rem;
         line-height: 1.1;
       }
       .btn-icon {
@@ -114,7 +112,7 @@
       }
       .actions {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         justify-content: flex-end;
         margin-top: 10px;
       }
@@ -169,8 +167,7 @@
         color: var(--secondary);
       }
       .room-head input[name="room_name"] {
-        flex: 1;
-        min-width: 0;
+        flex: 0 0 50%;
       }
       .badge {
         border: 1px solid var(--line);
@@ -198,7 +195,7 @@
         border-top: 1px solid var(--line);
         padding: 10px 16px;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
         gap: 10px;
         z-index: 1000;
       }
@@ -206,13 +203,13 @@
         text-align: center;
       }
       .sticky-footer .summary-label {
-        font-size: 12px;
+        font-size: 11px;
         color: var(--muted);
         margin-bottom: 2px;
       }
       .sticky-footer .summary-value {
         font-weight: 600;
-        font-size: 16px;
+        font-size: 15px;
         color: var(--primary);
       }
       .sticky-footer .summary-value.price {
@@ -222,7 +219,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
       }
       .header .actions {
         margin: 0;
@@ -230,17 +227,14 @@
       .room-head .badge {
         flex: 0 0 auto;
       }
+      .room-head input[name="room_name"] {
+        flex: 1;
+        min-width: 0;
+      }
       .set {
         background: #0d0e12;
         border: 1px solid #2f2f33;
         margin-bottom: 8px;
-        padding: 12px;
-      }
-      .set .room-head {
-        margin-bottom: 8px;
-      }
-      .set strong {
-        font-size: 16px;
       }
     </style>
   </head>
@@ -250,6 +244,12 @@
       <div class="actions">
         <button type="button" class="btn btn-xs" id="addRoomBtn">
           + เพิ่มห้อง
+        </button>
+        <button type="button" class="btn btn-xs" id="saveStateBtn">
+          บันทึก 💾
+        </button>
+        <button type="button" class="btn btn-xs" id="loadStateBtn">
+          โหลด 📂
         </button>
         <button type="button" class="btn btn-xs btn-danger" id="clearAllBtn">
           ล้างทั้งหมด 🗑️
@@ -373,7 +373,7 @@
             </select>
           </div>
         </div>
-
+        
         <div data-sets></div>
 
         <div class="total">
@@ -388,7 +388,7 @@
 
     <template id="setTpl">
       <div class="card set" data-set>
-        <div class="room-head" style="margin-bottom: 8px">
+        <div class="room-head" style="margin-bottom: 4px">
           <strong data-set-title>จุดที่ 01</strong>
           <span class="small" data-set-units>จำนวน 0 ชุด</span>
           <button
@@ -473,6 +473,7 @@
         </div>
       </div>
     </template>
+
     <script>
       const APP_VERSION = "input-ui/2025-08-19-r26";
       const WEBHOOK_URL =
@@ -507,8 +508,10 @@
 
       const copyBtn = document.getElementById("copyJsonBtn");
       const addRoomBtn = document.getElementById("addRoomBtn");
+      const saveStateBtn = document.getElementById("saveStateBtn");
+      const loadStateBtn = document.getElementById("loadStateBtn");
       const clearAllBtn = document.getElementById("clearAllBtn");
-
+      
       let roomCount = 0;
 
       function toNum(v) {
@@ -546,7 +549,7 @@
         room.style.background = bg;
         roomsEl.appendChild(frag);
         const created = roomsEl.querySelector("[data-room]:last-of-type");
-
+        
         updateToggleBtnText(created.querySelector('[data-act="toggle-room"]'));
 
         if (prefill) {
@@ -601,7 +604,7 @@
         ).value;
         const hasSheer = variant === "โปร่ง" || variant === "ทึบ&โปร่ง";
         const hasOpaque = variant !== "โปร่ง";
-
+        
         set.querySelector("[data-sheer-wrap]").classList.toggle("hidden", !hasSheer);
         set.querySelector("[data-sheer-price-label]").classList.toggle("hidden", !hasSheer);
         set.querySelector("[data-sheer-yardage-label]").classList.toggle("hidden", !hasSheer);
@@ -609,7 +612,7 @@
         set.querySelector("[data-opaque-price-label]").classList.toggle("hidden", !hasOpaque);
         set.querySelector("[data-opaque-yardage-label]").classList.toggle("hidden", !hasOpaque);
       }
-
+      
       function updateToggleBtnText(btn) {
         const details = btn.closest("details");
         if (!details) return;
@@ -668,7 +671,7 @@
         addSet(room);
         recalcAll();
       }
-
+      
       function clearAllData() {
         roomsEl.innerHTML = "";
         roomCount = 0;
@@ -736,7 +739,7 @@
             const units = (opaquePrice > 0 ? 1 : 0) + (sheerPrice > 0 ? 1 : 0);
             const yards = CALC.fabricYardage(style, w);
             const track = variant === "ทึบ&โปร่ง" ? w * 2 : w;
-
+            
             set.querySelector('[data-set-price-opaque]').textContent = fmt(opaquePrice, 0, true);
             set.querySelector('[data-set-price-sheer]').textContent = fmt(sheerPrice, 0, true);
             set.querySelector('[data-set-yardage-opaque]').textContent = fmt(yards, 2);
@@ -896,6 +899,44 @@
         };
       }
 
+      function saveState() {
+        const state = {
+          rooms: [...document.querySelectorAll("[data-room]")].map(
+            serializeRoom
+          ),
+        };
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
+        } catch (e) {
+          alert("ไม่สามารถบันทึกข้อมูลได้");
+        }
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            alert("ไม่พบข้อมูลที่บันทึกไว้!");
+            return false;
+          }
+          const state = JSON.parse(raw);
+          if (!state || !Array.isArray(state.rooms) || state.rooms.length === 0) {
+            alert("ข้อมูลที่บันทึกไว้ไม่ถูกต้อง!");
+            return false;
+          }
+          roomsEl.innerHTML = "";
+          roomCount = 0;
+          state.rooms.forEach((r) => addRoom(r));
+          recalcAll();
+          alert("โหลดข้อมูลเรียบร้อยแล้ว!");
+          return true;
+        } catch (e) {
+          alert("เกิดข้อผิดพลาดในการโหลดข้อมูล!");
+          return false;
+        }
+      }
+
       const recalcSoon = debounce(recalcAll, 50);
 
       addRoomBtn.addEventListener("click", () => {
@@ -903,6 +944,8 @@
         recalcAll();
       });
 
+      saveStateBtn.addEventListener("click", saveState);
+      loadStateBtn.addEventListener("click", loadState);
       clearAllBtn.addEventListener("click", () => {
         let ok = confirm("คุณต้องการลบข้อมูลทั้งหมดหรือไม่?");
         if (ok) {
@@ -933,57 +976,97 @@
           let ok = true;
           try {
             ok = confirm("ลบจุดนี้?");
-            if (!ok) return;
-            delSet(b);
           } catch (e) { ok = true; }
+          if (!ok) return;
+          delSet(b);
         }
-        if (act === "dup-room") dupRoom(b);
-        if (act === "dup-set") dupSet(b);
-        if (act === "clear-set") clearSet(b);
+        if (act === "dup-room") {
+          dupRoom(b);
+          recalcAll();
+        }
+        if (act === "dup-set") {
+          dupSet(b);
+          recalcAll();
+        }
+        if (act === "clear-set") {
+          let ok = true;
+          try {
+            ok = confirm("ล้างข้อมูลจุดนี้?");
+          } catch (e) { ok = true; }
+          if (!ok) return;
+          clearSet(b);
+        }
+        if (act === "clear-room") {
+          let ok = true;
+          try {
+            ok = confirm("ล้างข้อมูลห้องนี้?");
+          } catch (e) { ok = true; }
+          if (!ok) return;
+          clearRoom(b);
+        }
         if (act === "toggle-room") {
-            b.closest('details').toggleAttribute('open');
+          const d = b.closest("details");
+          if (d) {
+            d.open = !d.open;
             updateToggleBtnText(b);
+          }
+          recalcAll();
         }
-        if (act === "clear-room") clearRoom(b);
+      });
+      
+      document.addEventListener('toggle', (e) => {
+        const btn = e.target.querySelector('[data-act="toggle-room"]');
+        if (btn) {
+          updateToggleBtnText(btn);
+        }
       });
 
-      orderForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        if (roomsEl.childElementCount === 0) {
-          alert("กรุณาเพิ่มห้องอย่างน้อยหนึ่งห้อง");
-          return;
+      document.addEventListener("input", (e) => {
+        if (
+          e.target.matches(
+            'input[name="width_m"], input[name="height_m"], select[name="price_per_m"], select[name="style"], select[name="sheer_price_per_m"], input[name="room_name"], select[name="fabric_variant"]'
+          )
+        ) {
+          if (e.target.name === "fabric_variant")
+            toggleSetFabricUI(e.target.closest("[data-set]"));
+          recalcSoon();
         }
-        const data = buildPayload();
-        document.getElementById("payload").value = JSON.stringify(data);
-        orderForm.submit();
-      });
-
-      copyBtn.addEventListener("click", () => {
-        const data = buildPayload();
-        navigator.clipboard
-          .writeText(JSON.stringify(data, null, 2))
-          .then(() => {
-            alert("คัดลอก JSON ไปยังคลิปบอร์ดแล้ว!");
-          })
-          .catch((err) => {
-            console.error("Failed to copy: ", err);
-            alert("คัดลอกไม่สำเร็จ");
-          });
       });
 
       document.addEventListener("change", (e) => {
-        if (e.target.closest('[data-set][data-room]')) {
-            const set = e.target.closest('[data-set]');
-            if (e.target.name === 'fabric_variant') {
-                toggleSetFabricUI(set);
-            }
+        if (
+          e.target.matches('select[name="open_type"]')
+        ) {
+          recalcAll();
         }
-        recalcSoon();
       });
-      document.addEventListener("input", (e) => recalcSoon());
 
-      // เริ่มต้นด้วยการเพิ่มห้องเปล่า 1 ห้อง
-      addRoom();
+      copyBtn.addEventListener("click", () => {
+        const payload = buildPayload();
+        const str = JSON.stringify(payload, null, 2);
+        navigator.clipboard
+          ?.writeText(str)
+          .then(() => alert("คัดลอก JSON แล้ว"));
+      });
+
+      // Initial setup
+      if (localStorage.getItem(STORAGE_KEY) === null) {
+          addRoom();
+      } else {
+          loadState();
+      }
+      recalcAll();
+
+      orderForm.addEventListener("submit", (e) => {
+        const payload = buildPayload();
+        document.getElementById("payload").value = JSON.stringify(payload);
+
+        if (WEBHOOK_URL.includes("PUT-YOUR-HOOK-HERE")) {
+          e.preventDefault();
+          alert("ยังไม่ได้ตั้ง Webhook URL ของ Make");
+          return;
+        }
+      });
     </script>
   </body>
 </html>
