@@ -61,6 +61,9 @@
         border-radius: 0.6rem;
         background: #000;
         color: inherit;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
       }
       .small {
         font-size: 12px;
@@ -227,14 +230,29 @@
       .room-head .badge {
         flex: 0 0 auto;
       }
-      .room-head input[name="room_name"] {
-        flex: 1;
-        min-width: 0;
-      }
       .set {
         background: #0d0e12;
         border: 1px solid #2f2f33;
         margin-bottom: 8px;
+      }
+      .row.three-col .field:not(:placeholder-shown) {
+        /* This style is not needed for the requested change. */
+        /* You can remove it to simplify the code */
+      }
+      details:not([open]) .room-head input[name="room_name"] {
+        flex-grow: 1;
+      }
+      .field[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .btn-lock {
+        color: var(--danger);
+        border-color: var(--danger);
+      }
+      .btn-unlock {
+        color: var(--primary);
+        border-color: var(--primary);
       }
     </style>
   </head>
@@ -242,6 +260,9 @@
     <div class="header">
       <h1>Marnthara</h1>
       <div class="actions">
+        <button type="button" class="btn btn-xs" id="lockBtn">
+          <span class="lock-text">ล็อค</span> <span class="lock-icon">🔒</span>
+        </button>
         <button type="button" class="btn btn-xs" id="addRoomBtn">
           + เพิ่มห้อง
         </button>
@@ -252,6 +273,38 @@
     </div>
 
     <form id="orderForm" method="post" target="hiddenFrame">
+      <div class="card">
+        <div class="row three-col">
+          <div>
+            <label>ชื่อลูกค้า</label>
+            <input
+              class="field"
+              type="text"
+              name="customer_name"
+              placeholder="เช่น คุณสมชาย"
+            />
+          </div>
+          <div>
+            <label>ที่อยู่</label>
+            <input
+              class="field"
+              type="text"
+              name="customer_address"
+              placeholder="เช่น 123/45 หมู่บ้าน..."
+            />
+          </div>
+          <div>
+            <label>เบอร์โทร</label>
+            <input
+              class="field"
+              type="tel"
+              name="customer_phone"
+              placeholder="08xxxxxxxx"
+            />
+          </div>
+        </div>
+      </div>
+
       <input type="hidden" name="payload" id="payload" />
       <div id="rooms"></div>
       <div class="actions actions-split">
@@ -471,7 +524,7 @@
     <script>
       const APP_VERSION = "input-ui/2025-08-19-r26";
       const WEBHOOK_URL =
-        "https://hook.eu2.make.com/xul3fhuh96ybgfm2omdt2e74ejybxjoj";
+        "https://your-make-webhook-url.com/your-unique-path";
       const STORAGE_KEY = "marnthara.input.v1";
 
       const PRICING = {
@@ -503,8 +556,10 @@
       const copyBtn = document.getElementById("copyJsonBtn");
       const addRoomBtn = document.getElementById("addRoomBtn");
       const clearAllBtn = document.getElementById("clearAllBtn");
+      const lockBtn = document.getElementById("lockBtn");
       
       let roomCount = 0;
+      let isLocked = false;
 
       function toNum(v) {
         const n = parseFloat(v);
@@ -531,6 +586,7 @@
         };
       }
       function addRoom(prefill) {
+        if (isLocked) return;
         roomCount++;
         const frag = document.getElementById("roomTpl").content.cloneNode(true);
         const room = frag.querySelector("[data-room]");
@@ -563,9 +619,11 @@
 
         renumber();
         recalcAll();
+        updateLockState();
       }
 
       function addSet(roomEl, prefill) {
+        if (isLocked) return;
         const setsWrap = roomEl.querySelector("[data-sets]");
         const frag = document.getElementById("setTpl").content.cloneNode(true);
         setsWrap.appendChild(frag);
@@ -588,6 +646,7 @@
         toggleSetFabricUI(created);
         renumber();
         recalcAll();
+        updateLockState();
       }
 
       function toggleSetFabricUI(set) {
@@ -613,29 +672,36 @@
       }
 
       function delRoom(btn) {
+        if (isLocked) return;
         if (!confirm("คุณต้องการลบห้องนี้ใช่หรือไม่?")) return;
         btn.closest("[data-room]").remove();
         renumber();
         recalcAll();
+        updateLockState();
       }
 
       function delSet(btn) {
+        if (isLocked) return;
         if (!confirm("คุณต้องการลบชุดนี้ใช่หรือไม่?")) return;
         const room = btn.closest("[data-room]");
         btn.closest("[data-set]").remove();
         if (room.querySelectorAll("[data-set]").length === 0) addSet(room);
         renumber();
         recalcAll();
+        updateLockState();
       }
 
       function dupRoom(btn) {
+        if (isLocked) return;
         const src = btn.closest("[data-room]");
         const data = serializeRoom(src);
         if (data.room_name) data.room_name = data.room_name + " (copy)";
         addRoom(data);
+        updateLockState();
       }
 
       function dupSet(btn) {
+        if (isLocked) return;
         const set = btn.closest("[data-set]");
         const room = btn.closest("[data-room]");
         const data = serializeSet(
@@ -643,9 +709,11 @@
           room.querySelectorAll("[data-set]").length
         );
         addSet(room, data);
+        updateLockState();
       }
 
       function clearSet(btn) {
+        if (isLocked) return;
         if (!confirm("คุณต้องการล้างข้อมูลชุดนี้ใช่หรือไม่?")) return;
         const set = btn.closest("[data-set]");
         set.querySelector('input[name="width_m"]').value = "";
@@ -656,9 +724,11 @@
         if (sheerSel) sheerSel.value = "";
         toggleSetFabricUI(set);
         recalcAll();
+        updateLockState();
       }
 
       function clearRoom(btn) {
+        if (isLocked) return;
         if (!confirm("คุณต้องการล้างข้อมูลห้องนี้ใช่หรือไม่?")) return;
         const room = btn.closest("[data-room]");
         room.querySelectorAll("select").forEach((sel) => (sel.value = ""));
@@ -666,13 +736,40 @@
         wrap.innerHTML = "";
         addSet(room);
         recalcAll();
+        updateLockState();
       }
       
       function clearAllData() {
+        if (isLocked) return;
         if (!confirm("คุณต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?")) return;
         roomsEl.innerHTML = "";
         roomCount = 0;
         addRoom();
+        updateLockState();
+      }
+
+      function toggleLock() {
+        isLocked = !isLocked;
+        updateLockState();
+      }
+
+      function updateLockState() {
+        const fields = document.querySelectorAll('#orderForm input, #orderForm select');
+        fields.forEach(field => {
+          field.disabled = isLocked;
+        });
+
+        const buttons = document.querySelectorAll('#orderForm button:not(#clearAllBtn)');
+        buttons.forEach(button => {
+            button.disabled = isLocked;
+        });
+        
+        lockBtn.classList.toggle('btn-danger', isLocked);
+        lockBtn.classList.toggle('btn-primary', !isLocked);
+        lockBtn.querySelector('.lock-text').textContent = isLocked ? 'ปลดล็อค' : 'ล็อค';
+        lockBtn.querySelector('.lock-icon').textContent = isLocked ? '🔓' : '🔒';
+        clearAllBtn.disabled = false;
+        
       }
 
       function renumber() {
@@ -883,6 +980,9 @@
         });
 
         return {
+          customer_name: document.querySelector('input[name="customer_name"]').value || "",
+          customer_address: document.querySelector('input[name="customer_address"]').value || "",
+          customer_phone: document.querySelector('input[name="customer_phone"]').value || "",
           app_version: APP_VERSION,
           generated_at: new Date().toISOString(),
           total_thb: totalTHB,
@@ -927,6 +1027,10 @@
         }
       });
       document.addEventListener("submit", (e) => {
+        if (isLocked) {
+          e.preventDefault();
+          return;
+        }
         const form = e.target;
         if (form.id === "orderForm") {
           const payloadEl = form.querySelector("#payload");
@@ -935,10 +1039,11 @@
       });
       
       addRoomBtn.addEventListener("click", () => addRoom());
+      clearAllBtn.addEventListener("click", clearAllData);
+      lockBtn.addEventListener("click", toggleLock);
       copyBtn.addEventListener("click", () => {
         navigator.clipboard.writeText(JSON.stringify(buildPayload(), null, 2));
       });
-      clearAllBtn.addEventListener("click", clearAllData);
       
       addRoomInitial();
       recalcAll();
