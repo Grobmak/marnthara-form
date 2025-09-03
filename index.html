@@ -225,7 +225,17 @@
         margin-bottom: 12px;
       }
       .header .actions {
-        margin: 0;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: flex-end;
+        flex: 1;
+      }
+      .header h1 {
+        flex: 1;
+      }
+      .header .sp {
+        flex: 1;
       }
       .room-head .badge {
         flex: 0 0 auto;
@@ -235,45 +245,78 @@
         border: 1px solid #2f2f33;
         margin-bottom: 8px;
       }
-      .row.three-col .field:not(:placeholder-shown) {
-        /* This style is not needed for the requested change. */
-        /* You can remove it to simplify the code */
-      }
       details:not([open]) .room-head input[name="room_name"] {
-        flex-grow: 1;
+        width: 80%;
+        flex-grow: 0;
       }
       .field[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
       }
-      .btn-lock {
-        color: var(--danger);
-        border-color: var(--danger);
-      }
-      .btn-unlock {
+      .btn-primary {
         color: var(--primary);
         border-color: var(--primary);
+      }
+      .btn-danger {
+        border-color: var(--danger);
+        color: var(--danger);
+      }
+      .btn-add-room {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: #1a1b20;
+      }
+      .room-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .set-badge {
+        font-size: 12px;
+        border: 1px solid var(--muted);
+        border-radius: 99px;
+        width: 24px;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        font-weight: 500;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+      .set-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+      .set-head .sp {
+        flex: 1;
+      }
+      .btn-clear-data {
+        color: var(--muted);
+        border-color: var(--line);
       }
     </style>
   </head>
   <body>
     <div class="header">
       <h1>Marnthara</h1>
-      <div class="actions">
-        <button type="button" class="btn btn-xs" id="lockBtn">
-          <span class="lock-text">ล็อค</span> <span class="lock-icon">🔒</span>
-        </button>
-        <button type="button" class="btn btn-xs" id="addRoomBtn">
-          + เพิ่มห้อง
-        </button>
-        <button type="button" class="btn btn-xs btn-danger" id="clearAllBtn">
-          ล้างทั้งหมด 🗑️
-        </button>
-      </div>
+      <button type="button" class="btn btn-xs btn-add-room" id="addRoomHeaderBtn">
+        + เพิ่มห้อง
+      </button>
+      <div class="sp"></div>
+      <button type="button" class="btn btn-xs btn-primary" id="lockBtn">
+        <span class="lock-text">ล็อค</span> <span class="lock-icon">🔒</span>
+      </button>
+      <div class="sp"></div>
+      <button type="button" class="btn btn-xs btn-danger" id="clearAllBtn">
+        ล้างทั้งหมด 🗑️
+      </button>
     </div>
 
     <form id="orderForm" method="post" target="hiddenFrame">
-      <div class="card">
+      <div class="card" id="customerInfo">
         <div class="row three-col">
           <div>
             <label>ชื่อลูกค้า</label>
@@ -361,14 +404,6 @@
             required
           />
           <span class="small" data-room-brief>จุด 0 • ชุด 0 • ราคา 0 บาท</span>
-          <button
-            type="button"
-            class="btn btn-icon"
-            data-act="dup-room"
-            title="ก็อปห้อง"
-          >
-            ⧉
-          </button>
           <span class="sp"></span>
           <button
             type="button"
@@ -379,55 +414,34 @@
             ✕
           </button>
         </summary>
-
-        <div class="row three-col">
-          <div>
-            <label>ราคาผ้า (ต่อเมตร)</label>
-            <select class="field" name="price_per_m" required>
-              <option value="" hidden>เลือก</option>
-              <option value="1000">1,000</option>
-              <option value="1200">1,200</option>
-              <option value="1300">1,300</option>
-              <option value="1400">1,400</option>
-              <option value="1500">1,500</option>
-              <option value="1600">1,600</option>
-              <option value="1700">1,700</option>
-              <option value="1800">1,800</option>
-              <option value="1900">1,900</option>
-              <option value="2000">2,000</option>
-              <option value="2100">2,100</option>
-              <option value="2200">2,200</option>
-              <option value="2300">2,300</option>
-              <option value="2400">2,400</option>
-              <option value="2500">2,500</option>
-            </select>
-          </div>
-          <div>
-            <label>สไตล์</label>
-            <select class="field" name="style" required>
-              <option value="" hidden>เลือก</option>
-              <option>ลอน</option>
-              <option>ตาไก่</option>
-              <option>จีบ</option>
-            </select>
-          </div>
-          <div>
-            <label>รูปแบบเปิดผ้า</label>
-            <select class="field" name="open_type" required>
-              <option value="" hidden>เลือก</option>
-              <option>แยกกลาง</option>
-              <option>สไลด์เดี่ยว</option>
-            </select>
-          </div>
-        </div>
         
         <div data-sets></div>
 
         <div class="total">
-          <div class="small">ราคารวมของห้องนี้</div>
-          <button type="button" class="btn btn-xs" data-act="add-set">
-            + เพิ่มชุด
-          </button>
+          <div class="room-actions">
+            <button type="button" class="btn btn-xs btn-add-room" data-act="add-room">+ เพิ่มห้อง</button>
+            <button
+              type="button"
+              class="btn btn-icon btn-add-room"
+              data-act="dup-room"
+              title="ก็อปห้อง"
+            >
+              ⧉
+            </button>
+          </div>
+          <div class="room-actions">
+            <button type="button" class="btn btn-xs" data-act="add-set">
+              + เพิ่มชุด
+            </button>
+            <button
+              type="button"
+              class="btn btn-icon"
+              data-act="dup-set"
+              title="ก็อปชุด"
+            >
+              ⧉
+            </button>
+          </div>
           <div class="price" data-room-total>0 บาท</div>
         </div>
       </details>
@@ -435,20 +449,12 @@
 
     <template id="setTpl">
       <div class="card set" data-set>
-        <div class="room-head" style="margin-bottom: 4px">
-          <strong data-set-title>จุดที่ 01</strong>
+        <div class="set-head">
+          <div class="set-badge" data-set-title></div>
           <span class="small" data-set-units>จำนวน 0 ชุด</span>
-          <button
-            type="button"
-            class="btn btn-icon"
-            data-act="dup-set"
-            title="ก็อปจุด"
-          >
-            ⧉
-          </button>
           <span class="sp"></span>
-          <button type="button" class="btn btn-xs" data-act="clear-set">
-            clear
+          <button type="button" class="btn btn-xs btn-clear-data" data-act="clear-set">
+            ล้างข้อมูล
           </button>
           <button
             type="button"
@@ -489,6 +495,49 @@
             />
           </div>
         </div>
+        <div class="row three-col">
+          <div>
+            <label>ราคาผ้า (ต่อเมตร)</label>
+            <select class="field" name="price_per_m" required>
+              <option value="" hidden>เลือก</option>
+              <option value="">เลือก</option>
+              <option value="1000">1,000</option>
+              <option value="1200">1,200</option>
+              <option value="1300">1,300</option>
+              <option value="1400">1,400</option>
+              <option value="1500">1,500</option>
+              <option value="1600">1,600</option>
+              <option value="1700">1,700</option>
+              <option value="1800">1,800</option>
+              <option value="1900">1,900</option>
+              <option value="2000">2,000</option>
+              <option value="2100">2,100</option>
+              <option value="2200">2,200</option>
+              <option value="2300">2,300</option>
+              <option value="2400">2,400</option>
+              <option value="2500">2,500</option>
+            </select>
+          </div>
+          <div>
+            <label>สไตล์</label>
+            <select class="field" name="style" required>
+              <option value="" hidden>เลือก</option>
+              <option value="">เลือก</option>
+              <option>ลอน</option>
+              <option>ตาไก่</option>
+              <option>จีบ</option>
+            </select>
+          </div>
+          <div>
+            <label>รูปแบบเปิดผ้า</label>
+            <select class="field" name="open_type" required>
+              <option value="" hidden>เลือก</option>
+              <option value="">เลือก</option>
+              <option>แยกกลาง</option>
+              <option>สไลด์เดี่ยว</option>
+            </select>
+          </div>
+        </div>
         <div class="row">
           <div>
             <label>ชนิดผ้าของจุดนี้</label>
@@ -502,6 +551,7 @@
             <label>ราคาผ้าโปร่ง (ต่อเมตร)</label>
             <select class="field" name="sheer_price_per_m">
               <option value="" hidden>เลือก</option>
+              <option value="">เลือก</option>
               <option value="1000">1,000</option>
               <option value="1100">1,100</option>
               <option value="1200">1,200</option>
@@ -522,14 +572,18 @@
     </template>
 
     <script>
-      const APP_VERSION = "input-ui/2025-08-19-r26";
+      const APP_VERSION = "input-ui/1.0.7";
       const WEBHOOK_URL =
         "https://your-make-webhook-url.com/your-unique-path";
       const STORAGE_KEY = "marnthara.input.v1";
 
       const PRICING = {
         style_surcharge: { "ลอน": 200, "ตาไก่": 0, "จีบ": 0 },
-        height: { threshold: 2.5, add_per_m: 150 },
+        height: [
+          { threshold: 3.2, add_per_m: 300 },
+          { threshold: 2.8, add_per_m: 200 },
+          { threshold: 2.5, add_per_m: 150 },
+        ],
       };
       const CALC = {
         fabricYardage: (style, width) => {
@@ -544,19 +598,26 @@
           return yards > 0 ? yards : 0;
         },
       };
-
+      
       const stylePlus = (s) => PRICING.style_surcharge[s] ?? 0;
-      const heightPlus = (h) =>
-        h > PRICING.height.threshold ? PRICING.height.add_per_m : 0;
+      const heightPlus = (h) => {
+        const sorted = [...PRICING.height].sort((a,b) => b.threshold - a.threshold);
+        for(const entry of sorted) {
+          if (h > entry.threshold) {
+            return entry.add_per_m;
+          }
+        }
+        return 0;
+      };
 
       const roomsEl = document.getElementById("rooms");
       const orderForm = document.getElementById("orderForm");
       orderForm.action = WEBHOOK_URL;
 
       const copyBtn = document.getElementById("copyJsonBtn");
-      const addRoomBtn = document.getElementById("addRoomBtn");
       const clearAllBtn = document.getElementById("clearAllBtn");
       const lockBtn = document.getElementById("lockBtn");
+      const addRoomHeaderBtn = document.getElementById("addRoomHeaderBtn");
       
       let roomCount = 0;
       let isLocked = false;
@@ -603,12 +664,6 @@
         if (prefill) {
           created.querySelector('input[name="room_name"]').value =
             prefill.room_name || "";
-          created.querySelector('select[name="price_per_m"]').value =
-            prefill.price_per_m_raw || "";
-          created.querySelector('select[name="style"]').value =
-            prefill.style || "";
-          created.querySelector('select[name="open_type"]').value =
-            prefill.open_type || "";
         }
 
         if (prefill && prefill.sets && prefill.sets.length) {
@@ -633,12 +688,19 @@
 
         const fvSel = created.querySelector('select[name="fabric_variant"]');
         fvSel.value = prefill?.fabric_variant || "ทึบ";
+        
+        const otSel = created.querySelector('select[name="open_type"]');
+        otSel.value = prefill?.open_type || "";
 
         if (prefill) {
           created.querySelector('input[name="width_m"]').value =
             prefill.width_m ?? "";
           created.querySelector('input[name="height_m"]').value =
             prefill.height_m ?? "";
+          created.querySelector('select[name="price_per_m"]').value =
+            prefill.price_per_m_raw || "";
+          created.querySelector('select[name="style"]').value =
+            prefill.style || "";
           created.querySelector('select[name="sheer_price_per_m"]').value =
             prefill.sheer_price_per_m || "";
         }
@@ -722,6 +784,12 @@
         if (fvSel) fvSel.value = "ทึบ";
         const sheerSel = set.querySelector('select[name="sheer_price_per_m"]');
         if (sheerSel) sheerSel.value = "";
+        const otSel = set.querySelector('select[name="open_type"]');
+        if (otSel) otSel.value = "";
+        const styleSel = set.querySelector('select[name="style"]');
+        if(styleSel) styleSel.value = "";
+        const ppmSel = set.querySelector('select[name="price_per_m"]');
+        if(ppmSel) ppmSel.value = "";
         toggleSetFabricUI(set);
         recalcAll();
         updateLockState();
@@ -731,7 +799,7 @@
         if (isLocked) return;
         if (!confirm("คุณต้องการล้างข้อมูลห้องนี้ใช่หรือไม่?")) return;
         const room = btn.closest("[data-room]");
-        room.querySelectorAll("select").forEach((sel) => (sel.value = ""));
+        room.querySelector('input[name="room_name"]').value = "";
         const wrap = room.querySelector("[data-sets]");
         wrap.innerHTML = "";
         addSet(room);
@@ -744,6 +812,12 @@
         if (!confirm("คุณต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?")) return;
         roomsEl.innerHTML = "";
         roomCount = 0;
+        
+        const customerInputs = document.querySelectorAll('#customerInfo input');
+        customerInputs.forEach(input => {
+          input.value = "";
+        });
+
         addRoom();
         updateLockState();
       }
@@ -769,6 +843,7 @@
         lockBtn.querySelector('.lock-text').textContent = isLocked ? 'ปลดล็อค' : 'ล็อค';
         lockBtn.querySelector('.lock-icon').textContent = isLocked ? '🔓' : '🔒';
         clearAllBtn.disabled = false;
+        addRoomHeaderBtn.disabled = false;
         
       }
 
@@ -782,13 +857,9 @@
             setCount++;
             const lbl = set.querySelector("[data-set-title]");
             if (lbl)
-              lbl.textContent = `จุดที่ ${String(setCount).padStart(2, "0")}`;
+              lbl.textContent = setCount;
           });
         });
-      }
-
-      function basePricePerMRaw(room) {
-        return toNum(room.querySelector('select[name="price_per_m"]').value);
       }
 
       function recalcAll() {
@@ -799,10 +870,6 @@
         let grandTrack = 0;
 
         [...document.querySelectorAll("[data-room]")].forEach((room) => {
-          const baseRaw = basePricePerMRaw(room);
-          const style = room.querySelector('select[name="style"]').value;
-          const sPlus = stylePlus(style);
-
           let roomSum = 0;
           let roomUnits = 0;
           let roomOpaqueYards = 0;
@@ -819,8 +886,12 @@
             const variant = set.querySelector(
               'select[name="fabric_variant"]'
             ).value;
+            const style = set.querySelector('select[name="style"]').value;
+            const baseRaw = toNum(set.querySelector('select[name="price_per_m"]').value);
+            const sPlus = stylePlus(style);
+
             const hasOpaque = variant !== "โปร่ง";
-            const hasSheer = variant !== "ทึบ";
+            const hasSheer = variant === "โปร่ง" || variant === "ทึบ&โปร่ง";
             const sheerBase = hasSheer
               ? clamp01(set.querySelector('[name="sheer_price_per_m"]').value)
               : 0;
@@ -835,6 +906,11 @@
             
             set.querySelector('[data-set-price-opaque]').textContent = fmt(opaquePrice, 0, true);
             set.querySelector('[data-set-price-sheer]').textContent = fmt(sheerPrice, 0, true);
+            
+            // Fix: Show/hide yardage labels correctly
+            set.querySelector('[data-opaque-yardage-label]').classList.toggle('hidden', !hasOpaque);
+            set.querySelector('[data-sheer-yardage-label]').classList.toggle('hidden', !hasSheer);
+
             set.querySelector('[data-set-yardage-opaque]').textContent = fmt(yards, 2);
             set.querySelector('[data-set-yardage-sheer]').textContent = fmt(yards, 2);
             set.querySelector('[data-set-track]').textContent = fmt(track, 2);
@@ -876,13 +952,14 @@
         const fabric_variant = set.querySelector(
           'select[name="fabric_variant"]'
         ).value;
+        const open_type = set.querySelector('select[name="open_type"]').value || "";
+        const style = set.querySelector('select[name="style"]').value;
+        const ppmRaw = toNum(set.querySelector('select[name="price_per_m"]').value);
         const hasOpaque = fabric_variant !== "โปร่ง";
-        const hasSheer = fabric_variant !== "ทึบ";
+        const hasSheer = fabric_variant === "โปร่ง" || fabric_variant === "ทึบ&โปร่ง";
         const sheer_price_per_m = hasSheer
           ? clamp01(set.querySelector('[name="sheer_price_per_m"]').value)
           : 0;
-        const room = set.closest("[data-room]");
-        const style = room.querySelector('select[name="style"]').value;
         const yards = CALC.fabricYardage(style, width);
         const track = fabric_variant === "ทึบ&โปร่ง" ? width * 2 : width;
 
@@ -891,6 +968,9 @@
           width_m: width,
           height_m: height,
           fabric_variant,
+          open_type,
+          style,
+          price_per_m_raw: ppmRaw,
           sheer_price_per_m,
           fabric_yards_opaque: hasOpaque ? yards : 0,
           fabric_yards_sheer: hasSheer ? yards : 0,
@@ -899,16 +979,9 @@
       }
 
       function serializeRoom(room) {
-        const ppmRaw = basePricePerMRaw(room);
-        const style = room.querySelector('select[name="style"]').value;
-        const sPlus2 = stylePlus(style);
         return {
           room_id: Number(room.dataset.index) || null,
           room_name: room.querySelector('input[name="room_name"]').value || "",
-          price_per_m_raw: ppmRaw,
-          price_per_m: ppmRaw + sPlus2,
-          style,
-          open_type: room.querySelector('select[name="open_type"]').value || "",
           sets: [...room.querySelectorAll("[data-set]")].map((set, i) =>
             serializeSet(set, i)
           ),
@@ -924,9 +997,6 @@
         let totalTrack = 0;
 
         document.querySelectorAll("[data-room]").forEach((room) => {
-          const baseRaw = basePricePerMRaw(room);
-          const style = room.querySelector('select[name="style"]').value;
-          const sPlus = stylePlus(style);
           const roomObj = serializeRoom(room);
           roomObj.sets = [];
 
@@ -939,8 +1009,12 @@
             const variant = set.querySelector(
               'select[name="fabric_variant"]'
             ).value;
+            const open_type = set.querySelector('select[name="open_type"]').value || "";
+            const style = set.querySelector('select[name="style"]').value;
+            const baseRaw = toNum(set.querySelector('select[name="price_per_m"]').value);
+            const sPlus = stylePlus(style);
             const hasOpaque = variant !== "โปร่ง";
-            const hasSheer = variant !== "ทึบ";
+            const hasSheer = variant === "โปร่ง" || variant === "ทึบ&โปร่ง";
             const sheerBase = hasSheer
               ? clamp01(set.querySelector('[name="sheer_price_per_m"]').value)
               : 0;
@@ -958,6 +1032,9 @@
               width_m: w,
               height_m: h,
               fabric_variant: variant,
+              open_type: open_type,
+              style: style,
+              price_per_m_raw: baseRaw,
               price_per_m_opaque: opaquePerM,
               price_per_m_sheer: sheerPerM,
               price_opaque,
@@ -1017,6 +1094,7 @@
         if (act === "del-room") delRoom(btn);
         else if (act === "del-set") delSet(btn);
         else if (act === "add-set") addSet(btn.closest("[data-room]"));
+        else if (act === "add-room") addRoom();
         else if (act === "dup-room") dupRoom(btn);
         else if (act === "dup-set") dupSet(btn);
         else if (act === "clear-set") clearSet(btn);
@@ -1038,9 +1116,9 @@
         }
       });
       
-      addRoomBtn.addEventListener("click", () => addRoom());
       clearAllBtn.addEventListener("click", clearAllData);
       lockBtn.addEventListener("click", toggleLock);
+      addRoomHeaderBtn.addEventListener("click", addRoom);
       copyBtn.addEventListener("click", () => {
         navigator.clipboard.writeText(JSON.stringify(buildPayload(), null, 2));
       });
