@@ -421,6 +421,7 @@
             placeholder="ห้อง 01"
             required
           />
+          <span class="small" data-room-brief>จุด 0 • ชุด 0 • ราคา 0 บาท</span>
           <span class="sp"></span>
           <button
             type="button"
@@ -440,7 +441,7 @@
               + เพิ่มจุด
             </button>
           </div>
-        </div>
+          </div>
       </details>
     </template>
 
@@ -825,7 +826,7 @@
         const buttons = document.querySelectorAll('#orderForm button:not(#clearAllBtn)');
         buttons.forEach(button => {
             if (!button.matches('[data-act="toggle-room"]')) {
-                button.disabled = isLocked;
+              button.disabled = isLocked;
             }
         });
 
@@ -913,6 +914,15 @@
             if (hasOpaque || hasSheer) roomTrack += track;
             allSets += units;
           });
+
+          // ส่วนนี้ถูกลบออก:
+          // const rt = room.querySelector("[data-room-total]");
+          // if (rt) rt.textContent = fmt(roomSum, 0, true) + " บาท";
+
+          const brief = room.querySelector("[data-room-brief]");
+          if (brief) {
+            brief.innerHTML = `จุด <span class=\"num\">${fmt(points, 0, true)}</span> • ชุด <span class=\"num\">${fmt(roomUnits, 0, true)}</span> • ราคา <span class=\"num price\">${fmt(roomSum, 0, true)}</span> บาท`;
+          }
 
           grand += roomSum;
           grandOpaqueYards += roomOpaqueYards;
