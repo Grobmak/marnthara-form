@@ -500,7 +500,7 @@
             <label>ราคาผ้า (ต่อเมตร)</label>
             <select class="field" name="price_per_m" required>
               <option value="" hidden>เลือก</option>
-              <option value="">เลือก</option>
+              <option value=""></option>
               <option value="1000">1,000</option>
               <option value="1200">1,200</option>
               <option value="1300">1,300</option>
@@ -522,7 +522,7 @@
             <label>สไตล์</label>
             <select class="field" name="style" required>
               <option value="" hidden>เลือก</option>
-              <option value="">เลือก</option>
+              <option value=""></option>
               <option>ลอน</option>
               <option>ตาไก่</option>
               <option>จีบ</option>
@@ -532,7 +532,7 @@
             <label>รูปแบบเปิดผ้า</label>
             <select class="field" name="open_type" required>
               <option value="" hidden>เลือก</option>
-              <option value="">เลือก</option>
+              <option value=""></option>
               <option>แยกกลาง</option>
               <option>สไลด์เดี่ยว</option>
             </select>
@@ -551,7 +551,7 @@
             <label>ราคาผ้าโปร่ง (ต่อเมตร)</label>
             <select class="field" name="sheer_price_per_m">
               <option value="" hidden>เลือก</option>
-              <option value="">เลือก</option>
+              <option value=""></option>
               <option value="1000">1,000</option>
               <option value="1100">1,100</option>
               <option value="1200">1,200</option>
@@ -572,7 +572,7 @@
     </template>
 
     <script>
-      const APP_VERSION = "input-ui/1.0.7";
+      const APP_VERSION = "input-ui/1.0.12";
       const WEBHOOK_URL =
         "https://your-make-webhook-url.com/your-unique-path";
       const STORAGE_KEY = "marnthara.input.v1";
@@ -675,6 +675,8 @@
         renumber();
         recalcAll();
         updateLockState();
+
+        created.scrollIntoView({ behavior: 'smooth', block: 'end' });
       }
 
       function addSet(roomEl, prefill) {
@@ -709,6 +711,8 @@
         renumber();
         recalcAll();
         updateLockState();
+        
+        created.scrollIntoView({ behavior: 'smooth', block: 'end' });
       }
 
       function toggleSetFabricUI(set) {
@@ -759,19 +763,14 @@
         const data = serializeRoom(src);
         if (data.room_name) data.room_name = data.room_name + " (copy)";
         addRoom(data);
-        updateLockState();
       }
 
       function dupSet(btn) {
         if (isLocked) return;
-        const set = btn.closest("[data-set]");
+        const src = btn.closest("[data-set]");
         const room = btn.closest("[data-room]");
-        const data = serializeSet(
-          set,
-          room.querySelectorAll("[data-set]").length
-        );
+        const data = serializeSet(src);
         addSet(room, data);
-        updateLockState();
       }
 
       function clearSet(btn) {
@@ -835,7 +834,9 @@
 
         const buttons = document.querySelectorAll('#orderForm button:not(#clearAllBtn)');
         buttons.forEach(button => {
-            button.disabled = isLocked;
+            if (!button.matches('[data-act="toggle-room"]')) {
+                button.disabled = isLocked;
+            }
         });
         
         lockBtn.classList.toggle('btn-danger', isLocked);
@@ -1077,6 +1078,13 @@
             addRoom();
         }
       }
+      
+      // New function to handle blur on inputs for iOS zoom issue
+      function handleBlur(e) {
+          if (e.target.matches('input[type="number"], input[type="text"], input[type="tel"]') && e.target.closest('[data-set]')) {
+              window.scrollTo(0, 0);
+          }
+      }
 
       document.addEventListener("change", (e) => {
         const el = e.target;
@@ -1086,6 +1094,8 @@
         debounce(recalcAll)();
       });
       document.addEventListener("input", debounce(recalcAll));
+      document.addEventListener("blur", handleBlur, true);
+
       document.addEventListener("click", (e) => {
         const btn = e.target.closest("button[data-act]");
         if (!btn) return;
