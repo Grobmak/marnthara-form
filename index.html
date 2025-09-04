@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Marnthara Input (v3.1)</title>
+    <title>Marnthara Input (v3.2)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* --- Variable & Base Style --- */
@@ -64,7 +64,6 @@
         .hidden { display: none !important; }
         .room-head { display: flex; gap: 12px; align-items: center; }
         .room-head input { flex: 1 1 180px; min-width: 120px; }
-        .room-head .sp { flex: 1; display: none; } /* Hide old spacer */
         .room-head [data-room-brief] { flex-shrink: 0; margin-left: auto; }
         /* --- Custom Components --- */
         .set, .deco-item { background: #0d0e12; border: 1px solid #2f2f33; margin-bottom: 12px; border-radius: 12px; padding: 12px; transition: opacity 0.3s, border-color 0.3s; }
@@ -212,7 +211,7 @@
     <script>
     (function() {
         'use strict';
-        const APP_VERSION = "input-ui/3.1.0";
+        const APP_VERSION = "input-ui/3.2.0";
         const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
         const STORAGE_KEY = "marnthara.input.v3";
         const SQM_TO_SQYD = 1.19599;
@@ -536,7 +535,16 @@
             }
         }
 
-        document.addEventListener("change", debouncedRecalcAndSave);
+        document.addEventListener("change", e => {
+            if (e.target.matches('select[name="fabric_variant"]')) {
+                const setEl = e.target.closest(SELECTORS.set);
+                if (setEl) {
+                    toggleSetFabricUI(setEl);
+                }
+            }
+            debouncedRecalcAndSave();
+        });
+
         document.addEventListener("input", e => {
             if(e.target.matches('[name="deco_price_sqyd"]')) {
                 formatNumericInput(e);
