@@ -76,6 +76,7 @@
             price_per_m: 350,
             sets: [getNewSet()],
             decorations: [],
+            isCollapsed: false,
             calculations: {}
         };
     }
@@ -89,6 +90,7 @@
             state.rooms.forEach(room => {
                 if (!room.sets) room.sets = [];
                 if (!room.decorations) room.decorations = [];
+                if (room.isCollapsed === undefined) room.isCollapsed = false;
                 room.sets.forEach(set => {
                     if (set.is_suspended === undefined) set.is_suspended = false;
                 });
@@ -297,6 +299,12 @@
             const roomEl = DOMElements.templates.room.content.cloneNode(true).firstElementChild;
             roomEl.dataset.roomId = roomData.id;
 
+            roomEl.classList.toggle('collapsed', roomData.isCollapsed);
+            const toggleViewBtn = roomEl.querySelector('[data-view-text]');
+            if (toggleViewBtn) {
+                toggleViewBtn.textContent = roomData.isCollapsed ? 'ขยายห้อง' : 'ย่อห้อง';
+            }
+
             roomEl.querySelector('[data-bind="room.name"]').value = roomData.name;
             roomEl.querySelector('[data-bind="room.name"]').placeholder = `ห้อง ${String(roomIndex + 1).padStart(2, "0")}`;
             roomEl.querySelector('[data-bind="room.style"]').value = roomData.style;
@@ -451,6 +459,13 @@
             if (item) {
                 item.is_suspended = !item.is_suspended;
                 showToast(`รายการถูก${item.is_suspended ? 'ระงับ' : 'ใช้งาน'}แล้ว`, 'warning');
+            }
+        },
+        toggleRoomView: (btn) => {
+            const roomId = btn.closest('[data-room-id]').dataset.roomId;
+            const room = state.rooms.find(r => r.id === roomId);
+            if (room) {
+                room.isCollapsed = !room.isCollapsed;
             }
         },
         clearAll: () => {
