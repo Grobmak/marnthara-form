@@ -14,7 +14,6 @@
     // =================================================================================
     // --- DOM REFERENCES (VIEW) ---
     // =================================================================================
-    // ประกาศตัวแปร แต่จะหาองค์ประกอบใน DOM เมื่อหน้าเว็บโหลดเสร็จแล้ว
     let DOMElements = {};
 
     function getDOMElements() {
@@ -70,11 +69,17 @@
         const savedState = localStorage.getItem('curtainCalculatorState');
         if (savedState) {
             try {
-                Object.assign(state, JSON.parse(savedState));
+                const loadedState = JSON.parse(savedState);
+                if (loadedState.rooms && Array.isArray(loadedState.rooms)) {
+                    Object.assign(state, loadedState);
+                }
             } catch (error) {
                 console.error("Failed to parse saved state, starting fresh.", error);
                 localStorage.removeItem('curtainCalculatorState');
             }
+        }
+        if (state.rooms.length === 0) {
+            addNewRoom();
         }
     }
 
@@ -145,8 +150,10 @@
         state.totalPrice = 0;
         state.totalSqYd = 0;
         const summaryGrid = DOMElements.summaryGrid;
-        summaryGrid.innerHTML = '';
-        
+        if (summaryGrid) {
+            summaryGrid.innerHTML = '';
+        }
+
         const summary = {
             total: {
                 price: 0,
@@ -169,7 +176,6 @@
                     roomBriefElement.querySelector('.price').textContent = room.totalPrice.toFixed(2);
                 }
 
-                // Populate summary object
                 summary.rooms[room.id] = {
                     name: room.name || `ห้อง #${state.rooms.indexOf(room) + 1}`,
                     price: room.totalPrice,
@@ -183,7 +189,7 @@
                     setElement.querySelector('.set-summary-row .price').textContent = set.total_price.toFixed(2);
                     setElement.querySelector('.set-summary-row span:nth-of-type(2)').textContent = set.total_yd.toFixed(2);
                 }
-                
+
                 set.decos.forEach(deco => {
                     const decoElement = document.querySelector(`.deco-item[data-id="${deco.id}"]`);
                     if (decoElement) {
@@ -196,9 +202,8 @@
 
         summary.total.price = state.totalPrice;
         summary.total.sqyd = state.totalSqYd;
-        state.summary = summary; // Save summary to state
+        state.summary = summary;
 
-        // Render summary grid
         if (state.totalPrice > 0) {
             DOMElements.summaryCard.style.display = 'block';
             for (const key in summary.rooms) {
@@ -242,17 +247,17 @@
         const template = DOMElements.roomTemplate;
         const roomNode = template.content.cloneNode(true).querySelector('.room-item');
         roomNode.dataset.id = room.id;
-        
+
         bindData(roomNode, room, 'room');
-        updatePricingOptions(roomNode.querySelector('[data-bind="room.price"]'), room.style);
+        updatePricingOptions(roomNode.querySelector('[data-bind="room.price"]'), room.style, room.price);
 
         const setContainer = roomNode.querySelector('#setContainer');
-        room.sets.forEach(set => {
+        room.sets.forEach((set, index) => {
+            set.name = (index + 1).toString();
             const setNode = createSetNode(set);
             setContainer.appendChild(setNode);
         });
 
-        // Add 'add set' button
         const addSetBtn = document.createElement('button');
         addSetBtn.type = 'button';
         addSetBtn.className = 'btn btn-primary btn-sm mt-3';
@@ -262,16 +267,17 @@
 
         return roomNode;
     }
-    
+
     function createSetNode(set) {
         const template = DOMElements.setTemplate;
         const setNode = template.content.cloneNode(true).querySelector('.set-item');
         setNode.dataset.id = set.id;
 
         bindData(setNode, set, 'set');
-        
+
         const decoContainer = setNode.querySelector('.deco-container');
-        set.decos.forEach(deco => {
+        set.decos.forEach((deco, index) => {
+            deco.name = (index + 1).toString();
             const decoNode = createDecoNode(deco);
             decoContainer.appendChild(decoNode);
         });
@@ -301,13 +307,16 @@
         });
     }
 
-    function updatePricingOptions(selectElement, style) {
+    function updatePricingOptions(selectElement, style, selectedPrice) {
         selectElement.innerHTML = '<option value="0">เลือกราคา</option>';
         const prices = CONFIG.PRICING[style] || [];
         prices.forEach(price => {
             const option = document.createElement('option');
             option.value = price;
             option.textContent = `${price} บ./หลา`;
+            if (price == selectedPrice) {
+                option.selected = true;
+            }
             selectElement.appendChild(option);
         });
     }
@@ -332,23 +341,38 @@
         }, 3000);
     }
 
+    function addNewRoom() {
+        const newRoom = {
+            id: generateId(),
+            name: '',
+            style: 'curtain',
+            price: 0,
+            sets: [{
+                id: generateId(),
+                name: '1',
+                width_m: '',
+                height_m: '',
+                quantity: '1',
+                extra_cm: '0',
+                fold_times: '2.5',
+                price_yd: '',
+                decos: []
+            }],
+            totalPrice: 0,
+            totalSqYd: 0
+        };
+        state.rooms.push(newRoom);
+        render();
+        showToast('เพิ่มห้องใหม่แล้ว', 'success');
+    }
+
+
     // =================================================================================
     // --- EVENT LISTENERS (CONTROLLER) ---
     // =================================================================================
     function bindEventListeners() {
         DOMElements.addRoomBtn.addEventListener('click', () => {
-            const newRoom = {
-                id: generateId(),
-                name: '',
-                style: 'curtain',
-                price: 0,
-                sets: [{ id: generateId(), name: '1', width_m: '', height_m: '', quantity: '1', extra_cm: '0', fold_times: '2.5', price_yd: '', decos: [] }],
-                totalPrice: 0,
-                totalSqYd: 0
-            };
-            state.rooms.push(newRoom);
-            render();
-            showToast('เพิ่มห้องใหม่แล้ว', 'success');
+            addNewRoom();
         });
 
         DOMElements.clearAllBtn.addEventListener('click', () => {
@@ -360,18 +384,21 @@
             showModal(DOMElements.deleteModal);
         });
 
-        DOMEElements.confirmDeleteBtn.addEventListener('click', () => {
+        DOMElements.confirmDeleteBtn.addEventListener('click', () => {
             hideModal(DOMElements.deleteModal);
             if (state.tempDeleteTarget === 'all') {
                 state.rooms = [];
                 state.totalPrice = 0;
                 state.totalSqYd = 0;
-                render();
+                addNewRoom();
                 showToast('ล้างข้อมูลทั้งหมดแล้ว', 'success');
             } else {
                 const { type, id } = state.tempDeleteTarget;
                 if (type === 'room') {
                     state.rooms = state.rooms.filter(room => room.id !== id);
+                    if (state.rooms.length === 0) {
+                        addNewRoom();
+                    }
                 } else if (type === 'set') {
                     const room = state.rooms.find(room => room.sets.some(set => set.id === id));
                     if (room) {
@@ -408,12 +435,12 @@
             const element = target.closest(`[data-id]`);
             if (!element) return;
             const id = element.dataset.id;
-            
+
             if (scope === 'room') {
                 const room = findItem('room', id);
                 if (room) {
                     if (prop === 'price' && e.target.value === '0') {
-                        room[prop] = ''; // Store as empty string if 'เลือกราคา' is selected
+                        room[prop] = '';
                     } else {
                         room[prop] = e.target.value;
                     }
@@ -435,11 +462,11 @@
             const target = e.target;
             const action = target.dataset.action;
             if (!action) return;
-            
+
             const element = target.closest('[data-id]');
             const id = element.dataset.id;
             const type = action.split('-')[1];
-            
+
             if (action === 'add-set') {
                 const room = findItem('room', id);
                 if (room) {
@@ -498,8 +525,7 @@
                 showModal(DOMElements.deleteModal);
             }
         });
-        
-        // --- Submit Logic ---
+
         DOMElements.orderForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             showModal(DOMElements.confirmSubmitModal);
@@ -544,9 +570,7 @@
         });
     }
 
-    // Initialize the app on page load
     document.addEventListener('DOMContentLoaded', () => {
         init();
     });
-
 })();
