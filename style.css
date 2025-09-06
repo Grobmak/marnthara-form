@@ -67,6 +67,12 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
 .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; position: relative; }
 .total { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: 600; }
+/* Added styling for room-actions */
+.room-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
 .hidden { display: none !important; }
 .room-head { display: flex; gap: 12px; align-items: center; }
 .room-head input { flex: 1 1 180px; min-width: 120px; }
