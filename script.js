@@ -3,7 +3,7 @@
     // --- APP-WIDE CONFIGURATION ---
     // =================================================================================
     const CONFIG = {
-        WEBHOOK_URL: null,
+        WEBHOOK_URL: null, // ฟังก์ชันส่งข้อมูลถูกปิดใช้งาน
         PRICING: {
             fabric: [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000],
             sheer: [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000]
@@ -14,6 +14,7 @@
     // =================================================================================
     // --- DOM REFERENCES (VIEW) ---
     // =================================================================================
+    // ประกาศตัวแปร แต่จะหาองค์ประกอบใน DOM เมื่อหน้าเว็บโหลดเสร็จแล้ว
     let DOMElements = {};
 
     function initDOMElements() {
@@ -260,6 +261,7 @@
     // --- RENDERING LOGIC (VIEW) ---
     // =================================================================================
     function populateSelect(selectEl, prices, selectedValue) {
+        if (!selectEl) return;
         selectEl.innerHTML = '';
         const defaultOption = document.createElement('option');
         defaultOption.value = '';
@@ -279,6 +281,12 @@
 
     function render() {
         Calculator.runAllCalculations(state);
+
+        // ตรวจสอบว่า DOMElements พร้อมใช้งานหรือไม่
+        if (!DOMElements.orderForm) {
+            console.error("DOM elements are not initialized. Cannot render.");
+            return;
+        }
 
         document.querySelector('[data-bind="customer.name"]').value = state.customer.name;
         document.querySelector('[data-bind="customer.address"]').value = state.customer.address;
@@ -319,11 +327,15 @@
 
                 const hasOpaque = setData.fabric_variant === 'ทึบ' || setData.fabric_variant === 'ทึบ&โปร่ง';
                 const hasSheer = setData.fabric_variant === 'โปร่ง' || setData.fabric_variant === 'ทึบ&โปร่ง';
-                setEl.querySelector('[data-set-options-row]').classList.toggle("three-col", hasSheer);
-                setEl.querySelector('[data-sheer-wrap]').classList.toggle("hidden", !hasSheer);
+                const setOptionsRow = setEl.querySelector('[data-set-options-row]');
+                if (setOptionsRow) setOptionsRow.classList.toggle("three-col", hasSheer);
+                const sheerWrap = setEl.querySelector('[data-sheer-wrap]');
+                if (sheerWrap) sheerWrap.classList.toggle("hidden", !hasSheer);
                 ['price', 'yardage', 'track'].forEach(type => {
-                    setEl.querySelector(`[data-set-${type}-wrap="opaque"]`).classList.toggle("hidden", !hasOpaque);
-                    setEl.querySelector(`[data-set-${type}-wrap="sheer"]`).classList.toggle("hidden", !hasSheer);
+                    const opaqueWrap = setEl.querySelector(`[data-set-${type}-wrap="opaque"]`);
+                    const sheerWrap = setEl.querySelector(`[data-set-${type}-wrap="sheer"]`);
+                    if (opaqueWrap) opaqueWrap.classList.toggle("hidden", !hasOpaque);
+                    if (sheerWrap) sheerWrap.classList.toggle("hidden", !hasSheer);
                 });
 
                 setsContainer.appendChild(setEl);
@@ -489,6 +501,7 @@
     // --- UI HELPERS (Modals, Toasts, Clipboard) ---
     // =================================================================================
     function showToast(message, type = 'success') {
+        if (!DOMElements.toastContainer) return;
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
         toast.textContent = message;
@@ -503,6 +516,11 @@
     const showConfirmation = (title, body) => {
         return new Promise(resolve => {
             const modalEl = document.querySelector('#confirmationModal');
+            if (!modalEl) {
+                console.error("Modal not found");
+                resolve(false);
+                return;
+            }
             modalEl.querySelector('#modalTitle').textContent = title;
             modalEl.querySelector('#modalBody').textContent = body;
             modalEl.classList.add('visible');
@@ -519,6 +537,11 @@
 
     const showCopyOptionsModal = () => new Promise(resolve => {
         const modal = document.querySelector('#copyOptionsModal');
+        if (!modal) {
+            console.error("Copy options modal not found");
+            resolve(false);
+            return;
+        }
         modal.classList.add('visible');
         const confirmBtn = modal.querySelector('#copyOptionsConfirm');
         const cancelBtn = modal.querySelector('#copyOptionsCancel');
@@ -593,7 +616,6 @@
         initState();
         render();
 
-        // Attach event listeners after the DOM is ready and DOMElements are initialized
         document.addEventListener('input', (e) => {
             Actions.updateBoundValue(e.target);
             debouncedRender();
@@ -633,39 +655,41 @@
             }
         });
 
-        DOMElements.orderForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        if (DOMElements.orderForm) {
+            DOMElements.orderForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
 
-            if (!CONFIG.WEBHOOK_URL) {
-                showToast('ฟังก์ชันส่งข้อมูลถูกปิดใช้งานอยู่', 'info');
-                return;
-            }
+                if (!CONFIG.WEBHOOK_URL) {
+                    showToast('ฟังก์ชันส่งข้อมูลถูกปิดใช้งานอยู่', 'info');
+                    return;
+                }
 
-            if (state.isLocked) {
-                showToast('ฟอร์มถูกล็อคอยู่ ไม่สามารถส่งได้', 'error');
-                return;
-            }
+                if (state.isLocked) {
+                    showToast('ฟอร์มถูกล็อคอยู่ ไม่สามารถส่งได้', 'error');
+                    return;
+                }
 
-            DOMElements.submitBtn.disabled = true;
-            DOMElements.submitBtn.textContent = 'กำลังส่ง...';
+                DOMElements.submitBtn.disabled = true;
+                DOMElements.submitBtn.textContent = 'กำลังส่ง...';
 
-            try {
-                const payload = { ...state, app_version: CONFIG.APP_VERSION, generated_at: new Date().toISOString() };
-                const response = await fetch(CONFIG.WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) throw new Error(`Server responded with ${response.status}`);
-                showToast('ส่งข้อมูลสำเร็จแล้ว', 'success');
-            } catch (error) {
-                console.error("Submit failed:", error);
-                showToast('ส่งข้อมูลไม่สำเร็จ! โปรดตรวจสอบการเชื่อมต่อ', 'error');
-            } finally {
-                DOMElements.submitBtn.disabled = state.isLocked;
-                DOMElements.submitBtn.textContent = 'ส่งไปคำนวณ';
-            }
-        });
+                try {
+                    const payload = { ...state, app_version: CONFIG.APP_VERSION, generated_at: new Date().toISOString() };
+                    const response = await fetch(CONFIG.WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`Server responded with ${response.status}`);
+                    showToast('ส่งข้อมูลสำเร็จแล้ว', 'success');
+                } catch (error) {
+                    console.error("Submit failed:", error);
+                    showToast('ส่งข้อมูลไม่สำเร็จ! โปรดตรวจสอบการเชื่อมต่อ', 'error');
+                } finally {
+                    DOMElements.submitBtn.disabled = state.isLocked;
+                    DOMElements.submitBtn.textContent = 'ส่งไปคำนวณ';
+                }
+            });
+        }
     });
 
 })();
