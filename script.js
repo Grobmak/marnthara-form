@@ -79,7 +79,7 @@
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = roomHtml.trim();
             const newRoom = tempDiv.firstChild;
-            
+
             // Populate curtain fields if data exists
             if (roomData.curtain) {
                 const curtainFields = newRoom.querySelectorAll('[name^="curtain_"]');
@@ -184,7 +184,7 @@
                 const roomName = roomCard.querySelector('[name="room_name"]').value;
                 const roomNote = roomCard.querySelector('[name="room_note"]').value;
                 const curtainCard = roomCard.querySelector('.item-body');
-                
+
                 const curtain = {
                     fabric_type: curtainCard.querySelector('[name="curtain_fabric_type"]').value,
                     style: curtainCard.querySelector('[name="curtain_style"]').value,
@@ -193,7 +193,7 @@
                     qty: parseInt(curtainCard.querySelector('[name="curtain_qty"]').value) || 1,
                     note: curtainCard.querySelector('[name="curtain_note"]').value,
                 };
-                
+
                 const decorations = Array.from(roomCard.querySelectorAll('.item-card')).map(decoCard => ({
                     type: decoCard.querySelector('[name="deco_type"]').value,
                     width_m: parseFloat(decoCard.querySelector('[name="deco_width_m"]').value) || 0,
@@ -202,7 +202,7 @@
                     note: decoCard.querySelector('[name="deco_note"]').value,
                     suspended: decoCard.classList.contains('suspended')
                 }));
-                
+
                 return { room_name: roomName, room_note: roomNote, curtain, decorations };
             });
 
@@ -234,7 +234,7 @@
             style_surcharge: { "ลอน": 200, "ตาไก่": 0, "จีบ": 0 },
             height: [{ threshold: 3.2, add_per_m: 300 }, { threshold: 2.8, add_per_m: 200 }, { threshold: 2.5, add_per_m: 150 }],
         },
-        
+
         getMaterialPrice(type, width, height) {
             const heightAdd = this.PRICING.height.find(h => height >= h.threshold);
             let basePrice = 0;
@@ -251,7 +251,7 @@
             const curtainBody = roomCard.querySelector('.item-body');
             const roomNameEl = roomCard.querySelector('[data-room-name-display]');
             const roomSizeEl = roomCard.querySelector('[data-room-size-display]');
-            
+
             let roomTotalPrice = 0;
             let roomFabricPrice = 0;
             let roomDecoPrice = 0;
@@ -262,7 +262,7 @@
             const curtainWidth = parseFloat(curtainBody.querySelector('[name="curtain_width_m"]').value) || 0;
             const curtainHeight = parseFloat(curtainBody.querySelector('[name="curtain_height_m"]').value) || 0;
             const curtainQty = parseInt(curtainBody.querySelector('[name="curtain_qty"]').value) || 1;
-            
+
             let fabricPrice = 0;
             let styleSurcharge = 0;
             if (curtainFabricType && curtainWidth > 0 && curtainHeight > 0) {
@@ -299,17 +299,17 @@
                 totalFabricPrice += roomFabricPrice;
                 totalDecoPrice += roomDecoPrice;
             });
-            
+
             const discountInput = DOM.elements.discountInput;
             const discountValue = parseFloat(discountInput.value.replace(/,/g, '')) || 0;
-            
+
             const finalPrice = totalRoomsPrice - discountValue;
 
             DOM.elements.summaryTotalPrice.textContent = finalPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             DOM.elements.summaryFabricPrice.textContent = totalFabricPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             DOM.elements.summaryDecoPrice.textContent = totalDecoPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             DOM.elements.summaryDiscountPrice.textContent = discountValue.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            
+
             State.save();
         }
     };
@@ -466,14 +466,14 @@
                 roomCard.querySelector('.room-body').classList.toggle('closed');
             }
         },
-        
+
         toggleItem(target) {
             const itemHead = target.closest('.item-head');
             const itemBody = itemHead.nextElementSibling;
             itemHead.classList.toggle('closed');
             itemBody.classList.toggle('closed');
         },
-        
+
         clearCurtain(target) {
             const roomCard = DOM.findRoomCard(target);
             if (roomCard) {
@@ -493,7 +493,7 @@
                 this.clearCurtain(target);
             }
         },
-        
+
         addDeco(target, decoData = {}) {
             const roomCard = DOM.findRoomCard(target);
             if (roomCard) {
@@ -528,7 +528,7 @@
                 Calculations.updateTotalSummary();
             }
         },
-        
+
         toggleSuspend(target) {
             const itemCard = DOM.findItemCard(target);
             if (itemCard) {
@@ -538,23 +538,23 @@
                 Calculations.updateTotalSummary();
             }
         },
-        
+
         toggleLock() {
             State.isLocked = !State.isLocked;
             this.updateLockState();
         },
-        
+
         updateLockState() {
             const lockIcon = DOM.elements.lockBtn.querySelector('.lock-icon');
             const lockText = DOM.elements.lockBtn.querySelector('.lock-text');
             const allInputs = document.querySelectorAll('#orderForm input, #orderForm select, #orderForm textarea, #orderForm button');
-            
+
             allInputs.forEach(el => {
                 if (el.id !== 'lockBtn' && el.id !== 'clearAllBtn') {
                     el.disabled = State.isLocked;
                 }
             });
-            
+
             if (State.isLocked) {
                 lockText.textContent = 'ปลดล็อค';
                 lockIcon.textContent = '🔓';
@@ -565,7 +565,7 @@
                 DOM.showToast('หน้าจอถูกปลดล็อคแล้ว', 'success');
             }
         },
-        
+
         clearAll() {
             if (confirm('คุณต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?')) {
                 localStorage.removeItem(State.STORAGE_KEY);
