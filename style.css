@@ -51,7 +51,6 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
 .btn-primary.outline { background: transparent; color: var(--primary); }
 .btn-warning { border-color: var(--warning); color: var(--warning); }
 /* --- Layouts & Containers --- */
-/* Updated header layout */
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
 .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; position: relative; }
 .total { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: 600; }
@@ -66,19 +65,19 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
 .set.is-suspended, .deco-item.is-suspended { opacity: 0.5; border-left-color: var(--muted); }
 .item-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
 .item-badge { font-size: 1rem; font-weight: bold; background: var(--primary); color: #fff; border: none; border-radius: 99px; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; }
-/* Updated sticky footer layout */
+/* Sticky footer */
 .sticky-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--accent-dark); border-top: 1px solid var(--line); padding: 12px 16px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; z-index: 1000; }
 .sticky-footer .summary-item { text-align: center; }
 .sticky-footer .summary-label { font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; }
 .sticky-footer .summary-value { font-weight: 600; font-size: 1rem; color: var(--primary); }
 .sticky-footer .summary-value.price { color: var(--secondary); }
-/* --- Details & Summary --- */
+/* Details & Summary */
 details.room > summary { list-style: none; }
 details.room > summary::-webkit-details-marker { display: none; }
 [data-room-brief] { display: inline-block; padding: 0.2rem 0.5rem; border: 1px solid var(--line); border-radius: 0.5rem; background: #0d0e12; color: var(--muted); }
 [data-room-brief] .num { color: var(--primary); font-weight: 600; }
 [data-room-brief] .num.price { color: var(--secondary); }
-/* --- Confirmation Modal --- */
+/* Confirmation Modal */
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; transition: opacity 0.2s ease-in-out; pointer-events: none; }
 .modal-overlay.visible { opacity: 1; pointer-events: auto; }
 .modal { background: var(--card-bg); border-radius: 14px; padding: 24px; border: 1px solid var(--line); width: 90%; max-width: 400px; transform: scale(0.95); transition: transform 0.2s ease-in-out; }
@@ -94,7 +93,7 @@ details.room > summary::-webkit-details-marker { display: none; }
 }
 .summary-details > .summary-popup {
     position: absolute; right: 0; bottom: 100%; margin-bottom: -1px;
-    background-color: var(--card-bg); border: 1-px solid var(--line); border-radius: 8px 8px 0 0;
+    background-color: var(--card-bg); border: 1px solid var(--line); border-radius: 8px 8px 0 0;
     padding: 12px; min-width: 180px; z-index: 1000;
 }
 .summary-details > .summary-popup > .summary-item { text-align: left; margin-bottom: 8px; }
@@ -127,4 +126,16 @@ details.room > summary::-webkit-details-marker { display: none; }
 .toast.show {
     opacity: 1;
     transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+    .row.five-col {
+        grid-template-columns: 1fr 1fr;
+    }
+    .row.deco-row {
+        grid-template-columns: 1fr 1fr;
+    }
+    .row.five-col div:last-child, .row.deco-row div:last-child {
+        grid-column: span 2;
+    }
 }
