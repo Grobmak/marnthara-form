@@ -368,6 +368,18 @@ label {
     margin-bottom: 5px;
 }
 
+/* New CSS for flash effect */
+.room-head,
+.set,
+.deco-item {
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    border: 1px solid var(--line);
+    border-radius: 8px; /* Use var(--border-radius) if it's available and consistent */
+    padding: 16px; /* Adjust padding to match existing styles */
+    margin-bottom: 16px; /* Adjust margin to match existing styles */
+    background-color: var(--bg); /* Adjust background to match existing styles */
+}
+
 @media (max-width: 768px) {
     body { padding: 10px; }
     .header { flex-wrap: wrap; justify-content: flex-end; }
