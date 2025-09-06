@@ -67,7 +67,6 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
 .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; position: relative; }
 .total { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: 600; }
-/* Added styling for room-actions */
 .room-actions {
     display: flex;
     gap: 12px;
@@ -90,21 +89,21 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
     bottom: 0;
     left: 0;
     width: 100%;
-    background: #11141B; /* Darker background to match the theme */
+    background: #11141A; /* Adjusted to a darker, richer color */
     border-top: 1px solid var(--line);
-    padding: 8px 16px; /* Reduced vertical padding */
+    padding: 8px 16px; /* Reduced padding for a smaller height */
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     z-index: 1000;
 }
 .sticky-footer .summary-item { text-align: center; }
-.sticky-footer .summary-label { font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; }
-.sticky-footer .summary-value {
-    font-weight: 600;
-    font-size: 1.2rem; /* Increased font size for values */
-    color: var(--primary);
+.sticky-footer .summary-label {
+    font-size: 0.9rem; /* Increased font size */
+    color: var(--muted);
+    margin-bottom: 4px;
 }
+.sticky-footer .summary-value { font-weight: 600; font-size: 1rem; color: var(--primary); }
 .sticky-footer .summary-value.price { color: var(--secondary); }
 /* --- Details & Summary --- */
 details.room > summary { list-style: none; }
@@ -187,3 +186,4 @@ details.room > summary::-webkit-details-marker { display: none; }
     color: var(--fg);
     margin: 0;
 }
+```eof
