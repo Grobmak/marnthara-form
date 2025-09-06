@@ -1,6 +1,299 @@
 (function() {
     'use strict';
 
+    // Core logic for state management and calculations
+    const State = {
+        STORAGE_KEY: 'marntharaState',
+        isLocked: false,
+        rooms: [],
+
+        load() {
+            const savedState = localStorage.getItem(this.STORAGE_KEY);
+            if (savedState) {
+                const data = JSON.parse(savedState);
+                this.isLocked = data.isLocked;
+                this.rooms = data.rooms;
+                App.restoreUI();
+            } else {
+                this.addRoom();
+            }
+            App.updateLockState();
+        },
+
+        save() {
+            const payload = {
+                isLocked: this.isLocked,
+                rooms: this.rooms,
+            };
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(payload));
+        },
+
+        syncStateFromDOM() {
+            this.rooms = Array.from(document.querySelectorAll('.room-card')).map(roomEl => {
+                const roomId = roomEl.dataset.roomId;
+                const roomName = roomEl.querySelector('.room-name').value;
+                const isSuspended = roomEl.classList.contains('suspended');
+
+                const items = Array.from(roomEl.querySelectorAll('.item-card')).map(itemEl => {
+                    const itemId = itemEl.dataset.itemId;
+                    const isItemSuspended = itemEl.classList.contains('suspended');
+
+                    const decorations = Array.from(itemEl.querySelectorAll('.deco-card')).map(decoEl => {
+                        const decoId = decoEl.dataset.decoId;
+                        const isDecoSuspended = decoEl.classList.contains('suspended');
+                        return {
+                            id: decoId,
+                            isSuspended: isDecoSuspended,
+                            deco_name: decoEl.querySelector(`[name="deco_name_${decoId}"]`).value,
+                            deco_amount: decoEl.querySelector(`[name="deco_amount_${decoId}"]`).value,
+                            deco_price: decoEl.querySelector(`[name="deco_price_${decoId}"]`).value,
+                        };
+                    });
+
+                    return {
+                        id: itemId,
+                        isSuspended: isItemSuspended,
+                        type: itemEl.querySelector(`[name="item_type_${itemId}"]`).value,
+                        fabric_width: itemEl.querySelector(`[name="fabric_width_${itemId}"]`).value,
+                        fabric_height: itemEl.querySelector(`[name="fabric_height_${itemId}"]`).value,
+                        fabric_price: itemEl.querySelector(`[name="fabric_price_${itemId}"]`).value,
+                        deco_count: itemEl.querySelector(`[name="deco_count_${itemId}"]`).value,
+                        deco_price: itemEl.querySelector(`[name="deco_price_${itemId}"]`).value,
+                        discount: itemEl.querySelector(`[name="discount_${itemId}"]`).value,
+                        set_count: itemEl.querySelector(`[name="set_count_${itemId}"]`).value,
+                        decorations: decorations,
+                    };
+                });
+
+                return {
+                    id: roomId,
+                    name: roomName,
+                    isSuspended: isSuspended,
+                    items: items,
+                };
+            });
+            this.save();
+        },
+
+        addRoom() {
+            const roomEl = App.createRoomElement();
+            DOM.elements.roomsContainer.appendChild(roomEl);
+            App.cacheDynamicElements();
+            this.syncStateFromDOM();
+            App.scrollToElement(roomEl);
+        },
+
+        addItem(roomCard) {
+            const itemContainer = roomCard.querySelector('.item-container');
+            const itemEl = App.createItemElement();
+            itemContainer.appendChild(itemEl);
+            App.cacheDynamicElements();
+            this.syncStateFromDOM();
+            App.scrollToElement(itemEl);
+        },
+
+        addDeco(itemCard) {
+            const decoContainer = itemCard.querySelector('.deco-container');
+            const decoEl = App.createDecoElement();
+            decoContainer.appendChild(decoEl);
+            App.cacheDynamicElements();
+            this.syncStateFromDOM();
+            App.scrollToElement(decoEl);
+        },
+
+        deleteElement(el, type) {
+            const parentRoom = App.findRoomCard(el);
+            const parentItem = App.findItemCard(el);
+            const prevSibling = el.previousElementSibling;
+
+            if (confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
+                el.remove();
+                this.syncStateFromDOM();
+                App.updateTotalSummary();
+
+                let scrollToEl;
+                if (type === 'room') {
+                    scrollToEl = prevSibling || DOM.elements.roomsContainer.lastElementChild;
+                } else if (type === 'item') {
+                    scrollToEl = prevSibling || parentRoom.querySelector('.item-container').lastElementChild;
+                } else if (type === 'deco') {
+                    scrollToEl = prevSibling || parentItem.querySelector('.deco-container').lastElementChild;
+                }
+                App.scrollToElement(scrollToEl);
+            }
+        },
+
+        toggleSuspend(el, type) {
+            const target = (type === 'room') ? App.findRoomCard(el) : (type === 'item' ? App.findItemCard(el) : el.closest('.deco-card'));
+            if (target) {
+                target.classList.toggle('suspended');
+                const isSuspended = target.classList.contains('suspended');
+                el.querySelector('[data-suspend-text]').textContent = isSuspended ? 'เรียกคืน' : 'ระงับ';
+                this.syncStateFromDOM();
+                App.updateTotalSummary();
+            }
+        },
+
+        toggleLock() {
+            this.isLocked = !this.isLocked;
+            App.updateLockState();
+            this.save();
+        },
+
+        clearAll() {
+            if (confirm('คุณต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?')) {
+                localStorage.removeItem(this.STORAGE_KEY);
+                DOM.elements.roomsContainer.innerHTML = '';
+                this.rooms = [];
+                this.addRoom();
+                App.updateTotalSummary();
+                App.showToast('ล้างข้อมูลทั้งหมดแล้ว', 'success');
+            }
+        },
+
+        preparePayload() {
+            const customerInfo = {
+                customer_name: DOM.elements.customerName.value,
+                customer_address: DOM.elements.customerAddress.value,
+                customer_phone: DOM.elements.customerPhone.value,
+            };
+            const summary = {
+                discount: App.sanitizeValue(DOM.elements.discountInput.value),
+                deposit: App.sanitizeValue(DOM.elements.depositInput.value),
+                total: Calculations.totalPrice,
+                fabric_total: Calculations.fabricPrice,
+                deco_total: Calculations.decoPrice,
+            };
+            const data = {
+                customer: customerInfo,
+                summary: summary,
+                rooms: this.rooms,
+            };
+            DOM.elements.payloadInput.value = JSON.stringify(data);
+        }
+    };
+
+    const Calculations = {
+        PRICING: {
+            SQM_TO_SQYD: 1.19599,
+            ROLLER_SQYD: 280,
+            ROMAN_SQYD: 320,
+            PLEAT_SQYD: 200,
+            EYELET_SQYD: 200,
+        },
+        totalPrice: 0,
+        fabricPrice: 0,
+        decoPrice: 0,
+
+        calculateItem(itemData) {
+            if (itemData.isSuspended) return { subtotal: 0, fabric: 0, deco: 0, discount: 0 };
+
+            const {
+                type,
+                fabric_width,
+                fabric_height,
+                fabric_price,
+                deco_count,
+                deco_price,
+                discount,
+                set_count,
+                decorations,
+            } = itemData;
+
+            const fabricWidth = App.sanitizeValue(fabric_width);
+            const fabricHeight = App.sanitizeValue(fabric_height);
+            const fabricPrice = App.sanitizeValue(fabric_price);
+            const decoCount = App.sanitizeValue(deco_count);
+            const decoPrice = App.sanitizeValue(deco_price);
+            const itemDiscount = App.sanitizeValue(discount);
+            const setCount = App.sanitizeValue(set_count) || 1;
+
+            let totalFabricPrice = 0;
+            let totalDecoPrice = 0;
+            let totalDecoFromDecorations = 0;
+
+            if (fabricWidth > 0 && fabricHeight > 0 && fabricPrice > 0) {
+                const sqMeter = fabricWidth * fabricHeight;
+                const sqYard = sqMeter * this.PRICING.SQM_TO_SQYD;
+                const fabricCostPerSqYard = parseFloat(fabricPrice);
+
+                let calculatedFabricPrice = 0;
+                if (type === 'roller') {
+                    calculatedFabricPrice = sqYard * (fabricCostPerSqYard || this.PRICING.ROLLER_SQYD);
+                } else if (type === 'roman') {
+                    calculatedFabricPrice = sqYard * (fabricCostPerSqYard || this.PRICING.ROMAN_SQYD);
+                } else if (type === 'pleat') {
+                    calculatedFabricPrice = sqYard * (fabricCostPerSqYard || this.PRICING.PLEAT_SQYD);
+                } else if (type === 'eyelet') {
+                    calculatedFabricPrice = sqYard * (fabricCostPerSqYard || this.PRICING.EYELET_SQYD);
+                } else { // standard or default
+                    calculatedFabricPrice = sqYard * (fabricCostPerSqYard || this.PRICING.EYELET_SQYD);
+                }
+
+                totalFabricPrice = calculatedFabricPrice;
+            }
+
+            if (decoCount > 0 && decoPrice > 0) {
+                totalDecoPrice = decoCount * decoPrice;
+            }
+
+            decorations.forEach(deco => {
+                if (!deco.isSuspended) {
+                    totalDecoFromDecorations += App.sanitizeValue(deco.deco_amount) * App.sanitizeValue(deco.deco_price);
+                }
+            });
+
+            const subtotal = ((totalFabricPrice + totalDecoPrice + totalDecoFromDecorations) * setCount) - itemDiscount;
+
+            return {
+                subtotal: Math.max(0, subtotal),
+                fabric: totalFabricPrice * setCount,
+                deco: (totalDecoPrice + totalDecoFromDecorations) * setCount,
+                discount: itemDiscount,
+            };
+        },
+
+        updateTotalSummary() {
+            let totalFabric = 0;
+            let totalDeco = 0;
+            let totalDiscount = App.sanitizeValue(DOM.elements.discountInput.value);
+
+            State.rooms.forEach(room => {
+                if (room.isSuspended) return;
+
+                let roomSubtotal = 0;
+                room.items.forEach(item => {
+                    const result = this.calculateItem(item);
+                    roomSubtotal += result.subtotal;
+                    totalFabric += result.fabric;
+                    totalDeco += result.deco;
+                    totalDiscount += result.discount;
+
+                    const itemCardEl = document.querySelector(`[data-item-id="${item.id}"]`);
+                    if (itemCardEl) {
+                        itemCardEl.querySelector('.item-summary-price').textContent = result.subtotal.toFixed(2);
+                    }
+                });
+
+                const roomCardEl = document.querySelector(`[data-room-id="${room.id}"]`);
+                if (roomCardEl) {
+                    roomCardEl.querySelector('.room-summary-price').textContent = roomSubtotal.toFixed(2);
+                }
+            });
+
+            this.fabricPrice = totalFabric;
+            this.decoPrice = totalDeco;
+            this.totalPrice = Math.max(0, this.fabricPrice + this.decoPrice - totalDiscount);
+
+            DOM.elements.summaryTotalPrice.textContent = this.totalPrice.toFixed(2);
+            DOM.elements.summaryFabricPrice.textContent = this.fabricPrice.toFixed(2);
+            DOM.elements.summaryDecoPrice.textContent = this.decoPrice.toFixed(2);
+            DOM.elements.summaryDiscountPrice.textContent = totalDiscount.toFixed(2);
+
+            State.preparePayload();
+        }
+    };
+
     const DOM = {
         SELECTORS: {
             addRoomHeaderBtn: '#addRoomHeaderBtn',
@@ -35,6 +328,83 @@
             this.elements.itemAddButtons = document.querySelectorAll('.add-item-btn.item-btn');
             this.elements.decoAddButtons = document.querySelectorAll('.add-item-btn.deco-btn');
             this.elements.deleteButtons = document.querySelectorAll('.delete-btn');
+        },
+    };
+
+    const App = {
+        init() {
+            DOM.init();
+            this.bindEvents();
+            State.load();
+        },
+
+        bindEvents() {
+            DOM.elements.addRoomHeaderBtn.addEventListener('click', () => State.addRoom());
+            DOM.elements.lockBtn.addEventListener('click', () => State.toggleLock());
+            DOM.elements.clearAllBtn.addEventListener('click', () => State.clearAll());
+            DOM.elements.summaryToggleBtn.addEventListener('click', (e) => this.toggleSummary(e));
+
+            document.addEventListener('click', e => {
+                const deleteBtn = e.target.closest('.delete-btn');
+                if (deleteBtn) {
+                    const targetEl = deleteBtn.closest('.room-card, .item-card, .deco-card');
+                    const deleteType = deleteBtn.dataset.deleteType;
+                    if (targetEl && deleteType) {
+                        State.deleteElement(targetEl, deleteType);
+                    }
+                }
+            });
+
+            document.addEventListener('click', e => {
+                const suspendBtn = e.target.closest('[data-suspend-type]');
+                if (suspendBtn) {
+                    const suspendType = suspendBtn.dataset.suspend-type;
+                    State.toggleSuspend(suspendBtn, suspendType);
+                }
+            });
+
+            document.addEventListener('click', e => {
+                const addBtn = e.target.closest('.add-item-btn');
+                if (addBtn) {
+                    const roomCard = this.findRoomCard(addBtn);
+                    const itemCard = this.findItemCard(addBtn);
+
+                    if (addBtn.classList.contains('room-btn')) {
+                        State.addItem(roomCard);
+                    } else if (addBtn.classList.contains('deco-btn')) {
+                        State.addDeco(itemCard);
+                    }
+                }
+            });
+
+            document.addEventListener('input', e => {
+                const target = e.target;
+                if (target.matches('#orderForm input, #orderForm select, #orderForm textarea')) {
+                    State.syncStateFromDOM();
+                    this.updateTotalSummary();
+                }
+            });
+        },
+
+        restoreUI() {
+            State.rooms.forEach(roomData => {
+                const roomEl = this.createRoomElement(roomData);
+                DOM.elements.roomsContainer.appendChild(roomEl);
+                const itemContainer = roomEl.querySelector('.item-container');
+
+                roomData.items.forEach(itemData => {
+                    const itemEl = this.createItemElement(itemData);
+                    itemContainer.appendChild(itemEl);
+                    const decoContainer = itemEl.querySelector('.deco-container');
+
+                    itemData.decorations.forEach(decoData => {
+                        const decoEl = this.createDecoElement(decoData);
+                        decoContainer.appendChild(decoEl);
+                    });
+                });
+            });
+            State.syncStateFromDOM();
+            this.updateTotalSummary();
         },
 
         findRoomCard(el) {
@@ -136,18 +506,18 @@
             return decoElement;
         },
 
-        updateLockState(isLocked) {
-            const lockIcon = this.elements.lockBtn.querySelector('.lock-icon');
-            const lockText = this.elements.lockBtn.querySelector('.lock-text');
+        updateLockState() {
+            const lockIcon = DOM.elements.lockBtn.querySelector('.lock-icon');
+            const lockText = DOM.elements.lockBtn.querySelector('.lock-text');
             const allInputs = document.querySelectorAll('#orderForm input, #orderForm select, #orderForm textarea, #orderForm button');
 
             allInputs.forEach(el => {
                 if (el.id !== 'lockBtn' && el.id !== 'clearAllBtn') {
-                    el.disabled = isLocked;
+                    el.disabled = State.isLocked;
                 }
             });
 
-            if (isLocked) {
+            if (State.isLocked) {
                 lockText.textContent = 'ปลดล็อค';
                 lockIcon.textContent = '🔓';
                 this.showToast('หน้าจอถูกล็อคแล้ว', 'warning');
@@ -182,379 +552,14 @@
             if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
-        }
-    };
-
-    const Calculations = {
-        PRICING: {
-            SQM_TO_SQYD: 1.19599,
-            ROLLER_SQYD: 280,
-            ROMAN_SQYD: 320,
-            PLEAT_SQYD: 200,
-            EYELET_SQYD: 200,
         },
-        totalPrice: 0,
-        fabricPrice: 0,
-        decoPrice: 0,
 
         sanitizeValue(value) {
             return parseFloat(value.toString().replace(/,/g, '')) || 0;
         },
 
-        calculateItem(itemData) {
-            if (itemData.isSuspended) return { subtotal: 0, fabric: 0, deco: 0, discount: 0 };
-
-            const {
-                type,
-                fabric_width,
-                fabric_height,
-                fabric_price,
-                deco_count,
-                deco_price,
-                discount,
-                set_count,
-                decorations,
-            } = itemData;
-
-            const fabricWidth = this.sanitizeValue(fabric_width);
-            const fabricHeight = this.sanitizeValue(fabric_height);
-            const fabricPrice = this.sanitizeValue(fabric_price);
-            const decoCount = this.sanitizeValue(deco_count);
-            const decoPrice = this.sanitizeValue(deco_price);
-            const itemDiscount = this.sanitizeValue(discount);
-            const setCount = this.sanitizeValue(set_count) || 1;
-
-            let totalFabricPrice = 0;
-            let totalDecoPrice = 0;
-            let totalDecoFromDecorations = 0;
-
-            if (fabricWidth > 0 && fabricHeight > 0 && fabricPrice > 0) {
-                const sqMeter = fabricWidth * fabricHeight;
-                const sqYard = sqMeter * this.PRICING.SQM_TO_SQYD;
-                const fabricCostPerSqYard = parseFloat(fabricPrice);
-
-                let calculatedFabricPrice = 0;
-                if (type === 'roller') {
-                    calculatedFabricPrice = sqYard * (fabricCostPerSqYard || this.PRICING.ROLLER_SQYD);
-                } else if (type === 'roman') {
-                    calculatedFabricPrice = sqYard * (fabricCostPerSqYard || this.PRICING.ROMAN_SQYD);
-                } else if (type === 'pleat') {
-                    calculatedFabricPrice = sqYard * (fabricCostPerSqYard || this.PRICING.PLEAT_SQYD);
-                } else if (type === 'eyelet') {
-                    calculatedFabricPrice = sqYard * (fabricCostPerSqYard || this.PRICING.EYELET_SQYD);
-                } else { // standard or default
-                    calculatedFabricPrice = sqYard * (fabricCostPerSqYard || this.PRICING.EYELET_SQYD);
-                }
-
-                totalFabricPrice = calculatedFabricPrice;
-            }
-
-            if (decoCount > 0 && decoPrice > 0) {
-                totalDecoPrice = decoCount * decoPrice;
-            }
-
-            decorations.forEach(deco => {
-                if (!deco.isSuspended) {
-                    totalDecoFromDecorations += this.sanitizeValue(deco.deco_amount) * this.sanitizeValue(deco.deco_price);
-                }
-            });
-
-            const subtotal = ((totalFabricPrice + totalDecoPrice + totalDecoFromDecorations) * setCount) - itemDiscount;
-
-            return {
-                subtotal: Math.max(0, subtotal),
-                fabric: totalFabricPrice * setCount,
-                deco: (totalDecoPrice + totalDecoFromDecorations) * setCount,
-                discount: itemDiscount,
-            };
-        },
-
         updateTotalSummary() {
-            let totalFabric = 0;
-            let totalDeco = 0;
-            let totalDiscount = Calculations.sanitizeValue(DOM.elements.discountInput.value);
-
-            State.rooms.forEach(room => {
-                if (room.isSuspended) return;
-
-                let roomSubtotal = 0;
-                room.items.forEach(item => {
-                    const result = Calculations.calculateItem(item);
-                    roomSubtotal += result.subtotal;
-                    totalFabric += result.fabric;
-                    totalDeco += result.deco;
-                    totalDiscount += result.discount;
-
-                    const itemCardEl = document.querySelector(`[data-item-id="${item.id}"]`);
-                    if (itemCardEl) {
-                        itemCardEl.querySelector('.item-summary-price').textContent = result.subtotal.toFixed(2);
-                    }
-                });
-
-                const roomCardEl = document.querySelector(`[data-room-id="${room.id}"]`);
-                if (roomCardEl) {
-                    roomCardEl.querySelector('.room-summary-price').textContent = roomSubtotal.toFixed(2);
-                }
-            });
-
-            Calculations.fabricPrice = totalFabric;
-            Calculations.decoPrice = totalDeco;
-            Calculations.totalPrice = Math.max(0, Calculations.fabricPrice + Calculations.decoPrice - totalDiscount);
-
-            DOM.elements.summaryTotalPrice.textContent = Calculations.totalPrice.toFixed(2);
-            DOM.elements.summaryFabricPrice.textContent = Calculations.fabricPrice.toFixed(2);
-            DOM.elements.summaryDecoPrice.textContent = Calculations.decoPrice.toFixed(2);
-            DOM.elements.summaryDiscountPrice.textContent = totalDiscount.toFixed(2);
-
-            State.preparePayload();
-        }
-    };
-
-    const State = {
-        STORAGE_KEY: 'marntharaState',
-        isLocked: false,
-        rooms: [],
-
-        load() {
-            const savedState = localStorage.getItem(this.STORAGE_KEY);
-            if (savedState) {
-                const data = JSON.parse(savedState);
-                this.isLocked = data.isLocked;
-                this.rooms = data.rooms;
-                this.restoreUI();
-            } else {
-                this.addRoom();
-            }
-            DOM.updateLockState(this.isLocked);
-        },
-
-        save() {
-            const payload = {
-                isLocked: this.isLocked,
-                rooms: this.rooms,
-            };
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(payload));
-        },
-
-        restoreUI() {
-            this.rooms.forEach(roomData => {
-                const roomEl = DOM.createRoomElement(roomData);
-                DOM.elements.roomsContainer.appendChild(roomEl);
-                const itemContainer = roomEl.querySelector('.item-container');
-
-                roomData.items.forEach(itemData => {
-                    const itemEl = DOM.createItemElement(itemData);
-                    itemContainer.appendChild(itemEl);
-                    const decoContainer = itemEl.querySelector('.deco-container');
-
-                    itemData.decorations.forEach(decoData => {
-                        const decoEl = DOM.createDecoElement(decoData);
-                        decoContainer.appendChild(decoEl);
-                    });
-                });
-            });
-            this.syncStateFromDOM();
             Calculations.updateTotalSummary();
-        },
-
-        syncStateFromDOM() {
-            this.rooms = Array.from(document.querySelectorAll('.room-card')).map(roomEl => {
-                const roomId = roomEl.dataset.roomId;
-                const roomName = roomEl.querySelector('.room-name').value;
-                const isSuspended = roomEl.classList.contains('suspended');
-
-                const items = Array.from(roomEl.querySelectorAll('.item-card')).map(itemEl => {
-                    const itemId = itemEl.dataset.itemId;
-                    const isItemSuspended = itemEl.classList.contains('suspended');
-
-                    const decorations = Array.from(itemEl.querySelectorAll('.deco-card')).map(decoEl => {
-                        const decoId = decoEl.dataset.decoId;
-                        const isDecoSuspended = decoEl.classList.contains('suspended');
-                        return {
-                            id: decoId,
-                            isSuspended: isDecoSuspended,
-                            deco_name: decoEl.querySelector(`[name="deco_name_${decoId}"]`).value,
-                            deco_amount: decoEl.querySelector(`[name="deco_amount_${decoId}"]`).value,
-                            deco_price: decoEl.querySelector(`[name="deco_price_${decoId}"]`).value,
-                        };
-                    });
-
-                    return {
-                        id: itemId,
-                        isSuspended: isItemSuspended,
-                        type: itemEl.querySelector(`[name="item_type_${itemId}"]`).value,
-                        fabric_width: itemEl.querySelector(`[name="fabric_width_${itemId}"]`).value,
-                        fabric_height: itemEl.querySelector(`[name="fabric_height_${itemId}"]`).value,
-                        fabric_price: itemEl.querySelector(`[name="fabric_price_${itemId}"]`).value,
-                        deco_count: itemEl.querySelector(`[name="deco_count_${itemId}"]`).value,
-                        deco_price: itemEl.querySelector(`[name="deco_price_${itemId}"]`).value,
-                        discount: itemEl.querySelector(`[name="discount_${itemId}"]`).value,
-                        set_count: itemEl.querySelector(`[name="set_count_${itemId}"]`).value,
-                        decorations: decorations,
-                    };
-                });
-
-                return {
-                    id: roomId,
-                    name: roomName,
-                    isSuspended: isSuspended,
-                    items: items,
-                };
-            });
-            this.save();
-        },
-
-        addRoom() {
-            const roomEl = DOM.createRoomElement();
-            DOM.elements.roomsContainer.appendChild(roomEl);
-            DOM.cacheDynamicElements();
-            this.syncStateFromDOM();
-            DOM.scrollToElement(roomEl);
-        },
-
-        addItem(roomCard) {
-            const itemContainer = roomCard.querySelector('.item-container');
-            const itemEl = DOM.createItemElement();
-            itemContainer.appendChild(itemEl);
-            DOM.cacheDynamicElements();
-            this.syncStateFromDOM();
-            DOM.scrollToElement(itemEl);
-        },
-
-        addDeco(itemCard) {
-            const decoContainer = itemCard.querySelector('.deco-container');
-            const decoEl = DOM.createDecoElement();
-            decoContainer.appendChild(decoEl);
-            DOM.cacheDynamicElements();
-            this.syncStateFromDOM();
-            DOM.scrollToElement(decoEl);
-        },
-
-        deleteElement(el, type) {
-            const parentRoom = DOM.findRoomCard(el);
-            const parentItem = DOM.findItemCard(el);
-            const prevSibling = el.previousElementSibling;
-
-            if (confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
-                el.remove();
-                this.syncStateFromDOM();
-                Calculations.updateTotalSummary();
-
-                let scrollToEl;
-                if (type === 'room') {
-                    scrollToEl = prevSibling || DOM.elements.roomsContainer.lastElementChild;
-                } else if (type === 'item') {
-                    scrollToEl = prevSibling || parentRoom.querySelector('.item-container').lastElementChild;
-                } else if (type === 'deco') {
-                    scrollToEl = prevSibling || parentItem.querySelector('.deco-container').lastElementChild;
-                }
-                DOM.scrollToElement(scrollToEl);
-            }
-        },
-
-        toggleSuspend(el, type) {
-            const target = (type === 'room') ? DOM.findRoomCard(el) : (type === 'item' ? DOM.findItemCard(el) : el.closest('.deco-card'));
-            if (target) {
-                target.classList.toggle('suspended');
-                const isSuspended = target.classList.contains('suspended');
-                el.querySelector('[data-suspend-text]').textContent = isSuspended ? 'เรียกคืน' : 'ระงับ';
-                this.syncStateFromDOM();
-                Calculations.updateTotalSummary();
-            }
-        },
-
-        toggleLock() {
-            this.isLocked = !this.isLocked;
-            DOM.updateLockState(this.isLocked);
-            this.save();
-        },
-
-        clearAll() {
-            if (confirm('คุณต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?')) {
-                localStorage.removeItem(this.STORAGE_KEY);
-                DOM.elements.roomsContainer.innerHTML = '';
-                this.rooms = [];
-                this.addRoom();
-                Calculations.updateTotalSummary();
-                DOM.showToast('ล้างข้อมูลทั้งหมดแล้ว', 'success');
-            }
-        },
-
-        preparePayload() {
-            const customerInfo = {
-                customer_name: DOM.elements.customerName.value,
-                customer_address: DOM.elements.customerAddress.value,
-                customer_phone: DOM.elements.customerPhone.value,
-            };
-            const summary = {
-                discount: Calculations.sanitizeValue(DOM.elements.discountInput.value),
-                deposit: Calculations.sanitizeValue(DOM.elements.depositInput.value),
-                total: Calculations.totalPrice,
-                fabric_total: Calculations.fabricPrice,
-                deco_total: Calculations.decoPrice,
-            };
-            const data = {
-                customer: customerInfo,
-                summary: summary,
-                rooms: this.rooms,
-            };
-            DOM.elements.payloadInput.value = JSON.stringify(data);
-        }
-    };
-
-    const App = {
-        init() {
-            DOM.init();
-            this.bindEvents();
-            State.load();
-        },
-
-        bindEvents() {
-            DOM.elements.addRoomHeaderBtn.addEventListener('click', () => State.addRoom());
-            DOM.elements.lockBtn.addEventListener('click', () => State.toggleLock());
-            DOM.elements.clearAllBtn.addEventListener('click', () => State.clearAll());
-            DOM.elements.summaryToggleBtn.addEventListener('click', (e) => this.toggleSummary(e));
-
-            document.addEventListener('click', e => {
-                const deleteBtn = e.target.closest('.delete-btn');
-                if (deleteBtn) {
-                    const targetEl = deleteBtn.closest('.room-card, .item-card, .deco-card');
-                    const deleteType = deleteBtn.dataset.deleteType;
-                    if (targetEl && deleteType) {
-                        State.deleteElement(targetEl, deleteType);
-                    }
-                }
-            });
-
-            document.addEventListener('click', e => {
-                const suspendBtn = e.target.closest('[data-suspend-type]');
-                if (suspendBtn) {
-                    const suspendType = suspendBtn.dataset.suspendType;
-                    State.toggleSuspend(suspendBtn, suspendType);
-                }
-            });
-
-            document.addEventListener('click', e => {
-                const addBtn = e.target.closest('.add-item-btn');
-                if (addBtn) {
-                    const roomCard = DOM.findRoomCard(addBtn);
-                    const itemCard = DOM.findItemCard(addBtn);
-
-                    if (addBtn.classList.contains('room-btn')) {
-                        State.addItem(roomCard);
-                    } else if (addBtn.classList.contains('deco-btn')) {
-                        State.addDeco(itemCard);
-                    }
-                }
-            });
-
-            document.addEventListener('input', e => {
-                const target = e.target;
-                if (target.matches('#orderForm input, #orderForm select, #orderForm textarea')) {
-                    State.syncStateFromDOM();
-                    Calculations.updateTotalSummary();
-                }
-            });
         },
 
         toggleSummary(e) {
@@ -567,5 +572,6 @@
         }
     };
 
+    // The main entry point
     document.addEventListener('DOMContentLoaded', App.init.bind(App));
 })();
