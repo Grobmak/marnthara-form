@@ -304,17 +304,20 @@
             if (toggleViewBtn) {
                 toggleViewBtn.textContent = roomData.isCollapsed ? 'ขยายห้อง' : 'ย่อห้อง';
             }
+            
+            const roomNameEl = roomEl.querySelector('[data-room-name-display]');
+            if (roomNameEl) {
+                roomNameEl.textContent = roomData.name || `${roomIndex + 1}`;
+            }
 
             const roomNameInput = roomEl.querySelector('[data-bind="room.name"]');
             roomNameInput.value = roomData.name;
             roomNameInput.placeholder = `ห้อง ${String(roomIndex + 1).padStart(2, "0")}`;
             
-            if (!roomData.isCollapsed) {
-                const styleSelect = roomEl.querySelector('[data-bind="room.style"]');
-                if (styleSelect) styleSelect.value = roomData.style;
-                const priceSelect = roomEl.querySelector('[data-bind="room.price_per_m"]');
-                if (priceSelect) populateSelect(priceSelect, CONFIG.PRICING.fabric, roomData.price_per_m);
-            }
+            const styleSelect = roomEl.querySelector('[data-bind="room.style"]');
+            if (styleSelect) styleSelect.value = roomData.style;
+            const priceSelect = roomEl.querySelector('[data-bind="room.price_per_m"]');
+            if (priceSelect) populateSelect(priceSelect, CONFIG.PRICING.fabric, roomData.price_per_m);
 
             const setsContainer = roomEl.querySelector('[data-sets-container]');
             roomData.sets.forEach((setData, setIndex) => {
@@ -330,7 +333,7 @@
 
                 const calc = setData.calculations || {};
                 setEl.querySelector('[data-suspend-text]').textContent = setData.is_suspended ? 'ใช้งาน' : 'ระงับ';
-                setEl.querySelector('[data-item-title]').textContent = `${setIndex + 1}`;
+                setEl.querySelector('[data-item-title]').textContent = `จุดที่ ${setIndex + 1}`;
                 setEl.querySelector('[data-set-price="total"]').textContent = fmtCurrency(calc.total);
                 setEl.querySelector('[data-set-price="opaque"]').textContent = fmtCurrency(calc.opaquePrice);
                 setEl.querySelector('[data-set-price="sheer"]').textContent = fmtCurrency(calc.sheerPrice);
@@ -368,15 +371,11 @@
 
                 const calc = decoData.calculations || {};
                 decoEl.querySelector('[data-suspend-text]').textContent = decoData.is_suspended ? 'ใช้งาน' : 'ระงับ';
-                decoEl.querySelector('[data-item-title]').textContent = `${decoIndex + 1}`;
-                decoEl.querySelector('[data-deco-summary]').innerHTML = `ราคา: <span class="price">${fmtCurrency(calc.total)}</span> บ. • พื้นที่: <span class="price">${fmt(calc.areaSqyd)}</span> ตร.หลา`;
+                decoEl.querySelector('[data-item-title]').textContent = `รายการที่ ${decoIndex + 1}`;
+                decoEl.querySelector('[data-deco-summary]').innerHTML = `ราคา: <span class="price">${fmtCurrency(calc.total)}</span> บ. • พื้นที่: <span>${fmt(calc.areaSqyd)}</span> ตร.หลา`;
 
                 decosContainer.appendChild(decoEl);
             });
-
-            const brief = roomEl.querySelector('[data-room-brief]');
-            const roomCalc = roomData.calculations;
-            brief.innerHTML = `สไตล์: **${roomData.style}** • ราคา: **${fmtCurrency(roomData.price_per_m)}** บ./ม. • <span class="num">จุด ${fmtCurrency(roomCalc.sets + roomCalc.deco)}</span> • <span class="num">ชุด ${fmtCurrency(roomCalc.units)}</span> • ราคา <span class="num price">${fmtCurrency(roomCalc.price)}</span> บาท`;
 
             DOMElements.roomsContainer.appendChild(roomEl);
         });

@@ -115,17 +115,9 @@ label {
 .room-header {
     padding: 1rem;
     border-bottom: 1px solid #e0e0e0;
-    display: grid;
-    grid-template-columns: 2fr 3fr 1fr;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-}
-
-@media (max-width: 768px) {
-    .room-header {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-    }
 }
 
 .room-actions {
@@ -144,21 +136,12 @@ label {
     color: #555;
 }
 
-@media (max-width: 768px) {
-    .room-brief {
-        text-align: left;
-    }
-}
-
 .room-brief .num {
     font-weight: bold;
 }
 
 .room-content {
     padding: 1rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
 }
 
 .sets-section,

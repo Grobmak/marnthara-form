@@ -144,18 +144,18 @@
     <template id="room-template">
         <div class="room-card" data-room-id="">
             <div class="room-header">
-                <div class="form-group room-name-input">
-                    <label for="roomName">ชื่อห้อง</label>
-                    <input type="text" class="form-control" data-bind="room.name" placeholder="ชื่อห้อง">
-                </div>
-                <div class="room-brief" data-room-brief></div>
+                <h3>ห้อง <span data-room-name-display>1</span></h3>
                 <div class="room-actions">
                     <button type="button" class="btn btn-sm btn-info" data-act="toggleRoomView"><span data-view-text>ย่อห้อง</span></button>
                     <button type="button" class="btn btn-danger btn-sm" data-act="delRoom">ลบห้อง</button>
                 </div>
             </div>
             <div class="room-content">
-                <div class="form-group room-style-select">
+                <div class="form-group">
+                    <label for="roomName">ชื่อห้อง</label>
+                    <input type="text" class="form-control" data-bind="room.name" placeholder="ชื่อห้อง">
+                </div>
+                <div class="form-group">
                     <label for="roomStyle">สไตล์</label>
                     <select class="form-control" data-bind="room.style">
                         <option value="จีบ">จีบ</option>
@@ -163,7 +163,7 @@
                         <option value="พับ">พับ</option>
                     </select>
                 </div>
-                <div class="form-group room-price-select">
+                <div class="form-group">
                     <label for="roomPrice">ราคาผ้า (บ./ม.)</label>
                     <select class="form-control" data-bind="room.price_per_m"></select>
                 </div>
