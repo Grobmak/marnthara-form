@@ -136,13 +136,6 @@
         });
     }
 
-    function scrollToElement(el) {
-        if (!el) return;
-        setTimeout(() => {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 150); // Delay to allow the DOM to render the new element
-    }
-    
     function addRoom(prefill) {
         if (isLocked) return;
         roomCount++;
@@ -157,22 +150,15 @@
             created.querySelector(SELECTORS.roomNameInput).value = prefill.room_name || "";
             created.querySelector(SELECTORS.roomPricePerM).value = prefill.price_per_m_raw || "";
             created.querySelector(SELECTORS.roomStyle).value = prefill.style || "";
-            (prefill.sets || []).forEach(s => addSet(created, s, false));
-            (prefill.decorations || []).forEach(d => addDeco(created, d, false));
+            (prefill.sets || []).forEach(s => addSet(created, s));
+            (prefill.decorations || []).forEach(d => addDeco(created, d));
         }
 
-        if (created.querySelectorAll(SELECTORS.set).length === 0 && created.querySelectorAll(SELECTORS.decoItem).length === 0) {
-            addSet(created, null, false);
-        }
+        if (created.querySelectorAll(SELECTORS.set).length === 0 && created.querySelectorAll(SELECTORS.decoItem).length === 0) addSet(created);
         
-        renumber(); 
-        recalcAll(); 
-        saveData(); 
-        updateLockState();
-        if (!prefill) {
-            showToast('เพิ่มห้องใหม่แล้ว', 'success');
-            scrollToElement(created.querySelector('.room-head')); // Scroll to the new room's header
-        }
+        renumber(); recalcAll(); saveData(); updateLockState();
+        created.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        if (!prefill) showToast('เพิ่มห้องใหม่แล้ว', 'success');
     }
 
     function populatePriceOptions(selectEl, prices) {
@@ -184,7 +170,7 @@
         });
     }
 
-    function addSet(roomEl, prefill, showToastMessage = true) {
+    function addSet(roomEl, prefill) {
         if (isLocked) return;
         const setsWrap = roomEl.querySelector(SELECTORS.setsContainer);
         const frag = document.querySelector(SELECTORS.setTpl).content.cloneNode(true);
@@ -205,17 +191,16 @@
             }
         }
         toggleSetFabricUI(created); renumber(); recalcAll(); saveData(); updateLockState();
-        if (showToastMessage) showToast('เพิ่มจุดผ้าม่านแล้ว', 'success');
-        scrollToElement(created);
+        if (!prefill) showToast('เพิ่มจุดผ้าม่านแล้ว', 'success');
     }
     
-    function addDeco(roomEl, prefill, showToastMessage = true) {
+    function addDeco(roomEl, prefill) {
         if (isLocked) return;
         const decoWrap = roomEl.querySelector(SELECTORS.decorationsContainer);
         const frag = document.querySelector(SELECTORS.decoTpl).content.cloneNode(true);
         decoWrap.appendChild(frag);
-        const created = decoWrap.querySelector(`${SELECTORS.decoItem}:last-of-type`);
         if (prefill) {
+            const created = decoWrap.querySelector(`${SELECTORS.decoItem}:last-of-type`);
             created.querySelector('[name="deco_type"]').value = prefill.type || "";
             created.querySelector('[name="deco_width_m"]').value = prefill.width_m ?? "";
             created.querySelector('[name="deco_height_m"]').value = prefill.height_m ?? "";
@@ -227,23 +212,17 @@
             }
         }
         renumber(); recalcAll(); saveData(); updateLockState();
-        if (showToastMessage) showToast('เพิ่มรายการตกแต่งแล้ว', 'success');
-        scrollToElement(created);
+        if (!prefill) showToast('เพิ่มรายการตกแต่งแล้ว', 'success');
     }
     
     async function clearDeco(btn) { 
         if (isLocked || !await showConfirmation('ล้างข้อมูล', 'ยืนยันการล้างข้อมูลในรายการนี้?')) return;
         const deco = btn.closest(SELECTORS.decoItem);
-        const wasSuspended = deco.dataset.suspended === 'true';
         deco.querySelectorAll('input, select').forEach(el => { el.value = ''; });
-        deco.dataset.suspended = 'false';
-        deco.classList.remove('is-suspended');
-        deco.querySelector('[data-suspend-text]').textContent = 'ระงับ';
         recalcAll();
         saveData();
         updateLockState();
         showToast('ล้างข้อมูลตกแต่งแล้ว', 'success');
-        scrollToElement(deco);
     }
 
     function toggleSetFabricUI(setEl) {
@@ -270,48 +249,12 @@
         recalcAll();
         saveData();
         showToast(`รายการถูก${isSuspended ? 'ระงับ' : 'ใช้งาน'}แล้ว`, 'warning');
-        scrollToElement(item);
     }
 
-    async function delRoom(btn) { 
-        if (isLocked || !await showConfirmation('ลบห้อง', 'ยืนยันการลบห้องนี้?')) return; 
-        const prevRoom = btn.closest(SELECTORS.room).previousElementSibling;
-        btn.closest(SELECTORS.room).remove(); 
-        renumber(); recalcAll(); saveData(); updateLockState(); 
-        showToast('ลบห้องแล้ว', 'success'); 
-        scrollToElement(prevRoom || document.querySelector('.header'));
-    }
-    async function delSet(btn) { 
-        if (isLocked || !await showConfirmation('ลบจุด', 'ยืนยันการลบจุดติดตั้งนี้?')) return; 
-        const room = btn.closest(SELECTORS.room);
-        const prevSet = btn.closest(SELECTORS.set).previousElementSibling;
-        btn.closest(SELECTORS.set).remove(); 
-        if (room.querySelectorAll(SELECTORS.set).length === 0 && room.querySelectorAll(SELECTORS.decoItem).length === 0) addSet(room, null, false); 
-        renumber(); recalcAll(); saveData(); updateLockState(); 
-        showToast('ลบจุดผ้าม่านแล้ว', 'success'); 
-        scrollToElement(prevSet || room.querySelector('.room-head'));
-    }
-    async function delDeco(btn) { 
-        if (isLocked || !await showConfirmation('ลบรายการ', 'ยืนยันการลบรายการตกแต่งนี้?')) return; 
-        const room = btn.closest(SELECTORS.room);
-        const prevDeco = btn.closest(SELECTORS.decoItem).previousElementSibling;
-        btn.closest(SELECTORS.decoItem).remove(); 
-        if (room.querySelectorAll(SELECTORS.set).length === 0 && room.querySelectorAll(SELECTORS.decoItem).length === 0) addSet(room, null, false);
-        renumber(); recalcAll(); saveData(); updateLockState(); 
-        showToast('ลบรายการตกแต่งแล้ว', 'success'); 
-        scrollToElement(prevDeco || room.querySelector('.room-head'));
-    }
-    async function clearSet(btn) { 
-        if (isLocked || !await showConfirmation('ล้างข้อมูล', 'ยืนยันการล้างข้อมูลในจุดนี้?')) return; 
-        const set = btn.closest(SELECTORS.set); 
-        set.querySelectorAll('input, select').forEach(el => { el.value = el.name === 'fabric_variant' ? 'ทึบ' : ''; }); 
-        set.dataset.suspended = 'false';
-        set.classList.remove('is-suspended');
-        set.querySelector('[data-suspend-text]').textContent = 'ระงับ';
-        toggleSetFabricUI(set); recalcAll(); saveData(); updateLockState(); 
-        showToast('ล้างข้อมูลผ้าม่านแล้ว', 'success'); 
-        scrollToElement(set);
-    }
+    async function delRoom(btn) { if (isLocked || !await showConfirmation('ลบห้อง', 'ยืนยันการลบห้องนี้?')) return; btn.closest(SELECTORS.room).remove(); renumber(); recalcAll(); saveData(); updateLockState(); showToast('ลบห้องแล้ว', 'success'); }
+    async function delSet(btn) { if (isLocked || !await showConfirmation('ลบจุด', 'ยืนยันการลบจุดติดตั้งนี้?')) return; const room = btn.closest(SELECTORS.room); btn.closest(SELECTORS.set).remove(); if (room.querySelectorAll(SELECTORS.set).length === 0 && room.querySelectorAll(SELECTORS.decoItem).length === 0) addSet(room); renumber(); recalcAll(); saveData(); updateLockState(); showToast('ลบจุดผ้าม่านแล้ว', 'success'); }
+    async function delDeco(btn) { if (isLocked || !await showConfirmation('ลบรายการ', 'ยืนยันการลบรายการตกแต่งนี้?')) return; btn.closest(SELECTORS.decoItem).remove(); renumber(); recalcAll(); saveData(); updateLockState(); showToast('ลบรายการตกแต่งแล้ว', 'success'); }
+    async function clearSet(btn) { if (isLocked || !await showConfirmation('ล้างข้อมูล', 'ยืนยันการล้างข้อมูลในจุดนี้?')) return; const set = btn.closest(SELECTORS.set); set.querySelectorAll('input, select').forEach(el => { el.value = el.name === 'fabric_variant' ? 'ทึบ' : ''; }); toggleSetFabricUI(set); recalcAll(); saveData(); updateLockState(); showToast('ล้างข้อมูลผ้าม่านแล้ว', 'success'); }
     async function clearAllData() { if (isLocked || !await showConfirmation('ล้างข้อมูลทั้งหมด', 'คำเตือน! การกระทำนี้จะลบข้อมูลทั้งหมด ไม่สามารถกู้คืนได้')) return; roomsEl.innerHTML = ""; roomCount = 0; document.querySelectorAll('#customerInfo input').forEach(i => i.value = ""); addRoom(); saveData(); updateLockState(); showToast('ล้างข้อมูลทั้งหมดแล้ว', 'warning'); }
 
     function renumber() {
