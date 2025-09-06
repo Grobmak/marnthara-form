@@ -593,100 +593,64 @@
             });
         }
 
-        function recalcAll() {
-            let grand = 0, grandOpaqueYards = 0, grandSheerYards = 0, grandOpaqueTrack = 0, grandSheerTrack = 0;
+function recalcAll() {
+    // 🎉 แก้ไข: เพิ่มตัวแปรสำหรับรางทึบและรางโปร่ง
+    let grand = 0, grandOpaqueYards = 0, grandSheerYards = 0, grandOpaqueTrack = 0, grandSheerTrack = 0;
+    
+    document.querySelectorAll(SELECTORS.room).forEach((room) => {
+        let roomSum = 0, roomOpaqueYards = 0, roomSheerYards = 0;
+        
+        const baseRaw = toNum(room.querySelector(SELECTORS.roomPricePerM).value);
+        const style = room.querySelector(SELECTORS.roomStyle).value;
+        const sPlus = stylePlus(style);
+        
+        room.querySelectorAll(SELECTORS.set).forEach((set) => {
+            if (set.dataset.suspended === 'true') {
+                // ... (ส่วนนี้โค้ดเดิม) ...
+                return;
+            }
+            const w = clamp01(set.querySelector('input[name="width_m"]').value), h = clamp01(set.querySelector('input[name="height_m"]').value);
+            const hPlus = heightPlus(h), variant = set.querySelector('select[name="fabric_variant"]').value;
             
-            document.querySelectorAll(SELECTORS.room).forEach((room) => {
-                let roomSum = 0, roomOpaqueYards = 0, roomSheerYards = 0, roomOpaqueTrack = 0, roomSheerTrack = 0;
-                
-                const baseRaw = toNum(room.querySelector(SELECTORS.roomPricePerM).value);
-                const style = room.querySelector(SELECTORS.roomStyle).value;
-                const sPlus = stylePlus(style);
-                
-                room.querySelectorAll(SELECTORS.set).forEach((set) => {
-                    if (set.dataset.suspended === 'true') {
-                        set.querySelector('[data-set-price-total]').textContent = '0';
-                        set.querySelector('[data-set-price-opaque]').textContent = '0';
-                        set.querySelector('[data-set-price-sheer]').textContent = '0';
-                        set.querySelector('[data-set-yardage-opaque]').textContent = '0';
-                        set.querySelector('[data-set-yardage-sheer]').textContent = '0';
-                        set.querySelector('[data-set-opaque-track]').textContent = '0';
-                        set.querySelector('[data-set-sheer-track]').textContent = '0';
-                        return;
-                    }
-                    const w = clamp01(set.querySelector('input[name="width_m"]').value), h = clamp01(set.querySelector('input[name="height_m"]').value);
-                    const hPlus = heightPlus(h), variant = set.querySelector('select[name="fabric_variant"]').value;
-                    
-                    let opaquePrice = 0, sheerPrice = 0, opaqueYards = 0, sheerYards = 0, opaqueTrack = 0, sheerTrack = 0;
-                    
-                    if (w > 0 && h > 0) {
-                        if (variant === "ทึบ" || variant === "ทึบ&โปร่ง") {
-                            const opaquePerM = baseRaw + sPlus + hPlus;
-                            opaquePrice = Math.round(opaquePerM * w);
-                            opaqueYards = CALC.fabricYardage(style, w);
-                            opaqueTrack = w;
-                        }
-                        if (variant === "โปร่ง" || variant === "ทึบ&โปร่ง") {
-                            const sheerBase = clamp01(set.querySelector('select[name="sheer_price_per_m"]').value);
-                            const sheerPerM = sheerBase + sPlus + hPlus;
-                            sheerPrice = Math.round(sheerPerM * w);
-                            sheerYards = CALC.fabricYardage(style, w);
-                            sheerTrack = w;
-                        }
-                    }
+            let opaquePrice = 0, sheerPrice = 0, opaqueYards = 0, sheerYards = 0, opaqueTrack = 0, sheerTrack = 0;
+            
+            if (w > 0 && h > 0) {
+                if (variant === "ทึบ" || variant === "ทึบ&โปร่ง") {
+                    const opaquePerM = baseRaw + sPlus + hPlus;
+                    opaquePrice = Math.round(opaquePerM * w);
+                    opaqueYards = CALC.fabricYardage(style, w);
+                    opaqueTrack = w;
+                }
+                if (variant === "โปร่ง" || variant === "ทึบ&โปร่ง") {
+                    const sheerBase = clamp01(set.querySelector('select[name="sheer_price_per_m"]').value);
+                    const sheerPerM = sheerBase + sPlus + hPlus;
+                    sheerPrice = Math.round(sheerPerM * w);
+                    sheerYards = CALC.fabricYardage(style, w);
+                    sheerTrack = w;
+                }
+            }
 
-                    let totalSetPrice = opaquePrice + sheerPrice;
-                    set.querySelector('[data-set-price-total]').textContent = fmt(totalSetPrice, 0, true);
-                    set.querySelector('[data-set-price-opaque]').textContent = fmt(opaquePrice, 0, true);
-                    set.querySelector('[data-set-price-sheer]').textContent = fmt(sheerPrice, 0, true);
-                    set.querySelector('[data-set-yardage-opaque]').textContent = fmt(opaqueYards, 2);
-                    set.querySelector('[data-set-yardage-sheer]').textContent = fmt(sheerYards, 2);
-                    set.querySelector('[data-set-opaque-track]').textContent = fmt(opaqueTrack, 2);
-                    set.querySelector('[data-set-sheer-track]').textContent = fmt(sheerTrack, 2);
-                    
-                    roomSum += totalSetPrice;
-                    roomOpaqueYards += opaqueYards;
-                    roomSheerYards += sheerYards;
-                    roomOpaqueTrack += opaqueTrack;
-                    roomSheerTrack += sheerTrack;
-                });
+            let totalSetPrice = opaquePrice + sheerPrice;
+            set.querySelector('[data-set-price-total]').textContent = fmt(totalSetPrice, 0, true);
+            set.querySelector('[data-set-price-opaque]').textContent = fmt(opaquePrice, 0, true);
+            set.querySelector('[data-set-price-sheer]').textContent = fmt(sheerPrice, 0, true);
+            set.querySelector('[data-set-yardage-opaque]').textContent = fmt(opaqueYards, 2);
+            set.querySelector('[data-set-yardage-sheer]').textContent = fmt(sheerYards, 2);
+            set.querySelector('[data-set-opaque-track]').textContent = fmt(opaqueTrack, 2);
+            set.querySelector('[data-set-sheer-track]').textContent = fmt(sheerTrack, 2);
+            
+            roomSum += totalSetPrice;
+            roomOpaqueYards += opaqueYards;
+            roomSheerYards += sheerYards;
+            grandOpaqueTrack += opaqueTrack;
+            grandSheerTrack += sheerTrack;
+        });
 
-                room.querySelectorAll(SELECTORS.decoItem).forEach(deco => {
-                    const summaryEl = deco.querySelector('[data-deco-summary]');
-                    if (deco.dataset.suspended === 'true') {
-                        summaryEl.innerHTML = `ราคา: <span class="price">0</span> บ. • พื้นที่: <span class="price">0.00</span> ตร.หลา`;
-                        return;
-                    }
-                    const w = clamp01(deco.querySelector('[name="deco_width_m"]').value), h = clamp01(deco.querySelector('[name="deco_height_m"]').value);
-                    const price = clamp01(deco.querySelector('[name="deco_price_sqyd"]').value);
-                    const areaSqyd = w * h * SQM_TO_SQYD;
-                    const decoPrice = Math.round(areaSqyd * price);
-                    summaryEl.innerHTML = `ราคา: <span class="price">${fmt(decoPrice, 0, true)}</span> บ. • พื้นที่: <span class="price">${fmt(areaSqyd, 2)}</span> ตร.หลา`;
-                    roomSum += decoPrice;
-                });
-                
-                const brief = room.querySelector("[data-room-brief]");
-                const totalSetsInRoom = room.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"])`).length;
-                const totalDecoInRoom = room.querySelectorAll(`${SELECTORS.decoItem}:not([data-suspended="true"])`).length;
-                
-                const totalItemsInRoom = totalSetsInRoom + totalDecoInRoom;
+        // ... (โค้ดที่เหลือเดิม) ...
+    });
 
-                const totalUnitsInRoom = [...room.querySelectorAll(SELECTORS.set)].reduce((sum, set) => {
-                    if (set.dataset.suspended === 'true') return sum;
-                    const variant = set.querySelector('select[name="fabric_variant"]').value;
-                    if (variant === "ทึบ&โปร่ง") return sum + 2;
-                    return sum + 1;
-                }, 0) + [...room.querySelectorAll(SELECTORS.decoItem)].reduce((sum, deco) => {
-                    return sum + (deco.dataset.suspended === 'true' ? 0 : 1);
-                }, 0);
-
-                if (brief) brief.innerHTML = `<span class="num">จุด ${fmt(totalItemsInRoom, 0, true)}</span> • <span class="num">ชุด ${fmt(totalUnitsInRoom, 0, true)}</span> • ราคา <span class="num price">${fmt(roomSum, 0, true)}</span> บาท`;
-                
-                grand += roomSum; grandOpaqueYards += roomOpaqueYards;
-                grandSheerYards += roomSheerYards;
-                grandOpaqueTrack += roomOpaqueTrack;
-                grandSheerTrack += roomSheerTrack;
-            });
+    // ... (โค้ดที่เหลือเดิม) ...
+}
 
             const totalSets = [...document.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"])`)].reduce((sum, set) => {
                 const variant = set.querySelector('select[name="fabric_variant"]').value;
