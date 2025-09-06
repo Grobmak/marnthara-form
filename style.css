@@ -10,6 +10,7 @@
     --primary: #00A389;      /* Deep Teal for primary actions */
     --secondary: #F2994A;    /* Vibrant Orange for secondary actions */
     --warning: #FFD166;      /* Soft yellow for warnings */
+    --quantity-color: #E0E5EC; /* White for quantity numbers */
 
     /* Special Room Colors */
     --room1-bg: #1F2531;     /* Card BG */
@@ -48,7 +49,6 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
 /* --- Text & Price --- */
 .small { font-size: 0.8rem; color: var(--muted); }
 .price { font-weight: 600; color: var(--secondary); }
-.num { font-weight: 600; color: var(--primary); }
 /* --- Buttons --- */
 .btn {
     display: inline-flex; align-items: center; gap: 0.35rem; border: 1px solid var(--line); background: transparent;
@@ -104,13 +104,13 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
     color: var(--muted);
     margin-bottom: 4px;
 }
-.sticky-footer .summary-value { font-weight: 600; font-size: 1rem; color: var(--primary); }
+.sticky-footer .summary-value { font-weight: 600; font-size: 1rem; color: var(--quantity-color); }
 .sticky-footer .summary-value.price { color: var(--secondary); }
 /* --- Details & Summary --- */
 details.room > summary { list-style: none; }
 details.room > summary::-webkit-details-marker { display: none; }
 [data-room-brief] { display: inline-block; padding: 0.2rem 0.5rem; border: 1px solid var(--line); border-radius: 0.5rem; background: #0d0e12; color: var(--muted); }
-[data-room-brief] .num { color: var(--primary); font-weight: 600; }
+[data-room-brief] .num { color: var(--quantity-color); font-weight: 600; }
 [data-room-brief] .num.price { color: var(--secondary); }
 /* --- Confirmation Modal --- */
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; transition: opacity 0.2s ease-in-out; pointer-events: none; }
