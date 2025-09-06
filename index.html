@@ -473,14 +473,11 @@
     <script>
         /* eslint-disable no-unused-vars */
         const Calculator = {
-            // Constants
             CONVERSION_M_TO_YD: 1.09361,
-            // Constants for pricing and calculation
             CONSTANTS: {
                 FABRIC_WIDTH_M: 1.5,
-                FABRIC_EXTRA_PERCENT: 1.15, // 15% extra for sewing
+                FABRIC_EXTRA_PERCENT: 1.15,
             },
-            // Main calculation function
             runAllCalculations: (state) => {
                 let grandTotal = 0;
                 let grandOpaqueYards = 0;
@@ -492,7 +489,6 @@
                 state.rooms.forEach(room => {
                     room.calculations = { price: 0, sets: 0, units: 0 };
                     
-                    // Calculate for each set of curtains
                     room.sets.forEach(set => {
                         if (set.is_suspended) {
                             set.calculations = {};
@@ -512,13 +508,11 @@
                         const hasOpaque = set.fabric_variant === 'ทึบ' || set.fabric_variant === 'ทึบ&โปร่ง';
                         const hasSheer = set.fabric_variant === 'โปร่ง' || set.fabric_variant === 'ทึบ&โปร่ง';
                         
-                        // Opaque fabric calculation
                         if (hasOpaque) {
                             opaqueYards = ((width_m * 2) / Calculator.CONSTANTS.FABRIC_WIDTH_M) * height_m * Calculator.CONVERSION_M_TO_YD * Calculator.CONSTANTS.FABRIC_EXTRA_PERCENT;
                             opaquePrice = opaqueYards * price_per_m;
                         }
                         
-                        // Sheer fabric calculation
                         if (hasSheer) {
                             sheerYards = ((width_m * 2) / Calculator.CONSTANTS.FABRIC_WIDTH_M) * height_m * Calculator.CONVERSION_M_TO_YD * Calculator.CONSTANTS.FABRIC_EXTRA_PERCENT;
                             sheerPrice = sheerYards * sheer_price_per_m;
@@ -561,11 +555,9 @@
             },
         };
 
-        /* eslint-disable no-unused-vars */
         (function() {
             'use strict';
             
-            // --- Constants & Config ---
             const CONFIG = {
                 APP_VERSION: '4.0.0',
                 PRICING: {
@@ -589,7 +581,6 @@
                 }
             };
 
-            // --- State Management ---
             let state = {};
             
             function getNewRoom() {
@@ -634,7 +625,6 @@
                 localStorage.setItem('curtain_calculator_state', JSON.stringify(state));
             }, 1000);
 
-            // --- Helper Functions ---
             const fmt = (n) => typeof n === 'number' && !isNaN(n) ? n.toFixed(2) : '0.00';
             const fmtCurrency = (n) => typeof n === 'number' && !isNaN(n) ? n.toLocaleString("th-TH") : '0';
             const toNum = (s) => typeof s === 'string' ? parseFloat(s.replace(/,/g, '')) || 0 : s || 0;
@@ -664,16 +654,13 @@
             function render() {
                 Calculator.runAllCalculations(state);
                 
-                // --- Render Customer Info
                 document.querySelector('[data-bind="customer.name"]').value = state.customer.name;
 
-                // --- Render Rooms
                 DOMElements.roomsContainer.innerHTML = '';
                 state.rooms.forEach((roomData, roomIndex) => {
                     const roomEl = DOMElements.templates.room.content.cloneNode(true).firstElementChild;
                     roomEl.dataset.roomId = roomData.id;
                     
-                    // Bind room data
                     const roomTitle = roomEl.querySelector('[data-room-title]');
                     roomTitle.textContent = roomData.name || `ห้อง ${String(roomIndex + 1).padStart(2, "0")}`;
                     roomEl.querySelector('[data-bind="room.name"]').value = roomData.name;
@@ -681,20 +668,17 @@
                     roomEl.querySelector('[data-bind="room.style"]').value = roomData.style;
                     populateSelect(roomEl.querySelector('[data-bind="room.price_per_m"]'), CONFIG.PRICING.fabric, roomData.price_per_m);
 
-                    // Render sets
                     const setsContainer = roomEl.querySelector('[data-sets-container]');
                     roomData.sets.forEach((setData, setIndex) => {
                         const setEl = DOMElements.templates.set.content.cloneNode(true).firstElementChild;
                         setEl.dataset.setId = setData.id;
                         setEl.classList.toggle('is-suspended', setData.is_suspended);
                         
-                        // Bind set data
                         setEl.querySelector('[data-bind="set.width_m"]').value = setData.width_m;
                         setEl.querySelector('[data-bind="set.height_m"]').value = setData.height_m;
                         setEl.querySelector('[data-bind="set.fabric_variant"]').value = setData.fabric_variant;
                         populateSelect(setEl.querySelector('[data-bind="set.sheer_price_per_m"]'), CONFIG.PRICING.sheer, setData.sheer_price_per_m);
                         
-                        // Display calculation results
                         const calc = setData.calculations || {};
                         setEl.querySelector('[data-suspend-text]').textContent = setData.is_suspended ? 'ใช้งาน' : 'ระงับ';
                         setEl.querySelector('[data-item-title]').textContent = `จุดที่ ${setIndex + 1}`;
@@ -704,14 +688,12 @@
                         setEl.querySelector('[data-set-track="opaque"]').textContent = fmt(calc.opaqueTrack);
                         setEl.querySelector('[data-set-track="sheer"]').textContent = fmt(calc.sheerTrack);
 
-                        // Toggle UI based on variant
                         const hasSheer = setData.fabric_variant === 'โปร่ง' || setData.fabric_variant === 'ทึบ&โปร่ง';
                         setEl.querySelector('[data-sheer-wrap]').classList.toggle("hidden", !hasSheer);
 
                         setsContainer.appendChild(setEl);
                     });
 
-                    // Room summary brief
                     const brief = roomEl.querySelector('[data-room-brief]');
                     const roomCalc = roomData.calculations;
                     brief.innerHTML = `จำนวน ${roomCalc.sets} จุด • ราคา <span class="num price">${fmtCurrency(roomCalc.price)}</span> บาท`;
@@ -719,13 +701,11 @@
                     DOMElements.roomsContainer.appendChild(roomEl);
                 });
 
-                // --- Render Grand Summary
                 const summary = state.summary;
                 document.querySelector('[data-summary="grandTotal"]').textContent = fmtCurrency(summary.grandTotal);
                 document.querySelector('[data-summary="grandOpaqueYards"]').textContent = `${fmt(summary.grandOpaqueYards)}`;
                 document.querySelector('[data-summary="grandSheerYards"]').textContent = `${fmt(summary.grandSheerYards)}`;
 
-                // --- Render Lock State
                 DOMElements.lockBtn.classList.toggle('btn-danger', state.isLocked);
                 DOMElements.lockBtn.classList.toggle('btn-primary', !state.isLocked);
                 DOMElements.lockBtn.querySelector('.lock-text').textContent = state.isLocked ? 'ปลดล็อค' : 'ล็อก';
@@ -738,9 +718,6 @@
                 debouncedSave();
             }
 
-            // =================================================================================
-            // --- EVENT HANDLERS & ACTIONS (CONTROLLER) ---
-            // =================================================================================
             const Actions = {
                 addRoom: () => { state.rooms.push(getNewRoom()); showToast('เพิ่มห้องใหม่แล้ว', 'success'); },
                 delRoom: (btn) => {
@@ -851,9 +828,6 @@
                 }
             });
 
-            // =================================================================================
-            // --- UI HELPERS (Modals, Toasts, Clipboard) ---
-            // =================================================================================
             function showToast(message, type = 'success') {
                 const toast = document.createElement('div');
                 toast.className = `toast toast-${type}`;
@@ -902,7 +876,6 @@
                 text += `ลูกค้า: ${currentState.customer.name || 'ไม่ระบุ'}\n`;
                 text += `วันที่: ${new Date().toLocaleDateString('th-TH')}\n\n`;
 
-                // Room and Set Details
                 currentState.rooms.forEach((room, rIndex) => {
                     const roomName = room.name || `ห้อง ${String(rIndex + 1).padStart(2, "0")}`;
                     const sets = room.sets.filter(s => !s.is_suspended);
@@ -916,11 +889,10 @@
                         text += `• จุดที่ ${sIndex + 1}: กว้าง ${fmt(width_m)} ม. x สูง ${fmt(height_m)} ม. (${fabric_variant})\n`;
                         text += `  - ราคา: ${fmtCurrency(total)} บาท\n`;
                         text += `  - ผ้าที่ใช้: ทึบ ${fmt(opaqueYards)} หลา | โปร่ง ${fmt(sheerYards)} หลา\n`;
-                        text += `  - รางที่ใช้: ทึบ ${fmt(opaqueTrack)} ม. | โปร่ง ${fmt(sheerTrack)} ม.\n\n`;
+                        text += `  - รางที่ใช้: ทึบ ${fmt(opaqueTrack)} ม. | รางโปร่ง ${fmt(sheerTrack)} ม.\n\n`;
                     });
                 });
 
-                // Grand Summary
                 const summary = currentState.summary;
                 text += `--- สรุปยอดรวม ---\n`;
                 text += `ราคารวม: ${fmtCurrency(summary.grandTotal)} บาท\n`;
@@ -933,9 +905,6 @@
                 return text.trim();
             }
 
-            // =================================================================================
-            // --- INITIALIZATION ---
-            // =================================================================================
             initState();
             render();
         })();
