@@ -148,6 +148,13 @@
                     <label for="roomName">ชื่อห้อง</label>
                     <input type="text" class="form-control" data-bind="room.name" placeholder="ชื่อห้อง">
                 </div>
+                <div class="room-brief" data-room-brief></div>
+                <div class="room-actions">
+                    <button type="button" class="btn btn-sm btn-info" data-act="toggleRoomView"><span data-view-text>ย่อห้อง</span></button>
+                    <button type="button" class="btn btn-danger btn-sm" data-act="delRoom">ลบห้อง</button>
+                </div>
+            </div>
+            <div class="room-content">
                 <div class="form-group room-style-select">
                     <label for="roomStyle">สไตล์</label>
                     <select class="form-control" data-bind="room.style">
@@ -160,13 +167,6 @@
                     <label for="roomPrice">ราคาผ้า (บ./ม.)</label>
                     <select class="form-control" data-bind="room.price_per_m"></select>
                 </div>
-                <div class="room-brief" data-room-brief></div>
-                <div class="room-actions">
-                    <button type="button" class="btn btn-sm btn-info" data-act="toggleRoomView"><span data-view-text>ย่อห้อง</span></button>
-                    <button type="button" class="btn btn-danger btn-sm" data-act="delRoom">ลบห้อง</button>
-                </div>
-            </div>
-            <div class="room-content">
                 <div class="sets-section">
                     <h3>รายการผ้าม่าน</h3>
                     <div data-sets-container>

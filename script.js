@@ -305,10 +305,16 @@
                 toggleViewBtn.textContent = roomData.isCollapsed ? 'ขยายห้อง' : 'ย่อห้อง';
             }
 
-            roomEl.querySelector('[data-bind="room.name"]').value = roomData.name;
-            roomEl.querySelector('[data-bind="room.name"]').placeholder = `ห้อง ${String(roomIndex + 1).padStart(2, "0")}`;
-            roomEl.querySelector('[data-bind="room.style"]').value = roomData.style;
-            populateSelect(roomEl.querySelector('[data-bind="room.price_per_m"]'), CONFIG.PRICING.fabric, roomData.price_per_m);
+            const roomNameInput = roomEl.querySelector('[data-bind="room.name"]');
+            roomNameInput.value = roomData.name;
+            roomNameInput.placeholder = `ห้อง ${String(roomIndex + 1).padStart(2, "0")}`;
+            
+            if (!roomData.isCollapsed) {
+                const styleSelect = roomEl.querySelector('[data-bind="room.style"]');
+                if (styleSelect) styleSelect.value = roomData.style;
+                const priceSelect = roomEl.querySelector('[data-bind="room.price_per_m"]');
+                if (priceSelect) populateSelect(priceSelect, CONFIG.PRICING.fabric, roomData.price_per_m);
+            }
 
             const setsContainer = roomEl.querySelector('[data-sets-container]');
             roomData.sets.forEach((setData, setIndex) => {
@@ -370,7 +376,7 @@
 
             const brief = roomEl.querySelector('[data-room-brief]');
             const roomCalc = roomData.calculations;
-            brief.innerHTML = `<span class="num">จุด ${fmtCurrency(roomCalc.sets + roomCalc.deco)}</span> • <span class="num">ชุด ${fmtCurrency(roomCalc.units)}</span> • ราคา <span class="num price">${fmtCurrency(roomCalc.price)}</span> บาท`;
+            brief.innerHTML = `สไตล์: **${roomData.style}** • ราคา: **${fmtCurrency(roomData.price_per_m)}** บ./ม. • <span class="num">จุด ${fmtCurrency(roomCalc.sets + roomCalc.deco)}</span> • <span class="num">ชุด ${fmtCurrency(roomCalc.units)}</span> • ราคา <span class="num price">${fmtCurrency(roomCalc.price)}</span> บาท`;
 
             DOMElements.roomsContainer.appendChild(roomEl);
         });
