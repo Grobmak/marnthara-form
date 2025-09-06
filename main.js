@@ -105,12 +105,10 @@
         selectEl.innerHTML = '';
         prices.forEach(p => {
             const option = document.createElement('option');
-            // Fix: Store string value that can be formatted to match textContent
             option.value = p.toString();
             option.textContent = p.toLocaleString("th-TH");
             selectEl.appendChild(option);
         });
-        // Fix: Ensure selectedValue is also a string for comparison
         selectEl.value = selectedValue ? selectedValue.toString() : '';
     }
 
@@ -151,7 +149,7 @@
                 // Display calculation results
                 const calc = setData.calculations || {};
                 setEl.querySelector('[data-suspend-text]').textContent = setData.is_suspended ? 'ใช้งาน' : 'ระงับ';
-                setEl.querySelector('[data-item-title]').textContent = `${setIndex + 1}`;
+                setEl.querySelector('[data-item-title]').textContent = `จุดที่ ${setIndex + 1}`;
                 setEl.querySelector('[data-set-price="total"]').textContent = fmtCurrency(calc.total);
                 setEl.querySelector('[data-set-price="opaque"]').textContent = fmtCurrency(calc.opaquePrice);
                 setEl.querySelector('[data-set-price="sheer"]').textContent = fmtCurrency(calc.sheerPrice);
@@ -166,8 +164,8 @@
                 setEl.querySelector('[data-set-options-row]').classList.toggle("three-col", hasSheer);
                 setEl.querySelector('[data-sheer-wrap]').classList.toggle("hidden", !hasSheer);
                 ['price', 'yardage', 'track'].forEach(type => {
-                    setEl.querySelector(`[data-set-${type}-wrap="opaque"]`).classList.toggle("hidden", !hasOpaque);
-                    setEl.querySelector(`[data-set-${type}-wrap="sheer"]`).classList.toggle("hidden", !hasSheer);
+                    if (setEl.querySelector(`[data-set-${type}-wrap="opaque"]`)) setEl.querySelector(`[data-set-${type}-wrap="opaque"]`).classList.toggle("hidden", !hasOpaque);
+                    if (setEl.querySelector(`[data-set-${type}-wrap="sheer"]`)) setEl.querySelector(`[data-set-${type}-wrap="sheer"]`).classList.toggle("hidden", !hasSheer);
                 });
 
                 setsContainer.appendChild(setEl);
@@ -189,7 +187,7 @@
                 // Display calculation results
                 const calc = decoData.calculations || {};
                 decoEl.querySelector('[data-suspend-text]').textContent = decoData.is_suspended ? 'ใช้งาน' : 'ระงับ';
-                decoEl.querySelector('[data-item-title]').textContent = `${decoIndex + 1}`;
+                decoEl.querySelector('[data-item-title]').textContent = `ตกแต่งที่ ${decoIndex + 1}`;
                 decoEl.querySelector('[data-deco-summary]').innerHTML = `ราคา: <span class="price">${fmtCurrency(calc.total)}</span> บ. • พื้นที่: <span class="price">${fmt(calc.areaSqyd)}</span> ตร.หลา`;
 
                 decosContainer.appendChild(decoEl);
@@ -230,14 +228,13 @@
 
     // =================================================================================
     // --- EVENT HANDLERS & ACTIONS (CONTROLLER) ---
-    // Functions that handle user input, update the state, and trigger a re-render.
     // =================================================================================
     const Actions = {
         addRoom: () => { state.rooms.push(getNewRoom()); showToast('เพิ่มห้องใหม่แล้ว', 'success'); },
         delRoom: (btn) => {
             const roomId = btn.closest('[data-room-id]').dataset.roomId;
             state.rooms = state.rooms.filter(r => r.id !== roomId);
-            if (state.rooms.length === 0) Actions.addRoom(); // Ensure at least one room
+            if (state.rooms.length === 0) Actions.addRoom();
             showToast('ลบห้องแล้ว', 'success');
         },
         addSet: (btn) => {
@@ -323,7 +320,6 @@
                     const collection = type === 'set' ? room.sets : room.decorations;
                     const item = collection.find(i => i.id === itemId);
                     if (item) {
-                        // Corrected: Convert back to a number directly if it's a numeric input type
                         if (el.inputMode === 'numeric' || el.type === 'number') {
                             value = toNum(value);
                         }
@@ -362,7 +358,6 @@
                 render();
             }
         } else if(act === 'copy-json' || act === 'copy-text') {
-            // Non-state changing actions
             if (act === 'copy-json') {
                 copyToClipboard(JSON.stringify(state, null, 2), 'คัดลอก JSON แล้ว!', 'ไม่สามารถคัดลอก JSON ได้');
             } else if (act === 'copy-text') {

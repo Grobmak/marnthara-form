@@ -8,7 +8,7 @@
     <style>
         :root {
             --primary: #4a90e2;
-            --secondary: #50e3c2;
+            --secondary: #6c757d;
             --success: #50e3c2;
             --warning: #f5a623;
             --danger: #d0021b;
@@ -34,7 +34,13 @@
         .container {
             max-width: 900px;
             margin: auto;
-            padding: 20px;
+            padding: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
         }
 
         header {
@@ -49,16 +55,16 @@
 
         header h1 {
             margin: 0;
-            font-size: 2.5rem;
+            font-size: 2rem;
         }
 
         header p {
             margin: 5px 0 0;
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
 
         main {
-            padding-bottom: 120px; /* Space for sticky footer */
+            padding-bottom: 120px;
         }
 
         .card {
@@ -71,8 +77,8 @@
 
         .card-header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            align-items: flex-start;
             margin-bottom: 15px;
             border-bottom: 2px solid var(--border);
             padding-bottom: 10px;
@@ -81,6 +87,11 @@
         .card-header h2 {
             margin: 0;
             font-size: 1.5rem;
+        }
+        
+        .card-header .flex-row {
+            width: 100%;
+            margin-top: 10px;
         }
 
         .form-group {
@@ -115,52 +126,25 @@
             transition: background-color 0.2s;
         }
 
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-        
-        .btn-success {
-            background-color: var(--success);
-            color: var(--dark);
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: white;
-        }
-
-        .btn-warning {
-            background-color: var(--warning);
-            color: var(--dark);
-        }
-
-        .btn-light {
-            background-color: var(--light);
-            color: var(--dark);
-            border: 1px solid var(--border);
-        }
-
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 0.8rem;
-        }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-secondary { background-color: var(--secondary); color: white; }
+        .btn-success { background-color: var(--success); color: var(--dark); }
+        .btn-danger { background-color: var(--danger); color: white; }
+        .btn-warning { background-color: var(--warning); color: var(--dark); }
+        .btn-light { background-color: var(--light); color: var(--dark); border: 1px solid var(--border); }
+        .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
 
         .flex-row {
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             align-items: flex-end;
         }
-
+        
         .flex-row .form-group {
-            flex: 1;
+            flex: 1 1 calc(50% - 5px);
         }
-
+        
         .flex-row .form-group:last-child {
             flex-grow: 0;
             flex-shrink: 0;
@@ -182,9 +166,31 @@
         
         .set-item .item-header, .deco-item .item-header {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        @media (min-width: 576px) {
+            .set-item .item-header, .deco-item .item-header {
+                flex-wrap: nowrap;
+            }
+            .item-actions {
+                margin-top: 0;
+            }
+            .flex-row .form-group {
+                flex: 1;
+            }
+            .card-header .flex-row {
+                flex-wrap: nowrap;
+            }
         }
 
         .set-item.is-suspended, .deco-item.is-suspended {
@@ -198,11 +204,6 @@
             margin-right: 10px;
         }
 
-        .item-actions {
-            display: flex;
-            gap: 5px;
-        }
-
         .summary {
             margin-top: 20px;
             padding-top: 15px;
@@ -212,6 +213,19 @@
 
         .summary p {
             margin: 5px 0;
+        }
+        
+        .summary .flex-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        @media (min-width: 576px) {
+            .summary .flex-row {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
         }
 
         .summary .price {
@@ -234,17 +248,26 @@
             width: 100%;
             background: white;
             box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
-            padding: 15px 20px;
+            padding: 15px 10px;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 10px;
             align-items: center;
             z-index: 1000;
+        }
+        
+        @media (min-width: 576px) {
+            .sticky-footer {
+                flex-direction: row;
+                justify-content: space-between;
+            }
         }
 
         .grand-summary {
             display: flex;
             flex-direction: column;
             gap: 5px;
+            text-align: center;
         }
         
         .grand-summary p {
@@ -253,18 +276,21 @@
         }
         
         .grand-total {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: bold;
             color: var(--danger);
         }
-
-        .hidden {
-            display: none !important;
+        
+        @media (min-width: 576px) {
+            .grand-summary {
+                text-align: left;
+            }
+            .grand-total {
+                font-size: 1.8rem;
+            }
         }
 
-        .three-col .form-group {
-            flex: 1 1 30%;
-        }
+        .hidden { display: none !important; }
 
         .modal-overlay {
             position: fixed;
@@ -451,7 +477,7 @@
                 </div>
 
                 <div class="summary">
-                    <div class="flex-row" style="align-items: center; justify-content: space-between;">
+                    <div class="flex-row">
                         <p>
                             ราคา: <span class="price" data-set-price="total">0</span> บ.
                         </p>
