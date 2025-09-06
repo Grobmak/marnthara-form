@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Marnthara Input (v3.2)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -73,25 +74,18 @@
                     <div><label class="required">ราคาผ้า (ทึบ) (ต่อเมตร)</label><select class="field" name="room_price_per_m" required><option value="" hidden>เลือก</option></select></div>
                     <div><label class="required">สไตล์</label><select class="field" name="room_style" required><option value="" hidden>เลือก</option><option>ลอน</option><option>ตาไก่</option><option>จีบ</option></select></div>
                 </div>
-                <div class="small">
-                    <div class="row three-col">
-                        <div><label>ราคาราง (ต่อเมตร)</label><input class="field" type="number" name="room_track_price" step="0.01" min="0" value="0" /></div>
-                        <div><label>ค่าติดตั้ง (ต่อจุด)</label><input class="field" type="number" name="room_install_price" step="0.01" min="0" value="0" /></div>
-                        <div><label>ค่าอุปกรณ์อื่นๆ</label><input class="field" type="number" name="room_misc_price" step="0.01" min="0" value="0" /></div>
-                    </div>
-                </div>
-                <div data-sets></div>
-                <div data-decorations></div>
-                <div class="total">
-                    <div class="room-actions">
-                        <button type="button" class="btn btn-xs btn-primary outline" data-act="add-set">+ เพิ่มจุดผ้าม่าน</button>
-                        <button type="button" class="btn btn-xs btn-secondary outline" data-act="add-deco" style="--primary: var(--secondary);">+ ตกแต่งเพิ่ม</button>
-                    </div>
+            </div>
+            <div data-sets></div>
+            <div data-decorations></div>
+            <div class="total">
+                <div class="room-actions">
+                    <button type="button" class="btn btn-xs btn-primary outline" data-act="add-set">+ เพิ่มจุดผ้าม่าน</button>
+                    <button type="button" class="btn btn-xs btn-secondary outline" data-act="add-deco" style="--primary: var(--secondary);">+ ตกแต่งเพิ่ม</button>
                 </div>
             </div>
         </details>
     </template>
-
+    
     <template id="setTpl">
         <div class="card set" data-set>
             <div class="item-head">
@@ -104,43 +98,38 @@
             <div class="row five-col">
                 <div><label class="required">กว้าง (ม.)</label><input class="field" name="width_m" type="number" step="0.01" min="0" required /></div>
                 <div><label class="required">สูง (ม.)</label><input class="field" name="height_m" type="number" step="0.01" min="0" required /></div>
-                <div><label>ผ้าพับ</label><input class="field" name="fold_times" type="number" step="0.01" min="1.8" value="2.5" /></div>
-                <div><label>ส่วนเกิน (ซม.)</label><input class="field" name="extra_cm" type="number" step="1" min="0" value="15" /></div>
-                <div><label>จำนวน</label><input class="field" name="quantity" type="number" step="1" min="1" value="1" /></div>
+                <div><label class="required">จำนวน (จุด)</label><input class="field" name="quantity" type="number" step="1" min="1" required value="1" /></div>
+                <div><label>ราง/อุปกรณ์</label><input class="field" name="track_type" type="text" placeholder="เช่น รางโชว์" /></div>
+                <button type="button" class="btn btn-icon btn-primary" data-act="add-item-deco" title="เพิ่มตกแต่ง">+ ตกแต่ง</button>
             </div>
-            <div class="row" data-set-options-row>
-                <div><label>รูปแบบเปิดผ้า</label><select class="field" name="open_type"><option value="" hidden>เลือก</option><option>แยกกลาง</option><option>สไลด์เดี่ยว</option></select></div>
-                <div><label>ชนิดผ้าของจุดนี้</label><select class="field" name="fabric_variant"><option>ทึบ</option><option>โปร่ง</option><option>ทึบ&โปร่ง</option></select></div>
-                <div data-sheer-wrap class="hidden"><label>ราคาผ้าโปร่ง </label><select class="field" name="sheer_price_per_m"><option value="" hidden>เลือก</option></select></div>
+            <div class="row">
+                <div style="flex:1 1 200px;"><label>ราคาผ้า (โปร่ง) (ต่อเมตร)</label><select class="field" name="sheer_price_per_m"><option value="" selected>ไม่มี</option></select></div>
+                <div style="flex:1;"><label>เพิ่ม (ซม.)</label><input class="field" name="extra_cm" type="number" step="1" min="0" value="0" /></div>
+                <div style="flex:1;"><label>พับ (เท่า)</label><input class="field" name="fold_times" type="number" step="0.1" min="1" value="2.5" /></div>
+                <div style="flex:1;"><label>ความยาวราง</label><input class="field" name="track_length_m" type="number" step="0.01" min="0" /></div>
             </div>
-            <div class="small" style="margin-top: 8px">
-                <span data-set-brief><span class="num">0</span> หลา • <span class="num price">0</span> บาท</span>
-            </div>
+            <div class="total">ราคา: <span class="price" data-total>0</span> บาท</div>
         </div>
     </template>
-
+    
     <template id="decoTpl">
         <div class="card deco-item" data-deco>
             <div class="item-head">
                 <div class="item-badge" data-item-title></div>
                 <button type="button" class="btn btn-xs btn-warning" data-act="toggle-suspend" style="--primary: var(--warning);"><span data-suspend-text>ระงับ</span></button>
                 <span style="flex:1;"></span>
-                <button type="button" class="btn btn-icon btn-danger" data-act="del-deco" title="ลบรายการ">—</button>
+                <button type="button" class="btn btn-icon btn-danger" data-act="del-deco" title="ลบชุด">−</button>
             </div>
-            <div class="row five-col deco-row">
-                <div><label class="required">ประเภท</label><input class="field" name="type" placeholder="เช่น วอลเปเปอร์" required /></div>
-                <div><label class="required">กว้าง (ม.)</label><input class="field" name="width_m" type="number" step="0.01" min="0" required /></div>
-                <div><label class="required">สูง (ม.)</label><input class="field" name="height_m" type="number" step="0.01" min="0" required /></div>
-                <div><label class="required">ราคา (บ./ตร.ม.)</label><input class="field" name="price_sqm" type="number" step="0.01" min="0" required /></div>
-                <div><label>จำนวน</label><input class="field" name="quantity" type="number" step="1" min="1" value="1" /></div>
+            <div class="row deco-row">
+                <div><label>ประเภท</label><input class="field" name="type" type="text" placeholder="เช่น วอลเปเปอร์" /></div>
+                <div><label>ราคาต่อตร.หลา</label><input class="field" name="price_per_sq_yd" type="number" step="0.01" min="0" /></div>
+                <div><label>กว้าง (ม.)</label><input class="field" name="width_m" type="number" step="0.01" min="0" /></div>
+                <div><label>สูง (ม.)</label><input class="field" name="height_m" type="number" step="0.01" min="0" /></div>
             </div>
-            <div class="small" style="margin-top: 8px">
-                <span data-deco-brief><span class="num">0</span> ตร.ม. • <span class="num price">0</span> บาท</span>
-            </div>
+            <div class="total">ราคา: <span class="price" data-total>0</span> บาท</div>
         </div>
     </template>
 
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="script.js"></script>
 </body>
 </html>

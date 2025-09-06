@@ -100,6 +100,7 @@ details.room > summary::-webkit-details-marker { display: none; }
 .summary-details > .summary-popup > .summary-item { text-align: left; margin-bottom: 8px; }
 .summary-details > .summary-popup > .summary-item:last-child { margin-bottom: 0; }
 .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; position: relative; }
+
 /* Toast Notification Styles */
 .toast-container {
     position: fixed;
@@ -110,6 +111,7 @@ details.room > summary::-webkit-details-marker { display: none; }
     flex-direction: column;
     gap: 10px;
 }
+
 .toast {
     background-color: var(--card-bg);
     color: var(--fg);
@@ -121,6 +123,7 @@ details.room > summary::-webkit-details-marker { display: none; }
     transform: translateY(-20px);
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
+
 .toast.show {
     opacity: 1;
     transform: translateY(0);
