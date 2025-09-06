@@ -3,7 +3,6 @@
     // --- APP-WIDE CONFIGURATION ---
     // =================================================================================
     const CONFIG = {
-        // เปลี่ยนค่าจาก YOUR_WEBHOOK_URL_HERE เป็น null เพื่อปิดการทำงานชั่วคราว
         WEBHOOK_URL: null,
         PRICING: {
             fabric: [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000],
@@ -15,20 +14,24 @@
     // =================================================================================
     // --- DOM REFERENCES (VIEW) ---
     // =================================================================================
-    const DOMElements = {
-        orderForm: document.querySelector('#orderForm'),
-        roomsContainer: document.querySelector('[data-rooms-container]'),
-        templates: {
-            room: document.querySelector('#room-template'),
-            set: document.querySelector('#set-template'),
-            deco: document.querySelector('#deco-template'),
-        },
-        lockBtn: document.querySelector('#lockBtn'),
-        submitBtn: document.querySelector('#submitBtn'),
-        toastContainer: document.querySelector('[data-toast-container]'),
-        copyJsonBtn: document.querySelector('[data-act="copy-json"]'),
-        copyTextBtn: document.querySelector('[data-act="copy-text"]'),
-    };
+    let DOMElements = {};
+
+    function initDOMElements() {
+        DOMElements = {
+            orderForm: document.querySelector('#orderForm'),
+            roomsContainer: document.querySelector('[data-rooms-container]'),
+            templates: {
+                room: document.querySelector('#room-template'),
+                set: document.querySelector('#set-template'),
+                deco: document.querySelector('#deco-template'),
+            },
+            lockBtn: document.querySelector('#lockBtn'),
+            submitBtn: document.querySelector('#submitBtn'),
+            toastContainer: document.querySelector('[data-toast-container]'),
+            copyJsonBtn: document.querySelector('[data-act="copy-json"]'),
+            copyTextBtn: document.querySelector('[data-act="copy-text"]'),
+        };
+    }
 
     // =================================================================================
     // --- STATE MANAGEMENT & INITIALIZATION (MODEL) ---
@@ -80,7 +83,6 @@
         const savedState = localStorage.getItem('curtain-calculator-state');
         if (savedState) {
             state = JSON.parse(savedState);
-            // Ensure all necessary properties exist for backward compatibility
             if (!state.customer) state.customer = { name: '', address: '', phone: '' };
             if (!state.rooms || state.rooms.length === 0) state.rooms = [getNewRoom()];
             state.rooms.forEach(room => {
@@ -128,7 +130,7 @@
         if (typeof num !== 'number' || isNaN(num)) return '0';
         return num.toLocaleString("th-TH", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
-    
+
     function toNum(str) {
         return parseFloat(String(str).replace(/,/g, '')) || 0;
     }
@@ -147,12 +149,10 @@
                 return { total: 0, opaquePrice: 0, sheerPrice: 0, opaqueYards: 0, sheerYards: 0, opaqueTrack: 0, sheerTrack: 0 };
             }
 
-            // Opaque calculations
             const opaqueYards = width > 0 && height > 0 ? (width * 2 * 1.5) / 0.9144 : 0;
             const opaquePrice = opaqueYards > 0 ? opaqueYards * opaquePricePerM * 0.9144 : 0;
             const opaqueTrack = width > 0 ? width : 0;
 
-            // Sheer calculations
             const hasSheer = set.fabric_variant === 'โปร่ง' || set.fabric_variant === 'ทึบ&โปร่ง';
             const sheerYards = hasSheer && width > 0 && height > 0 ? (width * 2.5 * 1.5) / 0.9144 : 0;
             const sheerPrice = hasSheer && sheerYards > 0 ? sheerYards * sheerPricePerM * 0.9144 : 0;
@@ -280,38 +280,32 @@
     function render() {
         Calculator.runAllCalculations(state);
 
-        // --- Render Customer Info
         document.querySelector('[data-bind="customer.name"]').value = state.customer.name;
         document.querySelector('[data-bind="customer.address"]').value = state.customer.address;
         document.querySelector('[data-bind="customer.phone"]').value = state.customer.phone;
 
-        // --- Render Rooms
         DOMElements.roomsContainer.innerHTML = '';
         state.rooms.forEach((roomData, roomIndex) => {
             const roomEl = DOMElements.templates.room.content.cloneNode(true).firstElementChild;
             roomEl.dataset.roomId = roomData.id;
 
-            // Bind room data
             roomEl.querySelector('[data-bind="room.name"]').value = roomData.name;
             roomEl.querySelector('[data-bind="room.name"]').placeholder = `ห้อง ${String(roomIndex + 1).padStart(2, "0")}`;
             roomEl.querySelector('[data-bind="room.style"]').value = roomData.style;
             populateSelect(roomEl.querySelector('[data-bind="room.price_per_m"]'), CONFIG.PRICING.fabric, roomData.price_per_m);
 
-            // Render sets
             const setsContainer = roomEl.querySelector('[data-sets-container]');
             roomData.sets.forEach((setData, setIndex) => {
                 const setEl = DOMElements.templates.set.content.cloneNode(true).firstElementChild;
                 setEl.dataset.setId = setData.id;
                 setEl.classList.toggle('is-suspended', setData.is_suspended);
 
-                // Bind set data
                 setEl.querySelector('[data-bind="set.width_m"]').value = setData.width_m;
                 setEl.querySelector('[data-bind="set.height_m"]').value = setData.height_m;
                 setEl.querySelector('[data-bind="set.fabric_variant"]').value = setData.fabric_variant;
                 setEl.querySelector('[data-bind="set.open_type"]').value = setData.open_type;
                 populateSelect(setEl.querySelector('[data-bind="set.sheer_price_per_m"]'), CONFIG.PRICING.sheer, setData.sheer_price_per_m);
 
-                // Display calculation results
                 const calc = setData.calculations || {};
                 setEl.querySelector('[data-suspend-text]').textContent = setData.is_suspended ? 'ใช้งาน' : 'ระงับ';
                 setEl.querySelector('[data-item-title]').textContent = `${setIndex + 1}`;
@@ -323,7 +317,6 @@
                 setEl.querySelector('[data-set-track="opaque"]').textContent = fmt(calc.opaqueTrack);
                 setEl.querySelector('[data-set-track="sheer"]').textContent = fmt(calc.sheerTrack);
 
-                // Toggle UI based on variant
                 const hasOpaque = setData.fabric_variant === 'ทึบ' || setData.fabric_variant === 'ทึบ&โปร่ง';
                 const hasSheer = setData.fabric_variant === 'โปร่ง' || setData.fabric_variant === 'ทึบ&โปร่ง';
                 setEl.querySelector('[data-set-options-row]').classList.toggle("three-col", hasSheer);
@@ -336,20 +329,17 @@
                 setsContainer.appendChild(setEl);
             });
 
-            // Render decorations
             const decosContainer = roomEl.querySelector('[data-decos-container]');
             roomData.decorations.forEach((decoData, decoIndex) => {
                 const decoEl = DOMElements.templates.deco.content.cloneNode(true).firstElementChild;
                 decoEl.dataset.decoId = decoData.id;
                 decoEl.classList.toggle('is-suspended', decoData.is_suspended);
 
-                // Bind deco data
                 decoEl.querySelector('[data-bind="deco.type"]').value = decoData.type;
                 decoEl.querySelector('[data-bind="deco.width_m"]').value = decoData.width_m;
                 decoEl.querySelector('[data-bind="deco.height_m"]').value = decoData.height_m;
                 decoEl.querySelector('[data-bind="deco.price_sqyd"]').value = decoData.price_sqyd;
 
-                // Display calculation results
                 const calc = decoData.calculations || {};
                 decoEl.querySelector('[data-suspend-text]').textContent = decoData.is_suspended ? 'ใช้งาน' : 'ระงับ';
                 decoEl.querySelector('[data-item-title]').textContent = `${decoIndex + 1}`;
@@ -358,7 +348,6 @@
                 decosContainer.appendChild(decoEl);
             });
 
-            // Room summary brief
             const brief = roomEl.querySelector('[data-room-brief]');
             const roomCalc = roomData.calculations;
             brief.innerHTML = `<span class="num">จุด ${fmtCurrency(roomCalc.sets + roomCalc.deco)}</span> • <span class="num">ชุด ${fmtCurrency(roomCalc.units)}</span> • ราคา <span class="num price">${fmtCurrency(roomCalc.price)}</span> บาท`;
@@ -366,7 +355,6 @@
             DOMElements.roomsContainer.appendChild(roomEl);
         });
 
-        // --- Render Grand Summary
         const summary = state.summary;
         document.querySelector('[data-summary="grandTotal"]').textContent = fmtCurrency(summary.grandTotal);
         document.querySelector('[data-summary="totalPoints"]').textContent = fmtCurrency(summary.totalPoints);
@@ -377,7 +365,6 @@
         document.querySelector('[data-summary="grandOpaqueTrack"]').textContent = `${fmt(summary.grandOpaqueTrack)} ม.`;
         document.querySelector('[data-summary="grandSheerTrack"]').textContent = `${fmt(summary.grandSheerTrack)} ม.`;
 
-        // --- Render Lock State
         DOMElements.lockBtn.classList.toggle('btn-danger', state.isLocked);
         DOMElements.lockBtn.classList.toggle('btn-primary', !state.isLocked);
         DOMElements.lockBtn.querySelector('.lock-text').textContent = state.isLocked ? 'ปลดล็อค' : 'ล็อก';
@@ -485,7 +472,6 @@
                     const collection = type === 'set' ? room.sets : room.decorations;
                     const item = collection.find(i => i.id === itemId);
                     if (item) {
-                       // For numeric inputs, clean the value
                        if(el.inputMode === 'numeric') {
                            value = value.replace(/[^0-9.]/g, '');
                            el.value = value;
@@ -498,81 +484,6 @@
     };
 
     const debouncedRender = debounce(render, 300);
-
-    // Event listeners
-    document.addEventListener('input', (e) => {
-        Actions.updateBoundValue(e.target);
-        debouncedRender();
-    });
-    
-    document.addEventListener('click', async (e) => {
-        const btn = e.target.closest('button[data-act]');
-        if (!btn || (state.isLocked && btn.dataset.act !== 'toggleLock')) {
-            return;
-        }
-
-        const act = btn.dataset.act;
-        const action = Actions[act];
-
-        if (action) {
-            const isDestructive = act.startsWith('del') || act.startsWith('clear');
-            if (isDestructive) {
-                const titles = { 'delRoom': 'ลบห้อง', 'delSet': 'ลบจุด', 'delDeco': 'ลบรายการ', 'clearSet': 'ล้างข้อมูล', 'clearDeco': 'ล้างข้อมูล', 'clearAll': 'ล้างข้อมูลทั้งหมด' };
-                const bodies = { 'clearAll': 'คำเตือน! การกระทำนี้จะลบข้อมูลทั้งหมด ไม่สามารถกู้คืนได้', default: 'ยืนยันการกระทำนี้?' };
-                if (await showConfirmation(titles[act] || 'ยืนยัน', bodies[act] || bodies.default)) {
-                    action(btn);
-                    render();
-                }
-            } else {
-                action(btn);
-                render();
-            }
-        } else if(act === 'copy-json' || act === 'copy-text') {
-            if (act === 'copy-json') {
-                copyToClipboard(JSON.stringify(state, null, 2), 'คัดลอก JSON แล้ว!', 'ไม่สามารถคัดลอก JSON ได้');
-            } else if (act === 'copy-text') {
-                const options = await showCopyOptionsModal();
-                if (options) {
-                    copyToClipboard(buildTextPayload(state, options), 'คัดลอกข้อความแล้ว!', 'ไม่สามารถคัดลอกข้อความได้');
-                }
-            }
-        }
-    });
-
-    DOMElements.orderForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        // ตรวจสอบว่ามี Webhook URL หรือไม่
-        if (!CONFIG.WEBHOOK_URL) {
-            showToast('ฟังก์ชันส่งข้อมูลถูกปิดใช้งานอยู่', 'info');
-            return;
-        }
-
-        if (state.isLocked) {
-            showToast('ฟอร์มถูกล็อคอยู่ ไม่สามารถส่งได้', 'error');
-            return;
-        }
-        
-        DOMElements.submitBtn.disabled = true;
-        DOMElements.submitBtn.textContent = 'กำลังส่ง...';
-
-        try {
-            const payload = { ...state, app_version: CONFIG.APP_VERSION, generated_at: new Date().toISOString() };
-            const response = await fetch(CONFIG.WEBHOOK_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (!response.ok) throw new Error(`Server responded with ${response.status}`);
-            showToast('ส่งข้อมูลสำเร็จแล้ว', 'success');
-        } catch (error) {
-            console.error("Submit failed:", error);
-            showToast('ส่งข้อมูลไม่สำเร็จ! โปรดตรวจสอบการเชื่อมต่อ', 'error');
-        } finally {
-            DOMElements.submitBtn.disabled = state.isLocked;
-            DOMElements.submitBtn.textContent = 'ส่งไปคำนวณ';
-        }
-    });
 
     // =================================================================================
     // --- UI HELPERS (Modals, Toasts, Clipboard) ---
@@ -677,7 +588,84 @@
     // =================================================================================
     // --- INITIALIZATION ---
     // =================================================================================
-    initState();
-    render();
+    document.addEventListener('DOMContentLoaded', () => {
+        initDOMElements();
+        initState();
+        render();
+
+        // Attach event listeners after the DOM is ready and DOMElements are initialized
+        document.addEventListener('input', (e) => {
+            Actions.updateBoundValue(e.target);
+            debouncedRender();
+        });
+
+        document.addEventListener('click', async (e) => {
+            const btn = e.target.closest('button[data-act]');
+            if (!btn || (state.isLocked && btn.dataset.act !== 'toggleLock')) {
+                return;
+            }
+
+            const act = btn.dataset.act;
+            const action = Actions[act];
+
+            if (action) {
+                const isDestructive = act.startsWith('del') || act.startsWith('clear');
+                if (isDestructive) {
+                    const titles = { 'delRoom': 'ลบห้อง', 'delSet': 'ลบจุด', 'delDeco': 'ลบรายการ', 'clearSet': 'ล้างข้อมูล', 'clearDeco': 'ล้างข้อมูล', 'clearAll': 'ล้างข้อมูลทั้งหมด' };
+                    const bodies = { 'clearAll': 'คำเตือน! การกระทำนี้จะลบข้อมูลทั้งหมด ไม่สามารถกู้คืนได้', default: 'ยืนยันการกระทำนี้?' };
+                    if (await showConfirmation(titles[act] || 'ยืนยัน', bodies[act] || bodies.default)) {
+                        action(btn);
+                        render();
+                    }
+                } else {
+                    action(btn);
+                    render();
+                }
+            } else if(act === 'copy-json' || act === 'copy-text') {
+                if (act === 'copy-json') {
+                    copyToClipboard(JSON.stringify(state, null, 2), 'คัดลอก JSON แล้ว!', 'ไม่สามารถคัดลอก JSON ได้');
+                } else if (act === 'copy-text') {
+                    const options = await showCopyOptionsModal();
+                    if (options) {
+                        copyToClipboard(buildTextPayload(state, options), 'คัดลอกข้อความแล้ว!', 'ไม่สามารถคัดลอกข้อความได้');
+                    }
+                }
+            }
+        });
+
+        DOMElements.orderForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!CONFIG.WEBHOOK_URL) {
+                showToast('ฟังก์ชันส่งข้อมูลถูกปิดใช้งานอยู่', 'info');
+                return;
+            }
+
+            if (state.isLocked) {
+                showToast('ฟอร์มถูกล็อคอยู่ ไม่สามารถส่งได้', 'error');
+                return;
+            }
+
+            DOMElements.submitBtn.disabled = true;
+            DOMElements.submitBtn.textContent = 'กำลังส่ง...';
+
+            try {
+                const payload = { ...state, app_version: CONFIG.APP_VERSION, generated_at: new Date().toISOString() };
+                const response = await fetch(CONFIG.WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(`Server responded with ${response.status}`);
+                showToast('ส่งข้อมูลสำเร็จแล้ว', 'success');
+            } catch (error) {
+                console.error("Submit failed:", error);
+                showToast('ส่งข้อมูลไม่สำเร็จ! โปรดตรวจสอบการเชื่อมต่อ', 'error');
+            } finally {
+                DOMElements.submitBtn.disabled = state.isLocked;
+                DOMElements.submitBtn.textContent = 'ส่งไปคำนวณ';
+            }
+        });
+    });
 
 })();
