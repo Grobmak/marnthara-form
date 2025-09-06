@@ -1,7 +1,7 @@
 /* --- Variable & Base Style --- */
 :root {
     --bg: #0d0e12; --card-bg: #1a1b20; --fg: #e7e7ea;
-    --line: #2f2f33; --muted: #690417; --danger: #ff5a5f;
+    --line: #2f2f33; --muted: #b8b8bf; --danger: #ff5a5f;
     --primary: #5a7dff; --secondary: #4caf50; --warning: #ffc107;
     --room1-bg: #1a1b20; --room2-bg: #20222a; --room3-bg: #252830;
     --accent-dark: #2f2f33;
