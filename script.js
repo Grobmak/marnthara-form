@@ -40,7 +40,11 @@
 
     function cacheElements() {
         for (const key in SELECTORS) {
-            elements[key] = document.querySelector(SELECTORS[key]);
+            const element = document.querySelector(SELECTORS[key]);
+            if (!element) {
+                console.warn(`DOM element not found for selector: ${SELECTORS[key]}`);
+            }
+            elements[key] = element;
         }
     }
 
@@ -248,9 +252,13 @@
     // --- Application Logic Functions ---
     function addRoom() {
         const roomEl = createRoomElement();
-        elements.roomsContainer.appendChild(roomEl);
-        syncStateFromDOM();
-        scrollToElement(roomEl);
+        if (elements.roomsContainer) {
+            elements.roomsContainer.appendChild(roomEl);
+            syncStateFromDOM();
+            scrollToElement(roomEl);
+        } else {
+            console.error("Cannot add room: rooms container not found.");
+        }
     }
 
     function addItem(roomCard) {
@@ -309,6 +317,8 @@
     }
 
     function updateLockState() {
+        if (!elements.lockBtn) return; // Prevent errors if lockBtn is not found
+        
         const lockIcon = elements.lockBtn.querySelector('.lock-icon');
         const lockText = elements.lockBtn.querySelector('.lock-text');
         const allInputs = document.querySelectorAll('#orderForm input, #orderForm select, #orderForm textarea, #orderForm button');
@@ -333,7 +343,9 @@
     function clearAll() {
         if (confirm('คุณต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?')) {
             localStorage.removeItem(STORAGE_KEY);
-            elements.roomsContainer.innerHTML = '';
+            if (elements.roomsContainer) {
+                elements.roomsContainer.innerHTML = '';
+            }
             roomsData = [];
             addRoom();
             updateTotalSummary();
@@ -342,6 +354,8 @@
     }
 
     function toggleSummary(e) {
+        if (!elements.summaryToggleBtn) return;
+        
         const popup = elements.summaryToggleBtn.nextElementSibling;
         const toggleBtn = e.target.closest('.summary-toggle-btn');
         if (popup && toggleBtn) {
@@ -420,6 +434,8 @@
     }
 
     function updateTotalSummary() {
+        if (!elements.discountInput) return; // Prevent errors if key elements are missing
+
         let totalFabric = 0;
         let totalDeco = 0;
         let totalDiscount = sanitizeValue(elements.discountInput.value);
@@ -458,6 +474,13 @@
     }
 
     function restoreUI() {
+        if (!elements.roomsContainer) {
+            console.error("Cannot restore UI: rooms container not found.");
+            return;
+        }
+        
+        elements.roomsContainer.innerHTML = ''; // Clear existing content before restoring
+        
         roomsData.forEach(roomData => {
             const roomEl = createRoomElement(roomData);
             elements.roomsContainer.appendChild(roomEl);
@@ -480,9 +503,9 @@
 
     function preparePayload() {
         const customerInfo = {
-            customer_name: elements.customerName.value,
-            customer_address: elements.customerAddress.value,
-            customer_phone: elements.customerPhone.value,
+            customer_name: elements.customerName ? elements.customerName.value : '',
+            customer_address: elements.customerAddress ? elements.customerAddress.value : '',
+            customer_phone: elements.customerPhone ? elements.customerPhone.value : '',
         };
         const summary = {
             discount: sanitizeValue(elements.discountInput.value),
@@ -496,15 +519,17 @@
             summary: summary,
             rooms: roomsData,
         };
-        elements.payloadInput.value = JSON.stringify(data);
+        if (elements.payloadInput) {
+            elements.payloadInput.value = JSON.stringify(data);
+        }
     }
     
     // --- Event Handlers ---
     function bindEvents() {
-        elements.addRoomHeaderBtn.addEventListener('click', addRoom);
-        elements.lockBtn.addEventListener('click', toggleLock);
-        elements.clearAllBtn.addEventListener('click', clearAll);
-        elements.summaryToggleBtn.addEventListener('click', toggleSummary);
+        if (elements.addRoomHeaderBtn) elements.addRoomHeaderBtn.addEventListener('click', addRoom);
+        if (elements.lockBtn) elements.lockBtn.addEventListener('click', toggleLock);
+        if (elements.clearAllBtn) elements.clearAllBtn.addEventListener('click', clearAll);
+        if (elements.summaryToggleBtn) elements.summaryToggleBtn.addEventListener('click', toggleSummary);
 
         document.addEventListener('click', e => {
             const deleteBtn = e.target.closest('.delete-btn');
@@ -518,7 +543,7 @@
             
             const suspendBtn = e.target.closest('[data-suspend-type]');
             if (suspendBtn) {
-                const suspendType = suspendBtn.dataset.suspendType; // แก้ไข: เปลี่ยนจาก suspend-type เป็น suspendType
+                const suspendType = suspendBtn.dataset.suspendType;
                 toggleSuspend(suspendBtn, suspendType);
             }
             
