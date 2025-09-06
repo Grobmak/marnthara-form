@@ -3,7 +3,6 @@
     
     // Core Application Variables & Configuration
     const APP_VERSION = "input-ui/3.2.0";
-    const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v3";
     const SQM_TO_SQYD = 1.19599;
 
@@ -15,7 +14,6 @@
     };
 
     let isLocked = false;
-    let roomCount = 0;
     let roomsData = [];
 
     // --- DOM Selectors & Caching ---
@@ -520,7 +518,7 @@
             
             const suspendBtn = e.target.closest('[data-suspend-type]');
             if (suspendBtn) {
-                const suspendType = suspendBtn.dataset.suspendType;
+                const suspendType = suspendBtn.dataset.suspendType; // แก้ไข: เปลี่ยนจาก suspend-type เป็น suspendType
                 toggleSuspend(suspendBtn, suspendType);
             }
             
