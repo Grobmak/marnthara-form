@@ -386,7 +386,7 @@ header {
 
     .room-brief {
         flex-grow: 1;
-        text-align: right; /* กลับไปจัดชิดขวา */
+        text-align: right; /* กลับไปจัดชิดขวาาา */
     }
 
     .room-actions {
