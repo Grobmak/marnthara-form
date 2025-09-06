@@ -595,7 +595,8 @@
         }
 
         function recalcAll() {
-            let grand = 0, grandOpaqueYards = 0, grandSheerYards = 0, grandOpaqueTrack = 0, grandSheerTrack = 0;
+            let grand = 0, grandOpaqueYards = 0, grandSheerYards = 0;
+            let grandOpaqueTrack = 0, grandSheerTrack = 0;
             
             document.querySelectorAll(SELECTORS.room).forEach((room) => {
                 let roomSum = 0, roomOpaqueYards = 0, roomSheerYards = 0;
