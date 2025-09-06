@@ -323,6 +323,7 @@
     (function() {
         'use strict';
         const APP_VERSION = "input-ui/3.2.0";
+        // REMINDER: Replace this with your actual webhook URL
         const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
         const STORAGE_KEY = "marnthara.input.v3";
         const SQM_TO_SQYD = 1.19599;
@@ -597,7 +598,8 @@
             let grand = 0, grandOpaqueYards = 0, grandSheerYards = 0, grandOpaqueTrack = 0, grandSheerTrack = 0;
             
             document.querySelectorAll(SELECTORS.room).forEach((room) => {
-                let roomSum = 0, roomOpaqueYards = 0, roomSheerYards = 0, roomOpaqueTrack = 0, roomSheerTrack = 0;
+                let roomSum = 0, roomOpaqueYards = 0, roomSheerYards = 0;
+                let roomOpaqueTrack = 0, roomSheerTrack = 0;
                 
                 const baseRaw = toNum(room.querySelector(SELECTORS.roomPricePerM).value);
                 const style = room.querySelector(SELECTORS.roomStyle).value;
@@ -780,7 +782,7 @@
                         if (deco.is_suspended) return;
                         const decoPrice = Math.round(deco.width_m * deco.height_m * SQM_TO_SQYD * deco.price_sqyd);
                         text += `\n• รายการตกแต่งที่ ${dIndex + 1}: ${deco.type}\n`;
-                        text += `  - กว้าง ${fmt(deco.width_m, 2)} ม. x สูง ${fmt(deco.deco_height_m, 2)} ม.\n`;
+                        text += `  - กว้าง ${fmt(deco.width_m, 2)} ม. x สูง ${fmt(deco.height_m, 2)} ม.\n`;
                         text += `  - ราคา: ${fmt(decoPrice, 0, true)} บ.\n`;
                     });
                 });
