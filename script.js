@@ -3,7 +3,8 @@
     // --- APP-WIDE CONFIGURATION ---
     // =================================================================================
     const CONFIG = {
-        WEBHOOK_URL: "YOUR_WEBHOOK_URL_HERE", // ** อย่าลืมเปลี่ยน URL นี้เป็นของคุณ
+        // เปลี่ยนค่าจาก YOUR_WEBHOOK_URL_HERE เป็น null เพื่อปิดการทำงานชั่วคราว
+        WEBHOOK_URL: null,
         PRICING: {
             fabric: [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000],
             sheer: [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000]
@@ -81,7 +82,7 @@
             state = JSON.parse(savedState);
             // Ensure all necessary properties exist for backward compatibility
             if (!state.customer) state.customer = { name: '', address: '', phone: '' };
-            if (state.rooms.length === 0) state.rooms.push(getNewRoom());
+            if (!state.rooms || state.rooms.length === 0) state.rooms = [getNewRoom()];
             state.rooms.forEach(room => {
                 if (!room.sets) room.sets = [];
                 if (!room.decorations) room.decorations = [];
@@ -148,7 +149,7 @@
 
             // Opaque calculations
             const opaqueYards = width > 0 && height > 0 ? (width * 2 * 1.5) / 0.9144 : 0;
-            const opaquePrice = opaqueYards > 0 ? opaqueYards * opaquePricePerM * 0.9144 : 0; // The original calculation seems incorrect, this might be a fix.
+            const opaquePrice = opaqueYards > 0 ? opaqueYards * opaquePricePerM * 0.9144 : 0;
             const opaqueTrack = width > 0 ? width : 0;
 
             // Sheer calculations
@@ -398,7 +399,7 @@
         delRoom: (btn) => {
             const roomId = btn.closest('[data-room-id]').dataset.roomId;
             state.rooms = state.rooms.filter(r => r.id !== roomId);
-            if (state.rooms.length === 0) Actions.addRoom(); // Ensure at least one room
+            if (state.rooms.length === 0) Actions.addRoom();
             showToast('ลบห้องแล้ว', 'success');
         },
         addSet: (btn) => {
@@ -498,14 +499,17 @@
 
     const debouncedRender = debounce(render, 300);
 
+    // Event listeners
     document.addEventListener('input', (e) => {
         Actions.updateBoundValue(e.target);
         debouncedRender();
     });
-
+    
     document.addEventListener('click', async (e) => {
         const btn = e.target.closest('button[data-act]');
-        if (!btn || state.isLocked) return;
+        if (!btn || (state.isLocked && btn.dataset.act !== 'toggleLock')) {
+            return;
+        }
 
         const act = btn.dataset.act;
         const action = Actions[act];
@@ -513,8 +517,8 @@
         if (action) {
             const isDestructive = act.startsWith('del') || act.startsWith('clear');
             if (isDestructive) {
-                const titles = { 'del-room': 'ลบห้อง', 'del-set': 'ลบจุด', 'del-deco': 'ลบรายการ', 'clear-set': 'ล้างข้อมูล', 'clear-deco': 'ล้างข้อมูล', 'clear-all': 'ล้างข้อมูลทั้งหมด' };
-                const bodies = { 'clear-all': 'คำเตือน! การกระทำนี้จะลบข้อมูลทั้งหมด ไม่สามารถกู้คืนได้', default: 'ยืนยันการกระทำนี้?' };
+                const titles = { 'delRoom': 'ลบห้อง', 'delSet': 'ลบจุด', 'delDeco': 'ลบรายการ', 'clearSet': 'ล้างข้อมูล', 'clearDeco': 'ล้างข้อมูล', 'clearAll': 'ล้างข้อมูลทั้งหมด' };
+                const bodies = { 'clearAll': 'คำเตือน! การกระทำนี้จะลบข้อมูลทั้งหมด ไม่สามารถกู้คืนได้', default: 'ยืนยันการกระทำนี้?' };
                 if (await showConfirmation(titles[act] || 'ยืนยัน', bodies[act] || bodies.default)) {
                     action(btn);
                     render();
@@ -524,7 +528,6 @@
                 render();
             }
         } else if(act === 'copy-json' || act === 'copy-text') {
-            // Non-state changing actions
             if (act === 'copy-json') {
                 copyToClipboard(JSON.stringify(state, null, 2), 'คัดลอก JSON แล้ว!', 'ไม่สามารถคัดลอก JSON ได้');
             } else if (act === 'copy-text') {
@@ -538,10 +541,18 @@
 
     DOMElements.orderForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        // ตรวจสอบว่ามี Webhook URL หรือไม่
+        if (!CONFIG.WEBHOOK_URL) {
+            showToast('ฟังก์ชันส่งข้อมูลถูกปิดใช้งานอยู่', 'info');
+            return;
+        }
+
         if (state.isLocked) {
             showToast('ฟอร์มถูกล็อคอยู่ ไม่สามารถส่งได้', 'error');
             return;
         }
+        
         DOMElements.submitBtn.disabled = true;
         DOMElements.submitBtn.textContent = 'กำลังส่ง...';
 
