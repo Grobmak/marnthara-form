@@ -646,12 +646,6 @@ function recalcAll() {
             grandSheerTrack += sheerTrack;
         });
 
-        // ... (โค้ดที่เหลือเดิม) ...
-    });
-
-    // ... (โค้ดที่เหลือเดิม) ...
-}
-
             const totalSets = [...document.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"])`)].reduce((sum, set) => {
                 const variant = set.querySelector('select[name="fabric_variant"]').value;
                 if (variant === "ทึบ&โปร่ง") return sum + 2;
