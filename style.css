@@ -48,6 +48,7 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
 /* --- Text & Price --- */
 .small { font-size: 0.8rem; color: var(--muted); }
 .price { font-weight: 600; color: var(--secondary); }
+.num { font-weight: 600; color: var(--primary); }
 /* --- Buttons --- */
 .btn {
     display: inline-flex; align-items: center; gap: 0.35rem; border: 1px solid var(--line); background: transparent;
