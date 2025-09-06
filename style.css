@@ -1,24 +1,18 @@
 /* --- Variable & Base Style --- */
 :root {
-    /* Main Palette: Professional and modern dark theme */
-    --bg: #0f172a;        /* Deep navy blue for the main background */
-    --card-bg: #1e293b;   /* Slightly lighter navy for cards and containers */
-    --fg: #e2e8f0;        /* Off-white for main text for high contrast */
-    --line: #334155;      /* Dark blue-gray for borders and lines */
-    --muted: #94a3b8;     /* Muted blue-gray for secondary text and labels */
-    
-    /* Functional Colors: Brighter for clear feedback */
-    --primary: #3b82f6;   /* Vibrant blue for primary actions (Add, Copy, Submit) */
-    --secondary: #22c55e; /* Bright green for positive actions and success indicators */
-    --danger: #ef4444;    /* Clear red for destructive actions (Delete, Clear) */
-    --warning: #f59e0b;   /* Warm amber for warnings and notices */
-    
-    /* Room Backgrounds: Subtle alternating shades for visual separation */
-    --room1-bg: #1e293b;  /* Same as card-bg */
-    --room2-bg: #223048;  /* Slightly darker shade of the theme */
-    --room3-bg: #293850;  /* A little darker to create contrast */
-    
-    --accent-dark: #121b2f; /* Even darker shade for headers and accents */
+    --bg: #0c0d10; /* Darker background */
+    --card-bg: #1a1b20; /* Slightly lighter card background */
+    --fg: #e8e8ea; /* Light grey for foreground text */
+    --line: #2f2f33; /* Darker line and border color */
+    --muted: #a0a0a8; /* Muted text color for secondary info */
+    --danger: #ef4444; /* Brighter red for danger */
+    --primary: #3b82f6; /* A clean blue for primary actions */
+    --secondary: #22c55e; /* A vibrant green for secondary actions */
+    --warning: #facc15; /* A bright yellow for warnings */
+    --room1-bg: #1a1b20;
+    --room2-bg: #20222a;
+    --room3-bg: #252830;
+    --accent-dark: #1e3a24; /* Special dark green for room-head */
 }
 * { box-sizing: border-box; }
 body {
@@ -45,7 +39,7 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
     width: 100%; padding: 0.65rem 0.8rem; border: 1px solid var(--line); border-radius: 0.6rem;
     background: #000; color: inherit; appearance: none; font-size: 1rem;
 }
-.field:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); } /* Adjusted focus shadow to match new primary color */
+.field:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
 /* --- Text & Price --- */
 .small { font-size: 0.8rem; color: var(--muted); }
 .price { font-weight: 600; color: var(--secondary); }
@@ -166,19 +160,3 @@ details.room > summary::-webkit-details-marker { display: none; }
     color: var(--fg);
     margin: 0;
 }
-```eof
----
-
-**สรุปการปรับปรุง:**
-
-* **โทนสีหลัก:** เปลี่ยนจากโทนสีเทาเข้มเป็นโทน **น้ำเงินเข้ม (Deep Navy)** ที่ดูนุ่มนวลและเป็นมืออาชีพมากขึ้น
-* **การแสดงผล:** ข้อความและตัวเลขหลักยังคงใช้สี **Off-white** เพื่อให้อ่านง่ายบนพื้นหลังสีเข้ม
-* **สีของข้อมูล:**
-    * **ปุ่มหลัก/ราคาที่จุด:** ใช้สี **ฟ้า (Primary Blue)** ที่สว่างขึ้น เพื่อดึงดูดความสนใจและสร้างความแตกต่าง
-    * **ราคารวม/ราคาผ้าม่าน:** ใช้สี **เขียว (Secondary Green)** ที่เด่นชัด เพื่อสื่อถึงยอดรวมและสถานะที่เป็นบวก
-    * **ปุ่มอันตราย:** ใช้สี **แดง (Danger Red)** ที่คมชัดขึ้น
-    * **ป้ายเตือน:** ใช้สี **เหลืองอำพัน (Amber)** ที่ดูเป็นมิตรและไม่รุนแรงเกินไป
-
-การเปลี่ยนแปลงเหล่านี้จะช่วยยกระดับรูปลักษณ์ของเว็บไซต์ให้ดูทันสมัยและใช้งานง่ายขึ้นในทันที
-
-ลองนำโค้ดที่ปรับใหม่นี้ไปใช้ดูนะครับ ถ้าต้องการให้ปรับแก้สีไหนเพิ่มเติม หรือมีแนวคิดสีใหม่ที่ต้องการให้ลอง ผมยินดีครับ
