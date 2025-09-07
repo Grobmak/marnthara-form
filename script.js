@@ -224,15 +224,26 @@
         const frag = document.querySelector(SELECTORS.wallpaperTpl).content.cloneNode(true);
         wpWrap.appendChild(frag);
         const created = wpWrap.querySelector(`${SELECTORS.wallpaperItem}:last-of-type`);
+        
+        // Remove extra initial width fields
+        const initialInputs = created.querySelectorAll('.wp-input-row');
+        if (initialInputs.length > 2) {
+            for(let i = 2; i < initialInputs.length; i++) {
+                initialInputs[i].remove();
+            }
+        }
 
         if (prefill) {
-            created.querySelectorAll('[name="wp_width_m"]').forEach((input, i) => {
-                if (prefill.widths_m[i] !== undefined) {
-                    input.value = prefill.widths_m[i];
-                } else {
-                    input.remove();
-                }
+            const widthFieldsContainer = created.querySelector('.wp-width-group');
+            widthFieldsContainer.innerHTML = ''; // Clear initial inputs
+
+            prefill.widths_m.forEach(w => {
+                const newRow = document.createElement('div');
+                newRow.className = 'wp-input-row';
+                newRow.innerHTML = `<div><label>ความกว้าง (ม.)</label><input class="field" name="wp_width_m" type="number" step="0.01" min="0" required value="${w}" /></div>`;
+                widthFieldsContainer.appendChild(newRow);
             });
+
             created.querySelector('[name="wp_height_m"]').value = prefill.height_m ?? "";
             created.querySelector('[name="wp_price_roll"]').value = fmt(prefill.price_roll, 0, true) ?? "";
             if (prefill.is_suspended) {
@@ -660,10 +671,12 @@
                 }
             }
         } else if (btn.dataset.act === 'add-width') {
-            const row = btn.closest('.row');
+            const wpItem = btn.closest(SELECTORS.wallpaperItem);
+            const widthFieldsContainer = wpItem.querySelector('.wp-width-group');
             const newDiv = document.createElement('div');
-            newDiv.innerHTML = '<label>ความกว้าง (ม.)</label><input class="field" name="wp_width_m" type="number" step="0.01" min="0" required />';
-            row.insertBefore(newDiv, btn.closest('div'));
+            newDiv.className = 'wp-input-row';
+            newDiv.innerHTML = `<div><label>ความกว้าง (ม.)</label><input class="field" name="wp_width_m" type="number" step="0.01" min="0" required /></div>`;
+            widthFieldsContainer.appendChild(newDiv);
             debouncedRecalcAndSave();
         }
     });
