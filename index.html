@@ -169,7 +169,7 @@
 
     <template id="wallpaperTpl">
         <div class="wallpaper-item" data-wallpaper-item>
-             <div class="item-head">
+            <div class="item-head">
                 <div class="item-badge" data-item-title style="background-color: var(--info);"></div>
                 <button type="button" class="btn btn-xs btn-warning" data-act="toggle-suspend" style="--primary: var(--warning);"><span data-suspend-text>ระงับ</span></button>
                 <span style="flex:1;"></span>
@@ -186,16 +186,19 @@
                     <input class="field" name="wp_height_m" type="number" step="0.01" min="0" required />
                 </div>
             </div>
-            <div class="row">
-                <div class="input-container">
-                    <label>ความกว้าง (ม.)</label>
-                    <div class="flex-row" data-width-inputs>
+            <div>
+                <label>ความกว้าง (ม.)</label>
+                <div data-width-inputs>
+                    <div class="flex-row">
                         <div class="flex-item"><input class="field" name="wp_width_m" type="number" step="0.01" min="0" required /></div>
-                        <div class="flex-item"><button type="button" class="btn btn-icon btn-primary" data-act="add-width">+</button></div>
+                        <div class="flex-item-buttons">
+                            <button type="button" class="btn btn-icon btn-primary" data-act="add-width">+</button>
+                            <button type="button" class="btn btn-icon btn-danger" data-act="del-width">−</button>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="small" data-wallpaper-summary>ราคา: <span class="price">0</span> บ. • จำนวน: <span class="price">0</span> ม้วน</div>
+            <div class="small" data-wallpaper-summary>ราคา: <span class="price" data-wp-price>0</span> บ. • พื้นที่: <span class="price" data-wp-area>0</span> ตร.ม. • จำนวน: <span class="price" data-wp-rolls>0</span> ม้วน</div>
         </div>
     </template>
 

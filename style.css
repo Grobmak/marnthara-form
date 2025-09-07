@@ -191,26 +191,17 @@ details.room > summary::-webkit-details-marker { display: none; }
     margin: 0;
 }
 
-/* Mobile-Friendly Wallpeper width inputs */
-.input-container {
-    display: flex;
-    flex-direction: column;
+/* New Wallpaper width inputs styling */
+[data-width-inputs] > .flex-row:not(:last-child) {
+    margin-bottom: 12px;
 }
 
-.flex-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
+[data-width-inputs] > .flex-row > .flex-item-buttons {
+    display: none;
 }
-
-.flex-item {
-    flex: 1 1 120px;
+[data-width-inputs] > .flex-row:last-child > .flex-item-buttons {
     display: flex;
     gap: 8px;
+    flex-shrink: 0;
 }
-
-.flex-item input {
-    flex: 1;
-    min-width: 80px;
-}
+.flex-item { flex: 1; }
