@@ -226,19 +226,11 @@
         const created = wpWrap.querySelector(`${SELECTORS.wallpaperItem}:last-of-type`);
 
         if (prefill) {
-            const widthsContainer = created.querySelector('.row.four-col');
-            const addButton = widthsContainer.querySelector('[data-act="add-width"]').closest('div');
-            
-            // Remove existing default inputs
-            widthsContainer.innerHTML = '';
-            
-            (prefill.widths_m || []).forEach(w => {
-                const newDiv = document.createElement('div');
-                newDiv.innerHTML = `<input class="field" name="wp_width_m" type="number" step="0.01" min="0" required value="${w}" />`;
-                widthsContainer.appendChild(newDiv);
+            const widthInputs = created.querySelector('[data-width-inputs]');
+            widthInputs.innerHTML = '';
+            prefill.widths_m.forEach(width => {
+                addWidthInput(created, width);
             });
-            widthsContainer.appendChild(addButton);
-
             created.querySelector('[name="wp_height_m"]').value = prefill.height_m ?? "";
             created.querySelector('[name="wp_price_roll"]').value = fmt(prefill.price_roll, 0, true) ?? "";
             if (prefill.is_suspended) {
@@ -246,10 +238,33 @@
                 created.classList.add('is-suspended');
                 created.querySelector('[data-suspend-text]').textContent = 'ใช้งาน';
             }
+        } else {
+            addWidthInput(created);
         }
 
         renumber(); recalcAll(); saveData(); updateLockState();
         if (!prefill) showToast('เพิ่มวอลล์เปเปอร์แล้ว', 'success');
+    }
+
+    function addWidthInput(wpItem, value) {
+        const inputContainer = wpItem.querySelector('[data-width-inputs]');
+        const inputCount = inputContainer.querySelectorAll('input').length;
+        const newDiv = document.createElement('div');
+        newDiv.innerHTML = `<input class="field" name="wp_width_m" type="number" step="0.01" min="0" required />`;
+        if (inputCount > 0) {
+            newDiv.innerHTML += `<button type="button" class="btn btn-icon btn-danger btn-xs" data-act="del-width" title="ลบ">✕</button>`;
+        }
+        const inputEl = newDiv.querySelector('input');
+        if (value !== undefined) {
+            inputEl.value = value;
+        }
+        inputContainer.appendChild(newDiv);
+    }
+    
+    function delWidthInput(btn) {
+        const inputDiv = btn.closest('div');
+        inputDiv.remove();
+        debouncedRecalcAndSave();
     }
     
     async function clearDeco(btn) { 
@@ -666,11 +681,11 @@
                 }
             }
         } else if (btn.dataset.act === 'add-width') {
-            const row = btn.closest('.row');
-            const newDiv = document.createElement('div');
-            newDiv.innerHTML = '<input class="field" name="wp_width_m" type="number" step="0.01" min="0" required />';
-            row.insertBefore(newDiv, btn.closest('div'));
+            const wpItem = btn.closest(SELECTORS.wallpaperItem);
+            addWidthInput(wpItem);
             debouncedRecalcAndSave();
+        } else if (btn.dataset.act === 'del-width') {
+            delWidthInput(btn);
         }
     });
 

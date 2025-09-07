@@ -37,7 +37,7 @@ h1 { font-size: 1.2rem; margin: 0; padding: 0; }
 .room > div, .room > .total { padding-top: 12px; }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
 .row.three-col { grid-template-columns: repeat(3, 1fr); }
-.row.four-col { grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.row.four-col { grid-template-columns: repeat(4, 1fr); }
 .row.deco-row { grid-template-columns: repeat(4, 1fr) auto; align-items: end; }
 /* --- Form Elements --- */
 label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 4px; }
@@ -189,4 +189,32 @@ details.room > summary::-webkit-details-marker { display: none; }
     font-size: 1rem;
     color: var(--fg);
     margin: 0;
+}
+
+/* Wallpaper-specific styles */
+.wallpaper-item .width-row {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    margin-bottom: 0;
+}
+.wallpaper-item .width-row > div {
+    display: flex;
+    gap: 12px;
+}
+.wallpaper-item .width-row > div > div {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    flex: 1;
+}
+.wallpaper-item .width-row > div > div .btn-danger {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+    width: 1.2rem;
+    height: 1.2rem;
+    font-size: 0.7rem;
+    border-radius: 50%;
+    z-index: 10;
 }
