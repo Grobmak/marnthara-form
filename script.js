@@ -224,26 +224,12 @@
         const frag = document.querySelector(SELECTORS.wallpaperTpl).content.cloneNode(true);
         wpWrap.appendChild(frag);
         const created = wpWrap.querySelector(`${SELECTORS.wallpaperItem}:last-of-type`);
-        
-        // Remove extra initial width fields
-        const initialInputs = created.querySelectorAll('.wp-input-row');
-        if (initialInputs.length > 2) {
-            for(let i = 2; i < initialInputs.length; i++) {
-                initialInputs[i].remove();
-            }
-        }
+        const widthsContainer = created.querySelector('[data-widths-container]');
 
         if (prefill) {
-            const widthFieldsContainer = created.querySelector('.wp-width-group');
-            widthFieldsContainer.innerHTML = ''; // Clear initial inputs
-
-            prefill.widths_m.forEach(w => {
-                const newRow = document.createElement('div');
-                newRow.className = 'wp-input-row';
-                newRow.innerHTML = `<div><label>ความกว้าง (ม.)</label><input class="field" name="wp_width_m" type="number" step="0.01" min="0" required value="${w}" /></div>`;
-                widthFieldsContainer.appendChild(newRow);
-            });
-
+            // Clear default inputs and create new ones based on prefill data
+            widthsContainer.innerHTML = '';
+            prefill.widths_m.forEach(w => addWidth(created, w));
             created.querySelector('[name="wp_height_m"]').value = prefill.height_m ?? "";
             created.querySelector('[name="wp_price_roll"]').value = fmt(prefill.price_roll, 0, true) ?? "";
             if (prefill.is_suspended) {
@@ -251,10 +237,54 @@
                 created.classList.add('is-suspended');
                 created.querySelector('[data-suspend-text]').textContent = 'ใช้งาน';
             }
+        } else {
+            // For new wallpaper item, add initial 4 width fields
+            addWidth(created);
+            addWidth(created);
+            addWidth(created);
+            addWidth(created);
         }
 
         renumber(); recalcAll(); saveData(); updateLockState();
         if (!prefill) showToast('เพิ่มวอลล์เปเปอร์แล้ว', 'success');
+    }
+    
+    function addWidth(wpEl, prefillValue) {
+        const widthsContainer = wpEl.querySelector('[data-widths-container]');
+        const addBtnContainer = widthsContainer.querySelector('[data-act="add-width"]').parentNode;
+        
+        const newDiv = document.createElement('div');
+        newDiv.innerHTML = '<label>ความกว้าง (ม.)</label><input class="field" name="wp_width_m" type="number" step="0.01" min="0" required />';
+        
+        const newInput = newDiv.querySelector('input');
+        if (prefillValue !== undefined) {
+            newInput.value = prefillValue;
+        }
+
+        widthsContainer.insertBefore(newDiv, addBtnContainer);
+        
+        // Show/hide delete button based on number of inputs
+        const widthInputs = widthsContainer.querySelectorAll('[name="wp_width_m"]');
+        wpEl.querySelector('[data-act="del-width"]').classList.toggle('hidden', widthInputs.length <= 1);
+
+        recalcAll();
+        saveData();
+    }
+    
+    function delWidth(btn) {
+        const widthsContainer = btn.closest('[data-widths-container]');
+        const widthInputs = widthsContainer.querySelectorAll('[name="wp_width_m"]');
+        if (widthInputs.length > 1) {
+            const lastInputDiv = widthInputs[widthInputs.length - 1].parentNode;
+            lastInputDiv.remove();
+        }
+        
+        // Show/hide delete button based on number of inputs
+        const updatedWidthInputs = widthsContainer.querySelectorAll('[name="wp_width_m"]');
+        btn.classList.toggle('hidden', updatedWidthInputs.length <= 1);
+
+        recalcAll();
+        saveData();
     }
     
     async function clearDeco(btn) { 
@@ -404,19 +434,19 @@
             room.querySelectorAll(SELECTORS.wallpaperItem).forEach(wp => {
                 const summaryEl = wp.querySelector('[data-wallpaper-summary]');
                 if (wp.dataset.suspended === 'true') {
-                    summaryEl.innerHTML = `ราคา: <span class="price">0</span> บ. • จำนวน: <span class="price">0</span> ม้วน`;
+                    summaryEl.innerHTML = `ราคา: <span class="price">0</span> บ. • พื้นที่รวม: <span class="price">0</span> ตรม. • จำนวน: <span class="price">0</span> ม้วน`;
                     return;
                 }
                 const widths = [...wp.querySelectorAll('[name="wp_width_m"]')].map(input => clamp01(input.value));
                 const totalWidth = widths.reduce((sum, w) => sum + w, 0);
                 const height = clamp01(wp.querySelector('[name="wp_height_m"]').value);
-                const pricePerRoll = clamp01(wp.querySelector('[name="wp_price_roll"]').value);
 
-                const totalArea = totalWidth * height;
-                const rollsNeeded = Math.ceil(totalArea / WALLPAPER_AREA_PER_ROLL);
+                const totalAreaSqm = totalWidth * height;
+                const rollsNeeded = Math.ceil(totalAreaSqm / WALLPAPER_AREA_PER_ROLL);
+                const pricePerRoll = clamp01(wp.querySelector('[name="wp_price_roll"]').value);
                 const wpPrice = rollsNeeded * pricePerRoll;
 
-                summaryEl.innerHTML = `ราคา: <span class="price">${fmt(wpPrice, 0, true)}</span> บ. • จำนวน: <span class="price">${fmt(rollsNeeded, 0, true)}</span> ม้วน`;
+                summaryEl.innerHTML = `ราคา: <span class="price">${fmt(wpPrice, 0, true)}</span> บ. • พื้นที่รวม: <span class="price">${fmt(totalAreaSqm, 2)}</span> ตรม. • จำนวน: <span class="price">${fmt(rollsNeeded, 0, true)}</span> ม้วน`;
                 roomSum += wpPrice;
                 roomWallpaperRolls += rollsNeeded;
             });
@@ -554,14 +584,15 @@
                 room.wallpapers.forEach((wp, wIndex) => {
                     if (wp.is_suspended) return;
                     const totalWidth = wp.widths_m.reduce((sum, w) => sum + w, 0);
-                    const totalArea = totalWidth * wp.height_m;
-                    const rollsNeeded = Math.ceil(totalArea / WALLPAPER_AREA_PER_ROLL);
+                    const totalAreaSqm = totalWidth * wp.height_m;
+                    const rollsNeeded = Math.ceil(totalAreaSqm / WALLPAPER_AREA_PER_ROLL);
                     const wpPrice = rollsNeeded * wp.price_roll;
                     
                     text += `\n• วอลล์เปเปอร์ที่ ${wIndex + 1}: \n`;
                     text += `  - ขนาด: กว้างรวม ${fmt(totalWidth, 2)} ม. x สูง ${fmt(wp.height_m, 2)} ม.\n`;
-                    text += `  - จำนวน: ${fmt(rollsNeeded, 0, true)} ม้วน\n`;
                     text += `  - ราคา: ${fmt(wpPrice, 0, true)} บ.\n`;
+                    text += `  - พื้นที่รวม: ${fmt(totalAreaSqm, 2)} ตรม.\n`;
+                    text += `  - จำนวน: ${fmt(rollsNeeded, 0, true)} ม้วน\n`;
                 });
             });
             text += "\n";
@@ -644,7 +675,9 @@
             'add-set': (b) => addSet(b.closest(SELECTORS.room)),
             'add-deco': (b) => addDeco(b.closest(SELECTORS.room)),
             'add-wallpaper': (b) => addWallpaper(b.closest(SELECTORS.room)),
-            'clear-set': clearSet, 'toggle-suspend': toggleSuspend
+            'clear-set': clearSet, 'toggle-suspend': toggleSuspend,
+            'add-width': (b) => addWidth(b.closest(SELECTORS.wallpaperItem)),
+            'del-width': delWidth,
         };
         if (actions[act]) actions[act](btn);
         else if (btn.id === "addRoomHeaderBtn") addRoom();
@@ -670,14 +703,6 @@
                     showToast('ไม่สามารถคัดลอกข้อความได้', 'error');
                 }
             }
-        } else if (btn.dataset.act === 'add-width') {
-            const wpItem = btn.closest(SELECTORS.wallpaperItem);
-            const widthFieldsContainer = wpItem.querySelector('.wp-width-group');
-            const newDiv = document.createElement('div');
-            newDiv.className = 'wp-input-row';
-            newDiv.innerHTML = `<div><label>ความกว้าง (ม.)</label><input class="field" name="wp_width_m" type="number" step="0.01" min="0" required /></div>`;
-            widthFieldsContainer.appendChild(newDiv);
-            debouncedRecalcAndSave();
         }
     });
 

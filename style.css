@@ -37,6 +37,7 @@ h1 { font-size: 1.2rem; margin: 0; padding: 0; }
 .room > div, .room > .total { padding-top: 12px; }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
 .row.three-col { grid-template-columns: repeat(3, 1fr); }
+.row.four-col { grid-template-columns: repeat(4, 1fr) auto; align-items: end;}
 .row.deco-row { grid-template-columns: repeat(4, 1fr) auto; align-items: end; }
 /* --- Form Elements --- */
 label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 4px; }
@@ -188,16 +189,4 @@ details.room > summary::-webkit-details-marker { display: none; }
     font-size: 1rem;
     color: var(--fg);
     margin: 0;
-}
-
-/* --- New Styles for Wallpaper Width Inputs --- */
-.wp-width-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-.wp-input-row {
-    display: grid;
-    grid-template-columns: 1fr;
 }
