@@ -37,7 +37,7 @@ h1 { font-size: 1.2rem; margin: 0; padding: 0; }
 .room > div, .room > .total { padding-top: 12px; }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
 .row.three-col { grid-template-columns: repeat(3, 1fr); }
-.row.four-col { grid-template-columns: repeat(4, 1fr) auto; align-items: end;}
+.row.five-col { grid-template-columns: repeat(4, 1fr); align-items: end; }
 .row.deco-row { grid-template-columns: repeat(4, 1fr) auto; align-items: end; }
 /* --- Form Elements --- */
 label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 4px; }
