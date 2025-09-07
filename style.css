@@ -38,7 +38,16 @@ h1 { font-size: 1.2rem; margin: 0; padding: 0; }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
 .row.three-col { grid-template-columns: repeat(3, 1fr); }
 .row.five-col { grid-template-columns: 2fr 1fr 1fr 1.5fr auto; align-items: end;}
-.row.deco-row { grid-template-columns: repeat(4, 1fr) auto; align-items: end; }
+/* Removed the .row.deco-row class */
+/* .row.deco-row { grid-template-columns: repeat(4, 1fr) auto; align-items: end; } */
+/* Add the new CSS for deco-item and wallpaper-item rows */
+.deco-item .row {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.deco-item .row:last-of-type {
+    margin-bottom: 0;
+}
 /* --- Form Elements --- */
 label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 4px; }
 label.required::after { content: " *"; color: var(--danger); font-weight: bold; }
