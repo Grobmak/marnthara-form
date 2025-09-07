@@ -192,16 +192,23 @@ details.room > summary::-webkit-details-marker { display: none; }
 }
 
 /* New Wallpaper width inputs styling */
-[data-width-inputs] > .flex-row:not(:last-child) {
+[data-width-inputs] > .width-row:not(:last-child) {
     margin-bottom: 12px;
 }
-
-[data-width-inputs] > .flex-row > .flex-item-buttons {
-    display: none;
+.width-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
 }
-[data-width-inputs] > .flex-row:last-child > .flex-item-buttons {
+.width-input-item {
+    flex: 1;
+}
+.width-buttons {
     display: flex;
     gap: 8px;
     flex-shrink: 0;
 }
-.flex-item { flex: 1; }
+[data-width-inputs] > .width-row:not(:last-child) .width-buttons {
+    display: none;
+}

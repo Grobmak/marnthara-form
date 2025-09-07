@@ -255,18 +255,19 @@
     
     function createWidthInput(value = '', isLast = true) {
         const div = document.createElement('div');
-        div.className = 'flex-row';
-        div.innerHTML = `<div class="flex-item"><input class="field" name="wp_width_m" type="number" step="0.01" min="0" required /></div><div class="flex-item-buttons"><button type="button" class="btn btn-icon btn-primary" data-act="add-width">+</button><button type="button" class="btn btn-icon btn-danger" data-act="del-width">−</button></div>`;
+        div.className = 'width-row';
+        div.innerHTML = `<div class="width-input-item"><label>ความกว้าง (ม.)</label><input class="field" name="wp_width_m" type="number" step="0.01" min="0" required /></div><div class="width-buttons"><button type="button" class="btn btn-icon btn-primary" data-act="add-width">+</button><button type="button" class="btn btn-icon btn-danger" data-act="del-width">−</button></div>`;
         const input = div.querySelector('input');
         input.value = value;
+        if (!isLast) div.querySelector('.width-buttons').style.display = 'none';
         return div;
     }
 
     function addWidth(btn) {
         if (isLocked) return;
         const container = btn.closest('[data-width-inputs]');
-        const inputs = container.querySelectorAll('.flex-row');
-        inputs.forEach(input => input.querySelector('.flex-item-buttons').style.display = 'none');
+        const inputs = container.querySelectorAll('.width-row');
+        inputs.forEach(input => input.querySelector('.width-buttons').style.display = 'none');
         const newWidthInput = createWidthInput();
         container.appendChild(newWidthInput);
         debouncedRecalcAndSave();
@@ -275,10 +276,10 @@
     function delWidth(btn) {
         if (isLocked) return;
         const container = btn.closest('[data-width-inputs]');
-        const inputs = container.querySelectorAll('.flex-row');
+        const inputs = container.querySelectorAll('.width-row');
         if (inputs.length > 1) {
             inputs[inputs.length - 1].remove();
-            container.querySelector('.flex-row:last-child .flex-item-buttons').style.display = 'flex';
+            container.querySelector('.width-row:last-child .width-buttons').style.display = 'flex';
         }
         debouncedRecalcAndSave();
     }
