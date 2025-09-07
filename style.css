@@ -200,24 +200,50 @@ details.room > summary::-webkit-details-marker { display: none; }
     margin: 0;
 }
 
-/* New Wallpaper width inputs styling */
-[data-width-inputs] > .width-row:not(:last-child) {
-    margin-bottom: 12px;
-}
-.width-row {
+/* New styling for deco and wallpaper inputs */
+.deco-inputs, .wallpaper-inputs {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.deco-inputs .input-group, .wallpaper-inputs .input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Styles for single-column layout on smaller screens */
+@media (max-width: 600px) {
+    .deco-inputs, .wallpaper-inputs {
+        grid-template-columns: 1fr;
+    }
+}
+
+.deco-summary, .wallpaper-summary {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+}
+
+.width-inputs {
+    grid-column: span 2;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.width-row {
+    display: flex;
+    align-items: flex-end;
     gap: 8px;
-    align-items: center;
 }
-.width-input-item {
-    flex: 1;
+
+.width-row .input-group {
+    flex-grow: 1;
 }
+
 .width-buttons {
     display: flex;
     gap: 8px;
     flex-shrink: 0;
-}
-[data-width-inputs] > .width-row:not(:last-child) .width-buttons {
-    display: none;
 }
