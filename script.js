@@ -224,47 +224,32 @@
         const frag = document.querySelector(SELECTORS.wallpaperTpl).content.cloneNode(true);
         wpWrap.appendChild(frag);
         const created = wpWrap.querySelector(`${SELECTORS.wallpaperItem}:last-of-type`);
-
-        if (prefill) {
-            const widthInputs = created.querySelector('[data-width-inputs]');
-            widthInputs.innerHTML = '';
-            prefill.widths_m.forEach(width => {
-                addWidthInput(created, width);
+        const widthInputsContainer = created.querySelector('[data-width-inputs]');
+        
+        if (prefill && prefill.widths_m) {
+            prefill.widths_m.forEach((w, i) => {
+                if (i === 0) {
+                    created.querySelector('[name="wp_width_m"]').value = w ?? "";
+                } else {
+                    const newDiv = document.createElement('div');
+                    newDiv.className = 'flex-item';
+                    newDiv.innerHTML = `<input class="field" name="wp_width_m" type="number" step="0.01" min="0" required /><button type="button" class="btn btn-icon btn-danger" data-act="del-width">✕</button>`;
+                    newDiv.querySelector('input').value = w ?? "";
+                    widthInputsContainer.insertBefore(newDiv, widthInputsContainer.lastElementChild);
+                }
             });
-            created.querySelector('[name="wp_height_m"]').value = prefill.height_m ?? "";
-            created.querySelector('[name="wp_price_roll"]').value = fmt(prefill.price_roll, 0, true) ?? "";
-            if (prefill.is_suspended) {
-                created.dataset.suspended = 'true';
-                created.classList.add('is-suspended');
-                created.querySelector('[data-suspend-text]').textContent = 'ใช้งาน';
-            }
-        } else {
-            addWidthInput(created);
+        }
+        
+        created.querySelector('[name="wp_height_m"]').value = prefill?.height_m ?? "";
+        created.querySelector('[name="wp_price_roll"]').value = fmt(prefill?.price_roll, 0, true) ?? "";
+        if (prefill?.is_suspended) {
+            created.dataset.suspended = 'true';
+            created.classList.add('is-suspended');
+            created.querySelector('[data-suspend-text]').textContent = 'ใช้งาน';
         }
 
         renumber(); recalcAll(); saveData(); updateLockState();
         if (!prefill) showToast('เพิ่มวอลล์เปเปอร์แล้ว', 'success');
-    }
-
-    function addWidthInput(wpItem, value) {
-        const inputContainer = wpItem.querySelector('[data-width-inputs]');
-        const inputCount = inputContainer.querySelectorAll('input').length;
-        const newDiv = document.createElement('div');
-        newDiv.innerHTML = `<input class="field" name="wp_width_m" type="number" step="0.01" min="0" required />`;
-        if (inputCount > 0) {
-            newDiv.innerHTML += `<button type="button" class="btn btn-icon btn-danger btn-xs" data-act="del-width" title="ลบ">✕</button>`;
-        }
-        const inputEl = newDiv.querySelector('input');
-        if (value !== undefined) {
-            inputEl.value = value;
-        }
-        inputContainer.appendChild(newDiv);
-    }
-    
-    function delWidthInput(btn) {
-        const inputDiv = btn.closest('div');
-        inputDiv.remove();
-        debouncedRecalcAndSave();
     }
     
     async function clearDeco(btn) { 
@@ -682,10 +667,20 @@
             }
         } else if (btn.dataset.act === 'add-width') {
             const wpItem = btn.closest(SELECTORS.wallpaperItem);
-            addWidthInput(wpItem);
+            const widthInputsContainer = wpItem.querySelector('[data-width-inputs]');
+            const newDiv = document.createElement('div');
+            newDiv.className = 'flex-item';
+            newDiv.innerHTML = `<input class="field" name="wp_width_m" type="number" step="0.01" min="0" required /><button type="button" class="btn btn-icon btn-danger" data-act="del-width">✕</button>`;
+            widthInputsContainer.insertBefore(newDiv, btn.closest('.flex-item'));
             debouncedRecalcAndSave();
         } else if (btn.dataset.act === 'del-width') {
-            delWidthInput(btn);
+             const widthInputsContainer = btn.closest('[data-width-inputs]');
+             if (widthInputsContainer.querySelectorAll('[name="wp_width_m"]').length > 1) {
+                btn.closest('.flex-item').remove();
+                debouncedRecalcAndSave();
+             } else {
+                showToast('ต้องมีช่องใส่ความกว้างอย่างน้อยหนึ่งช่อง', 'error');
+             }
         }
     });
 

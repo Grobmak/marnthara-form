@@ -176,16 +176,23 @@
                 <button type="button" class="btn btn-xs" data-act="clear-wallpaper">ล้าง</button>
                 <button type="button" class="btn btn-icon btn-danger" data-act="del-wallpaper" title="ลบรายการ">✕</button>
             </div>
-            <div class="row four-col">
-                <div><label class="required">ความสูง (ม.)</label><input class="field" name="wp_height_m" type="number" step="0.01" min="0" required /></div>
-                <div><label class="required">ราคา/ม้วน</label><input class="field" name="wp_price_roll" type="text" inputmode="numeric" required /></div>
-            </div>
-            <div class="row width-row">
-                <div class="row four-col" data-width-inputs>
-                    <input class="field" name="wp_width_m" type="number" step="0.01" min="0" required />
+            <div class="row">
+                <div class="input-container">
+                    <label>ความกว้าง (ม.)</label>
+                    <div class="flex-row" data-width-inputs>
+                        <div class="flex-item"><input class="field" name="wp_width_m" type="number" step="0.01" min="0" required /></div>
+                        <div class="flex-item"><button type="button" class="btn btn-icon btn-primary" data-act="add-width">+</button></div>
+                    </div>
                 </div>
                 <div>
-                    <button type="button" class="btn btn-xs btn-primary outline" data-act="add-width">+</button>
+                    <label class="required">ความสูง (ม.)</label>
+                    <input class="field" name="wp_height_m" type="number" step="0.01" min="0" required />
+                </div>
+            </div>
+            <div class="row">
+                <div>
+                    <label class="required">ราคา/ม้วน</label>
+                    <input class="field" name="wp_price_roll" type="text" inputmode="numeric" required />
                 </div>
             </div>
             <div class="small" data-wallpaper-summary>ราคา: <span class="price">0</span> บ. • จำนวน: <span class="price">0</span> ม้วน</div>
