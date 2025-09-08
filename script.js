@@ -419,8 +419,67 @@
         };
     }
     
-    // Function buildTextPayload intentionally omitted for brevity as it was not requested to be changed.
-    // It would need significant updates to include wallpaper details.
+    function buildTextPayload(options) {
+        let text = "";
+        const payload = buildPayload();
+
+        if (options.customer) {
+            text += "=== ข้อมูลลูกค้า ===\n";
+            text += `ชื่อลูกค้า: ${payload.customer_name}\n`;
+            text += `ที่อยู่: ${payload.customer_address}\n`;
+            text += `เบอร์โทร: ${payload.customer_phone}\n\n`;
+        }
+
+        if (options.details) {
+            text += "=== รายละเอียดห้องและจุด ===\n";
+            payload.rooms.forEach(room => {
+                text += `\n** ห้อง: ${room.room_name || "ไม่มีชื่อ"} **\n`;
+                text += `ราคาผ้าทึบ: ${fmt(room.price_per_m_raw, 0, true)} บ. • สไตล์: ${room.style}\n`;
+
+                room.sets.forEach((set, i) => {
+                    if (set.is_suspended) return;
+                    text += `  - ผ้าม่านจุดที่ ${i + 1}: กว้าง ${fmt(set.width_m, 2)} ม. สูง ${fmt(set.height_m, 2)} ม. • ชนิดผ้า: ${set.fabric_variant} • รูปแบบเปิด: ${set.open_type}\n`;
+                    if (set.fabric_variant === "ทึบ&โปร่ง" && set.sheer_price_per_m) {
+                        text += `    (ราคาผ้าโปร่ง: ${fmt(set.sheer_price_per_m, 0, true)} บ.)\n`;
+                    }
+                });
+                
+                room.decorations.forEach((deco, i) => {
+                    if (deco.is_suspended) return;
+                    text += `  - รายการตกแต่งที่ ${i + 1}: ${deco.type} • กว้าง ${fmt(deco.width_m, 2)} ม. สูง ${fmt(deco.height_m, 2)} ม. • ราคา/ตร.หลา: ${fmt(deco.price_sqyd, 0, true)} บ.\n`;
+                });
+
+                room.wallpapers.forEach((wp, i) => {
+                    if (wp.is_suspended) return;
+                    text += `  - วอลเปเปอร์ที่ ${i + 1}: ความสูงห้อง ${fmt(wp.height_m, 2)} ม. • ราคา/ม้วน: ${fmt(wp.price_per_roll, 0, true)} บ.\n`;
+                    text += `    ความกว้างผนัง: ${wp.widths.map(w => `${fmt(w, 2)} ม.`).join(", ")}\n`;
+                });
+            });
+        }
+        
+        if (options.summary) {
+            const grandTotal = toNum(document.querySelector(SELECTORS.grandTotal).textContent);
+            const totalPoints = toNum(document.querySelector(SELECTORS.setCount).textContent);
+            const totalSets = toNum(document.querySelector(SELECTORS.setCountSets).textContent);
+            const totalDeco = toNum(document.querySelector(SELECTORS.setCountDeco).textContent);
+            const grandFabric = document.querySelector(SELECTORS.grandFabric).textContent;
+            const grandSheerFabric = document.querySelector(SELECTORS.grandSheerFabric).textContent;
+            const grandOpaqueTrack = document.querySelector(SELECTORS.grandOpaqueTrack).textContent;
+            const grandSheerTrack = document.querySelector(SELECTORS.grandSheerTrack).textContent;
+
+            text += "=== สรุปยอดรวม ===\n";
+            text += `ราคารวม: ${fmt(grandTotal, 0, true)} บ.\n`;
+            text += `จำนวนจุด: ${fmt(totalPoints, 0, true)}\n`;
+            text += `ผ้าม่าน (ชุด): ${fmt(totalSets, 0, true)}\n`;
+            text += `ตกแต่งเพิ่ม (ชุด): ${fmt(totalDeco, 0, true)}\n`;
+            text += `ผ้าทึบที่ใช้: ${grandFabric}\n`;
+            text += `ผ้าโปร่งที่ใช้: ${grandSheerFabric}\n`;
+            text += `รางทึบที่ใช้: ${grandOpaqueTrack}\n`;
+            text += `รางโปร่งที่ใช้: ${grandSheerTrack}\n`;
+        }
+        
+        return text;
+    }
 
     const debouncedRecalcAndSave = debounce(() => { recalcAll(); saveData(); });
     
@@ -481,7 +540,21 @@
         else if (btn.id === "addRoomHeaderBtn") addRoom();
         else if (btn.id === "clearAllBtn") clearAllData();
         else if (btn.id === "lockBtn") toggleLock();
-        // ... (copy JSON, copy text logic remains the same)
+        else if (btn.id === "copyJsonBtn") {
+            const payload = buildPayload();
+            navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
+                .then(() => showToast('คัดลอก JSON แล้ว', 'success'))
+                .catch(err => showToast('คัดลอก JSON ไม่สำเร็จ', 'error'));
+        }
+        else if (btn.id === "copyTextBtn") {
+            const options = await showCopyOptionsModal();
+            if (options) {
+                const text = buildTextPayload(options);
+                navigator.clipboard.writeText(text)
+                    .then(() => showToast('คัดลอกข้อความแล้ว', 'success'))
+                    .catch(err => showToast('คัดลอกข้อความไม่สำเร็จ', 'error'));
+            }
+        }
     });
 
     orderForm.addEventListener("submit", (e) => { /* ... (remains the same) ... */ });
