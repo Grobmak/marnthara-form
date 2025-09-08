@@ -88,7 +88,7 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
 /* --- Wallpaper Specific --- */
 .walls-section { margin-top: 12px; }
 .wall-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.wall-input-row .field { flex: 1; }
+.wall-input-row .field { flex: 1/4; }
 /* Updated sticky footer layout */
 .sticky-footer {
     position: fixed;
