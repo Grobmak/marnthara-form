@@ -157,6 +157,7 @@
     }
 
     function populatePriceOptions(selectEl, prices) {
+        if (!selectEl) return; // FIX: Add a check to prevent the TypeError if the element is not found
         selectEl.innerHTML = `<option value="" hidden>เลือก</option>`;
         prices.forEach(p => {
             const option = document.createElement('option');
