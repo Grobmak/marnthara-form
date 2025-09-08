@@ -145,7 +145,7 @@
             </div>
         </div>
     </template>
-    
+
     <template id="decoTpl">
         <div class="deco-item" data-deco-item>
              <div class="item-head">
@@ -191,7 +191,10 @@
 
     <template id="wallTpl">
         <div class="wall-input-row">
-            <input class="field" name="wall_width_m" type="number" step="0.01" min="0" placeholder="ความกว้าง (ม.)" required />
+            <div class="row">
+                <div><label>ความกว้าง (ม.)</label><input class="field" name="wall_width_m" type="number" step="0.01" min="0" placeholder="0.00" required /></div>
+                <div><label>ความกว้าง (ม.)</label><input class="field" name="wall_width_m" type="number" step="0.01" min="0" placeholder="0.00" required /></div>
+            </div>
             <button type="button" class="btn btn-icon btn-danger" data-act="del-wall" title="ลบผนัง">－</button>
         </div>
     </template>
