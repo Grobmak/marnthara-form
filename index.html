@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Marnthara Input (v3.2)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -34,7 +33,6 @@
                     <div class="summary-item"><div class="summary-label">ผ้าโปร่งที่ใช้</div><div class="summary-value price" id="grandSheerFabric">0 หลา</div></div>
                     <div class="summary-item"><div class="summary-label">รางทึบที่ใช้</div><div class="summary-value price" id="grandOpaqueTrack">0 ม.</div></div>
                     <div class="summary-item"><div class="summary-label">รางโปร่งที่ใช้</div><div class="summary-value price" id="grandSheerTrack">0 ม.</div></div>
-                    <div class="summary-item"><div class="summary-label">วอลล์เปเปอร์</div><div class="summary-value price" id="grandWallpaperRolls">0 ม้วน</div></div>
                 </div>
             </details>
             <button type="button" class="btn btn-xs" id="copyJsonBtn">คัดลอก JSON</button>
@@ -108,14 +106,14 @@
                 <div class="room-actions">
                     <button type="button" class="btn btn-xs btn-primary outline" data-act="add-set">+ เพิ่มจุดผ้าม่าน</button>
                     <button type="button" class="btn btn-xs btn-secondary outline" data-act="add-deco" style="--primary: var(--secondary);">+ ตกแต่งเพิ่ม</button>
-                    <button type="button" class="btn btn-xs btn-info outline" data-act="add-wallpaper" style="--primary: var(--info);">+ วอลล์เปเปอร์</button>
+                    <button type="button" class="btn btn-xs btn-info outline" data-act="add-wallpaper" style="--primary: var(--info);">+ เพิ่มวอลเปเปอร์</button>
                 </div>
             </div>
         </details>
     </template>
 
     <template id="setTpl">
-        <div class="card set" data-set>
+        <div class="set" data-set>
             <div class="item-head">
                 <div class="item-badge" data-item-title></div>
                 <button type="button" class="btn btn-xs btn-warning" data-act="toggle-suspend" style="--primary: var(--warning);"><span data-suspend-text>ระงับ</span></button>
@@ -157,33 +155,13 @@
                 <button type="button" class="btn btn-xs" data-act="clear-deco">ล้าง</button>
                 <button type="button" class="btn btn-icon btn-danger" data-act="del-deco" title="ลบรายการ">✕</button>
             </div>
-            <div class="deco-inputs">
-                <div class="input-group">
-                    <label>ประเภท</label>
-                    <select class="field" name="deco_type" required>
-                        <option value="" hidden>เลือก</option>
-                        <option>มู่ลี่ไม้</option>
-                        <option>ม่านม้วน</option>
-                        <option>ปรับแสง</option>
-                        <option>ฉากPVC</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>ความกว้าง(ม.)</label>
-                    <input class="field" name="deco_width_m" type="number" step="0.01" min="0" required />
-                </div>
-                <div class="input-group">
-                    <label>ความสูง(ม.)</label>
-                    <input class="field" name="deco_height_m" type="number" step="0.01" min="0" required />
-                </div>
-                <div class="input-group">
-                    <label>ราคา/ตร.หลา</label>
-                    <input class="field" name="deco_price_sqyd" type="text" inputmode="numeric" required />
-                </div>
+            <div class="row deco-row">
+                <div><label>ประเภท</label><select class="field" name="deco_type" required><option value="" hidden>เลือก</option><option>มู่ลี่ไม้</option><option>ม่านม้วน</option><option>ปรับแสง</option><option>ฉากPVC</option></select></div>
+                <div><label>กว้าง(ม.)</label><input class="field" name="deco_width_m" type="number" step="0.01" min="0" required /></div>
+                <div><label>สูง(ม.)</label><input class="field" name="deco_height_m" type="number" step="0.01" min="0" required /></div>
+                <div><label>ราคา/ตร.หลา</label><input class="field" name="deco_price_sqyd" type="text" inputmode="numeric" required /></div>
             </div>
-            <div class="deco-summary small">
-                ราคา: <span class="price">0</span> บ. • พื้นที่: <span class="price">0.00</span> ตร.หลา
-            </div>
+            <div class="small" data-deco-summary>ราคา: <span class="price">0</span> บ. • พื้นที่: <span class="price">0.00</span> ตร.หลา</div>
         </div>
     </template>
 
@@ -196,31 +174,25 @@
                 <button type="button" class="btn btn-xs" data-act="clear-wallpaper">ล้าง</button>
                 <button type="button" class="btn btn-icon btn-danger" data-act="del-wallpaper" title="ลบรายการ">✕</button>
             </div>
-            <div class="wallpaper-inputs">
-                <div class="input-group">
-                    <label class="required">ราคา/ม้วน</label>
-                    <input class="field" name="wp_price_roll" type="text" inputmode="numeric" required />
-                </div>
-                <div class="input-group">
-                    <label class="required">ความสูง (ม.)</label>
-                    <input class="field" name="wp_height_m" type="number" step="0.01" min="0" required />
-                </div>
-                <div data-width-inputs class="width-inputs">
-                    <div class="width-row">
-                        <div class="input-group">
-                            <label>ความกว้าง (ม.)</label>
-                            <input class="field" name="wp_width_m" type="number" step="0.01" min="0" required />
-                        </div>
-                        <div class="width-buttons">
-                            <button type="button" class="btn btn-icon btn-primary" data-act="add-width">+</button>
-                            <button type="button" class="btn btn-icon btn-danger" data-act="del-width">−</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="row">
+                <div><label>ความสูงห้อง (ม.)</label><input class="field" name="wallpaper_height_m" type="number" step="0.01" min="0" required /></div>
+                <div><label>ราคาต่อม้วน</label><input class="field" name="wallpaper_price_roll" type="text" inputmode="numeric" required /></div>
             </div>
-            <div class="wallpaper-summary small">
-                ราคา: <span class="price" data-wp-price>0</span> บ. • พื้นที่: <span class="price" data-wp-area>0</span> ตร.ม. • จำนวน: <span class="price" data-wp-rolls>0</span> ม้วน
+            <div class="walls-section">
+                <label>ความกว้างผนัง (ใส่ทีละด้าน)</label>
+                <div data-walls-container></div>
+                <button type="button" class="btn btn-xs" data-act="add-wall" style="margin-top: 8px;">+ เพิ่มผนัง</button>
             </div>
+            <div class="small" style="margin-top: 12px; border-top: 1px solid var(--line); padding-top: 8px;" data-wallpaper-summary>
+                ราคา: <span class="price">0</span> บ. • พื้นที่: <span class="price">0.00</span> ตร.ม. • ใช้ <span class="price">0</span> ม้วน
+            </div>
+        </div>
+    </template>
+
+    <template id="wallTpl">
+        <div class="wall-input-row">
+            <input class="field" name="wall_width_m" type="number" step="0.01" min="0" placeholder="ความกว้าง (ม.)" required />
+            <button type="button" class="btn btn-icon btn-danger" data-act="del-wall" title="ลบผนัง">－</button>
         </div>
     </template>
 

@@ -10,7 +10,7 @@
     --primary: #00A389;      /* Deep Teal for primary actions */
     --secondary: #F2994A;    /* Vibrant Orange for secondary actions */
     --warning: #FFD166;      /* Soft yellow for warnings */
-    --info: #3E90F0;         /* New color for info/wallpaper */
+    --info: #3B82F6;         /* Bright blue for wallpaper/info actions */
     --quantity-color: #E0E5EC; /* White for quantity numbers */
 
     /* Special Room Colors */
@@ -23,8 +23,9 @@
 }
 * { box-sizing: border-box; }
 body {
-    margin: 0; padding: 16px 16px 80px 16px; background: var(--bg);
+    margin: 0; padding: 16px 16px; background: var(--bg);
     color: var(--fg); font-family: system-ui, Segoe UI, Roboto, Arial; line-height: 1.5;
+    padding-bottom: 90px; /* Increased padding to avoid overlap with sticky footer */
 }
 h1 { font-size: 1.2rem; margin: 0; padding: 0; }
 /* --- Card & Layouts --- */
@@ -38,16 +39,7 @@ h1 { font-size: 1.2rem; margin: 0; padding: 0; }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
 .row.three-col { grid-template-columns: repeat(3, 1fr); }
 .row.five-col { grid-template-columns: 2fr 1fr 1fr 1.5fr auto; align-items: end;}
-/* Removed the .row.deco-row class */
-/* .row.deco-row { grid-template-columns: repeat(4, 1fr) auto; align-items: end; } */
-/* Add the new CSS for deco-item and wallpaper-item rows */
-.deco-item .row {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-.deco-item .row:last-of-type {
-    margin-bottom: 0;
-}
+.row.deco-row { grid-template-columns: repeat(4, 1fr) auto; align-items: end; }
 /* --- Form Elements --- */
 label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 4px; }
 label.required::after { content: " *"; color: var(--danger); font-weight: bold; }
@@ -75,15 +67,12 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
 .btn-primary.outline { background: transparent; color: var(--primary); }
 .btn-warning { border-color: var(--warning); color: var(--warning); }
 .btn-info { border-color: var(--info); color: var(--info); }
+.btn-info.outline { background: transparent; color: var(--info); }
 /* --- Layouts & Containers --- */
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
 .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; position: relative; }
 .total { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: 600; }
-.room-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-}
+.room-actions { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
 .hidden { display: none !important; }
 .room-head { display: flex; gap: 12px; align-items: center; }
 .room-head input { flex: 1 1 180px; min-width: 120px; }
@@ -96,6 +85,10 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
 .set.is-suspended, .deco-item.is-suspended, .wallpaper-item.is-suspended { opacity: 0.5; border-left-color: var(--muted); }
 .item-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
 .item-badge { font-size: 1rem; font-weight: bold; background: var(--primary); color: #fff; border: none; border-radius: 99px; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; }
+/* --- Wallpaper Specific --- */
+.walls-section { margin-top: 12px; }
+.wall-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.wall-input-row .field { flex: 1; }
 /* Updated sticky footer layout */
 .sticky-footer {
     position: fixed;
@@ -148,102 +141,14 @@ details.room > summary::-webkit-details-marker { display: none; }
 .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; position: relative; }
 
 /* Toast Notification Styles */
-.toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 3000;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.toast {
-    padding: 12px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    font-size: 0.9rem;
-    opacity: 0;
-    transform: translateY(-20px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-.toast.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-.toast.toast-success {
-    background-color: #d4edda; /* Light green background */
-    color: #155724; /* Dark green text */
-}
-.toast.toast-warning {
-    background-color: #fff3cd; /* Light yellow background */
-    color: #856404; /* Dark yellow text */
-}
-.toast.toast-error {
-    background-color: #f8d7da; /* Light red background */
-    color: #721c24; /* Dark red text */
-}
+.toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
+.toast { padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); font-size: 0.9rem; opacity: 0; transform: translateY(-20px); transition: opacity 0.3s ease, transform 0.3s ease; }
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.toast-success { background-color: #d4edda; color: #155724; }
+.toast.toast-warning { background-color: #fff3cd; color: #856404; }
+.toast.toast-error { background-color: #f8d7da; color: #721c24; }
 
 /* Copy Options Modal */
-.form-check {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-.form-check-input {
-    width: 1.2em;
-    height: 1.2em;
-}
-.form-check-label {
-    font-size: 1rem;
-    color: var(--fg);
-    margin: 0;
-}
-
-/* New styling for deco and wallpaper inputs */
-.deco-inputs, .wallpaper-inputs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.deco-inputs .input-group, .wallpaper-inputs .input-group {
-    display: flex;
-    flex-direction: column;
-}
-
-/* Styles for single-column layout on smaller screens */
-@media (max-width: 600px) {
-    .deco-inputs, .wallpaper-inputs {
-        grid-template-columns: 1fr;
-    }
-}
-
-.deco-summary, .wallpaper-summary {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--line);
-}
-
-.width-inputs {
-    grid-column: span 2;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.width-row {
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-}
-
-.width-row .input-group {
-    flex-grow: 1;
-}
-
-.width-buttons {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-}
+.form-check { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.form-check-input { width: 1.2em; height: 1.2em; }
+.form-check-label { font-size: 1rem; color: var(--fg); margin: 0; }
