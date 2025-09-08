@@ -15,7 +15,7 @@
     const CALC = {
         fabricYardage: (style, width) => {
             if (width <= 0) return 0;
-            if (style === "ตาไก่" || style === "จีบ") return (width * 2.0 + 0.6) / 0.9;
+            if (style === "ตาไก่" || style === "จีบ") return (width * 2.0 + 0.3) / 0.9;
             if (style === "ลอน") return (width * 2.6 + 0.6) / 0.9;
             return 0;
         },

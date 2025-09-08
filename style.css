@@ -153,32 +153,5 @@ details.room > summary::-webkit-details-marker { display: none; }
 .form-check-input { width: 1.2em; height: 1.2em; }
 .form-check-label { font-size: 1rem; color: var(--fg); margin: 0; }
 
-/* New wallpaper item layout for better spacing and alignment */
-.wallpaper-item .row {
-    grid-template-columns: 1fr 1fr;
-    align-items: center;
-}
-.wallpaper-item .row > div {
-    display: flex;
-    flex-direction: column;
-}
-.wallpaper-item .row > div label {
-    margin-bottom: 4px;
-}
-.wallpaper-item .walls-section > label {
-    margin-bottom: 8px;
-    font-weight: 600;
-}
-
-/* Adjusted wall input row to align items */
-.wall-input-row {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 8px;
-}
-/* Ensure the input field doesn't take full width and aligns well */
-.wall-input-row .field {
-    width: auto;
-    flex: 1; /* This is redundant with grid, but good for backward compatibility */
-}
+/* Fix for input width in wallpaper walls section */
+.wall-input-row .field { flex: 1 1 100%; max-width: 100px; }
