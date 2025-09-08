@@ -485,7 +485,27 @@
                 localStorage.removeItem(STORAGE_KEY); addRoom();
             }
         } else {
-            addRoom();
+// ในฟังก์ชัน addRoom()
+const hasCurtainsCheckbox = roomEl.querySelector('input[name="hasCurtains"]');
+const curtainSetsContainer = roomEl.querySelector('[data-curtain-sets-container]');
+if (hasCurtainsCheckbox) {
+    hasCurtainsCheckbox.addEventListener('change', () => {
+        if (hasCurtainsCheckbox.checked) {
+            curtainSetsContainer.style.display = 'block';
+        } else {
+            curtainSetsContainer.style.display = 'none';
+        }
+        recalcAll();
+    });
+}
+
+// ในฟังก์ชัน recalcAll()
+rooms.forEach(room => {
+    const hasCurtainsCheckbox = room.element.querySelector('input[name="hasCurtains"]');
+    if (hasCurtainsCheckbox && hasCurtainsCheckbox.checked) {
+        // ... โค้ดคำนวณผ้าม่านเดิม ...
+    }
+});
         }
         recalcAll();
     });
