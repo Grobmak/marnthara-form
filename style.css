@@ -152,8 +152,3 @@ details.room > summary::-webkit-details-marker { display: none; }
 .form-check { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .form-check-input { width: 1.2em; height: 1.2em; }
 .form-check-label { font-size: 1rem; color: var(--fg); margin: 0; }
-
-/* === เปลี่ยนแปลง: ปรับปรุงความกว้างช่อง Wallpaper === */
-.wall-input-row .field {
-    max-width: 200px;
-}
