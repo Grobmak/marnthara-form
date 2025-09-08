@@ -79,10 +79,10 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
 .room-head [data-room-brief] { flex-shrink: 0; margin-left: auto; }
 /* --- Custom Components --- */
 .set, .deco-item, .wallpaper-item { background: #0d0e12; border: 1px solid #2f2f33; margin-bottom: 12px; border-radius: 12px; padding: 12px; transition: opacity 0.3s, border-color 0.3s; }
-.set { border-left: 3px solid var(--primary); }
-.deco-item { border-left: 3px solid var(--secondary); }
-.wallpaper-item { border-left: 3px solid var(--info); }
-.set.is-suspended, .deco-item.is-suspended, .wallpaper-item.is-suspended { opacity: 0.5; border-left-color: var(--muted); }
+.set { background-color: rgba(0, 163, 137, 0.1); border-left: 3px solid var(--primary); }
+.deco-item { background-color: rgba(242, 153, 74, 0.1); border-left: 3px solid var(--secondary); }
+.wallpaper-item { background-color: rgba(59, 130, 246, 0.1); border-left: 3px solid var(--info); }
+.set.is-suspended, .deco-item.is-suspended, .wallpaper-item.is-suspended { opacity: 0.5; border-left-color: var(--muted); background-color: rgba(148, 163, 184, 0.1); }
 .item-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
 .item-badge { font-size: 1rem; font-weight: bold; background: var(--primary); color: #fff; border: none; border-radius: 99px; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; }
 /* --- Wallpaper Specific --- */
