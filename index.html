@@ -3,139 +3,146 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Marnthara Input (v3)</title>
+    <title>Marnthara Input (v4)</title>
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <header class="main-header">
+    <header class="app-header">
         <div class="menu-container">
             <button class="btn btn-icon" id="menuBtn" aria-label="เมนู">☰</button>
             <div class="menu-dropdown" id="menuDropdown">
-                <button type="button" class="btn btn-block" id="importBtn">Import (JSON)</button>
-                <button type="button" class="btn btn-block" id="exportBtn">Export (JSON)</button>
+                <button type="button" class="btn btn-block" id="importBtn">นำเข้า (Import)</button>
+                <button type="button" class="btn btn-block" id="exportBtn">ส่งออก (Export)</button>
             </div>
         </div>
         <h1>Marnthara</h1>
-        <button type="button" class="btn btn-xs btn-primary outline" id="addRoomHeaderBtn">เพิ่มห้อง</button>
-        <div style="flex:1;"></div>
-        <button type="button" class="btn btn-xs btn-primary" id="lockBtn"><span class="lock-text">ล็อค</span> <span class="lock-icon">🔒</span></button>
-        <button type="button" class="btn btn-xs btn-danger" id="clearAllBtn">ล้างข้อมูลทั้งหมด</button>
+        <button type="button" class="btn btn-xs btn-primary outline" id="addRoomHeaderBtn">+ เพิ่มห้อง</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-xs btn-primary" id="lockBtn">
+            <span class="lock-text">แก้ไข</span>
+            <span class="lock-icon">✏️</span>
+        </button>
+        <button type="button" class="btn btn-xs btn-danger" id="clearAllBtn" aria-label="ล้างข้อมูลทั้งหมด">ล้างทั้งหมด</button>
     </header>
 
-    <main class="main-content">
+    <main class="app-main">
         <form id="orderForm" method="post" target="hiddenFrame">
-            <section class="card customer-info-card">
-                <header class="card-header">ข้อมูลลูกค้า</header>
-                <div class="card-body grid gap-md">
-                    <label class="field-label-container">ชื่อ
-                        <input class="field" name="customer_name" type="text" />
-                    </label>
-                    <label class="field-label-container">ที่อยู่
+            <section class="card" id="customerInfo">
+                <details open>
+                    <summary class="card-summary">ข้อมูลลูกค้า</summary>
+                    <div class="card-content">
+                        <label>ชื่อลูกค้า</label>
+                        <input class="field" name="customer_name" type="text" required />
+                        <label>ที่อยู่</label>
                         <input class="field" name="customer_address" type="text" />
-                    </label>
-                    <label class="field-label-container">เบอร์โทร
-                        <input class="field" name="customer_phone" type="text" inputmode="tel" />
-                    </label>
-                </div>
-            </section>
-
-            <section class="rooms-container" id="roomsContainer">
+                        <label>เบอร์โทร</label>
+                        <input class="field" name="customer_phone" type="tel" />
+                        <input type="hidden" name="payload" id="payloadInput" />
+                    </div>
+                </details>
             </section>
             
-            <section class="total-summary-card card">
-                <header class="card-header">
-                    <h2>สรุปราคาและจำนวนทั้งหมด</h2>
-                </header>
-                <div class="total-summary-body" id="totalSummary">
-                    </div>
-            </section>
-            <input type="hidden" name="payload" id="payloadInput" />
-            <iframe name="hiddenFrame" style="display:none;"></iframe>
+            <section id="rooms" class="room-list"></section>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-submit">บันทึกข้อมูล</button>
+            </div>
         </form>
     </main>
 
-    <div id="toast-container" class="toast-container"></div>
-
     <template id="roomTpl">
-        <details class="room-details card" open>
-            <summary class="room-summary">
-                <div class="room-head">
-                    <div class="room-icon">🛏️</div>
-                    <input class="room-name-input" type="text" name="room_name" placeholder="ชื่อห้อง" required />
-                </div>
-                <div class="room-head-right">
-                    <button type="button" class="btn btn-icon btn-danger" data-action="removeRoom" aria-label="ลบห้องนี้">✕</button>
-                    <button type="button" class="btn btn-icon btn-primary" data-action="copyRoom" aria-label="คัดลอกห้องนี้">📄</button>
-                    <span class="room-total-price">0 บ.</span>
-                </div>
-            </summary>
-            <div class="room-content grid gap-md">
-                <div class="curtains-container" data-curtains-container></div>
-                <button type="button" class="btn btn-xs btn-info" data-action="addCurtain">+ เพิ่มจุดผ้าม่าน</button>
+        <div class="card room-card">
+            <details open>
+                <summary class="card-summary room-head">
+                    <button type="button" class="btn btn-xs btn-icon btn-danger delete-btn" data-action="delete-room" aria-label="ลบห้อง">✕</button>
+                    <input class="field room-name" name="room_name" type="text" placeholder="ชื่อห้อง (เช่น ห้องนอน 1)" required />
+                    <span class="room-summary"></span>
+                </summary>
+                <div class="card-content">
+                    <div class="card-section">
+                        <label>ความสูงของห้อง (เมตร)</label>
+                        <input class="field" name="height_m" type="number" step="0.01" min="0" required />
+                    </div>
 
-                <div class="wallpaper-container" data-wallpaper-container></div>
-                <button type="button" class="btn btn-xs btn-info" data-action="addWallpaper">+ เพิ่มวอลล์เปเปอร์</button>
-            </div>
-        </details>
+                    <div class="card-section curtain-section">
+                        <details>
+                            <summary class="section-summary">
+                                ม่าน
+                                <button type="button" class="btn btn-xs btn-info add-btn" data-action="add-curtain">+ เพิ่มม่าน</button>
+                            </summary>
+                            <div class="item-list curtain-list" data-curtains-container></div>
+                        </details>
+                    </div>
+
+                    <div class="card-section wallpaper-section">
+                        <details>
+                            <summary class="section-summary">
+                                วอลล์เปเปอร์
+                                <button type="button" class="btn btn-xs btn-info add-btn" data-action="add-wallpaper">+ เพิ่มวอลล์ฯ</button>
+                            </summary>
+                            <div class="item-list wallpaper-list" data-wallpapers-container></div>
+                        </details>
+                    </div>
+                </div>
+            </details>
+        </div>
     </template>
-
+    
     <template id="curtainTpl">
-        <div class="curtain-card card">
-            <div class="curtain-head">
-                <span class="curtain-label">จุดผ้าม่าน <span class="curtain-number"></span></span>
-                <div class="actions">
-                    <button type="button" class="btn btn-icon btn-danger" data-action="removeCurtain" aria-label="ลบจุดผ้าม่าน">✕</button>
-                </div>
+        <div class="item-card curtain-item">
+            <h5 class="item-title">ม่าน</h5>
+            <div class="item-actions">
+                <button type="button" class="btn btn-icon btn-danger" data-action="delete-curtain" title="ลบรายการ" aria-label="ลบม่าน">✕</button>
             </div>
-            <div class="curtain-content grid gap-sm">
-                <label class="field-label-container">ความกว้าง (ม.)
-                    <input class="field" name="curtain_width_m" type="number" step="0.01" min="0" required />
-                </label>
-                <label class="field-label-container">ความสูง (ม.)
-                    <input class="field" name="curtain_height_m" type="number" step="0.01" min="0" required />
-                </label>
+            <div class="item-content">
                 <div class="row">
-                    <label class="field-label-container">ผ้าหลัก
-                        <input class="field" name="curtain_fabric_m" type="number" step="0.01" min="0" required />
-                    </label>
-                    <label class="field-label-container">ผ้าโปร่ง
-                        <input class="field" name="curtain_sheer_m" type="number" step="0.01" min="0" required />
-                    </label>
+                    <div>
+                        <label>ชนิด</label>
+                        <select class="field" name="curtain_type">
+                            <option value="fabric">ผ้าทึบ</option>
+                            <option value="sheer">ผ้าโปร่ง</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>สไตล์</label>
+                        <select class="field" name="curtain_style">
+                            <option value="จีบ">จีบ</option>
+                            <option value="ตาไก่">ตาไก่</option>
+                            <option value="ลอน">ลอน</option>
+                        </select>
+                    </div>
                 </div>
-                <label class="field-label-container">สไตล์
-                    <select class="field" name="curtain_style">
-                        <option value="จีบ">จีบ</option>
-                        <option value="ลอน">ลอน</option>
-                        <option value="ตาไก่">ตาไก่</option>
-                    </select>
-                </label>
+                <label>ความกว้าง (ม.)</label>
+                <input class="field" name="curtain_width_m" type="number" step="0.01" min="0" required />
             </div>
-            <div class="curtain-summary" data-curtain-summary>
-                ราคา: <span class="price">0</span> บ. • ใช้ผ้า: <span class="price">0.00</span> ตร.ม.
+            <div class="item-summary" data-curtain-summary>
+                ราคา: <span class="price">0</span> บ. • ใช้ <span class="price">0.00</span> หลา
             </div>
         </div>
     </template>
 
     <template id="wallpaperTpl">
-        <div class="wallpaper-card card">
-            <div class="wallpaper-head">
-                <span class="wallpaper-label">วอลล์เปเปอร์ <span class="wallpaper-number"></span></span>
-                <button type="button" class="btn btn-icon btn-danger" data-action="removeWallpaper" aria-label="ลบวอลล์เปเปอร์">✕</button>
+        <div class="item-card wallpaper-item">
+            <h5 class="item-title">วอลล์เปเปอร์</h5>
+            <div class="item-actions">
+                <button type="button" class="btn btn-icon btn-danger" data-action="delete-wallpaper" title="ลบรายการ" aria-label="ลบวอลล์เปเปอร์">✕</button>
             </div>
-            <div class="wallpaper-content grid gap-sm">
-                <label class="field-label-container">ความสูงห้อง (ม.)
-                    <input class="field" name="wallpaper_height_m" type="number" step="0.01" min="0" required />
-                </label>
-                <label class="field-label-container">ราคาต่อม้วน
-                    <input class="field" name="wallpaper_price_roll" type="text" inputmode="numeric" required />
-                </label>
-                <section class="walls-section">
-                    <label>ความกว้างผนัง (ใส่ทีละด้าน)</label>
-                    <div class="walls-container" data-walls-container></div>
-                    <button type="button" class="btn btn-xs" data-action="addWall" style="margin-top: var(--space-xs);">+ เพิ่มผนัง</button>
-                </section>
+            <div class="item-content">
+                <div class="row">
+                    <div>
+                        <label>ความสูงวอลล์ฯ (ม.)</label>
+                        <input class="field" name="wallpaper_height_m" type="number" step="0.01" min="0" required />
+                    </div>
+                    <div>
+                        <label>ราคาต่อม้วน</label>
+                        <input class="field" name="wallpaper_price_roll" type="text" inputmode="numeric" required />
+                    </div>
+                </div>
+                <label>ความกว้างผนัง (ใส่ทีละด้าน)</label>
+                <div class="item-list" data-walls-container></div>
+                <button type="button" class="btn btn-xs btn-info" data-action="add-wall" style="margin-top: 8px;">+ เพิ่มผนัง</button>
             </div>
-            <div class="wallpaper-summary" data-wallpaper-summary>
+            <div class="item-summary" data-wallpaper-summary>
                 ราคา: <span class="price">0</span> บ. • พื้นที่: <span class="price">0.00</span> ตร.ม. • ใช้ <span class="price">0</span> ม้วน
             </div>
         </div>
@@ -143,10 +150,14 @@
 
     <template id="wallTpl">
         <div class="wall-input-row">
-            <input class="field" name="wall_width_m" type="number" step="0.01" min="0" required aria-label="ความกว้างผนัง (เมตร)" />
-            <button type="button" class="btn btn-icon btn-danger" data-action="removeWall" aria-label="ลบผนัง">✕</button>
+            <input class="field" name="wall_width_m" type="number" step="0.01" min="0" placeholder="ความกว้าง (ม.)" required />
+            <button type="button" class="btn btn-icon btn-danger" data-action="delete-wall" aria-label="ลบผนัง">✕</button>
         </div>
     </template>
+
+    <div id="toast" class="toast"></div>
+
+    <iframe name="hiddenFrame" style="display:none;"></iframe>
 
     <script src="script.js"></script>
 </body>
