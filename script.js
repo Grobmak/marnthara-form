@@ -419,8 +419,78 @@
         };
     }
     
-    // Function buildTextPayload intentionally omitted for brevity as it was not requested to be changed.
-    // It would need significant updates to include wallpaper details.
+    function buildTextPayload(options) {
+        const payload = buildPayload();
+        let text = "";
+
+        // 1. Customer Info
+        if (options.customer) {
+            text += "✅ ข้อมูลลูกค้า\n";
+            text += `ชื่อ: ${payload.customer_name}\n`;
+            text += `ที่อยู่: ${payload.customer_address}\n`;
+            text += `เบอร์โทร: ${payload.customer_phone}\n\n`;
+        }
+
+        // 2. Room Details
+        if (options.details) {
+            text += "✅ รายละเอียดห้อง\n";
+            payload.rooms.forEach((room, roomIndex) => {
+                const roomName = room.room_name || `ห้อง ${String(roomIndex + 1).padStart(2, '0')}`;
+                text += `\n**${roomName}** (สไตล์: ${room.style}, ราคาผ้าทึบ: ${fmt(room.price_per_m_raw, 0, true)} บ./ม.)\n`;
+
+                room.sets.forEach((set, setIndex) => {
+                    const isSuspended = set.is_suspended;
+                    if (isSuspended) return; // Skip suspended items
+                    const width = set.width_m;
+                    const height = set.height_m;
+                    const variant = set.fabric_variant;
+                    const openType = set.open_type;
+                    const sheerPrice = set.sheer_price_per_m;
+
+                    let details = `  • จุดที่ ${setIndex + 1} (${width}x${height} ม.): `;
+                    details += `ผ้า${variant}`;
+                    if (openType) details += `, เปิด${openType}`;
+                    if (variant === "โปร่ง" || variant === "ทึบ&โปร่ง") {
+                        details += `, ราคาผ้าโปร่ง: ${fmt(sheerPrice, 0, true)} บ./ม.`;
+                    }
+                    text += `${details}\n`;
+                });
+
+                room.decorations.forEach((deco, decoIndex) => {
+                    if (deco.is_suspended) return;
+                    text += `  • รายการตกแต่งที่ ${decoIndex + 1}: ${deco.type} (${deco.width_m}x${deco.height_m} ม.) ราคา: ${fmt(deco.price_sqyd, 0, true)} บ./ตร.หลา\n`;
+                });
+
+                room.wallpapers.forEach((wp, wpIndex) => {
+                    if (wp.is_suspended) return;
+                    const totalWidth = wp.widths.reduce((sum, w) => sum + w, 0);
+                    const totalAreaSqm = totalWidth * wp.height_m;
+                    const rollsNeeded = totalAreaSqm > 0 ? Math.ceil(totalAreaSqm / WALLPAPER_SQM_PER_ROLL) : 0;
+                    text += `  • วอลเปเปอร์ที่ ${wpIndex + 1}: สูง ${wp.height_m} ม., กว้างรวม ${fmt(totalWidth, 2)} ม. ราคา: ${fmt(wp.price_per_roll, 0, true)} บ./ม้วน, ใช้ ${rollsNeeded} ม้วน\n`;
+                });
+            });
+            text += "\n";
+        }
+        
+        // 3. Summary
+        if (options.summary) {
+            const grandTotalEl = document.querySelector(SELECTORS.grandTotal);
+            const totalSetsEl = document.querySelector(SELECTORS.setCountSets);
+            const totalDecoEl = document.querySelector(SELECTORS.setCountDeco);
+            const grandOpaqueYardsEl = document.querySelector(SELECTORS.grandFabric);
+            const grandSheerYardsEl = document.querySelector(SELECTORS.grandSheerFabric);
+
+            text += "✅ สรุปยอดรวม\n";
+            text += `ราคารวม: ${grandTotalEl.textContent} บาท\n`;
+            text += `จำนวนชุดผ้าม่าน: ${totalSetsEl.textContent} ชุด\n`;
+            text += `จำนวนรายการตกแต่ง: ${totalDecoEl.textContent} ชุด\n`;
+            text += `ผ้าทึบที่ต้องใช้: ${grandOpaqueYardsEl.textContent}\n`;
+            text += `ผ้าโปร่งที่ต้องใช้: ${grandSheerYardsEl.textContent}\n`;
+        }
+
+        return text.trim();
+    }
+
 
     const debouncedRecalcAndSave = debounce(() => { recalcAll(); saveData(); });
     
@@ -481,10 +551,27 @@
         else if (btn.id === "addRoomHeaderBtn") addRoom();
         else if (btn.id === "clearAllBtn") clearAllData();
         else if (btn.id === "lockBtn") toggleLock();
-        // ... (copy JSON, copy text logic remains the same)
+        else if (btn.id === "copyJsonBtn") {
+            const payload = buildPayload();
+            navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
+                .then(() => showToast("คัดลอก JSON แล้ว", "success"))
+                .catch(err => showToast("ไม่สามารถคัดลอกได้: " + err, "error"));
+        } else if (btn.id === "copyTextBtn") {
+            const options = await showCopyOptionsModal();
+            if (options) {
+                const text = buildTextPayload(options);
+                navigator.clipboard.writeText(text)
+                    .then(() => showToast("คัดลอกข้อความแล้ว", "success"))
+                    .catch(err => showToast("ไม่สามารถคัดลอกได้: " + err, "error"));
+            }
+        }
     });
 
-    orderForm.addEventListener("submit", (e) => { /* ... (remains the same) ... */ });
+    orderForm.addEventListener("submit", (e) => {
+        const payload = buildPayload();
+        document.querySelector(SELECTORS.payloadInput).value = JSON.stringify(payload);
+        showToast("ส่งข้อมูลแล้ว...", "success");
+    });
     
     window.addEventListener('load', () => {
         const storedData = localStorage.getItem(STORAGE_KEY);
