@@ -68,8 +68,9 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
 .btn-warning { border-color: var(--warning); color: var(--warning); }
 .btn-info { border-color: var(--info); color: var(--info); }
 .btn-info.outline { background: transparent; color: var(--info); }
+.btn-block { width: 100%; justify-content: center; padding: 0.65rem 0.8rem; }
 /* --- Layouts & Containers --- */
-.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; position: relative; }
 .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; position: relative; }
 .total { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: 600; }
 .room-actions { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
@@ -152,3 +153,42 @@ details.room > summary::-webkit-details-marker { display: none; }
 .form-check { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .form-check-input { width: 1.2em; height: 1.2em; }
 .form-check-label { font-size: 1rem; color: var(--fg); margin: 0; }
+
+/* Menu Dropdown Styles */
+.menu-container {
+    position: relative;
+    display: inline-block;
+}
+
+.menu-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    min-width: 180px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    padding: 8px;
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+}
+.menu-dropdown.show {
+    display: flex;
+}
+.menu-dropdown .btn {
+    border: none;
+    justify-content: flex-start;
+    color: var(--fg);
+    background-color: transparent;
+    transition: background-color 0.2s ease;
+}
+.menu-dropdown .btn:hover {
+    background-color: var(--line);
+}
+.header h1 {
+    margin-left: 1rem;
+}

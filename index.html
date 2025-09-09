@@ -8,6 +8,13 @@
 </head>
 <body>
     <div class="header">
+        <div class="menu-container">
+            <button class="btn btn-icon" id="menuBtn">☰</button>
+            <div class="menu-dropdown" id="menuDropdown">
+                <button type="button" class="btn btn-block" id="importBtn">นำเข้าข้อมูล (JSON)</button>
+                <button type="button" class="btn btn-block" id="exportBtn">ส่งออกข้อมูล (JSON)</button>
+            </div>
+        </div>
         <h1>Marnthara</h1>
         <button type="button" class="btn btn-xs btn-primary outline" id="addRoomHeaderBtn">+ เพิ่มห้อง</button>
         <span style="flex:1;"></span>
@@ -58,6 +65,18 @@
             <div class="modal-actions">
                 <button type="button" class="btn btn-xs" id="modalCancel">ยกเลิก</button>
                 <button type="button" class="btn btn-xs btn-danger" id="modalConfirm">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="importModal" class="modal-overlay">
+        <div class="modal">
+            <h3 class="modal-title">นำเข้าข้อมูล</h3>
+            <p class="modal-body">วางข้อมูล JSON ที่ต้องการนำเข้าในช่องด้านล่าง</p>
+            <textarea id="importJsonArea" class="field" rows="10"></textarea>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-xs" id="importCancel">ยกเลิก</button>
+                <button type="button" class="btn btn-xs btn-primary" id="importConfirm">นำเข้า</button>
             </div>
         </div>
     </div>

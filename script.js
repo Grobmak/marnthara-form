@@ -36,7 +36,9 @@
         toastContainer: '#toast-container',
         grandOpaqueTrack: '#grandOpaqueTrack', grandSheerTrack: '#grandSheerTrack',
         copyTextBtn: '#copyTextBtn', copyOptionsModal: '#copyOptionsModal', copyOptionsConfirm: '#copyOptionsConfirm', copyOptionsCancel: '#copyOptionsCancel',
-        copyCustomerInfo: '#copyCustomerInfo', copyRoomDetails: '#copyRoomDetails', copySummary: '#copySummary'
+        copyCustomerInfo: '#copyCustomerInfo', copyRoomDetails: '#copyRoomDetails', copySummary: '#copySummary',
+        menuBtn: '#menuBtn', menuDropdown: '#menuDropdown', importBtn: '#importBtn', exportBtn: '#exportBtn',
+        importModal: '#importModal', importJsonArea: '#importJsonArea', importConfirm: '#importConfirm', importCancel: '#importCancel'
     };
 
     const roomsEl = document.querySelector(SELECTORS.roomsContainer);
@@ -494,7 +496,10 @@
 
     const debouncedRecalcAndSave = debounce(() => { recalcAll(); saveData(); });
     
-    function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPayload())); }
+    function saveData(payload) {
+        if (!payload) payload = buildPayload();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    }
 
     function updateLockState() {
         const isFormLocked = isLocked || false;
@@ -516,6 +521,39 @@
         const input = e.target;
         let val = input.value.replace(/[^0-9]/g, '');
         input.value = val ? parseInt(val, 10).toLocaleString('th-TH') : '';
+    }
+
+    function showImportModal() {
+        const modal = document.querySelector(SELECTORS.importModal);
+        modal.classList.add('visible');
+    }
+
+    async function importData() {
+        const modal = document.querySelector(SELECTORS.importModal);
+        const jsonText = document.querySelector(SELECTORS.importJsonArea).value;
+        try {
+            const data = JSON.parse(jsonText);
+            if (!data || !data.rooms) {
+                showToast("ข้อมูล JSON ไม่ถูกต้อง", "error");
+                return;
+            }
+            
+            if (await showConfirmation('นำเข้าข้อมูล', 'การนำเข้าข้อมูลจะลบข้อมูลปัจจุบันทั้งหมด คุณแน่ใจหรือไม่?')) {
+                document.querySelector('input[name="customer_name"]').value = data.customer_name || "";
+                document.querySelector('input[name="customer_address"]').value = data.customer_address || "";
+                document.querySelector('input[name="customer_phone"]').value = data.customer_phone || "";
+                roomsEl.innerHTML = "";
+                roomCount = 0;
+                data.rooms.forEach(addRoom);
+                saveData(data); // Save the imported data
+                modal.classList.remove('visible');
+                showToast("นำเข้าข้อมูลเรียบร้อยแล้ว", "success");
+            }
+
+        } catch (err) {
+            showToast("ข้อมูล JSON ไม่ถูกต้อง: " + err.message, "error");
+            console.error(err);
+        }
     }
 
     document.addEventListener("change", e => {
@@ -564,6 +602,46 @@
                     .then(() => showToast("คัดลอกข้อความแล้ว", "success"))
                     .catch(err => showToast("ไม่สามารถคัดลอกได้: " + err, "error"));
             }
+        }
+    });
+
+    // New event listeners for the menu and import/export
+    document.querySelector(SELECTORS.menuBtn).addEventListener('click', () => {
+        document.querySelector(SELECTORS.menuDropdown).classList.toggle('show');
+    });
+
+    document.querySelector(SELECTORS.importBtn).addEventListener('click', async () => {
+        document.querySelector(SELECTORS.menuDropdown).classList.remove('show');
+        const modal = document.querySelector(SELECTORS.importModal);
+        document.querySelector(SELECTORS.importJsonArea).value = '';
+        modal.classList.add('visible');
+    });
+
+    document.querySelector(SELECTORS.exportBtn).addEventListener('click', () => {
+        document.querySelector(SELECTORS.menuDropdown).classList.remove('show');
+        const payload = buildPayload();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "marnthara_data.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        showToast("ส่งออกข้อมูลเป็นไฟล์ JSON แล้ว", "success");
+    });
+
+    document.querySelector(SELECTORS.importConfirm).addEventListener('click', () => {
+        importData();
+    });
+
+    document.querySelector(SELECTORS.importCancel).addEventListener('click', () => {
+        document.querySelector(SELECTORS.importModal).classList.remove('visible');
+    });
+
+    document.addEventListener('click', (e) => {
+        const menuDropdown = document.querySelector(SELECTORS.menuDropdown);
+        if (!menuDropdown.contains(e.target) && !document.querySelector(SELECTORS.menuBtn).contains(e.target)) {
+            menuDropdown.classList.remove('show');
         }
     });
 
