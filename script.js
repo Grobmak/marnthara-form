@@ -37,7 +37,7 @@
         grandOpaqueTrack: '#grandOpaqueTrack', grandSheerTrack: '#grandSheerTrack',
         copyTextBtn: '#copyTextBtn', copyOptionsModal: '#copyOptionsModal', copyOptionsConfirm: '#copyOptionsConfirm', copyOptionsCancel: '#copyOptionsCancel',
         copyCustomerInfo: '#copyCustomerInfo', copyRoomDetails: '#copyRoomDetails', copySummary: '#copySummary',
-        itemNameInput: '.item-name'
+        itemName: '[data-item-name]'
     };
 
     const roomsEl = document.querySelector(SELECTORS.roomsContainer);
@@ -175,7 +175,7 @@
         populatePriceOptions(created.querySelector('select[name="sheer_price_per_m"]'), PRICING.sheer);
 
         if (prefill) {
-            created.querySelector('input[name="set_name"]').value = prefill.name || "";
+            created.querySelector(SELECTORS.itemName).textContent = prefill.name || "";
             created.querySelector('input[name="width_m"]').value = prefill.width_m ?? "";
             created.querySelector('input[name="height_m"]').value = prefill.height_m ?? "";
             created.querySelector('select[name="fabric_variant"]').value = prefill.fabric_variant || "ทึบ";
@@ -198,7 +198,7 @@
         decoWrap.appendChild(frag);
         if (prefill) {
             const created = decoWrap.querySelector(`${SELECTORS.decoItem}:last-of-type`);
-            created.querySelector('input[name="deco_name"]').value = prefill.name || "";
+            created.querySelector(SELECTORS.itemName).textContent = prefill.name || "";
             created.querySelector('[name="deco_type"]').value = prefill.type || "";
             created.querySelector('[name="deco_width_m"]').value = prefill.width_m ?? "";
             created.querySelector('[name="deco_height_m"]').value = prefill.height_m ?? "";
@@ -221,7 +221,7 @@
         const created = wallpaperWrap.querySelector(`${SELECTORS.wallpaperItem}:last-of-type`);
 
         if (prefill) {
-            created.querySelector('input[name="wallpaper_name"]').value = prefill.name || "";
+            created.querySelector(SELECTORS.itemName).textContent = prefill.name || "";
             created.querySelector('[name="wallpaper_height_m"]').value = prefill.height_m ?? "";
             created.querySelector('[name="wallpaper_price_roll"]').value = fmt(prefill.price_per_roll, 0, true) ?? "";
             (prefill.widths || []).forEach(w => addWall(created.querySelector('[data-act="add-wall"]'), w));
@@ -292,6 +292,7 @@
     async function clearAllData() { if (isLocked || !await showConfirmation('ล้างข้อมูลทั้งหมด', 'คำเตือน! การกระทำนี้จะลบข้อมูลทั้งหมด ไม่สามารถกู้คืนได้')) return; roomsEl.innerHTML = ""; roomCount = 0; document.querySelectorAll('#customerInfo input').forEach(i => i.value = ""); addRoom(); saveData(); updateLockState(); showToast('ล้างข้อมูลทั้งหมดแล้ว', 'warning'); }
 
     function renumber() {
+        const payload = buildPayload();
         document.querySelectorAll(SELECTORS.room).forEach((room, rIdx) => {
             const roomNameInput = room.querySelector(SELECTORS.roomNameInput);
             if (roomNameInput && !roomNameInput.value) roomNameInput.placeholder = `ห้อง ${String(rIdx + 1).padStart(2, "0")}`;
@@ -300,22 +301,22 @@
             
             items.forEach((item, iIdx) => {
                 const badge = item.querySelector("[data-item-title]");
-                const nameInput = item.querySelector(SELECTORS.itemNameInput);
+                const nameEl = item.querySelector(SELECTORS.itemName);
+                const itemData = payload.rooms[rIdx].sets[iIdx] || payload.rooms[rIdx].decorations[iIdx] || payload.rooms[rIdx].wallpapers[iIdx];
                 const isSuspended = item.dataset.suspended === 'true';
 
                 if (badge) {
-                    if (nameInput && nameInput.value && !isSuspended) {
-                        badge.textContent = nameInput.value;
+                    if (itemData && itemData.name) {
+                        badge.textContent = itemData.name;
                         badge.style.display = 'inline-flex';
                     } else {
                         badge.textContent = `${iIdx + 1}`;
                         badge.style.display = 'inline-flex';
                     }
                 }
-                if (nameInput && isSuspended) {
-                    nameInput.style.display = 'none';
-                } else if (nameInput) {
-                    nameInput.style.display = 'block';
+                
+                if (nameEl) {
+                    nameEl.textContent = itemData.name || '';
                 }
             });
         });
@@ -419,19 +420,19 @@
                 price_per_m_raw: toNum(room.querySelector(SELECTORS.roomPricePerM).value),
                 style: room.querySelector(SELECTORS.roomStyle).value,
                 sets: [...room.querySelectorAll(SELECTORS.set)].map(set => ({
-                    name: set.querySelector('input[name="set_name"]').value || "",
+                    name: set.querySelector(SELECTORS.itemName).textContent || "",
                     width_m: clamp01(set.querySelector('input[name="width_m"]').value), height_m: clamp01(set.querySelector('input[name="height_m"]').value),
                     fabric_variant: set.querySelector('select[name="fabric_variant"]').value, open_type: set.querySelector('select[name="open_type"]').value,
                     sheer_price_per_m: clamp01(set.querySelector('select[name="sheer_price_per_m"]').value), is_suspended: set.dataset.suspended === 'true',
                 })),
                 decorations: [...room.querySelectorAll(SELECTORS.decoItem)].map(deco => ({
-                    name: deco.querySelector('input[name="deco_name"]').value || "",
+                    name: deco.querySelector(SELECTORS.itemName).textContent || "",
                     type: deco.querySelector('[name="deco_type"]').value, width_m: clamp01(deco.querySelector('[name="deco_width_m"]').value),
                     height_m: clamp01(deco.querySelector('[name="deco_height_m"]').value), price_sqyd: clamp01(deco.querySelector('[name="deco_price_sqyd"]').value),
                     is_suspended: deco.dataset.suspended === 'true',
                 })),
                 wallpapers: [...room.querySelectorAll(SELECTORS.wallpaperItem)].map(wp => ({
-                    name: wp.querySelector('input[name="wallpaper_name"]').value || "",
+                    name: wp.querySelector(SELECTORS.itemName).textContent || "",
                     height_m: clamp01(wp.querySelector('[name="wallpaper_height_m"]').value),
                     price_per_roll: clamp01(wp.querySelector('[name="wallpaper_price_roll"]').value),
                     widths: [...wp.querySelectorAll('[name="wall_width_m"]')].map(input => clamp01(input.value)),
@@ -553,10 +554,6 @@
     document.addEventListener("input", e => {
         if(e.target.matches('[name="deco_price_sqyd"], [name="wallpaper_price_roll"]')) {
             formatNumericInput(e);
-        }
-        // Also listen for changes in item names
-        if (e.target.matches(SELECTORS.itemNameInput)) {
-            renumber();
         }
         debouncedRecalcAndSave();
     });
