@@ -48,7 +48,7 @@ class MarntharaApp {
         this.state = this.getInitialState();
         this.loadState();
         this.initEventListeners();
-        this.render();
+        this.render(); // เรียก render ครั้งเดียวหลังจากโหลดข้อมูลทั้งหมด
     }
 
     getInitialState() {
@@ -278,7 +278,7 @@ class MarntharaApp {
             wallpapers: []
         };
         this.state.rooms.push(newRoom);
-        this.render();
+        this.render(); // Keep this render() here as it's triggered by user action
         this.showToast('เพิ่มห้องใหม่แล้ว', 'success');
     }
     
@@ -347,21 +347,16 @@ class MarntharaApp {
         else if (type === 'deco') item = this.state.rooms[roomIndex].decorations[itemIndex];
         else if (type === 'wallpaper') item = this.state.rooms[roomIndex].wallpapers[itemIndex];
 
-        item.is_suspended = !item.is_suspended;
+        if (item) { // เพิ่มการตรวจสอบ null เพื่อความปลอดภัย
+            item.is_suspended = !item.is_suspended;
+        }
         this.render();
-        this.showToast(`รายการถูก${item.is_suspended ? 'ระงับ' : 'ใช้งาน'}แล้ว`, 'warning');
+        this.showToast(`รายการถูก${item?.is_suspended ? 'ระงับ' : 'ใช้งาน'}แล้ว`, 'warning');
     }
 
     clearAllData() {
         this.state = this.getInitialState();
-        this.state.rooms.push({
-            name: '',
-            price_per_m_raw: '',
-            style: '',
-            sets: [{ width_m: '', height_m: '', fabric_variant: 'ทึบ', open_type: '', sheer_price_per_m: '', is_suspended: false }],
-            decorations: [],
-            wallpapers: []
-        });
+        this.addRoomInitial(); // ใช้ฟังก์ชันใหม่เพื่อเพิ่มห้องแรก
         this.render();
         this.showToast('ล้างข้อมูลทั้งหมดแล้ว', 'warning');
     }
@@ -381,6 +376,19 @@ class MarntharaApp {
             }
         });
         document.querySelector('#lockBtn .lock-text').textContent = this.state.isLocked ? 'ปลดล็อค' : 'ล็อค';
+    }
+    
+    // แยกฟังก์ชันเพิ่มห้องเริ่มต้นออกไป
+    addRoomInitial() {
+        const newRoom = {
+            name: '',
+            price_per_m_raw: '',
+            style: '',
+            sets: [{ width_m: '', height_m: '', fabric_variant: 'ทึบ', open_type: '', sheer_price_per_m: '', is_suspended: false }],
+            decorations: [],
+            wallpapers: []
+        };
+        this.state.rooms.push(newRoom);
     }
 
     // --- Event Handlers & Data Persistence ---
@@ -497,15 +505,17 @@ class MarntharaApp {
                     address: payload.customer_address ?? '',
                     phone: payload.customer_phone ?? ''
                 };
-                this.state.rooms = payload.rooms || [];
+                // ตรวจสอบให้แน่ใจว่า rooms เป็น Array เสมอ
+                this.state.rooms = Array.isArray(payload.rooms) ? payload.rooms : [];
                 this.state.isLocked = payload.isLocked ?? false;
             } catch (err) {
                 console.error("Failed to load data from storage:", err);
                 localStorage.removeItem(this.STORAGE_KEY);
+                this.state.rooms = []; // ตั้งค่า rooms เป็น Array ว่างในกรณีที่ข้อมูลเสียหาย
             }
         }
         if (this.state.rooms.length === 0) {
-            this.addRoom();
+            this.addRoomInitial();
         }
     }
 
