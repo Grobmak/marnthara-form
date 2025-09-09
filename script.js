@@ -293,33 +293,11 @@
             if (input && !input.value) input.placeholder = `ห้อง ${String(rIdx + 1).padStart(2, "0")}`;
             
             const items = room.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`);
+            const totalItems = items.length;
             
-            let setIndex = 0;
-            let decoIndex = 0;
-            let wallpaperIndex = 0;
-
-            items.forEach((item) => {
+            items.forEach((item, iIdx) => {
                 const lbl = item.querySelector("[data-item-title]");
-                const totalItemsInRoom = items.length;
-                if (lbl) lbl.textContent = totalItemsInRoom > 1 ? `${items.indexOf(item) + 1}/${totalItemsInRoom}` : `1`;
-
-                const isSet = item.matches(SELECTORS.set);
-                const isDeco = item.matches(SELECTORS.decoItem);
-                const isWallpaper = item.matches(SELECTORS.wallpaperItem);
-                
-                if (isSet) {
-                    setIndex++;
-                    const setName = item.querySelector('[data-set-name]');
-                    if (setName) setName.textContent = `ผ้าม่านจุดที่ ${setIndex}`;
-                } else if (isDeco) {
-                    decoIndex++;
-                    const decoName = item.querySelector('[data-deco-name]');
-                    if (decoName) decoName.textContent = `รายการตกแต่งที่ ${decoIndex}`;
-                } else if (isWallpaper) {
-                    wallpaperIndex++;
-                    const wallpaperName = item.querySelector('[data-wallpaper-name]');
-                    if (wallpaperName) wallpaperName.textContent = `วอลเปเปอร์ที่ ${wallpaperIndex}`;
-                }
+                if (lbl) lbl.textContent = totalItems > 1 ? `${iIdx + 1}/${totalItems}` : `${iIdx + 1}`;
             });
         });
     }
