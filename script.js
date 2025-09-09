@@ -1,6 +1,6 @@
 (function() {
     'use strict';
-    const APP_VERSION = "input-ui/3.3.0-wallpaper";
+    const APP_VERSION = "input-ui/3.3.1-wallpaper";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v3";
     const SQM_TO_SQYD = 1.19599;
@@ -47,11 +47,12 @@
         copyCustomerInfo: '#copyCustomerInfo', copyRoomDetails: '#copyRoomDetails', copySummary: '#copySummary',
         grandFabricWrap: '#grandFabricWrap', grandSheerFabricWrap: '#grandSheerFabricWrap', grandOpaqueTrackWrap: '#grandOpaqueTrackWrap', grandSheerTrackWrap: '#grandSheerTrackWrap', grandWallpaperWrap: '#grandWallpaperWrap'
     };
-    
-    // Global state variables
-    let rooms = [];
-    let customerInfo = { name: '', address: '', phone: '' };
-    let isLocked = false;
+
+    const state = {
+        customer: { name: '', address: '', phone: '' },
+        rooms: [],
+        isLocked: false
+    };
 
     const toNum = v => { if (typeof v === 'string') v = v.replace(/,/g, ''); return Number.isFinite(parseFloat(v)) ? parseFloat(v) : 0; }
     const fmt = (n, fixed = 2, asCurrency = false) => {
@@ -142,11 +143,11 @@
 
     const buildPayload = () => {
         return {
-            customer_name: customerInfo.name,
-            customer_address: customerInfo.address,
-            customer_phone: customerInfo.phone,
-            isLocked: isLocked,
-            rooms: rooms.map(room => ({
+            customer_name: state.customer.name,
+            customer_address: state.customer.address,
+            customer_phone: state.customer.phone,
+            isLocked: state.isLocked,
+            rooms: state.rooms.map(room => ({
                 room_name: room.name,
                 price_per_m_raw: toNum(room.price_per_m_raw),
                 style: room.style,
@@ -179,10 +180,10 @@
             const isDelBtn = el.dataset.act && el.dataset.act.startsWith('del');
             const isAddBtn = el.dataset.act && el.dataset.act.startsWith('add');
             if (isDelBtn || isAddBtn) {
-                el.disabled = isLocked;
+                el.disabled = state.isLocked;
             }
         });
-        document.querySelector('#lockBtn .lock-text').textContent = isLocked ? 'ปลดล็อค' : 'ล็อค';
+        document.querySelector('#lockBtn .lock-text').textContent = state.isLocked ? 'ปลดล็อค' : 'ล็อค';
     }
 
     const renumber = () => {
@@ -205,7 +206,7 @@
         let grandOpaqueTrack = 0, grandSheerTrack = 0, grandWallpaperRolls = 0;
         let setCountTotal = 0, setCountSets = 0, setCountDeco = 0;
         
-        rooms.forEach((room, roomIndex) => {
+        state.rooms.forEach((room, roomIndex) => {
             let roomSum = 0;
             const roomEl = document.querySelector(`${SELECTORS.room}[data-index="${roomIndex}"]`);
             if (!roomEl) return;
@@ -280,7 +281,7 @@
     const render = () => {
         const roomsEl = document.querySelector(SELECTORS.roomsContainer);
         roomsEl.innerHTML = '';
-        rooms.forEach((room, roomIndex) => {
+        state.rooms.forEach((room, roomIndex) => {
             const frag = document.querySelector(SELECTORS.roomTpl).content.cloneNode(true);
             const roomEl = frag.querySelector(SELECTORS.room);
             roomEl.dataset.index = roomIndex;
@@ -300,9 +301,9 @@
         renumber();
         recalculateAll();
 
-        document.querySelector('input[name="customer_name"]').value = customerInfo.name;
-        document.querySelector('input[name="customer_address"]').value = customerInfo.address;
-        document.querySelector('input[name="customer_phone"]').value = customerInfo.phone;
+        document.querySelector('input[name="customer_name"]').value = state.customer.name;
+        document.querySelector('input[name="customer_address"]').value = state.customer.address;
+        document.querySelector('input[name="customer_phone"]').value = state.customer.phone;
         
         updateLockState();
         saveState();
@@ -373,7 +374,7 @@
     
     // State Mutation
     const addRoom = () => {
-        if (isLocked) return;
+        if (state.isLocked) return;
         const newRoom = {
             name: '',
             price_per_m_raw: '',
@@ -382,80 +383,80 @@
             decorations: [],
             wallpapers: []
         };
-        rooms.push(newRoom);
+        state.rooms.push(newRoom);
         render();
         showToast('เพิ่มห้องใหม่แล้ว', 'success');
     }
     const deleteRoom = (roomIndex) => {
-        rooms.splice(roomIndex, 1);
+        state.rooms.splice(roomIndex, 1);
         render();
         showToast('ลบห้องแล้ว', 'success');
     }
     const addSet = (roomIndex) => {
-        if (isLocked) return;
+        if (state.isLocked) return;
         const newSet = { width_m: '', height_m: '', fabric_variant: 'ทึบ', open_type: '', sheer_price_per_m: '', is_suspended: false };
-        rooms[roomIndex].sets.push(newSet);
+        state.rooms[roomIndex].sets.push(newSet);
         render();
         showToast('เพิ่มจุดผ้าม่านแล้ว', 'success');
     }
     const deleteSet = (roomIndex, setIndex) => {
-        rooms[roomIndex].sets.splice(setIndex, 1);
+        state.rooms[roomIndex].sets.splice(setIndex, 1);
         render();
         showToast('ลบจุดผ้าม่านแล้ว', 'success');
     }
     const addDeco = (roomIndex) => {
-        if (isLocked) return;
+        if (state.isLocked) return;
         const newDeco = { type: '', width_m: '', height_m: '', price_sqyd: '', is_suspended: false };
-        rooms[roomIndex].decorations.push(newDeco);
+        state.rooms[roomIndex].decorations.push(newDeco);
         render();
         showToast('เพิ่มรายการตกแต่งแล้ว', 'success');
     }
     const deleteDeco = (roomIndex, decoIndex) => {
-        rooms[roomIndex].decorations.splice(decoIndex, 1);
+        state.rooms[roomIndex].decorations.splice(decoIndex, 1);
         render();
         showToast('ลบรายการตกแต่งแล้ว', 'success');
     }
     const addWallpaper = (roomIndex) => {
-        if (isLocked) return;
+        if (state.isLocked) return;
         const newWallpaper = { height_m: '', price_per_roll: '', widths: [''], is_suspended: false };
-        rooms[roomIndex].wallpapers.push(newWallpaper);
+        state.rooms[roomIndex].wallpapers.push(newWallpaper);
         render();
         showToast('เพิ่มรายการวอลเปเปอร์แล้ว', 'success');
     }
     const deleteWallpaper = (roomIndex, wallpaperIndex) => {
-        rooms[roomIndex].wallpapers.splice(wallpaperIndex, 1);
+        state.rooms[roomIndex].wallpapers.splice(wallpaperIndex, 1);
         render();
         showToast('ลบรายการวอลเปเปอร์แล้ว', 'success');
     }
     const addWall = (roomIndex, wallpaperIndex) => {
-        if (isLocked) return;
-        rooms[roomIndex].wallpapers[wallpaperIndex].widths.push('');
+        if (state.isLocked) return;
+        state.rooms[roomIndex].wallpapers[wallpaperIndex].widths.push('');
         render();
     }
     const deleteWall = (roomIndex, wallpaperIndex, wallIndex) => {
-        rooms[roomIndex].wallpapers[wallpaperIndex].widths.splice(wallIndex, 1);
+        state.rooms[roomIndex].wallpapers[wallpaperIndex].widths.splice(wallIndex, 1);
         render();
     }
     const toggleSuspend = (roomIndex, type, itemIndex) => {
         let item;
-        if (type === 'set') item = rooms[roomIndex].sets[itemIndex];
-        else if (type === 'deco') item = rooms[roomIndex].decorations[itemIndex];
-        else if (type === 'wallpaper') item = rooms[roomIndex].wallpapers[itemIndex];
+        if (type === 'set') item = state.rooms[roomIndex].sets[itemIndex];
+        else if (type === 'deco') item = state.rooms[roomIndex].decorations[itemIndex];
+        else if (type === 'wallpaper') item = state.rooms[roomIndex].wallpapers[itemIndex];
         if (item) item.is_suspended = !item.is_suspended;
         render();
         showToast(`รายการถูก${item?.is_suspended ? 'ระงับ' : 'ใช้งาน'}แล้ว`, 'warning');
     }
     const clearAllData = () => {
-        rooms = [];
-        customerInfo = { name: '', address: '', phone: '' };
+        state.rooms = [];
+        state.customer = { name: '', address: '', phone: '' };
         addRoom();
         render();
         showToast('ล้างข้อมูลทั้งหมดแล้ว', 'warning');
     }
     const toggleLock = () => {
-        isLocked = !isLocked;
+        state.isLocked = !state.isLocked;
         render();
-        showToast(isLocked ? 'ฟอร์มถูกล็อคแล้ว 🔒' : 'ฟอร์มถูกปลดล็อคแล้ว 🔓', 'info');
+        showToast(state.isLocked ? 'ฟอร์มถูกล็อคแล้ว 🔒' : 'ฟอร์มถูกปลดล็อคแล้ว 🔓', 'info');
     }
     
     // Event listeners
@@ -464,18 +465,17 @@
         if (storedData) {
             try {
                 const payload = JSON.parse(storedData);
-                customerInfo.name = payload.customer_name ?? '';
-                customerInfo.address = payload.customer_address ?? '';
-                customerInfo.phone = payload.customer_phone ?? '';
-                rooms = Array.isArray(payload.rooms) ? payload.rooms : [];
-                isLocked = payload.isLocked ?? false;
+                state.customer.name = payload.customer_name ?? '';
+                state.customer.address = payload.customer_address ?? '';
+                state.customer.phone = payload.customer_phone ?? '';
+                state.rooms = Array.isArray(payload.rooms) ? payload.rooms : [];
+                state.isLocked = payload.isLocked ?? false;
             } catch (err) {
                 console.error("Failed to load data from storage:", err);
                 localStorage.removeItem(STORAGE_KEY);
-                rooms = [];
             }
         }
-        if (rooms.length === 0) {
+        if (state.rooms.length === 0) {
             addRoom();
         } else {
             render();
@@ -506,29 +506,29 @@
         const wallEl = target.closest('.wall-input-row');
 
         if (target.name === 'customer_name' || target.name === 'customer_address' || target.name === 'customer_phone') {
-            customerInfo[target.name.replace('customer_', '')] = target.value;
+            state.customer[target.name.replace('customer_', '')] = target.value;
         } else if (roomIndex !== -1) {
             if (target.name === 'room_name') {
-                rooms[roomIndex].name = target.value;
+                state.rooms[roomIndex].name = target.value;
             } else if (target.name === 'room_price_per_m') {
-                rooms[roomIndex].price_per_m_raw = target.value;
+                state.rooms[roomIndex].price_per_m_raw = target.value;
             } else if (target.name === 'room_style') {
-                rooms[roomIndex].style = target.value;
+                state.rooms[roomIndex].style = target.value;
             } else if (setEl) {
                 const setIndex = Array.from(roomEl.querySelectorAll(SELECTORS.set)).indexOf(setEl);
-                rooms[roomIndex].sets[setIndex][target.name.replace('_m', '')] = target.value;
+                state.rooms[roomIndex].sets[setIndex][target.name.replace('_m', '')] = target.value;
             } else if (decoEl) {
                 const decoIndex = Array.from(roomEl.querySelectorAll(SELECTORS.decoItem)).indexOf(decoEl);
-                rooms[roomIndex].decorations[decoIndex][target.name.replace('deco_', '')] = target.value;
+                state.rooms[roomIndex].decorations[decoIndex][target.name.replace('deco_', '')] = target.value;
             } else if (wallpaperEl) {
                 const wallpaperIndex = Array.from(roomEl.querySelectorAll(SELECTORS.wallpaperItem)).indexOf(wallpaperEl);
                 if (target.name === 'wallpaper_height_m') {
-                    rooms[roomIndex].wallpapers[wallpaperIndex].height_m = target.value;
+                    state.rooms[roomIndex].wallpapers[wallpaperIndex].height_m = target.value;
                 } else if (target.name === 'wallpaper_price_roll') {
-                    rooms[roomIndex].wallpapers[wallpaperIndex].price_per_roll = target.value;
+                    state.rooms[roomIndex].wallpapers[wallpaperIndex].price_per_roll = target.value;
                 } else if (wallEl && target.name === 'wall_width_m') {
                     const wallIndex = Array.from(wallpaperEl.querySelectorAll('.wall-input-row')).indexOf(wallEl);
-                    rooms[roomIndex].wallpapers[wallpaperIndex].widths[wallIndex] = target.value;
+                    state.rooms[roomIndex].wallpapers[wallpaperIndex].widths[wallIndex] = target.value;
                 }
             }
         }
