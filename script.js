@@ -624,7 +624,7 @@
 
         // Get customer name and sanitize it for use in filename
         const customerName = document.querySelector('input[name="customer_name"]').value.trim() || 'marnthara_data';
-        const sanitizedName = customerName.replace(/[^a-z0-9\s]/gi, '_').replace(/\s+/g, '_');
+        const sanitizedName = customerName.replace(/[^a-zA-Z0-9\u0E00-\u0E7F\s]/g, '_').replace(/\s+/g, '_');
         const fileName = `${sanitizedName}.json`;
 
         const downloadAnchorNode = document.createElement('a');
