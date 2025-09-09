@@ -621,9 +621,11 @@
         document.querySelector(SELECTORS.menuDropdown).classList.remove('show');
         const payload = buildPayload();
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+        const customerName = payload.customer_name ? payload.customer_name.replace(/[^\w\dก-๙]/g, '').replace(/\s/g, '_') : '';
+        const fileName = customerName ? `${customerName}_marnthara_data.json` : 'marnthara_data.json';
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "marnthara_data.json");
+        downloadAnchorNode.setAttribute("download", fileName);
         document.body.appendChild(downloadAnchorNode);
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
