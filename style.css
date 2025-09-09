@@ -87,13 +87,8 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
 .item-badge { font-size: 1rem; font-weight: bold; background: var(--primary); color: #fff; border: none; border-radius: 99px; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; }
 /* --- Wallpaper Specific --- */
 .walls-section { margin-top: 12px; }
-.wall-input-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-}
+.wall-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.wall-input-row .field { flex: 1; }
 /* Updated sticky footer layout */
 .sticky-footer {
     position: fixed;
