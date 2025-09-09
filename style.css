@@ -84,7 +84,6 @@ label.required::after { content: " *"; color: var(--danger); font-weight: bold; 
 .wallpaper-item { border-left: 3px solid var(--info); }
 .set.is-suspended, .deco-item.is-suspended, .wallpaper-item.is-suspended { opacity: 0.5; border-left-color: var(--muted); }
 .item-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
-.item-head .item-name { flex: 1 1 120px; min-width: 80px; }
 .item-badge { font-size: 1rem; font-weight: bold; background: var(--primary); color: #fff; border: none; border-radius: 99px; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; }
 /* --- Wallpaper Specific --- */
 .walls-section { margin-top: 12px; }
