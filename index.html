@@ -24,10 +24,12 @@
 
     <form id="orderForm" method="post" target="hiddenFrame">
         <div class="card" id="customerInfo">
-            <div class="row three-col">
+            <div class="row two-col">
                 <div><label>ชื่อลูกค้า</label><input class="field" type="text" name="customer_name" placeholder="เช่น คุณสมชาย" /></div>
-                <div><label>ที่อยู่</label><input class="field" type="text" name="customer_address" placeholder="..." /></div>
                 <div><label>เบอร์โทร</label><input class="field" type="tel" name="customer_phone" placeholder="088-555-9955" /></div>
+            </div>
+            <div class="row">
+                <div><label>รายละเอียดเพิ่มเติม</label><input class="field" type="text" name="customer_address" placeholder="เช่น ที่อยู่, โครงการ, ชื่อหมู่บ้าน" /></div>
             </div>
         </div>
         <input type="hidden" name="payload" id="payload" />
