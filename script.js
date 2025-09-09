@@ -1,6 +1,6 @@
 (function() {
     'use strict';
-    const APP_VERSION = "input-ui/4.0.0";
+    const APP_VERSION = "input-ui/4.0.1";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4";
     const SQM_TO_SQYD = 1.19599;
