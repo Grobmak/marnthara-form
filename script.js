@@ -699,7 +699,7 @@ class MarntharaApp {
             const grandWallpaperEl = document.querySelector(this.SELECTORS.grandWallpaper);
             text += `--- สรุปยอดรวม ---\n`;
             if (grandTotalEl) text += `ราคารวม: ${grandTotalEl.textContent} บ.\n`;
-            if (setCountEl) text += `จำนวนจุดติดตั้ง: ${setCountEl.textContent} จุด\n`;
+            if (setCountEl) text += `จำนวนจุด: ${setCountEl.textContent} จุด\n`;
             if (grandOpaqueYardsEl) text += `ผ้าทึบที่ใช้: ${grandOpaqueYardsEl.textContent}\n`;
             if (grandSheerYardsEl) text += `ผ้าโปร่งที่ใช้: ${grandSheerYardsEl.textContent}\n`;
             if (grandOpaqueTrackEl) text += `รางทึบที่ใช้: ${grandOpaqueTrackEl.textContent}\n`;
