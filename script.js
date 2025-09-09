@@ -1,6 +1,6 @@
 (function() {
     'use strict';
-    const APP_VERSION = "input-ui/3.3.1-wallpaper";
+    const APP_VERSION = "input-ui/3.3.2-wallpaper";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v3";
     const SQM_TO_SQYD = 1.19599;
@@ -48,7 +48,7 @@
         grandFabricWrap: '#grandFabricWrap', grandSheerFabricWrap: '#grandSheerFabricWrap', grandOpaqueTrackWrap: '#grandOpaqueTrackWrap', grandSheerTrackWrap: '#grandSheerTrackWrap', grandWallpaperWrap: '#grandWallpaperWrap'
     };
 
-    const state = {
+    let state = {
         customer: { name: '', address: '', phone: '' },
         rooms: [],
         isLocked: false
@@ -281,6 +281,12 @@
     const render = () => {
         const roomsEl = document.querySelector(SELECTORS.roomsContainer);
         roomsEl.innerHTML = '';
+        if (!Array.isArray(state.rooms) || state.rooms.length === 0) {
+            // Handle case where state.rooms is empty or not an array
+            addRoom();
+            return;
+        }
+
         state.rooms.forEach((room, roomIndex) => {
             const frag = document.querySelector(SELECTORS.roomTpl).content.cloneNode(true);
             const roomEl = frag.querySelector(SELECTORS.room);
@@ -473,9 +479,11 @@
             } catch (err) {
                 console.error("Failed to load data from storage:", err);
                 localStorage.removeItem(STORAGE_KEY);
+                state.rooms = [];
             }
         }
         if (state.rooms.length === 0) {
+            // Ensure at least one room exists if starting from scratch
             addRoom();
         } else {
             render();
