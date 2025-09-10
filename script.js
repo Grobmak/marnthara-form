@@ -4,7 +4,7 @@
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v3";
     const SQM_TO_SQYD = 1.19599;
-    const WALLPAPER_SQM_PER_ROLL = 5.3;
+    const WALLPAPER_SQM_PER_ROLL = 5.3; // This constant will no longer be used for calculation
 
     const PRICING = {
         fabric: [1000, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500],
@@ -19,6 +19,13 @@
             if (style === "ลอน") return (width * 2.6 + 0.6) / 0.9;
             return 0;
         },
+        wallpaperRolls: (totalWidth, height) => {
+            if (totalWidth <= 0 || height <= 0) return 0;
+            const stripsPerRoll = Math.floor(10 / height);
+            if (stripsPerRoll === 0) return Infinity; // Prevent division by zero
+            const stripsNeeded = Math.ceil(totalWidth / 0.53);
+            return Math.ceil(stripsNeeded / stripsPerRoll);
+        }
     };
 
     const SELECTORS = {
@@ -362,7 +369,10 @@
                 const pricePerRoll = clamp01(wallpaper.querySelector('[name="wallpaper_price_roll"]').value);
                 const totalWidth = [...wallpaper.querySelectorAll('[name="wall_width_m"]')].reduce((sum, input) => sum + clamp01(input.value), 0);
                 const totalAreaSqm = totalWidth * h;
-                const rollsNeeded = totalAreaSqm > 0 ? Math.ceil(totalAreaSqm / WALLPAPER_SQM_PER_ROLL) : 0;
+                
+                // NEW CALCULATION: totalAreaSqm / areaPerRoll
+                const rollsNeeded = CALC.wallpaperRolls(totalWidth, h);
+
                 const wallpaperPrice = rollsNeeded * pricePerRoll;
                 summaryEl.innerHTML = `ราคา: <span class="price">${fmt(wallpaperPrice, 0, true)}</span> บ. • พื้นที่: <span class="price">${fmt(totalAreaSqm, 2)}</span> ตร.ม. • ใช้ <span class="price">${fmt(rollsNeeded, 0)}</span> ม้วน`;
                 roomSum += wallpaperPrice;
@@ -467,7 +477,7 @@
                     if (wp.is_suspended) return;
                     const totalWidth = wp.widths.reduce((sum, w) => sum + w, 0);
                     const totalAreaSqm = totalWidth * wp.height_m;
-                    const rollsNeeded = totalAreaSqm > 0 ? Math.ceil(totalAreaSqm / WALLPAPER_SQM_PER_ROLL) : 0;
+                    const rollsNeeded = CALC.wallpaperRolls(totalWidth, wp.height_m);
                     text += `  • วอลเปเปอร์ที่ ${wpIndex + 1}: สูง ${wp.height_m} ม., กว้างรวม ${fmt(totalWidth, 2)} ม. ราคา: ${fmt(wp.price_per_roll, 0, true)} บ./ม้วน, ใช้ ${rollsNeeded} ม้วน\n`;
                 });
             });
