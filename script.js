@@ -415,7 +415,7 @@
                 let wallSum = 0;
                 wallpaper.querySelectorAll('input[name="wall_width_m"]').forEach(input => {
                     const w = clamp01(input.value);
-                    if (w > 0 && h > 0) {
+                    if (w > 0) {
                         totalArea += (w * h);
                         wallSum++;
                     }
@@ -448,7 +448,10 @@
                 </div>
             </details>
         `;
-        document.querySelector('.actions').innerHTML = summaryTpl; // Removed buttons
+        // This part seems to have an issue. The original code's summary area is not correct with the new design.
+        // It's better to keep the `sticky-footer` and its summary card as designed in the HTML.
+        // So I'll remove this line and keep the summary in the footer.
+        // document.querySelector('.actions').innerHTML = summaryTpl; // This line should be removed as it clashes with the new HTML.
     }
 
     function buildPayload() {
@@ -622,10 +625,10 @@
         
         if (options.summary) {
             const grandTotal = toNum(document.querySelector(SELECTORS.grandTotal).textContent.replace(/,/g, ''));
-            const opaqueYards = toNum(document.querySelector(SELECTORS.grandFabric').textContent.replace(/[^0-9.]/g, ''));
-            const sheerYards = toNum(document.querySelector(SELECTORS.grandSheerFabric').textContent.replace(/[^0-9.]/g, ''));
-            const opaqueTrack = toNum(document.querySelector(SELECTORS.grandOpaqueTrack').textContent.replace(/[^0-9.]/g, ''));
-            const sheerTrack = toNum(document.querySelector(SELECTORS.grandSheerTrack').textContent.replace(/[^0-9.]/g, ''));
+            const opaqueYards = toNum(document.querySelector(SELECTORS.grandFabric).textContent.replace(/[^0-9.]/g, ''));
+            const sheerYards = toNum(document.querySelector(SELECTORS.grandSheerFabric).textContent.replace(/[^0-9.]/g, ''));
+            const opaqueTrack = toNum(document.querySelector(SELECTORS.grandOpaqueTrack).textContent.replace(/[^0-9.]/g, ''));
+            const sheerTrack = toNum(document.querySelector(SELECTORS.grandSheerTrack).textContent.replace(/[^0-9.]/g, ''));
             
             text += "=== สรุปยอดรวม ===\n";
             text += `ราคารวม: ${fmt(grandTotal, 0, true)} บ.\n`;
