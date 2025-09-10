@@ -300,18 +300,37 @@
         document.querySelectorAll(SELECTORS.room).forEach((room, rIdx) => {
             const input = room.querySelector(SELECTORS.roomNameInput);
             if (input && !input.value) input.placeholder = `ห้อง ${String(rIdx + 1).padStart(2, "0")}`;
-            const items = room.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`);
-            const totalItems = items.length;
-            items.forEach((item, iIdx) => {
-                const lbl = item.querySelector("[data-item-title]");
-                if (lbl) lbl.textContent = totalItems > 1 ? `${iIdx + 1}/${totalItems}` : `${iIdx + 1}`;
-            });
+            const sets = Array.from(room.querySelectorAll(SELECTORS.set));
+            const decoItems = Array.from(room.querySelectorAll(SELECTORS.decoItem));
+            const wallpaperItems = Array.from(room.querySelectorAll(SELECTORS.wallpaperItem));
+            const allItems = [...sets, ...decoItems, ...wallpaperItems];
+
+            const activeSets = sets.filter(s => s.dataset.suspended !== 'true');
+            const activeDeco = decoItems.filter(d => d.dataset.suspended !== 'true');
+            const activeWallpaper = wallpaperItems.filter(w => w.dataset.suspended !== 'true');
+
+            room.querySelector('[data-room-brief] .num:nth-child(1)').textContent = activeSets.length + activeDeco.length + activeWallpaper.length;
+            room.querySelector('[data-room-brief] .num:nth-child(2)').textContent = activeSets.length;
+        });
+
+        document.querySelectorAll(SELECTORS.set).forEach((set, sIdx) => {
+            const lbl = set.querySelector("[data-item-title]");
+            if (lbl) lbl.textContent = `${sIdx + 1}`;
+        });
+        document.querySelectorAll(SELECTORS.decoItem).forEach((deco, dIdx) => {
+            const lbl = deco.querySelector("[data-item-title]");
+            if (lbl) lbl.textContent = `${dIdx + 1}`;
+        });
+        document.querySelectorAll(SELECTORS.wallpaperItem).forEach((item, wIdx) => {
+            const lbl = item.querySelector("[data-item-title]");
+            if (lbl) lbl.textContent = `${wIdx + 1}`;
         });
     }
 
     function recalcAll() {
         let grand = 0, grandOpaqueYards = 0, grandSheerYards = 0;
         let grandOpaqueTrack = 0, grandSheerTrack = 0;
+        let totalSets = 0, totalDeco = 0;
 
         document.querySelectorAll(SELECTORS.room).forEach((room) => {
             let roomSum = 0;
@@ -320,10 +339,9 @@
             const sPlus = stylePlus(style);
 
             room.querySelectorAll(SELECTORS.set).forEach((set) => {
-                if (set.dataset.suspended === 'true') {
+                const isSuspended = set.dataset.suspended === 'true';
+                if (isSuspended) {
                     set.querySelector('[data-set-price-total]').textContent = "0";
-                    set.querySelector('[data-set-price-opaque]').textContent = "0";
-                    set.querySelector('[data-set-price-sheer]').textContent = "0";
                     set.querySelector('[data-set-yardage-opaque]').textContent = "0.00";
                     set.querySelector('[data-set-yardage-sheer]').textContent = "0.00";
                     set.querySelector('[data-set-opaque-track]').textContent = "0.00";
@@ -339,20 +357,18 @@
 
                 if (w > 0 && h > 0) {
                     if (variant === "ทึบ" || variant === "ทึบ&โปร่ง") {
-                        opaquePrice = Math.round((baseRaw + sPlus + hPlus) * w);
+                        opaquePrice = Math.round((baseRaw + hPlus) * w + sPlus);
                         opaqueYards = CALC.fabricYardage(style, w);
                         opaqueTrack = w;
                     }
                     if (variant === "โปร่ง" || variant === "ทึบ&โปร่ง") {
                         const sheerBase = clamp01(set.querySelector('select[name="sheer_price_per_m"]').value);
-                        sheerPrice = Math.round((sheerBase + sPlus + hPlus) * w);
+                        sheerPrice = Math.round((sheerBase + hPlus) * w + sPlus);
                         sheerYards = CALC.fabricYardage(style, w);
                         sheerTrack = w;
                     }
                 }
                 set.querySelector('[data-set-price-total]').textContent = fmt(opaquePrice + sheerPrice, 0, true);
-                set.querySelector('[data-set-price-opaque]').textContent = fmt(opaquePrice, 0, true);
-                set.querySelector('[data-set-price-sheer]').textContent = fmt(sheerPrice, 0, true);
                 set.querySelector('[data-set-yardage-opaque]').textContent = fmt(opaqueYards, 2);
                 set.querySelector('[data-set-yardage-sheer]').textContent = fmt(sheerYards, 2);
                 set.querySelector('[data-set-opaque-track]').textContent = fmt(opaqueTrack, 2);
@@ -363,10 +379,12 @@
                 grandSheerYards += sheerYards;
                 grandOpaqueTrack += opaqueTrack;
                 grandSheerTrack += sheerTrack;
+                totalSets++;
             });
 
             room.querySelectorAll(SELECTORS.decoItem).forEach(deco => {
-                if (deco.dataset.suspended === 'true') {
+                const isSuspended = deco.dataset.suspended === 'true';
+                if (isSuspended) {
                     deco.querySelector('[data-deco-sqyd]').textContent = "0.00";
                     deco.querySelector('[data-deco-price]').textContent = "0";
                     return;
@@ -379,10 +397,12 @@
                 deco.querySelector('[data-deco-sqyd]').textContent = fmt(sqyd, 2);
                 deco.querySelector('[data-deco-price]').textContent = fmt(total, 0, true);
                 roomSum += total;
+                totalDeco++;
             });
             
             room.querySelectorAll(SELECTORS.wallpaperItem).forEach(item => {
-                if (item.dataset.suspended === 'true') {
+                const isSuspended = item.dataset.suspended === 'true';
+                if (isSuspended) {
                     item.querySelector('[data-wallpaper-summary] .price:first-of-type').textContent = "0";
                     item.querySelector('[data-wallpaper-summary] .price:nth-of-type(2)').textContent = "0.00";
                     item.querySelector('[data-wallpaper-summary] .price:last-of-type').textContent = "0";
@@ -400,6 +420,7 @@
                 item.querySelector('[data-wallpaper-summary] .price:nth-of-type(2)').textContent = fmt(totalSqm, 2);
                 item.querySelector('[data-wallpaper-summary] .price:last-of-type').textContent = fmt(rollsNeeded, 0);
                 roomSum += total;
+                totalDeco++;
             });
 
             room.querySelector('[data-room-total]').textContent = fmt(roomSum, 0, true);
@@ -407,9 +428,9 @@
         });
 
         document.querySelector(SELECTORS.grandTotal).textContent = fmt(grand, 0, true);
-        document.querySelector(SELECTORS.setCount).textContent = document.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"])`).length + document.querySelectorAll(`${SELECTORS.decoItem}:not([data-suspended="true"])`).length + document.querySelectorAll(`${SELECTORS.wallpaperItem}:not([data-suspended="true"])`).length;
-        document.querySelector(SELECTORS.setCountSets).textContent = document.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"])`).length;
-        document.querySelector(SELECTORS.setCountDeco).textContent = document.querySelectorAll(`${SELECTORS.decoItem}:not([data-suspended="true"])`).length + document.querySelectorAll(`${SELECTORS.wallpaperItem}:not([data-suspended="true"])`).length;
+        document.querySelector(SELECTORS.setCountSets).textContent = totalSets;
+        document.querySelector(SELECTORS.setCountDeco).textContent = totalDeco;
+        document.querySelector(SELECTORS.setCount).textContent = totalSets + totalDeco;
         document.querySelector(SELECTORS.grandFabric).textContent = fmt(grandOpaqueYards, 2);
         document.querySelector(SELECTORS.grandSheerFabric).textContent = fmt(grandSheerYards, 2);
         document.querySelector(SELECTORS.grandOpaqueTrack).textContent = fmt(grandOpaqueTrack, 2);
