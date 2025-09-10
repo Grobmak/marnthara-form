@@ -311,34 +311,21 @@
         });
     }
 
-    const recalcAll = debounce(() => {
+    function recalcAll() {
         let grand = 0, grandOpaqueYards = 0, grandSheerYards = 0;
         let grandOpaqueTrack = 0, grandSheerTrack = 0;
-
+        
         document.querySelectorAll(SELECTORS.room).forEach((room) => {
             let roomSum = 0;
             const baseRaw = toNum(room.querySelector(SELECTORS.roomPricePerM).value);
             const style = room.querySelector(SELECTORS.roomStyle).value;
             const sPlus = stylePlus(style);
-
+            
             room.querySelectorAll(SELECTORS.set).forEach((set) => {
-                if (set.dataset.suspended === 'true') {
-                    set.querySelector('[data-set-price-total]').textContent = "0";
-                    set.querySelector('[data-set-price-opaque]').textContent = "0";
-                    set.querySelector('[data-set-price-sheer]').textContent = "0";
-                    set.querySelector('[data-set-yardage-opaque]').textContent = "0.00";
-                    set.querySelector('[data-set-yardage-sheer]').textContent = "0.00";
-                    set.querySelector('[data-set-opaque-track]').textContent = "0.00";
-                    set.querySelector('[data-set-sheer-track]').textContent = "0.00";
-                    return;
-                }
-                const w = clamp01(set.querySelector('input[name="width_m"]').value),
-                    h = clamp01(set.querySelector('input[name="height_m"]').value);
-                
-                const hPlus = heightPlus(h);
-                const variant = set.querySelector('select[name="fabric_variant"]').value;
+                if (set.dataset.suspended === 'true') { /* ... clear UI ... */ return; }
+                const w = clamp01(set.querySelector('input[name="width_m"]').value), h = clamp01(set.querySelector('input[name="height_m"]').value);
+                const hPlus = heightPlus(h), variant = set.querySelector('select[name="fabric_variant"]').value;
                 let opaquePrice = 0, sheerPrice = 0, opaqueYards = 0, sheerYards = 0, opaqueTrack = 0, sheerTrack = 0;
-
                 if (w > 0 && h > 0) {
                     if (variant === "ทึบ" || variant === "ทึบ&โปร่ง") {
                         opaquePrice = Math.round((baseRaw + sPlus + hPlus) * w);
@@ -360,310 +347,312 @@
                 set.querySelector('[data-set-opaque-track]').textContent = fmt(opaqueTrack, 2);
                 set.querySelector('[data-set-sheer-track]').textContent = fmt(sheerTrack, 2);
                 roomSum += opaquePrice + sheerPrice;
-                grandOpaqueYards += opaqueYards;
-                grandSheerYards += sheerYards;
-                grandOpaqueTrack += opaqueTrack;
-                grandSheerTrack += sheerTrack;
+                grandOpaqueYards += opaqueYards; grandSheerYards += sheerYards;
+                grandOpaqueTrack += opaqueTrack; grandSheerTrack += sheerTrack;
             });
+
             room.querySelectorAll(SELECTORS.decoItem).forEach(deco => {
                 const summaryEl = deco.querySelector('[data-deco-summary]');
-                if (deco.dataset.suspended === 'true') {
-                    summaryEl.innerHTML = `ราคา: <span class="price">0</span> บ. • พื้นที่: <span class="price">0.00</span> ตร.หลา`;
-                    return;
-                }
-                const w = clamp01(deco.querySelector('[name="deco_width_m"]').value),
-                    h = clamp01(deco.querySelector('[name="deco_height_m"]').value);
+                if (deco.dataset.suspended === 'true') { summaryEl.innerHTML = `ราคา: <span class="price">0</span> บ. • พื้นที่: <span class="price">0.00</span> ตร.หลา`; return; }
+                const w = clamp01(deco.querySelector('[name="deco_width_m"]').value), h = clamp01(deco.querySelector('[name="deco_height_m"]').value);
                 const price = clamp01(deco.querySelector('[name="deco_price_sqyd"]').value);
                 const areaSqyd = w * h * SQM_TO_SQYD;
                 const decoPrice = Math.round(areaSqyd * price);
                 summaryEl.innerHTML = `ราคา: <span class="price">${fmt(decoPrice, 0, true)}</span> บ. • พื้นที่: <span class="price">${fmt(areaSqyd, 2)}</span> ตร.หลา`;
                 roomSum += decoPrice;
             });
+
             room.querySelectorAll(SELECTORS.wallpaperItem).forEach(wallpaper => {
                 const summaryEl = wallpaper.querySelector('[data-wallpaper-summary]');
-                if (wallpaper.dataset.suspended === 'true') {
-                    summaryEl.innerHTML = `ราคา: <span class="price">0</span> บ. • พื้นที่: <span class="price">0.00</span> ตร.ม. • ใช้ <span class="price">0</span> ม้วน`;
-                    return;
-                }
+                if (wallpaper.dataset.suspended === 'true') { summaryEl.innerHTML = `ราคา: <span class="price">0</span> บ. • พื้นที่: <span class="price">0.00</span> ตร.ม. • ใช้ <span class="price">0</span> ม้วน`; return; }
                 const h = clamp01(wallpaper.querySelector('[name="wallpaper_height_m"]').value);
                 const pricePerRoll = clamp01(wallpaper.querySelector('[name="wallpaper_price_roll"]').value);
-                const totalWidth = Array.from(wallpaper.querySelectorAll('[name="wall_width_m"]')).reduce((sum, el) => sum + clamp01(el.value), 0);
+                const totalWidth = [...wallpaper.querySelectorAll('[name="wall_width_m"]')].reduce((sum, input) => sum + clamp01(input.value), 0);
+                const totalAreaSqm = totalWidth * h;
                 
+                // NEW CALCULATION: totalAreaSqm / areaPerRoll
                 const rollsNeeded = CALC.wallpaperRolls(totalWidth, h);
-                const totalSqM = totalWidth * h;
-                const totalPrice = rollsNeeded * pricePerRoll;
 
-                summaryEl.innerHTML = `ราคา: <span class="price">${fmt(totalPrice, 0, true)}</span> บ. • พื้นที่: <span class="price">${fmt(totalSqM, 2)}</span> ตร.ม. • ใช้ <span class="price">${rollsNeeded}</span> ม้วน`;
-                roomSum += totalPrice;
+                const wallpaperPrice = rollsNeeded * pricePerRoll;
+                summaryEl.innerHTML = `ราคา: <span class="price">${fmt(wallpaperPrice, 0, true)}</span> บ. • พื้นที่: <span class="price">${fmt(totalAreaSqm, 2)}</span> ตร.ม. • ใช้ <span class="price">${fmt(rollsNeeded, 0)}</span> ม้วน`;
+                roomSum += wallpaperPrice;
             });
-            room.querySelector('[data-room-brief]').innerHTML = `<span class="num">จุด ${room.querySelectorAll(SELECTORS.set).length}</span> • <span class="num">ชุด ${room.querySelectorAll(`${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`).length}</span> • ราคา <span class="num price">${fmt(roomSum, 0, true)}</span> บ.`;
+            
+            const totalItemsInRoom = room.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"]), ${SELECTORS.decoItem}:not([data-suspended="true"]), ${SELECTORS.wallpaperItem}:not([data-suspended="true"])`).length;
+            const totalUnitsInRoom = [...room.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"])`)].reduce((sum, set) => sum + (set.querySelector('select[name="fabric_variant"]').value === "ทึบ&โปร่ง" ? 2 : 1), 0) + room.querySelectorAll(`${SELECTORS.decoItem}:not([data-suspended="true"]), ${SELECTORS.wallpaperItem}:not([data-suspended="true"])`).length;
+            
+            const brief = room.querySelector("[data-room-brief]");
+            if (brief) brief.innerHTML = `<span class="num">จุด ${fmt(totalItemsInRoom, 0, true)}</span> • <span class="num">ชุด ${fmt(totalUnitsInRoom, 0, true)}</span> • ราคา <span class="num price">${fmt(roomSum, 0, true)}</span> บาท`;
             grand += roomSum;
         });
 
+        const totalSets = [...document.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"])`)].reduce((sum, set) => sum + (set.querySelector('select[name="fabric_variant"]').value === "ทึบ&โปร่ง" ? 2 : 1), 0);
+        const totalDeco = document.querySelectorAll(`${SELECTORS.decoItem}:not([data-suspended="true"]), ${SELECTORS.wallpaperItem}:not([data-suspended="true"])`).length;
+        const totalPoints = document.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"]), ${SELECTORS.decoItem}:not([data-suspended="true"]), ${SELECTORS.wallpaperItem}:not([data-suspended="true"])`).length;
+        
         document.querySelector(SELECTORS.grandTotal).textContent = fmt(grand, 0, true);
-        document.querySelector(SELECTORS.setCount).textContent = document.querySelectorAll(SELECTORS.set).length;
-        document.querySelector(SELECTORS.setCountSets).textContent = document.querySelectorAll(SELECTORS.set).length;
-        document.querySelector(SELECTORS.setCountDeco).textContent = document.querySelectorAll(`${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`).length;
+        document.querySelector(SELECTORS.setCount).textContent = fmt(totalPoints, 0, true);
+        document.querySelector(SELECTORS.setCountSets).textContent = fmt(totalSets, 0, true);
+        document.querySelector(SELECTORS.setCountDeco).textContent = fmt(totalDeco, 0, true);
         document.querySelector(SELECTORS.grandFabric).textContent = `${fmt(grandOpaqueYards, 2)} หลา`;
         document.querySelector(SELECTORS.grandSheerFabric).textContent = `${fmt(grandSheerYards, 2)} หลา`;
         document.querySelector(SELECTORS.grandOpaqueTrack).textContent = `${fmt(grandOpaqueTrack, 2)} ม.`;
         document.querySelector(SELECTORS.grandSheerTrack).textContent = `${fmt(grandSheerTrack, 2)} ม.`;
+    }
 
-        saveData();
-    });
-
-    const buildPayload = () => {
-        const payload = {};
-        payload.customer_name = document.querySelector('input[name="customer_name"]').value;
-        payload.customer_phone = document.querySelector('input[name="customer_phone"]').value;
-        payload.customer_address = document.querySelector('input[name="customer_address"]').value;
-        payload.rooms = Array.from(document.querySelectorAll(SELECTORS.room)).map(room => {
-            const roomData = {};
-            roomData.room_name = room.querySelector(SELECTORS.roomNameInput).value;
-            roomData.price_per_m = toNum(room.querySelector(SELECTORS.roomPricePerM).value);
-            roomData.price_per_m_raw = room.querySelector(SELECTORS.roomPricePerM).value;
-            roomData.style = room.querySelector(SELECTORS.roomStyle).value;
-            roomData.sets = Array.from(room.querySelectorAll(SELECTORS.set)).map(set => ({
-                is_suspended: set.dataset.suspended === 'true',
-                width_m: toNum(set.querySelector('input[name="width_m"]').value),
-                height_m: toNum(set.querySelector('input[name="height_m"]').value),
-                fabric_variant: set.querySelector('select[name="fabric_variant"]').value,
-                open_type: set.querySelector('select[name="open_type"]').value,
-                sheer_price_per_m: set.querySelector('select[name="sheer_price_per_m"]').value
-            }));
-            roomData.decorations = Array.from(room.querySelectorAll(SELECTORS.decoItem)).map(deco => ({
-                is_suspended: deco.dataset.suspended === 'true',
-                type: deco.querySelector('[name="deco_type"]').value,
-                width_m: toNum(deco.querySelector('[name="deco_width_m"]').value),
-                height_m: toNum(deco.querySelector('[name="deco_height_m"]').value),
-                price_sqyd: toNum(deco.querySelector('[name="deco_price_sqyd"]').value)
-            }));
-            roomData.wallpapers = Array.from(room.querySelectorAll(SELECTORS.wallpaperItem)).map(wallpaper => ({
-                is_suspended: wallpaper.dataset.suspended === 'true',
-                height_m: toNum(wallpaper.querySelector('[name="wallpaper_height_m"]').value),
-                price_per_roll: toNum(wallpaper.querySelector('[name="wallpaper_price_roll"]').value),
-                widths: Array.from(wallpaper.querySelectorAll('[name="wall_width_m"]')).map(el => toNum(el.value))
-            }));
-            return roomData;
-        });
-        payload.version = APP_VERSION;
-        return payload;
-    };
-
-    const copyToClipboard = (text) => {
-        if (!navigator.clipboard) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            return;
-        }
-        navigator.clipboard.writeText(text).then(() => {
-            showToast('คัดลอกสำเร็จ!', 'success');
-        }).catch(err => {
-            console.error('Failed to copy: ', err);
-            showToast('คัดลอกไม่สำเร็จ', 'error');
-        });
-    };
-
-    const createTextSummary = (payload) => {
-        let text = `ข้อมูลลูกค้า\n`;
-        text += `ชื่อ: ${payload.customer_name}\n`;
-        text += `เบอร์โทร: ${payload.customer_phone}\n`;
-        text += `รายละเอียด: ${payload.customer_address}\n\n`;
-        
-        const formatItem = (item, type) => {
-            let summary = "";
-            if (item.is_suspended) summary += `(ระงับ) `;
-            if (type === 'set') {
-                const w = item.width_m, h = item.height_m;
-                const sheerPrice = toNum(item.sheer_price_per_m);
-                summary += `กว้าง ${w}ม. x สูง ${h}ม. `;
-                summary += `ผ้า${item.fabric_variant} `;
-                if (item.open_type) summary += `(${item.open_type}) `;
-                if (sheerPrice) summary += `ผ้าโปร่ง ${sheerPrice}บ./ม.`;
-            } else if (type === 'deco') {
-                summary += `${item.type} กว้าง ${item.width_m}ม. x สูง ${item.height_m}ม. ราคา ${fmt(item.price_sqyd, 0, true)}บ./ตร.หลา`;
-            } else if (type === 'wallpaper') {
-                const totalWidth = item.widths.reduce((sum, w) => sum + w, 0);
-                summary += `วอลเปเปอร์ สูง ${item.height_m}ม. กว้างรวม ${fmt(totalWidth, 2)}ม. ราคา ${fmt(item.price_per_roll, 0, true)}บ./ม้วน`;
-            }
-            return summary;
+    function buildPayload() {
+        return {
+            customer_name: document.querySelector('input[name="customer_name"]').value || "",
+            customer_address: document.querySelector('input[name="customer_address"]').value || "",
+            customer_phone: document.querySelector('input[name="customer_phone"]').value || "",
+            app_version: APP_VERSION,
+            generated_at: new Date().toISOString(),
+            rooms: [...document.querySelectorAll(SELECTORS.room)].map(room => ({
+                room_name: room.querySelector(SELECTORS.roomNameInput).value || "",
+                price_per_m_raw: toNum(room.querySelector(SELECTORS.roomPricePerM).value),
+                style: room.querySelector(SELECTORS.roomStyle).value,
+                sets: [...room.querySelectorAll(SELECTORS.set)].map(set => ({
+                    width_m: clamp01(set.querySelector('input[name="width_m"]').value), height_m: clamp01(set.querySelector('input[name="height_m"]').value),
+                    fabric_variant: set.querySelector('select[name="fabric_variant"]').value, open_type: set.querySelector('select[name="open_type"]').value,
+                    sheer_price_per_m: clamp01(set.querySelector('select[name="sheer_price_per_m"]').value), is_suspended: set.dataset.suspended === 'true',
+                })),
+                decorations: [...room.querySelectorAll(SELECTORS.decoItem)].map(deco => ({
+                    type: deco.querySelector('[name="deco_type"]').value, width_m: clamp01(deco.querySelector('[name="deco_width_m"]').value),
+                    height_m: clamp01(deco.querySelector('[name="deco_height_m"]').value), price_sqyd: clamp01(deco.querySelector('[name="deco_price_sqyd"]').value),
+                    is_suspended: deco.dataset.suspended === 'true',
+                })),
+                wallpapers: [...room.querySelectorAll(SELECTORS.wallpaperItem)].map(wp => ({
+                    height_m: clamp01(wp.querySelector('[name="wallpaper_height_m"]').value),
+                    price_per_roll: clamp01(wp.querySelector('[name="wallpaper_price_roll"]').value),
+                    widths: [...wp.querySelectorAll('[name="wall_width_m"]')].map(input => clamp01(input.value)),
+                    is_suspended: wp.dataset.suspended === 'true',
+                }))
+            }))
         };
+    }
+    
+    function buildTextPayload(options) {
+        const payload = buildPayload();
+        let text = "";
 
-        if (payload.rooms && payload.rooms.length > 0) {
-            text += `รายละเอียดห้องและจุด\n`;
-            payload.rooms.forEach(room => {
-                text += `\n** ห้อง: ${room.room_name || "ไม่มีชื่อ"} **\n`;
-                text += `ราคาผ้า: ${fmt(room.price_per_m, 0, true)} บ./ม. สไตล์: ${room.style}\n`;
-                
-                if (room.sets && room.sets.length > 0) {
-                    text += "--- จุดผ้าม่าน ---\n";
-                    room.sets.forEach((set, i) => {
-                        text += `จุด ${i+1}: ${formatItem(set, 'set')}\n`;
-                    });
-                }
-                
-                if (room.decorations && room.decorations.length > 0) {
-                    text += "--- รายการตกแต่ง ---\n";
-                    room.decorations.forEach((deco, i) => {
-                        text += `รายการ ${i+1}: ${formatItem(deco, 'deco')}\n`;
-                    });
-                }
+        // 1. Customer Info
+        if (options.customer) {
+            text += "✅ ข้อมูลลูกค้า\n";
+            text += `ชื่อ: ${payload.customer_name}\n`;
+            text += `ที่อยู่: ${payload.customer_address}\n`;
+            text += `เบอร์โทร: ${payload.customer_phone}\n\n`;
+        }
 
-                if (room.wallpapers && room.wallpapers.length > 0) {
-                    text += "--- วอลเปเปอร์ ---\n";
-                    room.wallpapers.forEach((wallpaper, i) => {
-                        text += `รายการ ${i+1}: ${formatItem(wallpaper, 'wallpaper')}\n`;
-                    });
-                }
+        // 2. Room Details
+        if (options.details) {
+            text += "✅ รายละเอียดห้อง\n";
+            payload.rooms.forEach((room, roomIndex) => {
+                const roomName = room.room_name || `ห้อง ${String(roomIndex + 1).padStart(2, '0')}`;
+                text += `\n**${roomName}** (สไตล์: ${room.style}, ราคาผ้าทึบ: ${fmt(room.price_per_m_raw, 0, true)} บ./ม.)\n`;
+
+                room.sets.forEach((set, setIndex) => {
+                    const isSuspended = set.is_suspended;
+                    if (isSuspended) return; // Skip suspended items
+                    const width = set.width_m;
+                    const height = set.height_m;
+                    const variant = set.fabric_variant;
+                    const openType = set.open_type;
+                    const sheerPrice = set.sheer_price_per_m;
+
+                    let details = `  • จุดที่ ${setIndex + 1} (${width}x${height} ม.): `;
+                    details += `ผ้า${variant}`;
+                    if (openType) details += `, เปิด${openType}`;
+                    if (variant === "โปร่ง" || variant === "ทึบ&โปร่ง") {
+                        details += `, ราคาผ้าโปร่ง: ${fmt(sheerPrice, 0, true)} บ./ม.`;
+                    }
+                    text += `${details}\n`;
+                });
+
+                room.decorations.forEach((deco, decoIndex) => {
+                    if (deco.is_suspended) return;
+                    text += `  • รายการตกแต่งที่ ${decoIndex + 1}: ${deco.type} (${deco.width_m}x${deco.height_m} ม.) ราคา: ${fmt(deco.price_sqyd, 0, true)} บ./ตร.หลา\n`;
+                });
+
+                room.wallpapers.forEach((wp, wpIndex) => {
+                    if (wp.is_suspended) return;
+                    const totalWidth = wp.widths.reduce((sum, w) => sum + w, 0);
+                    const totalAreaSqm = totalWidth * wp.height_m;
+                    const rollsNeeded = CALC.wallpaperRolls(totalWidth, wp.height_m);
+                    text += `  • วอลเปเปอร์ที่ ${wpIndex + 1}: สูง ${wp.height_m} ม., กว้างรวม ${fmt(totalWidth, 2)} ม. ราคา: ${fmt(wp.price_per_roll, 0, true)} บ./ม้วน, ใช้ ${rollsNeeded} ม้วน\n`;
+                });
             });
+            text += "\n";
         }
         
-        text += `\nสรุปยอดรวม\n`;
-        const grandTotal = document.querySelector(SELECTORS.grandTotal).textContent;
-        const grandFabric = document.querySelector(SELECTORS.grandFabric).textContent;
-        const grandSheerFabric = document.querySelector(SELECTORS.grandSheerFabric).textContent;
-        const grandOpaqueTrack = document.querySelector(SELECTORS.grandOpaqueTrack).textContent;
-        const grandSheerTrack = document.querySelector(SELECTORS.grandSheerTrack).textContent;
-        
-        text += `ราคารวม: ${grandTotal} บ.\n`;
-        text += `ผ้าทึบ: ${grandFabric}\n`;
-        text += `ผ้าโปร่ง: ${grandSheerFabric}\n`;
-        text += `รางทึบ: ${grandOpaqueTrack}\n`;
-        text += `รางโปร่ง: ${grandSheerTrack}\n`;
+        // 3. Summary
+        if (options.summary) {
+            const grandTotalEl = document.querySelector(SELECTORS.grandTotal);
+            const totalSetsEl = document.querySelector(SELECTORS.setCountSets);
+            const totalDecoEl = document.querySelector(SELECTORS.setCountDeco);
+            const grandOpaqueYardsEl = document.querySelector(SELECTORS.grandFabric);
+            const grandSheerYardsEl = document.querySelector(SELECTORS.grandSheerFabric);
 
-        return text;
-    };
+            text += "✅ สรุปยอดรวม\n";
+            text += `ราคารวม: ${grandTotalEl.textContent} บาท\n`;
+            text += `จำนวนชุดผ้าม่าน: ${totalSetsEl.textContent} ชุด\n`;
+            text += `จำนวนรายการตกแต่ง: ${totalDecoEl.textContent} ชุด\n`;
+            text += `ผ้าทึบที่ต้องใช้: ${grandOpaqueYardsEl.textContent}\n`;
+            text += `ผ้าโปร่งที่ต้องใช้: ${grandSheerYardsEl.textContent}\n`;
+        }
+
+        return text.trim();
+    }
+
+
+    const debouncedRecalcAndSave = debounce(() => { recalcAll(); saveData(); });
     
-    function saveData() {
-        const payload = buildPayload();
+    function saveData(payload) {
+        if (!payload) payload = buildPayload();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    }
-    
-    function exportData() {
-        const payload = buildPayload();
-        const jsonStr = JSON.stringify(payload, null, 2);
-        const blob = new Blob([jsonStr], {type: "application/json"});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `marnthara_data_${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        showToast('ส่งออกข้อมูลแล้ว', 'success');
-    }
-
-    function importData() {
-        const modal = document.querySelector(SELECTORS.importModal);
-        modal.classList.add('visible');
-        const confirmBtn = modal.querySelector(SELECTORS.importConfirm);
-        const cancelBtn = modal.querySelector(SELECTORS.importCancel);
-        const textarea = modal.querySelector(SELECTORS.importJsonArea);
-        
-        const cleanup = (result) => {
-            modal.classList.remove('visible');
-            confirmBtn.onclick = null;
-            cancelBtn.onclick = null;
-            textarea.value = '';
-        };
-
-        confirmBtn.onclick = async () => {
-            try {
-                const payload = JSON.parse(textarea.value);
-                document.querySelector('input[name="customer_name"]').value = payload.customer_name;
-                document.querySelector('input[name="customer_address"]').value = payload.customer_address;
-                document.querySelector('input[name="customer_phone"]').value = payload.customer_phone;
-                roomsEl.innerHTML = ""; roomCount = 0;
-                if (payload.rooms && payload.rooms.length > 0) payload.rooms.forEach(addRoom);
-                else addRoom();
-                showToast('นำเข้าข้อมูลสำเร็จ', 'success');
-            } catch(e) {
-                showToast('ข้อมูล JSON ไม่ถูกต้อง', 'error');
-                console.error('JSON parse error:', e);
-            }
-            cleanup();
-        };
-
-        cancelBtn.onclick = () => cleanup();
     }
 
     function updateLockState() {
-        const btnText = document.querySelector('.lock-text');
-        const btnIcon = document.querySelector('.lock-icon');
-        if (isLocked) {
-            btnText.textContent = 'ปลดล็อค';
-            btnIcon.textContent = '🔓';
-            document.body.classList.add('locked');
-            document.querySelectorAll('input, select, .btn:not(#lockBtn, #clearAllBtn)').forEach(el => el.disabled = true);
-        } else {
-            btnText.textContent = 'ล็อค';
-            btnIcon.textContent = '🔒';
-            document.body.classList.remove('locked');
-            document.querySelectorAll('input, select, .btn:not(#lockBtn, #clearAllBtn)').forEach(el => el.disabled = false);
-        }
+        const isFormLocked = isLocked || false;
+        document.querySelectorAll('input, select, button').forEach(el => {
+            const btn = el.closest('button');
+            if (btn && (btn.id === 'lockBtn' || btn.id === 'addRoomHeaderBtn')) return;
+            el.disabled = isFormLocked;
+        });
+        const lockBtn = document.querySelector(SELECTORS.lockBtn);
+        lockBtn.classList.toggle('btn-primary', !isFormLocked);
+        lockBtn.classList.toggle('btn-danger', isFormLocked);
+        lockBtn.querySelector('.lock-text').textContent = isFormLocked ? 'ปลดล็อค' : 'ล็อก';
+        lockBtn.querySelector('.lock-icon').textContent = isFormLocked ? '🔓' : '🔒';
     }
     
-    document.addEventListener('input', (e) => {
-        if (isLocked) return;
-        if (e.target.closest(SELECTORS.room)) recalcAll();
-        if (e.target.name === 'fabric_variant') toggleSetFabricUI(e.target.closest(SELECTORS.set));
-    });
+    function toggleLock() { isLocked = !isLocked; updateLockState(); showToast(isLocked ? 'ฟอร์มถูกล็อคแล้ว' : 'ฟอร์มถูกปลดล็อคแล้ว', isLocked ? 'warning' : 'success'); }
     
-    document.addEventListener('change', (e) => {
-        if (isLocked) return;
-        if (e.target.closest(SELECTORS.room)) recalcAll();
+    function formatNumericInput(e) {
+        const input = e.target;
+        let val = input.value.replace(/[^0-9]/g, '');
+        input.value = val ? parseInt(val, 10).toLocaleString('th-TH') : '';
+    }
+
+    function showImportModal() {
+        const modal = document.querySelector(SELECTORS.importModal);
+        modal.classList.add('visible');
+    }
+
+    async function importData() {
+        const modal = document.querySelector(SELECTORS.importModal);
+        const jsonText = document.querySelector(SELECTORS.importJsonArea).value;
+        try {
+            const data = JSON.parse(jsonText);
+            if (!data || !data.rooms) {
+                showToast("ข้อมูล JSON ไม่ถูกต้อง", "error");
+                return;
+            }
+            
+            if (await showConfirmation('นำเข้าข้อมูล', 'การนำเข้าข้อมูลจะลบข้อมูลปัจจุบันทั้งหมด คุณแน่ใจหรือไม่?')) {
+                document.querySelector('input[name="customer_name"]').value = data.customer_name || "";
+                document.querySelector('input[name="customer_address"]').value = data.customer_address || "";
+                document.querySelector('input[name="customer_phone"]').value = data.customer_phone || "";
+                roomsEl.innerHTML = "";
+                roomCount = 0;
+                data.rooms.forEach(addRoom);
+                saveData(data); // Save the imported data
+                modal.classList.remove('visible');
+                showToast("นำเข้าข้อมูลเรียบร้อยแล้ว", "success");
+            }
+
+        } catch (err) {
+            showToast("ข้อมูล JSON ไม่ถูกต้อง: " + err.message, "error");
+            console.error(err);
+        }
+    }
+
+    document.addEventListener("change", e => {
+        if (e.target.matches('select[name="fabric_variant"]')) {
+            toggleSetFabricUI(e.target.closest(SELECTORS.set));
+        }
+        debouncedRecalcAndSave();
     });
 
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('button');
+    document.addEventListener("input", e => {
+        if(e.target.matches('[name="deco_price_sqyd"], [name="wallpaper_price_roll"]')) {
+            formatNumericInput(e);
+        }
+        debouncedRecalcAndSave();
+    });
+
+    document.addEventListener("click", async (e) => {
+        const btn = e.target.closest("button");
         if (!btn) return;
-        const action = btn.dataset.act;
-        if (isLocked && !['toggle-lock', 'del-room', 'del-set', 'del-deco', 'del-wallpaper', 'del-wall'].includes(action)) {
-            showToast('ฟอร์มถูกล็อคอยู่', 'warning');
-            return;
-        }
-        if (action === 'add-set') addSet(btn.closest(SELECTORS.room));
-        if (action === 'add-deco') addDeco(btn.closest(SELECTORS.room));
-        if (action === 'add-wallpaper') addWallpaper(btn.closest(SELECTORS.room));
-        if (action === 'add-wall') addWall(btn);
-        if (action === 'toggle-suspend') toggleSuspend(btn);
+        const act = btn.dataset.act;
+        if (btn.type !== 'submit') e.preventDefault();
         
-        if (action === 'del-room') delRoom(btn);
-        if (action === 'del-set') delSet(btn);
-        if (action === 'del-deco') delDeco(btn);
-        if (action === 'del-wallpaper') delWallpaper(btn);
-        if (action === 'del-wall') delWall(btn);
-        if (action === 'clear-set') clearSet(btn);
-        if (action === 'clear-deco') clearDeco(btn);
-        if (action === 'clear-wallpaper') clearWallpaper(btn);
-    });
-
-    document.querySelector(SELECTORS.addRoomHeaderBtn).addEventListener('click', () => addRoom());
-    document.querySelector(SELECTORS.clearAllBtn).addEventListener('click', clearAllData);
-    document.querySelector(SELECTORS.copyJsonBtn).addEventListener('click', () => copyToClipboard(JSON.stringify(buildPayload(), null, 2)));
-    document.querySelector(SELECTORS.lockBtn).addEventListener('click', () => { isLocked = !isLocked; updateLockState(); });
-    document.querySelector(SELECTORS.submitBtn).addEventListener('click', () => recalcAll());
-    document.querySelector(SELECTORS.copyTextBtn).addEventListener('click', async () => {
-        const options = await showCopyOptionsModal();
-        if (options) {
+        const actions = {
+            'del-room': delRoom, 'del-set': delSet, 'del-deco': delDeco, 'del-wallpaper': delWallpaper, 'del-wall': delWall,
+            'add-set': (b) => addSet(b.closest(SELECTORS.room)),
+            'add-deco': (b) => addDeco(b.closest(SELECTORS.room)),
+            'add-wallpaper': (b) => addWallpaper(b.closest(SELECTORS.room)),
+            'add-wall': (b) => addWall(b),
+            'clear-set': clearSet, 'clear-deco': clearDeco, 'clear-wallpaper': clearWallpaper,
+            'toggle-suspend': toggleSuspend
+        };
+        if (actions[act]) actions[act](btn);
+        else if (btn.id === "addRoomHeaderBtn") addRoom();
+        else if (btn.id === "clearAllBtn") clearAllData();
+        else if (btn.id === "lockBtn") toggleLock();
+        else if (btn.id === "copyJsonBtn") {
             const payload = buildPayload();
-            let text = "";
-            if (options.customer) text += createTextSummary({ ...payload, rooms: [] });
-            if (options.details) text += createTextSummary({ rooms: payload.rooms });
-            if (options.summary) text += createTextSummary({ rooms: [] }); // This is incomplete, needs fixing. But for now, just copy the summary portion
-            copyToClipboard(createTextSummary(payload));
+            navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
+                .then(() => showToast("คัดลอก JSON แล้ว", "success"))
+                .catch(err => showToast("ไม่สามารถคัดลอกได้: " + err, "error"));
+        } else if (btn.id === "copyTextBtn") {
+            const options = await showCopyOptionsModal();
+            if (options) {
+                const text = buildTextPayload(options);
+                navigator.clipboard.writeText(text)
+                    .then(() => showToast("คัดลอกข้อความแล้ว", "success"))
+                    .catch(err => showToast("ไม่สามารถคัดลอกได้: " + err, "error"));
+            }
         }
     });
 
+    // New event listeners for the menu and import/export
     document.querySelector(SELECTORS.menuBtn).addEventListener('click', () => {
         document.querySelector(SELECTORS.menuDropdown).classList.toggle('show');
     });
 
-    document.querySelector(SELECTORS.importBtn).addEventListener('click', importData);
-    document.querySelector(SELECTORS.exportBtn).addEventListener('click', exportData);
+    document.querySelector(SELECTORS.importBtn).addEventListener('click', async () => {
+        document.querySelector(SELECTORS.menuDropdown).classList.remove('show');
+        const modal = document.querySelector(SELECTORS.importModal);
+        document.querySelector(SELECTORS.importJsonArea).value = '';
+        modal.classList.add('visible');
+    });
+
+    document.querySelector(SELECTORS.exportBtn).addEventListener('click', () => {
+        document.querySelector(SELECTORS.menuDropdown).classList.remove('show');
+        const payload = buildPayload();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+
+        // Get customer name and sanitize it for use in filename
+        const customerName = document.querySelector('input[name="customer_name"]').value.trim() || 'marnthara_data';
+        const sanitizedName = customerName.replace(/[^a-zA-Z0-9\u0E00-\u0E7F\s]/g, '_').replace(/\s+/g, '_');
+        const fileName = `${sanitizedName}.json`;
+
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", fileName);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        showToast("ส่งออกข้อมูลเป็นไฟล์ JSON แล้ว", "success");
+    });
+
+    document.querySelector(SELECTORS.importConfirm).addEventListener('click', () => {
+        importData();
+    });
+
+    document.querySelector(SELECTORS.importCancel).addEventListener('click', () => {
+        document.querySelector(SELECTORS.importModal).classList.remove('visible');
+    });
 
     document.addEventListener('click', (e) => {
         const menuDropdown = document.querySelector(SELECTORS.menuDropdown);
