@@ -152,11 +152,6 @@
             created.querySelector(SELECTORS.roomNameInput).value = prefill.room_name || "";
             created.querySelector(SELECTORS.roomPricePerM).value = prefill.price_per_m_raw || "";
             created.querySelector(SELECTORS.roomStyle).value = prefill.style || "";
-            if (prefill.is_suspended) {
-                created.dataset.suspended = 'true';
-                created.classList.add('is-suspended');
-                created.querySelector('[data-suspend-text]').textContent = 'ใช้งาน';
-            }
             (prefill.sets || []).forEach(s => addSet(created, s));
             (prefill.decorations || []).forEach(d => addDeco(created, d));
             (prefill.wallpapers || []).forEach(w => addWallpaper(created, w));
@@ -290,16 +285,6 @@
         showToast(`รายการถูก${isSuspended ? 'ระงับ' : 'ใช้งาน'}แล้ว`, 'warning');
     }
 
-    function toggleRoomSuspend(btn) {
-        const room = btn.closest(SELECTORS.room);
-        const isSuspended = !(room.dataset.suspended === 'true');
-        room.dataset.suspended = isSuspended;
-        room.classList.toggle('is-suspended', isSuspended);
-        btn.querySelector('[data-suspend-text]').textContent = isSuspended ? 'ใช้งาน' : 'ระงับ';
-        recalcAll(); saveData();
-        showToast(`ห้องถูก${isSuspended ? 'ระงับ' : 'ใช้งาน'}แล้ว`, 'warning');
-    }
-
     async function delRoom(btn) { if (isLocked || !await showConfirmation('ลบห้อง', 'ยืนยันการลบห้องนี้?')) return; btn.closest(SELECTORS.room).remove(); renumber(); recalcAll(); saveData(); updateLockState(); showToast('ลบห้องแล้ว', 'success'); }
     async function delSet(btn) { if (isLocked || !await showConfirmation('ลบจุด', 'ยืนยันการลบจุดติดตั้งนี้?')) return; btn.closest(SELECTORS.set).remove(); renumber(); recalcAll(); saveData(); updateLockState(); showToast('ลบจุดผ้าม่านแล้ว', 'success'); }
     async function delDeco(btn) { if (isLocked || !await showConfirmation('ลบรายการ', 'ยืนยันการลบรายการตกแต่งนี้?')) return; btn.closest(SELECTORS.decoItem).remove(); renumber(); recalcAll(); saveData(); updateLockState(); showToast('ลบรายการตกแต่งแล้ว', 'success'); }
@@ -331,13 +316,6 @@
         let grandOpaqueTrack = 0, grandSheerTrack = 0;
         
         document.querySelectorAll(SELECTORS.room).forEach((room) => {
-            if (room.dataset.suspended === 'true') {
-                // Clear UI for suspended room
-                room.querySelector("[data-room-brief]").innerHTML = `ระงับการคำนวณ`;
-                room.classList.add("is-suspended");
-                return;
-            }
-            
             let roomSum = 0;
             const baseRaw = toNum(room.querySelector(SELECTORS.roomPricePerM).value);
             const style = room.querySelector(SELECTORS.roomStyle).value;
@@ -433,7 +411,6 @@
                 room_name: room.querySelector(SELECTORS.roomNameInput).value || "",
                 price_per_m_raw: toNum(room.querySelector(SELECTORS.roomPricePerM).value),
                 style: room.querySelector(SELECTORS.roomStyle).value,
-                is_suspended: room.dataset.suspended === 'true',
                 sets: [...room.querySelectorAll(SELECTORS.set)].map(set => ({
                     width_m: clamp01(set.querySelector('input[name="width_m"]').value), height_m: clamp01(set.querySelector('input[name="height_m"]').value),
                     fabric_variant: set.querySelector('select[name="fabric_variant"]').value, open_type: set.querySelector('select[name="open_type"]').value,
@@ -470,8 +447,6 @@
         if (options.details) {
             text += "✅ รายละเอียดห้อง\n";
             payload.rooms.forEach((room, roomIndex) => {
-                if (room.is_suspended) return; // Skip suspended rooms
-                
                 const roomName = room.room_name || `ห้อง ${String(roomIndex + 1).padStart(2, '0')}`;
                 text += `\n**${roomName}** (สไตล์: ${room.style}, ราคาผ้าทึบ: ${fmt(room.price_per_m_raw, 0, true)} บ./ม.)\n`;
 
@@ -618,8 +593,7 @@
             'add-wallpaper': (b) => addWallpaper(b.closest(SELECTORS.room)),
             'add-wall': (b) => addWall(b),
             'clear-set': clearSet, 'clear-deco': clearDeco, 'clear-wallpaper': clearWallpaper,
-            'toggle-suspend': toggleSuspend,
-            'toggle-room-suspend': toggleRoomSuspend
+            'toggle-suspend': toggleSuspend
         };
         if (actions[act]) actions[act](btn);
         else if (btn.id === "addRoomHeaderBtn") addRoom();
