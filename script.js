@@ -152,6 +152,12 @@
             created.querySelector(SELECTORS.roomNameInput).value = prefill.room_name || "";
             created.querySelector(SELECTORS.roomPricePerM).value = prefill.price_per_m_raw || "";
             created.querySelector(SELECTORS.roomStyle).value = prefill.style || "";
+            // NEW: Restore room suspended state
+            if (prefill.is_suspended) {
+                created.dataset.suspended = 'true';
+                created.classList.add('is-suspended');
+                created.querySelector('[data-suspend-text]').textContent = 'ใช้งาน';
+            }
             (prefill.sets || []).forEach(s => addSet(created, s));
             (prefill.decorations || []).forEach(d => addDeco(created, d));
             (prefill.wallpapers || []).forEach(w => addWallpaper(created, w));
@@ -275,6 +281,19 @@
         setEl.querySelector("[data-opaque-track-label]").classList.toggle("hidden", !hasOpaque);
     }
     
+    // NEW: Function to toggle suspension for a room
+    function toggleSuspendRoom(btn) {
+        const room = btn.closest(SELECTORS.room);
+        const isSuspended = !(room.dataset.suspended === 'true');
+        room.dataset.suspended = isSuspended;
+        room.classList.toggle('is-suspended', isSuspended);
+        btn.querySelector('[data-suspend-text]').textContent = isSuspended ? 'ใช้งาน' : 'ระงับ';
+        btn.querySelector('.lock-icon').textContent = isSuspended ? '✅' : '🚷'; // Update icon
+        recalcAll(); saveData();
+        showToast(`ห้องถูก${isSuspended ? 'ระงับ' : 'ใช้งาน'}แล้ว`, 'warning');
+    }
+
+    // Existing: Function to toggle suspension for individual items
     function toggleSuspend(btn) {
         const item = btn.closest('.set, .deco-item, .wallpaper-item');
         const isSuspended = !(item.dataset.suspended === 'true');
@@ -299,6 +318,9 @@
     function renumber() {
         document.querySelectorAll(SELECTORS.room).forEach((room, rIdx) => {
             const input = room.querySelector(SELECTORS.roomNameInput);
+            const roomNumberSpan = room.querySelector('[data-room-number]');
+            if (roomNumberSpan) roomNumberSpan.textContent = `ห้อง ${String(rIdx + 1).padStart(2, "0")}`;
+
             if (input && !input.value) input.placeholder = `ห้อง ${String(rIdx + 1).padStart(2, "0")}`;
             
             const items = room.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`);
@@ -314,15 +336,32 @@
     function recalcAll() {
         let grand = 0, grandOpaqueYards = 0, grandSheerYards = 0;
         let grandOpaqueTrack = 0, grandSheerTrack = 0;
-        
+        let totalSets = 0, totalDeco = 0, totalPoints = 0; // Initialize for grand totals
+
         document.querySelectorAll(SELECTORS.room).forEach((room) => {
             let roomSum = 0;
+            let roomSets = 0, roomDeco = 0, roomPoints = 0; // Initialize for room totals
+
+            const roomIsSuspended = room.dataset.suspended === 'true';
+            const roomBrief = room.querySelector("[data-room-brief]");
+
+            if (roomIsSuspended) {
+                // If room is suspended, zero out its display and skip calculations
+                if (roomBrief) roomBrief.innerHTML = `<span class="num">ห้องถูกระงับ</span> • ราคา <span class="num price">0</span> บาท`;
+                room.querySelectorAll('[data-set-price-total], [data-set-price-opaque], [data-set-price-sheer]').forEach(el => el.textContent = fmt(0, 0, true));
+                room.querySelectorAll('[data-set-yardage-opaque], [data-set-yardage-sheer], [data-set-opaque-track], [data-set-sheer-track]').forEach(el => el.textContent = fmt(0, 2));
+                room.querySelectorAll('[data-deco-summary], [data-wallpaper-summary]').forEach(el => el.innerHTML = `ราคา: <span class="price">0</span> บ. • พื้นที่: <span class="price">0.00</span> ตร.หลา`);
+                return; // Skip further calculations for this room
+            }
+
             const baseRaw = toNum(room.querySelector(SELECTORS.roomPricePerM).value);
             const style = room.querySelector(SELECTORS.roomStyle).value;
             const sPlus = stylePlus(style);
             
             room.querySelectorAll(SELECTORS.set).forEach((set) => {
-                if (set.dataset.suspended === 'true') { /* ... clear UI ... */ return; }
+                const isSuspended = set.dataset.suspended === 'true';
+                if (isSuspended) { /* ... clear UI ... */ return; } // Still clear individual suspended items
+                
                 const w = clamp01(set.querySelector('input[name="width_m"]').value), h = clamp01(set.querySelector('input[name="height_m"]').value);
                 const hPlus = heightPlus(h), variant = set.querySelector('select[name="fabric_variant"]').value;
                 let opaquePrice = 0, sheerPrice = 0, opaqueYards = 0, sheerYards = 0, opaqueTrack = 0, sheerTrack = 0;
@@ -349,6 +388,10 @@
                 roomSum += opaquePrice + sheerPrice;
                 grandOpaqueYards += opaqueYards; grandSheerYards += sheerYards;
                 grandOpaqueTrack += opaqueTrack; grandSheerTrack += sheerTrack;
+                
+                // Update room and grand totals for sets
+                roomSets += (variant === "ทึบ&โปร่ง" ? 2 : 1);
+                roomPoints++;
             });
 
             room.querySelectorAll(SELECTORS.decoItem).forEach(deco => {
@@ -360,6 +403,10 @@
                 const decoPrice = Math.round(areaSqyd * price);
                 summaryEl.innerHTML = `ราคา: <span class="price">${fmt(decoPrice, 0, true)}</span> บ. • พื้นที่: <span class="price">${fmt(areaSqyd, 2)}</span> ตร.หลา`;
                 roomSum += decoPrice;
+
+                // Update room and grand totals for decorations
+                roomDeco++;
+                roomPoints++;
             });
 
             room.querySelectorAll(SELECTORS.wallpaperItem).forEach(wallpaper => {
@@ -376,20 +423,23 @@
                 const wallpaperPrice = rollsNeeded * pricePerRoll;
                 summaryEl.innerHTML = `ราคา: <span class="price">${fmt(wallpaperPrice, 0, true)}</span> บ. • พื้นที่: <span class="price">${fmt(totalAreaSqm, 2)}</span> ตร.ม. • ใช้ <span class="price">${fmt(rollsNeeded, 0)}</span> ม้วน`;
                 roomSum += wallpaperPrice;
+
+                // Update room and grand totals for wallpapers
+                roomDeco++; // Treat wallpaper as a "decoration" for counting purposes
+                roomPoints++;
             });
             
-            const totalItemsInRoom = room.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"]), ${SELECTORS.decoItem}:not([data-suspended="true"]), ${SELECTORS.wallpaperItem}:not([data-suspended="true"])`).length;
-            const totalUnitsInRoom = [...room.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"])`)].reduce((sum, set) => sum + (set.querySelector('select[name="fabric_variant"]').value === "ทึบ&โปร่ง" ? 2 : 1), 0) + room.querySelectorAll(`${SELECTORS.decoItem}:not([data-suspended="true"]), ${SELECTORS.wallpaperItem}:not([data-suspended="true"])`).length;
-            
-            const brief = room.querySelector("[data-room-brief]");
-            if (brief) brief.innerHTML = `<span class="num">จุด ${fmt(totalItemsInRoom, 0, true)}</span> • <span class="num">ชุด ${fmt(totalUnitsInRoom, 0, true)}</span> • ราคา <span class="num price">${fmt(roomSum, 0, true)}</span> บาท`;
+            // Update room brief with its own totals
+            if (roomBrief) brief.innerHTML = `<span class="num">จุด ${fmt(roomPoints, 0, true)}</span> • <span class="num">ชุด ${fmt(roomSets + roomDeco, 0, true)}</span> • ราคา <span class="num price">${fmt(roomSum, 0, true)}</span> บาท`;
             grand += roomSum;
+
+            // Add room's totals to grand totals
+            totalSets += roomSets;
+            totalDeco += roomDeco;
+            totalPoints += roomPoints;
         });
 
-        const totalSets = [...document.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"])`)].reduce((sum, set) => sum + (set.querySelector('select[name="fabric_variant"]').value === "ทึบ&โปร่ง" ? 2 : 1), 0);
-        const totalDeco = document.querySelectorAll(`${SELECTORS.decoItem}:not([data-suspended="true"]), ${SELECTORS.wallpaperItem}:not([data-suspended="true"])`).length;
-        const totalPoints = document.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"]), ${SELECTORS.decoItem}:not([data-suspended="true"]), ${SELECTORS.wallpaperItem}:not([data-suspended="true"])`).length;
-        
+        // Update grand total display
         document.querySelector(SELECTORS.grandTotal).textContent = fmt(grand, 0, true);
         document.querySelector(SELECTORS.setCount).textContent = fmt(totalPoints, 0, true);
         document.querySelector(SELECTORS.setCountSets).textContent = fmt(totalSets, 0, true);
@@ -411,6 +461,7 @@
                 room_name: room.querySelector(SELECTORS.roomNameInput).value || "",
                 price_per_m_raw: toNum(room.querySelector(SELECTORS.roomPricePerM).value),
                 style: room.querySelector(SELECTORS.roomStyle).value,
+                is_suspended: room.dataset.suspended === 'true', // NEW: Room suspended state
                 sets: [...room.querySelectorAll(SELECTORS.set)].map(set => ({
                     width_m: clamp01(set.querySelector('input[name="width_m"]').value), height_m: clamp01(set.querySelector('input[name="height_m"]').value),
                     fabric_variant: set.querySelector('select[name="fabric_variant"]').value, open_type: set.querySelector('select[name="open_type"]').value,
@@ -448,7 +499,13 @@
             text += "✅ รายละเอียดห้อง\n";
             payload.rooms.forEach((room, roomIndex) => {
                 const roomName = room.room_name || `ห้อง ${String(roomIndex + 1).padStart(2, '0')}`;
-                text += `\n**${roomName}** (สไตล์: ${room.style}, ราคาผ้าทึบ: ${fmt(room.price_per_m_raw, 0, true)} บ./ม.)\n`;
+                const roomSuspendedStatus = room.is_suspended ? " (ระงับ)" : ""; // NEW: Room suspended status
+                text += `\n**${roomName}${roomSuspendedStatus}** (สไตล์: ${room.style}, ราคาผ้าทึบ: ${fmt(room.price_per_m_raw, 0, true)} บ./ม.)\n`;
+
+                if (room.is_suspended) {
+                    text += "  - ห้องนี้ถูกระงับการคำนวณ\n";
+                    return; // Skip details for suspended room
+                }
 
                 room.sets.forEach((set, setIndex) => {
                     const isSuspended = set.is_suspended;
@@ -593,7 +650,8 @@
             'add-wallpaper': (b) => addWallpaper(b.closest(SELECTORS.room)),
             'add-wall': (b) => addWall(b),
             'clear-set': clearSet, 'clear-deco': clearDeco, 'clear-wallpaper': clearWallpaper,
-            'toggle-suspend': toggleSuspend
+            'toggle-suspend': toggleSuspend,
+            'toggle-suspend-room': toggleSuspendRoom // NEW: Add room suspension action
         };
         if (actions[act]) actions[act](btn);
         else if (btn.id === "addRoomHeaderBtn") addRoom();
