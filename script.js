@@ -100,15 +100,17 @@
     
     // --- Event Listeners (Updated for new buttons) ---
     document.addEventListener("click", async (e) => {
-        const btn = e.target.closest("button");
-        if (!btn) {
-            // Check for scrim click to close sheet
-            if (e.target.matches(SELECTORS.materialSheet)) {
-                hideMaterialSheet();
-            }
+        // Check for scrim click to close sheet first
+        if (e.target.matches(SELECTORS.materialSheet)) {
+            hideMaterialSheet();
             return;
         }
 
+        const btn = e.target.closest("button");
+        if (!btn) {
+            return;
+        }
+        
         const act = btn.dataset.act;
         if (btn.type !== 'submit' && btn.form !== orderForm) e.preventDefault();
         
@@ -138,8 +140,6 @@
                 break;
         }
     });
-
-    // ... (All other event listeners and the window.load function are unchanged)
 
     // Make sure to add the sheet listener
     const sheet = document.querySelector(SELECTORS.materialSheet);

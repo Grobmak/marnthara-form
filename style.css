@@ -86,5 +86,3 @@ body {
 .sheet-content .summary-value { display: block; font-size: var(--md-sys-typescale-title-large-size); font-weight: 500; color: var(--md-sys-color-on-surface); }
 .sheet-content .summary-value.secondary { color: var(--md-sys-color-secondary); }
 .summary-divider { height: 1px; background-color: var(--md-sys-color-outline); margin: 16px 0; }
-
-/* (The rest of the CSS for dialogs, toasts, etc. is unchanged) */
