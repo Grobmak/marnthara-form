@@ -299,12 +299,30 @@
             if (input && !input.value) input.placeholder = `ห้อง ${String(rIdx + 1).padStart(2, "0")}`;
             
             const items = room.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`);
-            const totalItems = items.length;
+            
+            let setsCount = 0;
+            let decoCount = 0;
+            let wallpaperCount = 0;
             
             items.forEach((item, iIdx) => {
                 const lbl = item.querySelector("[data-item-title]");
-                if (lbl) lbl.textContent = totalItems > 1 ? `${iIdx + 1}/${totalItems}` : `${iIdx + 1}`;
+                if (lbl) {
+                    if (item.classList.contains('set')) {
+                        setsCount++;
+                        lbl.textContent = setsCount;
+                    } else if (item.classList.contains('deco-item')) {
+                        decoCount++;
+                        lbl.textContent = decoCount;
+                    } else if (item.classList.contains('wallpaper-item')) {
+                        wallpaperCount++;
+                        lbl.textContent = wallpaperCount;
+                    }
+                }
             });
+            const brief = room.querySelector('[data-room-brief]');
+            if (brief) {
+                brief.innerHTML = `<span class="md-label-text">จุด ${setsCount}</span> • <span class="md-label-text">ตกแต่ง ${decoCount}</span> • <span class="md-label-text">วอลเปเปอร์ ${wallpaperCount}</span> • ราคา <span class="price">0</span> บ.`;
+            }
         });
     }
 
@@ -395,14 +413,15 @@
                 roomSum += wallpaperPrice;
             });
             room.querySelector('[data-room-brief] .price').textContent = fmt(roomSum, 0, true);
-            room.querySelector('[data-room-brief] .num').textContent = room.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`).length;
             
-            const setsCount = room.querySelectorAll(SELECTORS.set).length;
-            const decoCount = room.querySelectorAll(SELECTORS.decoItem).length;
-            room.querySelector('[data-room-brief] [data-set-count]').textContent = setsCount;
-            room.querySelector('[data-room-brief] [data-deco-count]').textContent = decoCount;
+            const setsCount = room.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"])`).length;
+            const decoCount = room.querySelectorAll(`${SELECTORS.decoItem}:not([data-suspended="true"])`).length;
+            const wallpaperCount = room.querySelectorAll(`${SELECTORS.wallpaperItem}:not([data-suspended="true"])`).length;
             
-            grand += roomSum;
+            const brief = room.querySelector('[data-room-brief]');
+            if (brief) {
+                brief.innerHTML = `<span class="md-label-text">จุด ${setsCount}</span> • <span class="md-label-text">ตกแต่ง ${decoCount}</span> • <span class="md-label-text">วอลเปเปอร์ ${wallpaperCount}</span> • ราคา <span class="price">${fmt(roomSum, 0, true)}</span> บ.`;
+            }
         });
 
         const totalSets = document.querySelectorAll(SELECTORS.set).length;
@@ -609,6 +628,14 @@
         document.querySelector(SELECTORS.menuDropdown).classList.toggle('show');
     });
 
+    document.addEventListener("click", (e) => {
+        const menuDropdown = document.querySelector(SELECTORS.menuDropdown);
+        const menuBtn = document.querySelector(SELECTORS.menuBtn);
+        if (!menuDropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+            menuDropdown.classList.remove('show');
+        }
+    });
+
     document.querySelector(SELECTORS.importBtn).addEventListener("click", () => {
         document.querySelector(SELECTORS.importModal).classList.add('visible');
     });
@@ -649,17 +676,6 @@
         }
     }));
 
-    document.querySelectorAll('input[type="text"], input[type="tel"]').forEach(input => {
-        input.addEventListener("focus", (e) => {
-            const field = e.target.closest('.md-text-field');
-            if (field) field.classList.add('md-focused');
-        });
-        input.addEventListener("blur", (e) => {
-            const field = e.target.closest('.md-text-field');
-            if (field) field.classList.remove('md-focused');
-        });
-    });
-
     document.addEventListener("change", (e) => {
         const target = e.target;
         if (target.matches('select[name="fabric_variant"]')) {
@@ -669,6 +685,14 @@
             recalcAll();
             saveData();
         }
+    });
+
+    orderForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const payload = buildPayload();
+        document.querySelector(SELECTORS.payloadInput).value = JSON.stringify(payload);
+        showToast("กำลังส่งข้อมูล...", "success");
+        orderForm.submit();
     });
 
     const saveData = () => {
