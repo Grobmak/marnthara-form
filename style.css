@@ -151,228 +151,372 @@ label.required::after { content: " *"; color: var(--error); }
 
 /* --- M3 Buttons --- */
 .m3-button-icon, .m3-button-filled, .m3-button-outlined, .m3-button-text {
-    display: inline-flex; align-items: center; justify-content: center;
-    border-radius: 20px; border: none;
-    font-family: inherit; font-weight: 500; letter-spacing: 0.1px;
-    cursor: pointer; transition: all 150ms ease-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    border: none;
+    font-family: inherit;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    cursor: pointer;
+    transition: all 150ms ease-out;
     -webkit-tap-highlight-color: transparent;
     gap: 8px;
 }
 .m3-button-icon {
-    width: 40px; height: 40px; border-radius: 50%; padding: 0;
-    background-color: transparent; color: var(--on-surface-variant);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    padding: 0;
+    background-color: transparent;
+    color: var(--on-surface-variant);
 }
-.m3-button-icon.small { width: 32px; height: 32px; }
-.m3-button-icon:hover { background-color: rgba(var(--on-surface-rgb), 0.08); }
+.m3-button-icon.small {
+    width: 32px;
+    height: 32px;
+}
+.m3-button-icon:hover {
+    background-color: rgba(var(--on-surface-rgb), 0.08);
+}
 .m3-button-filled {
-    background-color: var(--primary); color: var(--on-primary);
+    background-color: var(--primary);
+    color: var(--on-primary);
     padding: 10px 24px;
 }
-.m3-button-filled:hover { box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+.m3-button-filled:hover {
+    box-shadow: 0 1px 2px rgba(0,0,0,.3);
+}
 .m3-button-outlined {
-    background-color: transparent; color: var(--primary);
+    background-color: transparent;
+    color: var(--primary);
     border: 1px solid var(--outline);
     padding: 10px 24px;
 }
-.m3-button-outlined:hover { background-color: rgba(var(--primary-rgb), 0.08); }
+.m3-button-outlined:hover {
+    background-color: rgba(var(--primary-rgb), 0.08);
+}
 .m3-button-text {
-    background-color: transparent; color: var(--primary);
+    background-color: transparent;
+    color: var(--primary);
     padding: 10px 12px;
 }
-.m3-button-text.compact { padding: 4px 8px; font-size: 0.8rem;}
-.m3-button-text:hover { background-color: rgba(var(--primary-rgb), 0.08); }
-button:disabled { opacity: 0.5; cursor: not-allowed; }
+.m3-button-text:hover {
+    background-color: rgba(var(--primary-rgb), 0.08);
+}
+.m3-button-icon:disabled, .m3-button-filled:disabled, .m3-button-outlined:disabled, .m3-button-text:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
-/* --- M3 FAB (Floating Action Button) --- */
+/* --- M3 Floating Action Button (FAB) --- */
 .m3-fab {
-    position: fixed; bottom: 96px; right: 16px;
-    width: 56px; height: 56px;
+    position: fixed;
+    right: 16px;
+    bottom: 96px;
+    width: 56px;
+    height: 56px;
     border-radius: 16px;
+    border: none;
     background-color: var(--primary-container);
     color: var(--on-primary-container);
-    border: none;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all 150ms ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,.2);
+    cursor: pointer;
+    transition: all 150ms ease-out;
+    -webkit-tap-highlight-color: transparent;
     z-index: 100;
 }
-.m3-fab:hover { transform: scale(1.05); }
+.m3-fab:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,.2);
+}
+.m3-fab:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
-/* --- M3 Card --- */
+/* --- M3 Bottom App Bar --- */
+.m3-bottom-app-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background-color: var(--surface-container-high);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 4px rgba(0,0,0,.1);
+    z-index: 100;
+}
+.m3-bottom-app-bar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: var(--on-surface-variant);
+}
+.m3-bottom-app-bar-item .label {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.m3-bottom-app-bar-item .value {
+    font-size: 1.125rem;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+/* --- M3 Card & Containers --- */
 .m3-card {
-    background-color: var(--surface-container-low);
-    border: 1px solid var(--outline);
+    background-color: var(--surface-container);
     border-radius: 12px;
+    overflow: hidden;
     margin-bottom: 16px;
 }
 .m3-card-header {
+    background-color: var(--surface-container-high);
     padding: 16px;
-    display: flex; align-items: center; gap: 8px;
 }
-.m3-card-header.interactive { cursor: pointer; }
-.m3-card-content { padding: 16px; }
-.room-brief {
-    margin-left: auto;
-    font-size: 0.75rem;
-    padding: 4px 8px;
-    border-radius: 8px;
-    background-color: var(--surface-container);
-    color: var(--on-surface-variant);
-    flex-shrink: 0;
+.m3-card-header.interactive {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 8px;
+    cursor: pointer;
+    transition: background-color 150ms ease-out;
 }
-.room-brief .num { color: var(--on-surface); font-weight: 500; }
-.room-brief .price { color: var(--secondary); }
+.m3-card-header.interactive:hover {
+    background-color: var(--surface-container-highest);
+}
+.m3-card-content {
+    padding: 16px;
+}
 
-/* --- M3 Text Field (Outlined) --- */
-.m3-text-field { position: relative; }
-.m3-text-field.outlined input,
-.m3-text-field.outlined select,
-.m3-text-field.outlined textarea {
+/* --- M3 Text Field --- */
+.m3-text-field {
+    position: relative;
     width: 100%;
-    padding: 16px;
+}
+.m3-text-field input, .m3-text-field select {
+    width: 100%;
+    padding: 16px 16px 8px;
+    border: none;
+    border-bottom: 1px solid var(--outline);
+    background-color: var(--surface-container-highest);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--on-surface);
+    transition: border-bottom-color 150ms ease-out;
+}
+.m3-text-field input:focus, .m3-text-field select:focus {
+    outline: none;
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 7px;
+}
+.m3-text-field input:not(:placeholder-shown) + label,
+.m3-text-field input:focus + label,
+.m3-text-field select:valid + label,
+.m3-text-field select:focus + label {
+    transform: translateY(-50%) scale(0.75);
+    top: 8px;
+}
+.m3-text-field label {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: transform 150ms ease-out, top 150ms ease-out;
+    pointer-events: none;
+}
+.m3-text-field select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.m3-text-field::after {
+    content: '▼';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
+    color: var(--on-surface);
+    pointer-events: none;
+}
+.m3-text-field input[type="tel"] {
+    -moz-appearance: textfield;
+}
+.m3-text-field.no-padding input, .m3-text-field.no-padding label { padding-left: 0; padding-right: 0; }
+.m3-text-field.no-padding::after { display: none; }
+.m3-text-field input[name="room_name"] {
+    border: none;
+    background-color: transparent;
+    padding-top: 8px;
+}
+.m3-text-field input[name="room_name"]:focus {
+    border: none;
+    padding-bottom: 8px;
+}
+.m3-text-field input[name="room_name"] + label { top: 50%; transform: translateY(-50%); }
+.m3-text-field input[name="room_name"]:not(:placeholder-shown) + label,
+.m3-text-field input[name="room_name"]:focus + label {
+    transform: translateY(-100%) scale(0.75);
+    top: 0;
+}
+.m3-text-field.outlined {
+    position: relative;
     border: 1px solid var(--outline);
     border-radius: 4px;
+}
+.m3-text-field.outlined input, .m3-text-field.outlined select, .m3-text-field.outlined textarea {
+    border: none;
     background-color: transparent;
-    color: var(--on-surface);
-    font-size: 1rem;
-    font-family: inherit;
-    transition: border-color 150ms ease-out;
+    padding: 16px 16px 8px;
+}
+.m3-text-field.outlined input:focus, .m3-text-field.outlined select:focus, .m3-text-field.outlined textarea:focus {
+    padding: 16px 16px 8px;
+    border: none;
+}
+.m3-text-field.outlined input:focus, .m3-text-field.outlined select:focus, .m3-text-field.outlined textarea:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: -1px;
 }
 .m3-text-field.outlined label {
-    position: absolute;
-    top: 50%; transform: translateY(-50%);
-    left: 16px;
-    pointer-events: none;
+    top: 0;
+    transform: translateY(10px) scale(1);
     transition: all 150ms ease-out;
-    background-color: var(--surface-container-low);
+    background-color: transparent;
     padding: 0 4px;
+    left: 12px;
 }
-.room .m3-text-field.outlined label {
-    background-color: var(--surface-container); /* Match room background */
-}
-.m3-text-field.no-padding {
-    flex-grow: 1;
-}
-.m3-text-field.no-padding input { padding: 8px 0; border: none; background: transparent; font-size: 1.1rem; font-weight: 500;}
-.m3-text-field.no-padding label { top: 50%; left: 0; padding: 0; background: transparent;}
-.m3-text-field.no-padding input:focus + label,
-.m3-text-field.no-padding input:not(:placeholder-shown) + label {
-    top: -8px; font-size: 0.75rem; color: var(--primary);
-}
-.m3-text-field.outlined input:focus,
-.m3-text-field.outlined select:focus,
-.m3-text-field.outlined textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-}
-.m3-text-field.outlined input:focus + label,
-.m3-text-field.outlined select:focus + label,
-.m3-text-field.outlined textarea:focus + label,
 .m3-text-field.outlined input:not(:placeholder-shown) + label,
+.m3-text-field.outlined input:focus + label,
 .m3-text-field.outlined select:valid + label,
-.m3-text-field.outlined textarea:not(:placeholder-shown) + label {
-    top: 0; font-size: 0.75rem; color: var(--primary);
-}
-select { -webkit-appearance: none; appearance: none; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="%236F7977"><path d="M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z"/></svg>') no-repeat right 12px center; }
-
-/* --- M3 Bottom App Bar (Sticky Footer) --- */
-.m3-bottom-app-bar {
-    position: fixed; bottom: 0; left: 0; width: 100%;
-    height: 80px; padding: 0 16px;
-    background-color: var(--surface-container-high);
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    align-content: center; gap: 8px; z-index: 100;
-    border-top: 1px solid var(--outline);
-}
-.m3-bottom-app-bar-item { text-align: center; }
-.m3-bottom-app-bar-item .label { font-size: 0.75rem; color: var(--on-surface-variant); }
-.m3-bottom-app-bar-item .value { font-size: 1rem; font-weight: 500; color: var(--on-surface); }
-.m3-bottom-app-bar-item .value.price { color: var(--secondary); font-weight: bold; }
-
-/* --- M3 Menu & Summary Popup --- */
-.m3-menu-container, .m3-summary-details { position: relative; }
-.m3-menu {
-    position: absolute; top: 100%; left: 0;
-    margin-top: 8px; min-width: 200px;
+.m3-text-field.outlined select:focus + label,
+.m3-text-field.outlined textarea:not(:placeholder-shown) + label,
+.m3-text-field.outlined textarea:focus + label {
+    transform: translateY(-50%) scale(0.75);
+    top: 0;
     background-color: var(--surface-container);
-    border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    padding: 8px 0;
+}
+.m3-text-field.outlined textarea {
+    resize: none;
+}
+.m3-text-field.outlined::after {
+    right: 12px;
+}
+.m3-text-field.outlined.full-width {
+    width: 100%;
+}
+
+/* --- M3 Dialog --- */
+.m3-dialog-scrim {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 200;
-    display: none; /* Toggled by JS */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 250ms ease-out, visibility 250ms ease-out;
+}
+.m3-dialog-scrim.visible {
+    opacity: 1;
+    visibility: visible;
+}
+.m3-dialog {
+    background-color: var(--surface-container-high);
+    border-radius: 28px;
+    padding: 24px;
+    min-width: 280px;
+    max-width: 560px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    display: flex;
     flex-direction: column;
 }
-.m3-menu.show { display: flex; }
-.m3-menu-item, .m3-menu-item-static {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px;
-    font-size: 1rem; color: var(--on-surface);
-    background-color: transparent; border: none; width: 100%; text-align: left;
-    cursor: pointer;
+.m3-dialog-title { margin-top: 0; margin-bottom: 16px; }
+.m3-dialog-body { margin-top: 0; margin-bottom: 24px; }
+.m3-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
 }
-.m3-menu-item-static { cursor: default; justify-content: space-between; }
-.m3-menu-item:hover { background-color: rgba(var(--on-surface-rgb), 0.08); }
-#summaryPopup { right: 0; left: auto; bottom: 100%; top: auto; margin-bottom: 8px; }
+.m3-dialog-actions .m3-button-text:first-child {
+    color: var(--on-surface-variant);
+}
 
-/* --- M3 Dialog (Modal) --- */
-.m3-dialog-scrim {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 2000;
-    opacity: 0; transition: opacity 200ms ease-out; pointer-events: none;
-}
-.m3-dialog-scrim.visible { opacity: 1; pointer-events: auto; }
-.m3-dialog {
-    background: var(--surface-container-high);
-    border-radius: 28px; padding: 24px;
-    width: calc(100% - 32px); max-width: 400px;
-    transform: scale(0.95); transition: transform 200ms ease-out;
-}
-.m3-dialog-scrim.visible .m3-dialog { transform: scale(1); }
-.m3-dialog-title { color: var(--on-surface); margin: 0 0 16px 0; }
-.m3-dialog-body { margin: 0 0 24px 0; color: var(--on-surface-variant); line-height: 1.5; }
-.m3-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
-
-/* --- M3 Checkbox --- */
-.m3-checkbox-label {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 12px; font-size: 1rem;
-    cursor: pointer;
-}
-.m3-checkbox-label input { accent-color: var(--primary); width: 1.2em; height: 1.2em;}
-
-/* --- Item Cards (Set, Deco, Wallpaper) --- */
-.item-card {
+/* --- M3 Menu Dropdown --- */
+.m3-menu-container { position: relative; }
+.m3-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 20;
     background-color: var(--surface-container);
-    border: 1px solid var(--outline);
-    border-radius: 12px;
-    margin-bottom: 12px;
-    transition: opacity 300ms, border-color 300ms;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    min-width: 200px;
+    padding: 8px 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 150ms ease-out, transform 150ms ease-out, visibility 150ms ease-out;
 }
-.item-card.is-suspended { opacity: 0.5; border-left-color: var(--outline); }
-.item-header {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 8px 8px 16px;
-    border-bottom: 1px solid var(--outline);
+.m3-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
-.item-badge {
-    font-size: 0.9rem; font-weight: 500;
-    color: var(--on-primary-container); background-color: var(--primary-container);
-    border-radius: 8px; width: 28px; height: 28px;
-    display: inline-flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+.m3-menu-item, .m3-menu-item-static {
+    background-color: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--on-surface);
+    width: 100%;
+    text-align: left;
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
-.item-card.deco .item-badge { background-color: var(--secondary-container); color: var(--on-secondary-container); }
-.item-card.wallpaper .item-badge { background-color: #cce5ff; color: #004085; } /* Example color */
-.item-title { font-weight: 500; color: var(--on-surface-variant); }
-.item-content { padding: 16px; }
-.item-summary {
-    font-size: 0.8rem; color: var(--on-surface-variant);
-    border-top: 1px solid var(--outline);
-    padding-top: 12px; margin-top: 12px;
+.m3-menu-item:hover { background-color: var(--surface-container-high); }
+.m3-menu-item .material-symbols-outlined { color: var(--on-surface-variant); }
+.m3-menu-item-static {
+    cursor: default;
+    justify-content: space-between;
 }
+.m3-menu-item-static:hover { background-color: transparent; }
+
+/* --- Checkbox --- */
+.m3-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    margin-bottom: 8px;
+}
+
+/* --- Form Item Styles --- */
+.actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-end; margin-top: 16px; }
+.actions .m3-button-outlined { flex: 1; }
+.actions .m3-button-filled { flex: 1 1 120px; }
+.item-summary { font-size: 0.875rem; color: var(--on-surface-variant); margin-top: 8px; }
+.item-summary.total-price-row { display: grid; grid-template-columns: 1fr auto; row-gap: 4px; align-items: center; }
 .item-summary .price { font-weight: 500; color: var(--secondary); }
+.is-suspended { opacity: 0.5; }
+.room-brief { color: var(--on-surface-variant); font-size: 0.875rem; white-space: nowrap; }
+.room-brief .num { font-weight: 500; color: var(--secondary); }
 .room-actions { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; border-top: 1px solid var(--outline); padding-top: 16px; margin-top: 16px; }
 .walls-section { margin-top: 12px; }
 .wall-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -390,11 +534,6 @@ select { -webkit-appearance: none; appearance: none; background: url('data:image
     color: var(--on-surface);
 }
 .toast.show { opacity: 1; transform: translateY(0); }
-.toast.toast-success { background-color: var(--primary-container); color: var(--on-primary-container); }
-.toast.toast-warning { background-color: var(--secondary-container); color: var(--on-secondary-container); }
-.toast.toast-error { background-color: var(--error); color: var(--on-error); }
-
-/* Final Overrides */
-details > summary { list-style: none; }
-details > summary::-webkit-details-marker { display: none; }
-.actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; position: relative; flex-wrap: wrap; }
+.toast-success { color: var(--md-sys-color-primary-light); }
+.toast-warning { color: var(--md-sys-color-secondary-light); }
+.toast-error { color: var(--md-sys-color-error-light); }
