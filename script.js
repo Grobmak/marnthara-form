@@ -364,11 +364,14 @@
     });
 
     document.addEventListener('click', async (e) => {
-        const action = e.target.closest('button, .tab')?.dataset?.act || e.target.closest('button, .tab')?.dataset?.action || e.target.closest('.tab')?.dataset?.tab;
+        // Find the action from data-act, data-action, data-tab, or button id
+        const targetButton = e.target.closest('button, .tab');
+        if (!targetButton) return;
+
+        const action = targetButton.dataset.act || targetButton.dataset.action || targetButton.dataset.tab || targetButton.id;
+        
         const roomElement = e.target.closest('[data-room-index]');
         const itemElement = e.target.closest('[data-item-container]');
-
-        if (!action) return;
 
         e.preventDefault();
 
@@ -405,19 +408,15 @@
                     updateRoomSummary(roomElement);
                 }
                 break;
-            case 'summary':
-                updateOverallSummary();
-                showMaterialSheet(SELECTORS.summarySheet);
+            case 'menuBtn':
+                const menuDropdown = document.querySelector(SELECTORS.menuDropdown);
+                menuDropdown.classList.toggle('visible');
                 break;
             case 'lockBtn':
                 isLocked = !isLocked;
                 document.getElementById('lockBtn').querySelector('.material-symbols-outlined').textContent = isLocked ? 'lock' : 'lock_open';
                 document.getElementById('lockBtn').querySelector('.lock-text').textContent = isLocked ? 'ปลดล็อค' : 'ล็อค';
                 showToast(isLocked ? 'ล็อค' : 'ปลดล็อค');
-                break;
-            case 'menuBtn':
-                const menuDropdown = document.querySelector(SELECTORS.menuDropdown);
-                menuDropdown.classList.toggle('visible');
                 break;
             case 'clearAllBtn':
                 if (await showDialog(SELECTORS.clearAllModal)) {
@@ -431,14 +430,26 @@
                     .then(() => showToast("คัดลอก JSON แล้ว", "success"))
                     .catch(err => showToast("ไม่สามารถคัดลอกได้: " + err, "error"));
                 break;
-            case 'copyTextBtn': // This button might not exist anymore, but keeping for safety
-                const options = await showDialog(SELECTORS.copyOptionsModal);
-                if (options) { /* ... copy text logic ... */ }
-                break;
             case 'exportBtn': /* ... export logic ... */ break;
             case 'importBtn':
                 document.querySelector(SELECTORS.importJsonArea).value = '';
                 document.querySelector(SELECTORS.importModal).classList.add('visible');
+                break;
+            case 'import':
+                try {
+                    const jsonData = JSON.parse(document.querySelector(SELECTORS.importJsonArea).value);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(jsonData));
+                    showToast("Import JSON สำเร็จ! กำลังโหลดข้อมูลใหม่...", "success");
+                    location.reload();
+                } catch (e) {
+                    showToast("JSON ไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง", "error");
+                }
+                break;
+            case 'cancel':
+                e.target.closest('.modal-scrim').classList.remove('visible');
+                break;
+            case 'close':
+                hideMaterialSheet();
                 break;
         }
     });
