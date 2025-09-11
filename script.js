@@ -564,19 +564,20 @@
         }
     });
     
-    document.querySelector(SELECTORS.summaryBtn).addEventListener('click', () => {
-        const popup = document.querySelector(SELECTORS.summaryPopup);
-        popup.style.display = (popup.style.display === 'none') ? 'block' : 'none';
-        
-        // Hide popup if clicked outside
-        const hidePopup = (e) => {
-            if (!popup.contains(e.target) && !document.querySelector(SELECTORS.summaryBtn).contains(e.target)) {
-                popup.style.display = 'none';
-                document.removeEventListener('click', hidePopup);
-            }
-        };
-        if (popup.style.display === 'block') {
-            setTimeout(() => document.addEventListener('click', hidePopup), 100);
+    // FIX: Refactored summary button logic to be more robust.
+    const summaryPopup = document.querySelector(SELECTORS.summaryPopup);
+    const summaryBtn = document.querySelector(SELECTORS.summaryBtn);
+
+    summaryBtn.addEventListener('click', () => {
+        // Recalculate summary data before showing to ensure it's up-to-date
+        recalcAll();
+        summaryPopup.classList.toggle('show');
+    });
+
+    // Hide the popup if a click occurs outside of it or the button
+    document.addEventListener('click', (e) => {
+        if (!summaryPopup.contains(e.target) && !summaryBtn.contains(e.target) && summaryPopup.classList.contains('show')) {
+            summaryPopup.classList.remove('show');
         }
     });
 
