@@ -27,7 +27,7 @@
 
     <form id="orderForm" method="post" target="hiddenFrame">
         <div class="card" id="customerInfo">
-            <div class="row">
+            <div class="row two-col">
                 <div><label>ชื่อลูกค้า</label><input class="field" type="text" name="customer_name" placeholder="เช่น คุณสมชาย" /></div>
                 <div><label>เบอร์โทร</label><input class="field" type="tel" name="customer_phone" placeholder="088-555-9955" /></div>
             </div>
@@ -211,11 +211,13 @@
                     </div>
                 </div>
             </div>
-            <div class="row deco-row">
+            <div class="row two-col">
                 <div><label class="required">ชนิด</label><input class="field" name="deco_type" type="text" placeholder="เช่น ห่วง, สายรัด" required /></div>
+                <div><label class="required">ราคา/ตร.หลา</label><input class="field" name="deco_price_sqyd" type="text" inputmode="numeric" required /></div>
+            </div>
+            <div class="row two-col">
                 <div><label>ความกว้าง (ม.)</label><input class="field" name="deco_width_m" type="number" step="0.01" min="0" /></div>
                 <div><label>ความสูง (ม.)</label><input class="field" name="deco_height_m" type="number" step="0.01" min="0" /></div>
-                <div><label class="required">ราคา/ตร.หลา</label><input class="field" name="deco_price_sqyd" type="text" inputmode="numeric" required /></div>
             </div>
             <div class="small">
                 ราคา: <span class="price" data-deco-price>0</span> บ. • พื้นที่: <span class="price" data-deco-sqyd>0.00</span> ตร.หลา
