@@ -54,11 +54,12 @@
     </form>
 
     <div class="sticky-footer">
-        <div class="summary-item"><div class="summary-label">ราคารวม</div><div class="summary-value price" id="grandTotal">0</div></div>
-        <div class="summary-item"><div class="summary-label">จำนวนจุด</div><div class="summary-value" id="setCount">0</div></div>
-        <div class="summary-item"><div class="summary-label">ผ้าม่าน(ชุด)</div><div class="summary-value" id="setCountSets">0</div></div>
-        <div class="summary-item"><div class="summary-label">ตกแต่งเพิ่ม(ชุด)</div><div class="summary-value" id="setCountDeco">0</div></div>
+        <button type="button" class="btn btn-xs btn-primary outline" id="summaryBtn">สรุปวัสดุ</button>
+        <button type="button" class="btn btn-xs" id="copyJsonBtn">คัดลอก JSON</button>
+        <button type="button" class="btn btn-xs" id="copyTextBtn">คัดลอกข้อความ</button>
+        <button type="submit" class="btn btn-xs btn-primary" id="submitBtn">ส่งไปคำนวณ</button>
     </div>
+</form>
 
     <div id="toast-container" class="toast-container"></div>
 

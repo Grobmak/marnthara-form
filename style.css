@@ -266,7 +266,7 @@ select.field {
     -webkit-backdrop-filter: blur(16px);
     border-top: 1px solid var(--lg-border);
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
     z-index: 10;
     box-shadow: 0 -4px 12px var(--lg-shadow-color);
