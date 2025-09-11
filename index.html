@@ -70,7 +70,7 @@
             </div>
         </div>
     </div>
-    
+
     <div id="importModal" class="modal-overlay">
         <div class="modal">
             <h3 class="modal-title">นำเข้าข้อมูล</h3>
@@ -109,19 +109,18 @@
 
     <template id="roomTpl">
         <details class="card room" data-room open>
-            <summary class="room-head">
-                <input class="field" type="text" name="room_name" placeholder="ห้อง 01" required />
-                <span class="small" data-room-brief><span class="num">จุด 0</span> • <span class="num">ชุด 0</span> • ราคา <span class="num price">0</span> บาท</span>
-                <div class="room-menu-container">
-                    <button type="button" class="btn btn-icon btn-danger" data-act="room-menu" title="ตัวเลือกห้อง">...
-                        <div class="room-menu-dropdown">
-                            <button type="button" class="btn btn-block" data-act="suspend-room"><span data-suspend-room-text>ระงับห้อง</span></button>
-                            <button type="button" class="btn btn-block" data-act="clear-room">ล้างข้อมูล</button>
-                            <button type="button" class="btn btn-block btn-danger" data-act="del-room">ลบห้อง</button>
-                        </div>
-                    </button>
-                </div>
-            </summary>
+<summary class="room-head">
+    <input class="field" type="text" name="room_name" placeholder="ห้อง 01" required="">
+    <span class="small" data-room-brief=""><span class="num">จุด 1</span> • <span class="num">ชุด 0</span> • ราคา <span class="num price">0</span> บ.ท</span>
+    <div class="room-menu-container">
+        <button type="button" class="btn btn-icon btn-danger" data-act="room-menu" title="ตัวเลือกห้อง">...</button>
+        <div class="room-menu-dropdown">
+            <button type="button" class="btn btn-block" data-act="suspend-room"><span data-suspend-room-text="">ระงับห้อง</span></button>
+            <button type="button" class="btn btn-block" data-act="clear-room">ล้างข้อมูล</button>
+            <button type="button" class="btn btn-block btn-danger" data-act="del-room">ลบห้อง</button>
+        </div>
+    </div>
+</summary>
             <div>
                 <div class="row">
                     <div><label class="required">ราคาผ้า (ทึบ) (ต่อเมตร)</label><select class="field" name="room_price_per_m" required><option value="" hidden>เลือก</option></select></div>
@@ -177,7 +176,7 @@
             </div>
         </div>
     </template>
-    
+
     <template id="decoTpl">
         <div class="deco-item" data-deco-item>
             <div class="item-head">
