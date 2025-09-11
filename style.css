@@ -1,5 +1,6 @@
 /* --- Material 3 Themed Liquid Glass Style --- */
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600&display=swap');
 
 :root {
     /* M3 Color System - Dark Theme */
@@ -240,7 +241,7 @@ select.field {
     border-bottom: 1px solid var(--lg-border);
 }
 
-.actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 16px; position: sticky; bottom: 0; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 16px; }
 .summary-details { flex: 1; text-align: left; }
 .summary-details summary { cursor: pointer; color: var(--lg-primary); font-weight: 500; }
 .summary-popup {
@@ -255,6 +256,7 @@ select.field {
 .summary-item { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
 .summary-item:last-child { margin-bottom: 0; }
 
+.final-actions { margin: var(--base-spacing) 0; }
 .sticky-footer {
     position: fixed;
     bottom: 0;
@@ -266,7 +268,7 @@ select.field {
     -webkit-backdrop-filter: blur(16px);
     border-top: 1px solid var(--lg-border);
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     z-index: 10;
     box-shadow: 0 -4px 12px var(--lg-shadow-color);
