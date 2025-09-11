@@ -114,10 +114,17 @@ h3 { font-size: 1.25rem; font-weight: 500; margin: 0 0 1rem 0; }
     white-space: nowrap;
 }
 
+/* --- Adjusted Layouts for Inputs --- */
 .row { display: grid; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
 .row.two-col { grid-template-columns: 1fr 1fr; }
-.row.five-col { grid-template-columns: 2fr 1fr 1.5fr 1.5fr 1.5fr; align-items: end; }
-.row.deco-row { grid-template-columns: 2fr 1fr 1fr 1.5fr; align-items: end; }
+.row.five-col-adjusted { 
+    grid-template-columns: 1fr 1fr 1.8fr 1.8fr 1.5fr; 
+    align-items: end; 
+}
+.row.deco-row-adjusted { 
+    grid-template-columns: 2fr 1fr 1fr 1.5fr; 
+    align-items: end; 
+}
 
 /* --- Form Elements --- */
 label {
@@ -125,6 +132,9 @@ label {
     color: var(--on-surface-variant);
     display: block;
     margin-bottom: var(--spacing-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 label.required::after { content: " *"; color: var(--error); }
 .field {
@@ -147,7 +157,7 @@ label.required::after { content: " *"; color: var(--error); }
 select.field {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23CAC4D0'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 1rem center;
+    background-position: right 0.75rem center;
     background-size: 1.25rem;
     padding-right: 2.5rem;
 }
@@ -191,13 +201,14 @@ textarea.field { resize: vertical; }
 
 /* Text Button */
 .btn.text { background-color: transparent; color: var(--primary); padding: var(--spacing-sm) var(--spacing-md); }
-.btn.text:hover { background-color: rgba(var(--primary-rgb, 208, 188, 255), 0.08); }
+.btn.text:hover { background-color: rgba(208, 188, 255, 0.08); }
 .btn.btn-secondary.text { color: var(--secondary); }
-.btn.btn-secondary.text:hover { background-color: rgba(var(--secondary-rgb, 204, 194, 220), 0.08); }
+.btn.btn-secondary.text:hover { background-color: rgba(204, 194, 220, 0.08); }
 .btn.btn-tertiary.text { color: var(--tertiary); }
-.btn.btn-tertiary.text:hover { background-color: rgba(var(--tertiary-rgb, 239, 184, 200), 0.08); }
+.btn.btn-tertiary.text:hover { background-color: rgba(239, 184, 200, 0.08); }
 .btn.btn-danger.text { color: var(--error); }
-.btn.btn-danger.text:hover { background-color: rgba(var(--error-rgb, 242, 184, 181), 0.08); }
+.btn.btn-danger.text:hover { background-color: rgba(242, 184, 181, 0.08); }
+
 
 /* --- Layouts & Components --- */
 .header {
@@ -225,11 +236,11 @@ textarea.field { resize: vertical; }
 .deco-item { border-left: 3px solid var(--secondary); }
 .wallpaper-item { border-left: 3px solid var(--tertiary); }
 
-.is-suspended-room, .is-suspended { opacity: 0.5; background: var(--surface-container-low); }
-.is-suspended-room > summary, .is-suspended-room .room-body { pointer-events: none; }
-.is-suspended { pointer-events: none; }
-.is-suspended .actions button { pointer-events: auto; } /* Allow suspend button to be clicked */
-.is-suspended-room .room-menu-container button { pointer-events: auto; } /* Allow room menu to be clicked */
+/* --- Suspension Styles (Bug Fix) --- */
+.is-suspended { opacity: 0.5; background: var(--surface-container-low); pointer-events: none; }
+.is-suspended .actions button { pointer-events: auto; }
+.is-suspended-room { opacity: 0.5; }
+.is-suspended-room > .room-body { pointer-events: none; }
 
 
 .item-head { display: flex; justify-content: space-between; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-md); }
@@ -377,7 +388,7 @@ textarea.field { resize: vertical; }
 }
 .menu-dropdown .btn:hover, .room-menu-dropdown .btn:hover { background: var(--surface-container-highest); }
 .room-menu-dropdown .btn.danger { color: var(--error); }
-.room-menu-dropdown .btn.danger:hover { background: rgba(var(--error-rgb, 242, 184, 181), 0.1); }
+.room-menu-dropdown .btn.danger:hover { background: rgba(242, 184, 181, 0.1); }
 
 /* Toast Notifications */
 .toast-container { position: fixed; bottom: 140px; right: 16px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 999; }
@@ -420,9 +431,3 @@ textarea.field { resize: vertical; }
     transform: translate(-50%, -50%);
 }
 .form-check-label { font-size: 1rem; cursor: pointer; }
-.global-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-lg);
-}

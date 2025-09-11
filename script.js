@@ -1,6 +1,6 @@
 (function() {
     'use strict';
-    const APP_VERSION = "input-ui/3.3.0-wallpaper-m3";
+    const APP_VERSION = "input-ui/3.4.0-hotfix";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v3";
     const SQM_TO_SQYD = 1.19599;
@@ -518,19 +518,29 @@
         const lockText = lockBtn.querySelector('.lock-text');
         const lockIcon = lockBtn.querySelector('.lock-icon');
         
-        const allControls = document.querySelectorAll('input, select, textarea, button:not(#lockBtn):not(#menuBtn)');
         isLocked = lockBtn.dataset.locked === 'true';
+        const allControls = document.querySelectorAll('input, select, textarea, button');
+        
+        allControls.forEach(el => {
+            // Unlock all buttons first, then disable based on lock state
+            el.disabled = false;
+            if (isLocked) {
+                // In locked state, only lockBtn and menuBtn should be enabled
+                if (el.id !== 'lockBtn' && el.id !== 'menuBtn') {
+                    el.disabled = true;
+                }
+            }
+        });
 
         if (isLocked) {
-            allControls.forEach(el => el.disabled = true);
             lockText.textContent = 'ปลดล็อค';
             lockIcon.textContent = 'lock';
         } else {
-            allControls.forEach(el => el.disabled = false);
             lockText.textContent = 'ล็อค';
             lockIcon.textContent = 'lock_open';
         }
     }
+
 
     // --- Event Listeners ---
     document.addEventListener('input', debounce(e => {
@@ -543,39 +553,42 @@
 
     document.addEventListener('click', async (e) => {
         const target = e.target.closest('[data-act]');
-        if (!target) return;
-        
-        // Close any open menus if clicking on an action
-        const openMenus = document.querySelectorAll('.room-menu-dropdown.show, .menu-dropdown.show');
+        if (!target) {
+            // If the click is outside any menu, close them
+            const openMenus = document.querySelectorAll('.menu-dropdown.show, .room-menu-dropdown.show');
+            if (openMenus.length > 0 && !e.target.closest('.menu-container, .room-menu-container')) {
+                openMenus.forEach(menu => menu.classList.remove('show'));
+            }
+            return;
+        }
         
         const action = target.dataset.act;
+
         switch (action) {
             case 'add-set': addSet(target.closest(SELECTORS.room)); break;
             case 'add-deco': addDeco(target.closest(SELECTORS.room)); break;
             case 'add-wallpaper': addWallpaper(target.closest(SELECTORS.room)); break;
             case 'add-wall': addWall(target); break;
-            case 'del-room': delRoom(target); break;
-            case 'del-set': delSet(target); break;
-            case 'del-deco': delDeco(target); break;
-            case 'del-wallpaper': delWallpaper(target); break;
-            case 'del-wall': delWall(target); break;
-            case 'clear-set': clearSet(target); break;
-            case 'clear-deco': clearDeco(target); break;
-            case 'clear-wallpaper': clearWallpaper(target); break;
-            case 'clear-room': clearRoom(target); break;
+            case 'del-room': await delRoom(target); break;
+            case 'del-set': await delSet(target); break;
+            case 'del-deco': await delDeco(target); break;
+            case 'del-wallpaper': await delWallpaper(target); break;
+            case 'del-wall': await delWall(target); break;
+            case 'clear-set': await clearSet(target); break;
+            case 'clear-deco': await clearDeco(target); break;
+            case 'clear-wallpaper': await clearWallpaper(target); break;
+            case 'clear-room': await clearRoom(target); break;
             case 'suspend-item': toggleSuspend(target); break;
             case 'suspend-room': toggleSuspendRoom(target); break;
             case 'toggle-room-menu':
                 e.stopPropagation();
-                const menu = target.closest('.room-menu-container').querySelector('.room-menu-dropdown');
-                menu.classList.toggle('show');
-                break;
+                target.closest('.room-menu-container').querySelector('.room-menu-dropdown').classList.toggle('show');
+                return; // Prevent immediate closing
             default: break;
         }
 
-        openMenus.forEach(menu => {
-             if (!menu.classList.contains('show')) menu.classList.remove('show');
-        });
+        // Close all menus after an action is performed
+        document.querySelectorAll('.room-menu-dropdown.show, .menu-dropdown.show').forEach(menu => menu.classList.remove('show'));
     });
 
     document.querySelector(SELECTORS.addRoomHeaderBtn).addEventListener('click', () => addRoom());
@@ -588,8 +601,7 @@
     });
 
     document.querySelector(SELECTORS.copyJsonBtn).addEventListener('click', () => {
-        const payload = buildPayload();
-        navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
+        navigator.clipboard.writeText(JSON.stringify(buildPayload(), null, 2))
             .then(() => showToast("คัดลอก JSON แล้ว", 'success'))
             .catch(() => showToast("ไม่สามารถคัดลอก JSON ได้", 'error'));
     });
@@ -597,8 +609,7 @@
     document.querySelector(SELECTORS.copyTextBtn).addEventListener('click', async () => {
         const options = await showCopyOptionsModal();
         if (!options) return;
-        const text = generateCopyText(options);
-        navigator.clipboard.writeText(text)
+        navigator.clipboard.writeText(generateCopyText(options))
             .then(() => showToast("คัดลอกข้อความแล้ว", 'success'))
             .catch(() => showToast("ไม่สามารถคัดลอกข้อความได้", 'error'));
     });
@@ -623,10 +634,8 @@
     });
     
     document.querySelector(SELECTORS.exportBtn).addEventListener('click', () => {
-        const payload = buildPayload();
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
         const a = document.createElement('a');
-        a.href = dataStr;
+        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(buildPayload(), null, 2));
         a.download = "marnthara_data.json";
         a.click();
         a.remove();
@@ -638,19 +647,8 @@
         document.querySelector(SELECTORS.menuDropdown).classList.toggle('show');
     });
 
-    document.addEventListener('click', (e) => {
-        const openMenus = document.querySelectorAll('.menu-dropdown.show, .room-menu-dropdown.show');
-        if (openMenus.length > 0) {
-            const menuBtn = e.target.closest('#menuBtn, [data-act="toggle-room-menu"]');
-            if (!menuBtn) {
-                 openMenus.forEach(menu => menu.classList.remove('show'));
-            }
-        }
-    });
-
     orderForm.addEventListener("submit", (e) => {
-        const payload = buildPayload();
-        document.querySelector(SELECTORS.payloadInput).value = JSON.stringify(payload);
+        document.querySelector(SELECTORS.payloadInput).value = JSON.stringify(buildPayload());
         showToast("ส่งข้อมูลแล้ว...", "success");
     });
     

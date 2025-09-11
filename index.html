@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Marnthara Input (v3.3)</title>
+    <title>Marnthara Input (v3.4)</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,6 +21,8 @@
         </div>
         <h1>Marnthara</h1>
         <button type="button" class="btn btn-primary filled" id="addRoomHeaderBtn"><span class="material-icons">add</span> เพิ่มห้อง</button>
+        <button type="button" class="btn btn-secondary text" id="lockBtn"><span class="material-icons lock-icon">lock_open</span><span class="lock-text">ล็อค</span></button>
+        <button type="button" class="btn btn-danger text" id="clearAllBtn" title="ล้างทั้งหมด"><span class="material-icons">delete_sweep</span></button>
     </div>
 
     <form id="orderForm" method="post" target="hiddenFrame">
@@ -37,12 +39,6 @@
         <div id="rooms"></div>
     </form>
     
-    <div class="global-actions">
-        <button type="button" class="btn btn-danger text" id="clearAllBtn"><span class="material-icons">delete_sweep</span>ล้างทั้งหมด</button>
-        <button type="button" class="btn btn-secondary text" id="lockBtn"><span class="material-icons lock-icon">lock_open</span><span class="lock-text">ล็อค</span></button>
-    </div>
-
-
     <div class="sticky-footer">
         <div class="summary-grid">
             <div class="summary-item"><div class="summary-label">ผ้าม่าน(ชุด)</div><div class="summary-value" id="setCountSets">0</div></div>
@@ -160,7 +156,7 @@
                     <button type="button" class="btn btn-icon text btn-xs" data-act="del-set" title="ลบจุด"><span class="material-icons">close</span></button>
                 </div>
             </div>
-            <div class="row five-col" data-set-options-row>
+            <div class="row five-col-adjusted" data-set-options-row>
                 <div><label class="required">กว้าง(ม.)</label><input class="field" name="width_m" type="number" step="0.01" min="0" required /></div>
                 <div><label class="required">สูง(ม.)</label><input class="field" name="height_m" type="number" step="0.01" min="0" required /></div>
                 <div><label class="required">ประเภท</label><select class="field" name="fabric_variant" required><option>ทึบ</option><option>โปร่ง</option><option>ทึบ&โปร่ง</option></select></div>
@@ -192,7 +188,7 @@
                     <button type="button" class="btn btn-icon text btn-xs" data-act="del-deco" title="ลบรายการ"><span class="material-icons">close</span></button>
                 </div>
             </div>
-            <div class="row deco-row">
+            <div class="row deco-row-adjusted">
                 <div><label class="required">ประเภท</label><input class="field" name="deco_type" placeholder="เช่น โซฟา, เบาะ" required /></div>
                 <div><label>กว้าง(ม.)</label><input class="field" name="deco_width_m" type="number" step="0.01" min="0" /></div>
                 <div><label>ยาว(ม.)</label><input class="field" name="deco_height_m" type="number" step="0.01" min="0" /></div>
