@@ -118,14 +118,8 @@ h3 { font-size: 1.25rem; font-weight: 500; margin: 0 0 1rem 0; }
     margin-bottom: var(--base-spacing);
 }
 
-@media (min-width: 600px) {
-    .row.two-col { grid-template-columns: 1fr 1fr; }
-}
-
-.row.three-col { grid-template-columns: 1fr; }
-@media (min-width: 600px) {
-    .row.three-col { grid-template-columns: repeat(3, 1fr); }
-}
+.row.two-col { grid-template-columns: 1fr 1fr; }
+.row.three-col { grid-template-columns: repeat(3, 1fr); }
 
 .row.five-col { grid-template-columns: 1fr; align-items: end;}
 @media (min-width: 600px) {
