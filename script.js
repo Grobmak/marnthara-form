@@ -1,6 +1,6 @@
 (function() {
     'use strict';
-    const APP_VERSION = "input-ui/4.0.0-m3-liquidglass-fixed-v2"; // Updated version
+    const APP_VERSION = "input-ui/4.0.0-m3-liquidglass-fixed-v4";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4";
     const SQM_TO_SQYD = 1.19599;
@@ -34,11 +34,6 @@
         lockBtn: '#lockBtn', addRoomHeaderBtn: '#addRoomHeaderBtn', submitBtn: '#submitBtn',
         grandTotal: '#grandTotal', setCount: '#setCount', grandFabric: '#grandFabric', grandSheerFabric: '#grandSheerFabric',
         modal: '#confirmationModal', modalTitle: '#modalTitle', modalBody: '#modalBody', modalConfirm: '#modalConfirm', modalCancel: '#modalCancel',
-        room: '[data-room]', set: '[data-set]', setsContainer: '[data-sets]',
-        decorationsContainer: '[data-decorations]', decoItem: '[data-deco-item]',
-        wallpapersContainer: '[data-wallpapers]', wallpaperItem: '[data-wallpaper-item]', wallsContainer: '[data-walls-container]',
-        sheerWrap: '[data-sheer-wrap]',
-        roomNameInput: 'input[name="room_name"]', roomPricePerM: 'select[name="room_price_per_m"]', roomStyle: 'select[name="room_style"]',
         setCountSets: '#setCountSets', setCountDeco: '#setCountDeco',
         toastContainer: '#toast-container',
         grandOpaqueTrack: '#grandOpaqueTrack', grandSheerTrack: '#grandSheerTrack',
@@ -46,6 +41,11 @@
         copyCustomerInfo: '#copyCustomerInfo', copyRoomDetails: '#copyRoomDetails', copySummary: '#copySummary',
         menuBtn: '#menuBtn', menuDropdown: '#menuDropdown', importBtn: '#importBtn', exportBtn: '#exportBtn',
         importModal: '#importModal', importJsonArea: '#importJsonArea', importConfirm: '#importConfirm', importCancel: '#importCancel',
+        room: '[data-room]', set: '[data-set]', setsContainer: '[data-sets]',
+        decorationsContainer: '[data-decorations]', decoItem: '[data-deco-item]',
+        wallpapersContainer: '[data-wallpapers]', wallpaperItem: '[data-wallpaper-item]', wallsContainer: '[data-walls-container]',
+        sheerWrap: '[data-sheer-wrap]',
+        roomNameInput: 'input[name="room_name"]', roomPricePerM: 'select[name="room_price_per_m"]', roomStyle: 'select[name="room_style"]',
         roomMenuBtn: '.room-menu-btn', setMenuBtn: '.set-menu-btn', decoMenuBtn: '.deco-menu-btn', wallpaperMenuBtn: '.wallpaper-menu-btn',
         roomMenuDropdown: '.room-menu-dropdown', setMenuDropdown: '.set-menu-dropdown', decoMenuDropdown: '.deco-menu-dropdown', wallpaperMenuDropdown: '.wallpaper-menu-dropdown',
     };
@@ -79,6 +79,10 @@
 
     function showToast(message, type = 'default') {
         const container = document.querySelector(SELECTORS.toastContainer);
+        if (!container) {
+            console.error('Toast container not found!');
+            return;
+        }
         const toast = document.createElement('div');
         toast.className = 'toast';
         toast.textContent = message;
@@ -141,7 +145,10 @@
     }
 
     function addRoom(prefill) {
-        if (isLocked) return;
+        if (isLocked) {
+             showToast('ไม่สามารถเพิ่มห้องได้ในขณะที่ถูกล็อค', 'error');
+             return;
+        }
         roomCount++;
         const frag = document.querySelector(SELECTORS.roomTpl).content.cloneNode(true);
         const room = frag.querySelector(SELECTORS.room);
@@ -181,7 +188,10 @@
     }
 
     function addSet(roomEl, prefill) {
-        if (isLocked) return;
+        if (isLocked) {
+            showToast('ไม่สามารถเพิ่มรายการได้ในขณะที่ถูกล็อค', 'error');
+            return;
+        }
         const setsWrap = roomEl.querySelector(SELECTORS.setsContainer);
         const frag = document.querySelector(SELECTORS.setTpl).content.cloneNode(true);
         const created = frag.querySelector(SELECTORS.set);
@@ -205,7 +215,10 @@
     }
     
     function addDeco(roomEl, prefill) {
-        if (isLocked) return;
+        if (isLocked) {
+            showToast('ไม่สามารถเพิ่มรายการได้ในขณะที่ถูกล็อค', 'error');
+            return;
+        }
         const decoWrap = roomEl.querySelector(SELECTORS.decorationsContainer);
         const frag = document.querySelector(SELECTORS.decoTpl).content.cloneNode(true);
         const created = frag.querySelector(SELECTORS.decoItem);
@@ -225,7 +238,10 @@
     }
     
     function addWallpaper(roomEl, prefill) {
-        if (isLocked) return;
+        if (isLocked) {
+            showToast('ไม่สามารถเพิ่มรายการได้ในขณะที่ถูกล็อค', 'error');
+            return;
+        }
         const wallpaperWrap = roomEl.querySelector(SELECTORS.wallpapersContainer);
         const frag = document.querySelector(SELECTORS.wallpaperTpl).content.cloneNode(true);
         const created = frag.querySelector(SELECTORS.wallpaperItem);
@@ -246,7 +262,10 @@
     }
     
     function addWall(btn, prefillWidth) {
-        if (isLocked) return;
+        if (isLocked) {
+             showToast('ไม่สามารถเพิ่มรายการได้ในขณะที่ถูกล็อค', 'error');
+             return;
+        }
         const wallsContainer = btn.closest(SELECTORS.wallpaperItem).querySelector(SELECTORS.wallsContainer);
         const frag = document.querySelector(SELECTORS.wallTpl).content.cloneNode(true);
         if (prefillWidth) {
@@ -262,6 +281,10 @@
     }
     
     function delItem(el, name) {
+        if (isLocked) {
+            showToast('ไม่สามารถลบรายการได้ในขณะที่ถูกล็อค', 'error');
+            return;
+        }
         const room = el.closest(SELECTORS.room);
         const currentCount = room.querySelectorAll(`[data-${name}]`).length;
         if (currentCount > 1) {
@@ -274,6 +297,10 @@
     }
 
     function delRoom(el) {
+        if (isLocked) {
+            showToast('ไม่สามารถลบห้องได้ในขณะที่ถูกล็อค', 'error');
+            return;
+        }
         if (roomsEl.querySelectorAll(SELECTORS.room).length > 1) {
             showConfirmation('ยืนยันการลบห้อง', 'คุณแน่ใจหรือไม่ว่าต้องการลบห้องนี้? การกระทำนี้ไม่สามารถย้อนกลับได้')
                 .then(confirmed => {
@@ -289,6 +316,10 @@
     }
 
     function clearRoom(el) {
+        if (isLocked) {
+            showToast('ไม่สามารถล้างข้อมูลห้องได้ในขณะที่ถูกล็อค', 'error');
+            return;
+        }
         showConfirmation('ยืนยันการล้างข้อมูลห้อง', 'คุณแน่ใจหรือไม่ว่าต้องการล้างข้อมูลทั้งหมดในห้องนี้?')
             .then(confirmed => {
                 if (confirmed) {
@@ -304,6 +335,10 @@
     }
 
     function clearAll() {
+        if (isLocked) {
+            showToast('ไม่สามารถล้างข้อมูลทั้งหมดได้ในขณะที่ถูกล็อค', 'error');
+            return;
+        }
         showConfirmation('ยืนยันการล้างข้อมูลทั้งหมด', 'คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้')
             .then(confirmed => {
                 if (confirmed) {
@@ -505,6 +540,10 @@
     }
 
     function delWall(btn) {
+        if (isLocked) {
+             showToast('ไม่สามารถลบรายการได้ในขณะที่ถูกล็อค', 'error');
+             return;
+        }
         const wallRow = btn.closest('.wall-input-row');
         const wallsContainer = wallRow.parentElement;
         if (wallsContainer.children.length > 1) {
@@ -537,6 +576,7 @@
             recalcAll();
         } catch (e) {
             console.error("Failed to load data from localStorage", e);
+            showToast('พบข้อผิดพลาดในการโหลดข้อมูล', 'error');
             addRoom();
         }
     }
@@ -733,6 +773,10 @@
     }
 
     function importJson() {
+        if (isLocked) {
+             showToast('ไม่สามารถนำเข้าข้อมูลได้ในขณะที่ถูกล็อค', 'error');
+             return;
+        }
         const modal = document.querySelector(SELECTORS.importModal);
         const textarea = modal.querySelector(SELECTORS.importJsonArea);
         textarea.value = "";
