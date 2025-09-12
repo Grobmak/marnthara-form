@@ -230,15 +230,31 @@ select.field {
 .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 16px; position: relative; }
 .total { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: 600; }
 .room-actions { display: flex; gap: 12px; justify-content: flex-start; flex-wrap: wrap; }
-.summary-details { flex: 1; text-align: left; }
-.summary-details summary { cursor: pointer; color: var(--lg-primary); font-weight: 500; }
+.summary-details {
+    /* โค้ดที่คุณใส่มาถูกต้องแล้ว */
+    position: relative;
+    z-index: 10;
+    flex: 1; /* คุณสมบัตินี้ทำให้มันขยายตามพื้นที่ที่มีอยู่ */
+    text-align: left;
+}
+.summary-details summary {
+    cursor: pointer;
+    color: var(--lg-primary);
+    font-weight: 500;
+}
 .summary-popup {
+    /* *** นี่คือโค้ดที่ต้องแก้ไข *** */
+    position: absolute; /* ทำให้มันลอยขึ้นมาเหนือองค์ประกอบอื่น */
+    top: 100%; /* จัดตำแหน่งให้เริ่มที่ขอบล่างของกล่องแม่ */
+    right: 0; /* จัดตำแหน่งให้ชิดขวาของกล่องแม่ */
+    margin-top: 8px; /* เพิ่มช่องว่างด้านบนเล็กน้อย */
+
+    /* โค้ดสำหรับสไตล์อื่น ๆ ที่มีอยู่แล้ว */
     border: 1px solid var(--lg-border);
     border-radius: var(--base-border-radius);
     padding: var(--base-spacing);
     background-color: var(--lg-card-bg-light);
     backdrop-filter: blur(16px);
-    margin-top: 8px;
     box-shadow: 0 4px 12px var(--lg-shadow-color);
 }
 .summary-item { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
