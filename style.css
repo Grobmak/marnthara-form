@@ -453,18 +453,21 @@ body {
     display: none !important;
 }
 
-.option-group[data-product-type="fabric"],
-.option-group[data-product-type="sheer"],
-.option-group[data-product-type="wallpaper"],
-.option-group[data-product-type="roller_blind"] {
+.option-group[data-product-type] {
     display: none;
+}
+
+/* สำคัญ: แสดงเฉพาะกลุ่มที่มีคลาส active */
+.option-group[data-product-type].active {
+    display: block;
 }
 
 input[name="product_type"][value="fabric"]:checked ~ .option-group[data-product-type="fabric"],
 input[name="product_type"][value="sheer"]:checked ~ .option-group[data-product-type="sheer"],
 input[name="product_type"][value="wallpaper"]:checked ~ .option-group[data-product-type="wallpaper"],
 input[name="product_type"][value="roller_blind"]:checked ~ .option-group[data-product-type="roller_blind"] {
-    display: block;
+    /* ถูกตัดทิ้ง เพราะโครงสร้าง HTML ไม่ใช่ sibling ตาม selector นี้ */
+    display: none;
 }
 
 .alert {
