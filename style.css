@@ -118,13 +118,8 @@ h3 { font-size: 1.25rem; font-weight: 500; margin: 0 0 1rem 0; }
     margin-bottom: var(--base-spacing);
 }
 
-/* โค้ดใหม่ */
-.row.two-col { 
-    grid-template-columns: 1fr 1fr; 
-}
-
 @media (min-width: 600px) {
-    /* บรรทัด .row.two-col เดิมจะถูกลบออกจากส่วนนี้ */
+    .row.two-col { grid-template-columns: 1fr 1fr; }
 }
 
 .row.three-col { grid-template-columns: 1fr; }
