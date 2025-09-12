@@ -96,6 +96,22 @@ h3 { font-size: 1.25rem; font-weight: 500; margin: 0 0 1rem 0; }
     padding-top: var(--base-spacing);
 }
 
+.total {
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.room-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
 .set-head, .modal-title, .set-title {
     display: flex;
     justify-content: space-between;
@@ -181,6 +197,8 @@ select.field {
 /* --- Text & Price --- */
 .small { font-size: 0.85rem; color: var(--lg-accent); }
 .price { font-weight: 600; color: var(--lg-secondary); }
+.ml-2 { margin-left: 0.5rem; }
+
 
 /* --- Buttons --- */
 .btn {
