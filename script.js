@@ -1,6 +1,6 @@
 (function() {
     'use strict';
-    const APP_VERSION = "input-ui/4.0.0-m3-liquidglass-fixed"; // Updated version
+    const APP_VERSION = "input-ui/4.0.0-m3-liquidglass-fixed-v2"; // Updated version
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4";
     const SQM_TO_SQYD = 1.19599;
@@ -832,18 +832,28 @@
     });
 
     document.addEventListener('click', (e) => {
+        // Close all other open dropdowns
         document.querySelectorAll('.menu-dropdown.show').forEach(dropdown => {
-             if (!dropdown.parentElement.contains(e.target)) {
+            const container = dropdown.closest('.menu-container');
+            if (container && !container.contains(e.target)) {
+                 dropdown.classList.remove('show');
+            } else if (!container && e.target.id !== 'menuBtn' && !dropdown.contains(e.target)) {
                 dropdown.classList.remove('show');
             }
         });
-
+        
+        // Handle clicks on any menu button
         const menuBtn = e.target.closest('.room-menu-btn, .set-menu-btn, .deco-menu-btn, .wallpaper-menu-btn');
+        const mainMenuBtn = e.target.closest('#menuBtn');
+
         if (menuBtn) {
             e.preventDefault();
             const dropdown = menuBtn.closest('.menu-container').querySelector('.menu-dropdown');
             dropdown.classList.toggle('show');
-            return;
+        } else if (mainMenuBtn) {
+            e.preventDefault();
+            const dropdown = document.querySelector(SELECTORS.menuDropdown);
+            dropdown.classList.toggle('show');
         }
     });
 
