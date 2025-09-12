@@ -112,13 +112,15 @@ h3 { font-size: 1.25rem; font-weight: 500; margin: 0 0 1rem 0; }
     gap: var(--base-spacing);
     margin-bottom: var(--base-spacing);
 }
-.row.three-col { grid-template-columns: 1fr 1fr; } /* แสดง 2 คอลัมน์บนมือถือ */
-.row.five-col { grid-template-columns: 1fr 1fr; align-items: end;} /* แสดง 2 คอลัมน์บนมือถือ */
-.row.deco-row { grid-template-columns: 1fr 1fr; align-items: end; } /* แสดง 2 คอลัมน์บนมือถือ */
+/* แก้ไขลำดับคอลัมน์สำหรับ Deco Row และ Wallpaper Row */
+.row.deco-row, .row.five-col, .row.three-col {
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+}
 
 @media (min-width: 600px) {
     .row.two-col { grid-template-columns: 1fr 1fr; }
-    .row.three-col { grid-template-columns: repeat(3, 1fr); }
+    .row.three-col { grid-template-columns: 1fr 1fr 1fr; }
     .row.five-col { grid-template-columns: 2fr 1fr 1fr 1.5fr auto; }
     .row.deco-row {
         grid-template-columns: repeat(4, 1fr) auto;
