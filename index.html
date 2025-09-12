@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Marnthara Input (v3)</title>
+    <title>Marnthara Input (v4)</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,6 +21,7 @@
         </div>
         <h1>Marnthara</h1>
         <button type="button" class="btn btn-xs btn-primary outline" id="addRoomHeaderBtn">+ เพิ่มห้อง</button>
+        <span style="flex:1;"></span>
         <button type="button" class="btn btn-xs btn-primary" id="lockBtn"><span class="lock-text">ล็อค</span> <span class="lock-icon material-symbols-outlined">lock_open</span></button>
         <button type="button" class="btn btn-xs btn-danger" id="clearAllBtn">ล้างทั้งหมด</button>
     </div>
@@ -134,11 +135,13 @@
             <div data-decorations></div>
             <div data-wallpapers></div>
             <div class="total">
-                <span class="room-summary">ราคาห้อง: <span class="price" data-room-total>0</span> บ.</span>
                 <div class="room-actions">
                     <button type="button" class="btn btn-xs btn-primary outline" data-act="add-set">+ เพิ่มจุดผ้าม่าน</button>
-                    <button type="button" class="btn btn-xs btn-secondary outline" data-act="add-deco" style="--primary: var(--lg-secondary);">+ ตกแต่งเพิ่ม</button>
-                    <button type="button" class="btn btn-xs btn-info outline" data-act="add-wallpaper" style="--primary: var(--lg-info);">+ เพิ่มวอลเปเปอร์</button>
+                    <button type="button" class="btn btn-xs btn-secondary outline" data-act="add-deco" style="--primary: var(--secondary);">+ ตกแต่งเพิ่ม</button>
+                    <button type="button" class="btn btn-xs btn-info outline" data-act="add-wallpaper" style="--primary: var(--info);">+ เพิ่มวอลเปเปอร์</button>
+                </div>
+                <div class="room-summary">
+                    ราคาห้อง: <span class="price" data-room-total>0</span> บ.
                 </div>
             </div>
         </details>
@@ -147,7 +150,7 @@
     <template id="setTpl">
         <div class="set card" data-set>
             <div class="set-head">
-                <span class="set-title">ผ้าม่านจุดที่ <span data-item-title></span></span>
+                 <span class="set-title">ผ้าม่านจุดที่ <span data-item-title></span></span>
                 <div class="menu-container set-menu-container">
                     <button type="button" class="btn btn-icon btn-xs set-menu-btn"><span class="material-symbols-outlined">more_vert</span></button>
                     <div class="menu-dropdown set-menu-dropdown">
@@ -158,30 +161,15 @@
                 </div>
             </div>
             <div class="row two-col">
-                <div><label class="required">ความกว้าง (ม.)</label><input class="field" name="width_m" type="number" step="0.01" min="0" required /></div>
-                <div><label class="required">ความสูง (ม.)</label><input class="field" name="height_m" type="number" step="0.01" min="0" required /></div>
+                <div><label class="required">กว้าง (ม.)</label><input class="field" name="width_m" type="number" step="0.01" min="0" required /></div>
+                <div><label class="required">สูง (ม.)</label><input class="field" name="height_m" type="number" step="0.01" min="0" required /></div>
             </div>
             <div class="row three-col" data-set-options-row>
-                <div><label class="required">ชนิดผ้า</label>
-                    <select class="field" name="fabric_variant" required>
-                        <option>ทึบ</option>
-                        <option>โปร่ง</option>
-                        <option>ทึบ&โปร่ง</option>
-                    </select>
-                </div>
-                <div><label class="required">รูปแบบเปิด-ปิด</label>
-                    <select class="field" name="open_type" required>
-                        <option value="" hidden>เลือก</option>
-                        <option>แยกกลาง</option>
-                        <option>เปิดข้าง</option>
-                    </select>
-                </div>
-                <div data-sheer-wrap class="hidden">
-                    <label>ราคาผ้าโปร่ง (ต่อเมตร)</label>
-                    <select class="field" name="sheer_price_per_m"><option value="" hidden>เลือก</option></select>
-                </div>
+                <div><label>รูปแบบเปิดผ้า</label><select class="field" name="open_type"><option value="" hidden>เลือก</option><option>แยกกลาง</option><option>สไลด์เดี่ยว</option></select></div>
+                <div><label>ชนิดผ้าของจุดนี้</label><select class="field" name="fabric_variant"><option>ทึบ</option><option>โปร่ง</option><option>ทึบ&โปร่ง</option></select></div>
+                <div data-sheer-wrap class="hidden"><label>ราคาผ้าโปร่ง </label><select class="field" name="sheer_price_per_m"><option value="" hidden>เลือก</option></select></div>
             </div>
-            <div class="small" data-set-summary>
+            <div class="small" style="margin-top: 8px">
                 <div>
                     ราคารวม: <span class="price" data-set-price-total>0</span> บ.
                     <span data-opaque-price-label class="ml-2">• ทึบ: <span class="price" data-set-price-opaque>0</span> บ.</span>
@@ -196,10 +184,10 @@
             </div>
         </div>
     </template>
-
+    
     <template id="decoTpl">
         <div class="deco-item card" data-deco-item>
-            <div class="set-head">
+             <div class="set-head">
                 <span class="set-title">ตกแต่งพิเศษ <span data-item-title></span></span>
                 <div class="menu-container deco-menu-container">
                     <button type="button" class="btn btn-icon btn-xs deco-menu-btn"><span class="material-symbols-outlined">more_vert</span></button>
@@ -211,10 +199,10 @@
                 </div>
             </div>
             <div class="row deco-row">
-                <div><label class="required">ชนิด</label><input class="field" name="deco_type" type="text" placeholder="เช่น ห่วง, สายรัด" required /></div>
-                <div><label>ความกว้าง (ม.)</label><input class="field" name="deco_width_m" type="number" step="0.01" min="0" /></div>
-                <div><label>ความสูง (ม.)</label><input class="field" name="deco_height_m" type="number" step="0.01" min="0" /></div>
-                <div><label class="required">ราคา/ตร.หลา</label><input class="field" name="deco_price_sqyd" type="text" inputmode="numeric" required /></div>
+                <div><label>ประเภท</label><select class="field" name="deco_type" required><option value="" hidden>เลือก</option><option>มู่ลี่ไม้</option><option>ม่านม้วน</option><option>ปรับแสง</option><option>ฉากPVC</option></select></div>
+                <div><label>กว้าง(ม.)</label><input class="field" name="deco_width_m" type="number" step="0.01" min="0" required /></div>
+                <div><label>สูง(ม.)</label><input class="field" name="deco_height_m" type="number" step="0.01" min="0" required /></div>
+                <div><label>ราคา/ตร.หลา</label><input class="field" name="deco_price_sqyd" type="text" inputmode="numeric" required /></div>
             </div>
             <div class="small" data-deco-summary>ราคา: <span class="price" data-deco-price>0</span> บ. • พื้นที่: <span class="price" data-deco-sqyd>0.00</span> ตร.หลา</div>
         </div>
@@ -224,7 +212,7 @@
         <div class="wallpaper-item card" data-wallpaper-item>
             <div class="set-head">
                 <span class="set-title">วอลเปเปอร์ <span data-item-title></span></span>
-                <div class="menu-container wallpaper-menu-container">
+                 <div class="menu-container wallpaper-menu-container">
                     <button type="button" class="btn btn-icon btn-xs wallpaper-menu-btn"><span class="material-symbols-outlined">more_vert</span></button>
                     <div class="menu-dropdown wallpaper-menu-dropdown">
                         <button type="button" class="btn btn-block" data-act="toggle-wallpaper-suspend"><span class="material-symbols-outlined">pause</span> <span data-suspend-text>ระงับ</span> / ใช้งาน</button>
@@ -234,8 +222,8 @@
                 </div>
             </div>
             <div class="row two-col">
-                <div><label class="required">ความสูงห้อง (ม.)</label><input class="field" name="wallpaper_height_m" type="number" step="0.01" min="0" required /></div>
-                <div><label class="required">ราคาต่อม้วน</label><input class="field" name="wallpaper_price_roll" type="text" inputmode="numeric" required /></div>
+                <div><label>ความสูงห้อง (ม.)</label><input class="field" name="wallpaper_height_m" type="number" step="0.01" min="0" required /></div>
+                <div><label>ราคาต่อม้วน</label><input class="field" name="wallpaper_price_roll" type="text" inputmode="numeric" required /></div>
             </div>
             <div class="walls-section">
                 <label>ความกว้างผนัง (ใส่ทีละด้าน)</label>
@@ -250,7 +238,7 @@
 
     <template id="wallTpl">
         <div class="wall-input-row">
-            <input class="field" name="wall_width_m" type="number" step="0.01" min="0" required />
+            <input class="field" name="wall_width_m" type="number" step="0.01" min="0" placeholder="ความกว้าง (ม.)" required />
             <button type="button" class="btn btn-icon btn-danger outline" data-act="del-wall" title="ลบผนัง"><span class="material-symbols-outlined">delete</span></button>
         </div>
     </template>
