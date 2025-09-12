@@ -361,12 +361,17 @@
                 const variant = set.querySelector('select[name="fabric_variant"]').value;
                 const sheerPriceRaw = toNum(set.querySelector('select[name="sheer_price_per_m"]').value);
                 
-                const basePrice = baseRaw + sPlus + heightPlus(h);
+                // --- FIX: Correctly calculate the surcharges and total price. ---
+                const hPlus = heightPlus(h);
+                const opaquePricePerM = baseRaw + sPlus + hPlus;
+                const sheerPricePerM = sheerPriceRaw + hPlus;
+
                 const opaqueYardage = CALC.fabricYardage(style, w);
                 const sheerYardage = (variant === 'โปร่ง' || variant === 'ทึบ&โปร่ง') ? CALC.fabricYardage(style, w) : 0;
                 
-                const opaquePrice = (variant === 'ทึบ' || variant === 'ทึบ&โปร่ง') ? Math.ceil(opaqueYardage) * basePrice : 0;
-                const sheerPrice = (variant === 'โปร่ง' || variant === 'ทึบ&โปร่ง') ? Math.ceil(sheerYardage) * sheerPriceRaw : 0;
+                const opaquePrice = (variant === 'ทึบ' || variant === 'ทึบ&โปร่ง') ? Math.ceil(opaqueYardage) * opaquePricePerM : 0;
+                const sheerPrice = (variant === 'โปร่ง' || variant === 'ทึบ&โปร่ง') ? Math.ceil(sheerYardage) * sheerPricePerM : 0;
+                // --- END FIX ---
 
                 const setTotal = opaquePrice + sheerPrice;
                 roomSum += setTotal;
@@ -576,8 +581,9 @@
                 room.sets.forEach((set, i) => {
                     if(set.is_suspended) return;
                     const variant = set.fabric_variant;
-                    const opaquePrice = (variant === 'ทึบ' || variant === 'ทึบ&โปร่ง') ? Math.ceil(CALC.fabricYardage(room.style, set.width_m)) * (room.price_per_m_raw + stylePlus(room.style) + heightPlus(set.height_m)) : 0;
-                    const sheerPrice = (variant === 'โปร่ง' || variant === 'ทึบ&โปร่ง') ? Math.ceil(CALC.fabricYardage(room.style, set.width_m)) * set.sheer_price_per_m : 0;
+                    const hPlus = heightPlus(set.height_m);
+                    const opaquePrice = (variant === 'ทึบ' || variant === 'ทึบ&โปร่ง') ? Math.ceil(CALC.fabricYardage(room.style, set.width_m)) * (room.price_per_m_raw + stylePlus(room.style) + hPlus) : 0;
+                    const sheerPrice = (variant === 'โปร่ง' || variant === 'ทึบ&โปร่ง') ? Math.ceil(CALC.fabricYardage(room.style, set.width_m)) * (set.sheer_price_per_m + hPlus) : 0;
                     textToCopy += `  - จุดที่ ${i + 1}: กว้าง ${fmt(set.width_m, 2)} ม. x สูง ${fmt(set.height_m, 2)} ม. (${set.fabric_variant} - ${set.open_type})\n`;
                     if(opaquePrice > 0) textToCopy += `    ผ้าทึบ: ${fmt(opaquePrice, 0, true)} บ. | ใช้ ${fmt(CALC.fabricYardage(room.style, set.width_m), 2)} หลา\n`;
                     if(sheerPrice > 0) textToCopy += `    ผ้าโปร่ง: ${fmt(sheerPrice, 0, true)} บ. | ใช้ ${fmt(CALC.fabricYardage(room.style, set.width_m), 2)} หลา\n`;
