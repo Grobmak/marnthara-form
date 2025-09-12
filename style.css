@@ -340,3 +340,10 @@ body.is-locked .field:not([readonly]) {
     opacity: 0.5;
     pointer-events: none;
 }
+/* Custom style for the delete wall button to make it round */
+.btn-icon[data-act="del-wall"] {
+    border-radius: 50%;
+    width: 36px; /* Adjust as needed */
+    height: 36px; /* Adjust as needed */
+    padding: 0; /* Remove default padding for better centering */
+}
