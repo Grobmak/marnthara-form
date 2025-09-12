@@ -108,17 +108,13 @@ h3 { font-size: 1.25rem; font-weight: 500; margin: 0 0 1rem 0; }
 }
 .row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr; /* แสดง 2 คอลัมน์บนมือถือ */
     gap: var(--base-spacing);
     margin-bottom: var(--base-spacing);
 }
-.row.three-col { grid-template-columns: 1fr 1fr; }
-.row.five-col { grid-template-columns: 1fr 1fr; align-items: end;}
-.row.deco-row { grid-template-columns: 1fr 1fr; align-items: end; }
-
-/* จัดเรียงช่องใหม่สำหรับ Wallpaper */
-.deco-row.four-col { grid-template-columns: 1fr 1fr; }
-.deco-row.five-col { grid-template-columns: 1fr 1fr; }
+.row.three-col { grid-template-columns: 1fr 1fr; } /* แสดง 2 คอลัมน์บนมือถือ */
+.row.five-col { grid-template-columns: 1fr 1fr; align-items: end;} /* แสดง 2 คอลัมน์บนมือถือ */
+.row.deco-row { grid-template-columns: 1fr 1fr; align-items: end; } /* แสดง 2 คอลัมน์บนมือถือ */
 
 @media (min-width: 600px) {
     .row.two-col { grid-template-columns: 1fr 1fr; }
@@ -129,7 +125,7 @@ h3 { font-size: 1.25rem; font-weight: 500; margin: 0 0 1rem 0; }
         align-items: end;
     }
 }
-.wall-input-row { display: grid; gap: 8px; margin-bottom: 8px; align-items: center; grid-template-columns: 1fr 1fr; }
+.wall-input-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
 .wall-input-row .field { flex-grow: 1; }
 
 /* --- Form Elements --- */
