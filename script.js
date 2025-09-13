@@ -709,30 +709,27 @@
 
         const importBtnEl = document.querySelector(SELECTORS.importBtn);
         if (importBtnEl) {
-            importBtnEl.addEventListener('click', () => showModal(SELECTORS.importModal));
+            importBtnEl.addEventListener('click', () => {
+                showModal(SELECTORS.importModal);
+            });
         }
 
         const importConfirmEl = document.querySelector(SELECTORS.importConfirm);
         if (importConfirmEl) {
-            importConfirmEl.addEventListener('click', () => {
+            importConfirmEl.addEventListener('click', async () => {
                 const importJsonAreaEl = document.querySelector(SELECTORS.importJsonArea);
                 const jsonText = importJsonAreaEl ? importJsonAreaEl.value : '';
                 try {
                     const payload = JSON.parse(jsonText);
                     loadPayload(payload);
+                    document.querySelector(SELECTORS.importModal).classList.remove('visible');
                 } catch (e) {
                     showToast("ข้อมูล JSON ไม่ถูกต้อง", "error");
                 }
             });
         }
 
-        const importCancelEl = document.querySelector(SELECTORS.importCancel);
-        if (importCancelEl) {
-            importCancelEl.addEventListener('click', () => {
-                const importModalEl = document.querySelector(SELECTORS.importModal);
-                if (importModalEl) importModalEl.classList.remove('visible');
-            });
-        }
+        // Removed the separate importCancel listener as it's now handled by showModal's cleanup.
         
         const exportBtnEl = document.querySelector(SELECTORS.exportBtn);
         if (exportBtnEl) {
