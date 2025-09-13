@@ -148,55 +148,46 @@
                     <input type="text" name="room_name" class="room-name-input" placeholder="ห้อง 01">
                 </h2>
                 <div class="room-brief" data-room-brief><span class="num">0 จุด</span> • ราคา <span class="num price">0 บ.</span></div>
-                <div class="menu-wrapper">
-                    <button type="button" class="btn-icon material-button" data-act="menu-room"><span class="material-symbols-outlined">more_vert</span></button>
+                <div class="dropdown-wrapper">
+                    <button class="btn btn-icon material-button" data-act="menu-room">
+                        <span class="material-symbols-outlined">more_vert</span>
+                    </button>
                     <div class="menu-dropdown glass-card">
-                        <button type="button" data-act="toggle-suspend-room"><span class="material-symbols-outlined">toggle_on</span><span data-suspend-text>ระงับ</span></button>
-                        <button type="button" data-act="clear-room"><span class="material-symbols-outlined">delete</span>ล้างข้อมูลห้อง</button>
-                        <button type="button" class="is-danger" data-act="del-room"><span class="material-symbols-outlined">delete_forever</span>ลบห้องนี้</button>
+                        <button type="button" data-act="add-set"><span class="material-symbols-outlined">add</span>เพิ่มผ้าม่าน</button>
+                        <button type="button" data-act="add-deco"><span class="material-symbols-outlined">add</span>เพิ่มของตกแต่ง</button>
+                        <button type="button" data-act="add-wallpaper"><span class="material-symbols-outlined">add</span>เพิ่มวอลเปเปอร์</button>
+                        <div class="divider"></div>
+                        <button type="button" data-act="toggle-suspend-room"><span class="material-symbols-outlined">lock_open</span><span data-suspend-text>ระงับ</span></button>
+                        <button type="button" data-act="del-room" class="is-danger"><span class="material-symbols-outlined">delete_forever</span>ลบห้อง</button>
                     </div>
                 </div>
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>ราคาผ้าต่อเมตร</label>
-                    <select name="room_price_per_m" required></select>
-                </div>
-                <div class="form-group">
-                    <label>สไตล์</label>
-                    <select name="room_style">
-                        <option value="">เลือก</option>
-                        <option value="ลอน">ลอน</option>
-                        <option value="ตาไก่">ตาไก่</option>
-                        <option value="จีบ">จีบ</option>
-                    </select>
-                </div>
+            <div class="room-content">
+                <div data-sets></div>
+                <div data-decorations></div>
+                <div data-wallpapers></div>
             </div>
-            <div data-sets></div>
-            <div data-decorations></div>
-            <div data-wallpapers></div>
-            <div class="item-actions">
-                <button type="button" class="btn material-button add-btn" data-act="add-set"><span class="material-symbols-outlined">add</span>เพิ่มจุดผ้าม่าน</button>
-                <button type="button" class="btn material-button add-btn" data-act="add-deco"><span class="material-symbols-outlined">add</span>เพิ่มของตกแต่ง</button>
-                <button type="button" class="btn material-button add-btn" data-act="add-wallpaper"><span class="material-symbols-outlined">add</span>เพิ่มวอลเปเปอร์</button>
-            </div>
+            <div class="item-summary room-summary" data-room-summary></div>
         </div>
     </template>
 
     <template id="setTpl">
-        <div class="card glass-card item-card set-card" data-set>
+        <div class="card item-card set-card glass-card" data-set>
             <div class="item-card-header">
-                <h3 class="item-title-wrapper">จุดที่ <span class="item-title" data-item-title></span></h3>
-                <div class="menu-wrapper">
-                    <button type="button" class="btn-icon material-button" data-act="menu-item"><span class="material-symbols-outlined">more_vert</span></button>
+                <h3>รายการที่ <span class="item-title" data-item-title></span></h3>
+                <div class="dropdown-wrapper">
+                    <button class="btn btn-icon material-button" data-act="menu-item">
+                        <span class="material-symbols-outlined">more_vert</span>
+                    </button>
                     <div class="menu-dropdown glass-card">
-                        <button type="button" data-act="toggle-suspend"><span class="material-symbols-outlined">toggle_on</span><span data-suspend-text>ระงับ</span></button>
-                        <button type="button" data-act="clear-set"><span class="material-symbols-outlined">delete</span>ล้างข้อมูล</button>
-                        <button type="button" class="is-danger" data-act="del-set"><span class="material-symbols-outlined">delete_forever</span>ลบรายการนี้</button>
+                        <button type="button" data-act="clear-set"><span class="material-symbols-outlined">clear_all</span>ล้างข้อมูล</button>
+                        <button type="button" data-act="toggle-suspend"><span class="material-symbols-outlined">lock_open</span><span data-suspend-text>ระงับ</span></button>
+                        <div class="divider"></div>
+                        <button type="button" data-act="del-set" class="is-danger"><span class="material-symbols-outlined">delete_forever</span>ลบรายการนี้</button>
                     </div>
                 </div>
             </div>
-            <div class="form-row">
+            <div class="form-row three-col">
                 <div class="form-group">
                     <label>ความกว้าง (ม.)</label>
                     <input type="number" name="width_m" step="0.01" min="0">
@@ -205,53 +196,61 @@
                     <label>ความสูง (ม.)</label>
                     <input type="number" name="height_m" step="0.01" min="0">
                 </div>
-            </div>
-            <div class="form-row three-col">
                 <div class="form-group">
-                    <label>รูปแบบผ้า</label>
+                    <label>รูปแบบ</label>
                     <select name="fabric_variant">
-                        <option value="ทึบ" selected>ผ้าทึบ</option>
-                        <option value="โปร่ง">ผ้าโปร่ง</option>
-                        <option value="ทึบ&โปร่ง">ทึบ + โปร่ง</option>
+                        <option value="ทึบ">ทึบ</option>
+                        <option value="โปร่ง">โปร่ง</option>
+                        <option value="ทึบ&โปร่ง" selected>ทึบ&โปร่ง</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>ประเภทราง</label>
-                    <select name="open_type">
-                        <option value="">เลือก</option>
-                        <option value="แยกกลาง">แยกกลาง</option>
-                        <option value="เปิดข้าง">เปิดข้าง</option>
-                    </select>
-                </div>
-                <div class="form-group" data-sheer-wrap>
-                    <label>ราคาผ้าโปร่ง/ม.</label>
-                    <select name="sheer_price_per_m"></select>
-                </div>
+            </div>
+            <div class="form-group">
+                <label>สไตล์</label>
+                <select name="open_type">
+                    <option value="" hidden>เลือกสไตล์</option>
+                    <option value="ตาไก่">ตาไก่</option>
+                    <option value="จีบ">จีบ</option>
+                    <option value="ลอน">ลอน</option>
+                </select>
+            </div>
+            <div class="form-group" data-sheer-wrap>
+                <label>ราคาผ้าโปร่งต่อหลา</label>
+                <select name="sheer_price_per_m">
+                    <option value="" hidden>เลือกราคา</option>
+                </select>
             </div>
             <div class="item-summary" data-set-summary></div>
         </div>
     </template>
-
+    
     <template id="decoTpl">
-        <div class="card glass-card item-card deco-card" data-deco-item>
+        <div class="card item-card deco-card glass-card" data-deco-item>
             <div class="item-card-header">
-                <h3 class="item-title-wrapper">รายการตกแต่งที่ <span class="item-title" data-item-title></span></h3>
-                <div class="menu-wrapper">
-                    <button type="button" class="btn-icon material-button" data-act="menu-item"><span class="material-symbols-outlined">more_vert</span></button>
+                <h3>รายการที่ <span class="item-title" data-item-title></span></h3>
+                <div class="dropdown-wrapper">
+                    <button class="btn btn-icon material-button" data-act="menu-item">
+                        <span class="material-symbols-outlined">more_vert</span>
+                    </button>
                     <div class="menu-dropdown glass-card">
-                        <button type="button" data-act="toggle-suspend"><span class="material-symbols-outlined">toggle_on</span><span data-suspend-text>ระงับ</span></button>
-                        <button type="button" data-act="clear-deco"><span class="material-symbols-outlined">delete</span>ล้างข้อมูล</button>
-                        <button type="button" class="is-danger" data-act="del-deco"><span class="material-symbols-outlined">delete_forever</span>ลบรายการนี้</button>
+                        <button type="button" data-act="clear-deco"><span class="material-symbols-outlined">clear_all</span>ล้างข้อมูล</button>
+                        <button type="button" data-act="toggle-suspend"><span class="material-symbols-outlined">lock_open</span><span data-suspend-text>ระงับ</span></button>
+                        <div class="divider"></div>
+                        <button type="button" data-act="del-deco" class="is-danger"><span class="material-symbols-outlined">delete_forever</span>ลบรายการนี้</button>
                     </div>
                 </div>
             </div>
-            <div class="form-row">
+            <div class="form-row two-col">
                 <div class="form-group">
-                    <label>ประเภทของตกแต่ง</label>
-                    <input type="text" name="deco_type" placeholder="เช่น ผ้าโปร่ง, หัวเสา">
+                    <label>ประเภท</label>
+                    <input type="text" name="deco_type" placeholder="เช่น มู่ลี่, ฉากกั้น">
+                </div>
+                <div class="form-group">
+                    <label>ราคาต่อหลา</label>
+                    <input type="number" name="deco_price_sqyd" step="0.01" min="0">
                 </div>
             </div>
-            <div class="form-row">
+            <div class="form-row two-col">
                 <div class="form-group">
                     <label>ความกว้าง (ม.)</label>
                     <input type="number" name="deco_width_m" step="0.01" min="0">
@@ -260,29 +259,28 @@
                     <label>ความสูง (ม.)</label>
                     <input type="number" name="deco_height_m" step="0.01" min="0">
                 </div>
-                <div class="form-group">
-                    <label>ราคาต่อ ตร.หลา</label>
-                    <input type="number" name="deco_price_sqyd" step="0.01" min="0">
-                </div>
             </div>
             <div class="item-summary" data-deco-summary></div>
         </div>
     </template>
 
     <template id="wallpaperTpl">
-        <div class="card glass-card item-card wallpaper-card" data-wallpaper-item>
+        <div class="card item-card wallpaper-card glass-card" data-wallpaper-item>
             <div class="item-card-header">
-                <h3 class="item-title-wrapper">วอลเปเปอร์ที่ <span class="item-title" data-item-title></span></h3>
-                <div class="menu-wrapper">
-                    <button type="button" class="btn-icon material-button" data-act="menu-item"><span class="material-symbols-outlined">more_vert</span></button>
+                <h3>รายการที่ <span class="item-title" data-item-title></span></h3>
+                <div class="dropdown-wrapper">
+                    <button class="btn btn-icon material-button" data-act="menu-item">
+                        <span class="material-symbols-outlined">more_vert</span>
+                    </button>
                     <div class="menu-dropdown glass-card">
-                        <button type="button" data-act="toggle-suspend"><span class="material-symbols-outlined">toggle_on</span><span data-suspend-text>ระงับ</span></button>
-                        <button type="button" data-act="clear-wallpaper"><span class="material-symbols-outlined">delete</span>ล้างข้อมูล</button>
-                        <button type="button" class="is-danger" data-act="del-wallpaper"><span class="material-symbols-outlined">delete_forever</span>ลบรายการนี้</button>
+                        <button type="button" data-act="clear-wallpaper"><span class="material-symbols-outlined">clear_all</span>ล้างข้อมูล</button>
+                        <button type="button" data-act="toggle-suspend"><span class="material-symbols-outlined">lock_open</span><span data-suspend-text>ระงับ</span></button>
+                        <div class="divider"></div>
+                        <button type="button" data-act="del-wallpaper" class="is-danger"><span class="material-symbols-outlined">delete_forever</span>ลบรายการนี้</button>
                     </div>
                 </div>
             </div>
-            <div class="form-row">
+            <div class="form-row two-col">
                 <div class="form-group">
                     <label>ความสูง (ม.)</label>
                     <input type="number" name="wallpaper_height_m" step="0.01" min="0">
@@ -309,6 +307,5 @@
     </template>
 
     <div id="toast-container"></div>
-    <script src="script.js"></script>
 </body>
 </html>

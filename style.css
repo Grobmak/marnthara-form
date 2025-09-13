@@ -244,108 +244,125 @@ label {
     color: var(--on-surface-variant);
 }
 
-input[type="text"], input[type="number"], textarea, select {
+input[type="text"], input[type="number"], select, textarea {
     width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.3);
+    padding: 0.75rem;
+    border: 1px solid var(--outline);
+    border-radius: 10px;
     font-size: 1rem;
+    background: rgba(255, 255, 255, 0.1);
     color: var(--on-surface);
-    transition: all 0.3s ease;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
+    transition: all 0.2s ease;
 }
 
-input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
+input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
     outline: none;
-    background: rgba(255, 255, 255, 0.5);
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px var(--primary-container);
 }
 
-select {
-    padding-right: 2.5rem;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-down'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 1.2rem;
+input[type="text"]::placeholder, input[type="number"]::placeholder, textarea::placeholder {
     color: var(--on-surface-variant);
+    opacity: 0.6;
 }
 
 .form-row {
     display: flex;
     gap: 1rem;
-    margin-bottom: 1rem;
     flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 
 .form-row .form-group {
     flex: 1;
+    min-width: 150px;
     margin-bottom: 0;
 }
 
-.room-actions, .item-actions {
+.form-row.two-col .form-group {
+    flex-basis: calc(50% - 0.5rem);
+}
+.form-row.three-col .form-group {
+    flex-basis: calc(33.333% - 0.666rem);
+}
+
+.wall-input-row {
     display: flex;
     gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.wall-input-row input {
+    flex: 1;
+}
+
+.item-summary {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.item-summary .price {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.room-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    padding: 1rem 1.5rem;
 }
 
 .btn {
-    color: var(--on-primary);
-    border: none;
     padding: 0.75rem 1.5rem;
-    border-radius: 12px;
-    cursor: pointer;
+    border: none;
+    border-radius: 10px;
     font-size: 1rem;
     font-weight: 600;
-    transition: all 0.3s ease;
+    cursor: pointer;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: var(--primary-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .material-button {
-    border-radius: 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background: var(--primary-color);
+    color: var(--on-primary);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .material-button:hover {
-    background: var(--primary-color);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.material-button:active {
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    transform: translateY(1px);
-}
-
-.btn:disabled {
-    background: var(--surface-variant);
-    color: var(--on-surface-variant);
-    box-shadow: none;
-    cursor: not-allowed;
+    background: #7A66C1;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
 }
 
 .btn-icon {
-    background: transparent;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border-radius: 50%;
+    background: none;
     border: none;
     color: var(--on-surface-variant);
     cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    box-shadow: none;
 }
 
 .btn-icon:hover {
-    background: var(--surface-variant);
+    background: rgba(0, 0, 0, 0.04);
 }
 
 .btn-icon.is-primary {
@@ -356,48 +373,71 @@ select {
     color: var(--error-color);
 }
 
-.btn-icon.is-warning {
-    color: var(--warning-color);
-}
-
 .btn-outline {
-    background: transparent;
-    border: 1px solid var(--outline);
-    color: var(--on-surface-variant);
-    box-shadow: none;
+    background: none;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
 }
 
 .btn-outline:hover {
-    background: var(--surface-variant);
+    background: rgba(103, 80, 164, 0.08);
 }
 
 .add-btn {
     width: 100%;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.5);
     border: 1px dashed var(--on-surface-variant);
     color: var(--on-surface-variant);
     margin-top: 1rem;
-    box-shadow: none;
 }
 
 .add-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    color: var(--on-surface);
+    background: rgba(255, 255, 255, 0.7);
+    border-color: var(--primary-color);
 }
 
-.item-summary {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 12px;
-    padding: 1rem;
-    margin-top: 1rem;
-    font-size: 0.9rem;
+.divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+    margin: 0.5rem 0;
+}
+
+.button-row {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.button-row .btn {
+    width: 100%;
+    max-width: 250px;
+}
+
+.dropdown-wrapper {
+    position: relative;
+}
+
+.dropdown-wrapper button {
+    border-radius: 50%;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-bottom: 2rem;
+    font-size: 0.8rem;
     color: var(--on-surface-variant);
 }
 
-.item-summary .price {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--primary-color);
+.footer p {
+    margin: 0.25rem 0;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
 }
 
 .modal-backdrop {
@@ -458,7 +498,9 @@ select {
     opacity: 0;
     visibility: hidden;
     transform: translateY(20px);
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--on-surface);
+    font-weight: 500;
 }
 
 .toast.show {
@@ -467,32 +509,63 @@ select {
     transform: translateY(0);
 }
 
-.toast-success {
-    background: rgba(76, 175, 80, 0.8);
-    color: white;
+.toast.toast-success {
+    background-color: #E8F5E9; /* Light green */
+    color: #2E7D32; /* Dark green */
 }
 
-.toast-warning {
-    background: rgba(255, 193, 7, 0.8);
-    color: black;
+.toast.toast-error {
+    background-color: #FFEBEE; /* Light red */
+    color: #C62828; /* Dark red */
 }
 
-.footer {
-    text-align: center;
-    margin-top: 2rem;
-    font-size: 0.8rem;
+.toast.toast-warning {
+    background-color: #FFF3E0; /* Light orange */
+    color: #EF6C00; /* Dark orange */
+}
+
+/* Specific styles for different item types */
+.set-card .form-row.three-col .form-group {
+    flex: none;
+    width: calc(33.333% - 0.666rem);
+}
+
+.set-card .form-row.three-col .form-group:first-child,
+.set-card .form-row.three-col .form-group:nth-child(2) {
+    width: 100%; /* Spans full width on small screens */
+}
+
+.set-card .form-row.three-col {
+    flex-wrap: wrap;
+}
+
+@media (min-width: 768px) {
+    .set-card .form-row.three-col {
+        flex-wrap: nowrap;
+    }
+}
+
+.add-btn {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px dashed var(--on-surface-variant);
     color: var(--on-surface-variant);
+    margin-top: 1rem;
 }
 
-/* responsive */
-@media (max-width: 600px) {
-    .container {
-        padding: 0.5rem;
-    }
-    .card {
-        padding: 1rem;
-    }
-    .modal-content {
-        padding: 1.5rem;
-    }
+.add-btn:hover {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: var(--primary-color);
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-check input {
+    width: 20px;
+    height: 20px;
 }
