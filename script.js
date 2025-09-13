@@ -249,7 +249,7 @@
             const heightInput = created.querySelector('[name="deco_height_m"]');
             if (heightInput) heightInput.value = prefill.height_m ?? "";
             const priceInput = created.querySelector('[name="deco_price_sqyd"]');
-            if (priceInput) priceInput.value = fmt(prefill.price_sqyd, 0, true) ?? "";
+            if (priceInput) priceInput.value = prefill.price_sqyd ?? "";
             if (prefill.is_suspended) {
                 created.dataset.suspended = 'true';
                 created.classList.add('is-suspended');
@@ -273,7 +273,7 @@
             const heightInput = created.querySelector('[name="wallpaper_height_m"]');
             if (heightInput) heightInput.value = prefill.height_m ?? "";
             const priceInput = created.querySelector('[name="wallpaper_price_roll"]');
-            if (priceInput) priceInput.value = fmt(prefill.price_per_roll, 0, true) ?? "";
+            if (priceInput) priceInput.value = prefill.price_per_roll ?? "";
             (prefill.widths || []).forEach(w => addWall(created.querySelector('[data-act="add-wall"]'), w));
             if (prefill.is_suspended) {
                 created.dataset.suspended = 'true';
@@ -710,26 +710,20 @@
         const importBtnEl = document.querySelector(SELECTORS.importBtn);
         if (importBtnEl) {
             importBtnEl.addEventListener('click', () => {
-                showModal(SELECTORS.importModal);
+                showModal(SELECTORS.importModal, async () => {
+                    const importJsonAreaEl = document.querySelector(SELECTORS.importJsonArea);
+                    const jsonText = importJsonAreaEl ? importJsonAreaEl.value : '';
+                    try {
+                        const payload = JSON.parse(jsonText);
+                        loadPayload(payload);
+                        return true; // Success, close modal
+                    } catch (e) {
+                        showToast("ข้อมูล JSON ไม่ถูกต้อง", "error");
+                        return false; // Failure, keep modal open
+                    }
+                });
             });
         }
-
-        const importConfirmEl = document.querySelector(SELECTORS.importConfirm);
-        if (importConfirmEl) {
-            importConfirmEl.addEventListener('click', async () => {
-                const importJsonAreaEl = document.querySelector(SELECTORS.importJsonArea);
-                const jsonText = importJsonAreaEl ? importJsonAreaEl.value : '';
-                try {
-                    const payload = JSON.parse(jsonText);
-                    loadPayload(payload);
-                    document.querySelector(SELECTORS.importModal).classList.remove('visible');
-                } catch (e) {
-                    showToast("ข้อมูล JSON ไม่ถูกต้อง", "error");
-                }
-            });
-        }
-
-        // Removed the separate importCancel listener as it's now handled by showModal's cleanup.
         
         const exportBtnEl = document.querySelector(SELECTORS.exportBtn);
         if (exportBtnEl) {
