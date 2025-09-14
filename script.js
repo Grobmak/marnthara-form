@@ -1,9 +1,9 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.0.0-refactored";
+    const APP_VERSION = "input-ui/4.1.0-ios-glass";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
-    const STORAGE_KEY = "marnthara.input.v4"; // Incremented version for new data structure
+    const STORAGE_KEY = "marnthara.input.v4"; // Data structure is compatible, no key change needed
     const SQM_TO_SQYD = 1.19599;
 
     const PRICING = {
@@ -36,7 +36,7 @@
     const SELECTORS = {
         orderForm: '#orderForm', roomsContainer: '#rooms', roomTpl: '#roomTpl', setTpl: '#setTpl', decoTpl: '#decoTpl', wallpaperTpl: '#wallpaperTpl', wallTpl: '#wallTpl',
         payloadInput: '#payload', copyJsonBtn: '#copyJsonBtn', clearAllBtn: '#clearAllBtn',
-        lockBtn: '#lockBtn', addRoomFooterBtn: '#addRoomFooterBtn', submitBtn: '#submitBtn',
+        lockBtn: '#lockBtn', addRoomFooterBtn: '#addRoomFooterBtn',
         grandTotal: '#grandTotal', setCount: '#setCount', grandFabric: '#grandFabric', grandSheerFabric: '#grandSheerFabric',
         modal: '#confirmationModal', modalTitle: '#modalTitle', modalBody: '#modalBody', modalConfirm: '#modalConfirm', modalCancel: '#modalCancel',
         room: '[data-room]', set: '[data-set]', setsContainer: '[data-sets]',
@@ -47,10 +47,12 @@
         setCountSets: '#setCountSets', setCountDeco: '#setCountDeco',
         toastContainer: '#toast-container',
         grandOpaqueTrack: '#grandOpaqueTrack', grandSheerTrack: '#grandSheerTrack',
-        copyTextBtn: '#copyTextBtn', copyOptionsModal: '#copyOptionsModal', copyOptionsConfirm: '#copyOptionsConfirm', copyOptionsCancel: '#copyOptionsCancel',
+        copyOptionsModal: '#copyOptionsModal', copyOptionsConfirm: '#copyOptionsConfirm', copyOptionsCancel: '#copyOptionsCancel',
         copyCustomerInfo: '#copyCustomerInfo', copyRoomDetails: '#copyRoomDetails', copySummary: '#copySummary',
         menuBtn: '#menuBtn', menuDropdown: '#menuDropdown', importBtn: '#importBtn', exportBtn: '#exportBtn',
-        importModal: '#importModal', importJsonArea: '#importJsonArea', importConfirm: '#importConfirm', importCancel: '#importCancel'
+        importModal: '#importModal', importJsonArea: '#importJsonArea', importConfirm: '#importConfirm', importCancel: '#importCancel',
+        // --- MOVED BUTTONS ---
+        copyTextMenuBtn: '#copyTextMenuBtn', submitMenuBtn: '#submitMenuBtn'
     };
 
     // --- STATE ---
@@ -260,8 +262,8 @@
     function suspendItem(item, isSuspended, notify = true) {
         item.dataset.suspended = isSuspended;
         item.classList.toggle('is-suspended', isSuspended);
-        const suspendIcon = item.querySelector('[data-act="toggle-suspend"] .material-symbols-outlined');
-        if (suspendIcon) suspendIcon.textContent = isSuspended ? 'play_circle' : 'pause_circle';
+        const suspendIcon = item.querySelector('[data-act="toggle-suspend"] ion-icon');
+        if (suspendIcon) suspendIcon.name = isSuspended ? 'play-circle-outline' : 'pause-circle-outline';
         if (notify) showToast(`รายการถูก${isSuspended ? 'ระงับ' : 'ใช้งาน'}แล้ว`, 'warning');
     }
 
@@ -474,7 +476,6 @@
         if (!lockBtn) return;
         lockBtn.classList.toggle('is-locked', isLocked);
         lockBtn.querySelector('.lock-text').textContent = isLocked ? 'ปลดล็อค' : 'ล็อก';
-        lockBtn.querySelector('.lock-icon').textContent = isLocked ? 'lock' : 'lock_open';
         
         document.querySelectorAll('input, select, textarea, button').forEach(el => {
             const isExempt = el.closest('.summary-footer') || el.closest('.main-header') || el.closest('.modal-wrapper');
@@ -554,6 +555,14 @@
         return summary;
     }
 
+    function handleSubmit() {
+        const form = document.querySelector(SELECTORS.orderForm);
+        form.querySelector(SELECTORS.payloadInput).value = JSON.stringify(buildPayload());
+        // In a real scenario, you might use fetch() here. For now, we just show a toast.
+        showToast("ส่งข้อมูลแล้ว...", "success");
+        // form.submit(); // Uncomment to allow actual form submission
+    }
+
     // --- EVENT LISTENERS & INITIALIZATION ---
     function init() {
         const orderForm = document.querySelector(SELECTORS.orderForm);
@@ -612,16 +621,27 @@
         document.querySelector(SELECTORS.addRoomFooterBtn).addEventListener('click', () => addRoom());
         document.querySelector(SELECTORS.lockBtn).addEventListener('click', toggleLock);
         
-        document.querySelector(SELECTORS.copyTextBtn).addEventListener('click', async () => {
+        // --- HEADER & MENU ACTIONS ---
+        const menuDropdown = document.querySelector(SELECTORS.menuDropdown);
+        
+        document.querySelector(SELECTORS.copyTextMenuBtn).addEventListener('click', async (e) => {
+            e.preventDefault();
             const options = await showCopyOptionsModal();
             if (!options) return;
             navigator.clipboard.writeText(buildTextSummary(options))
                 .then(() => showToast('คัดลอกข้อความสำเร็จ', 'success'))
                 .catch(() => showToast('คัดลอกล้มเหลว', 'error'));
+            menuDropdown.classList.remove('show');
+        });
+
+        document.querySelector(SELECTORS.submitMenuBtn).addEventListener('click', (e) => {
+            e.preventDefault();
+            handleSubmit();
+            menuDropdown.classList.remove('show');
         });
         
-        // Menu Actions
-        document.querySelector(SELECTORS.clearAllBtn).addEventListener('click', async () => {
+        document.querySelector(SELECTORS.clearAllBtn).addEventListener('click', async (e) => {
+            e.preventDefault();
             if (isLocked || !await showConfirmation('ล้างข้อมูลทั้งหมด', 'คำเตือน! การกระทำนี้จะลบข้อมูลทั้งหมด ไม่สามารถกู้คืนได้')) return;
             roomsEl.innerHTML = "";
             roomCount = 0;
@@ -629,15 +649,19 @@
             addRoom();
             saveData();
             showToast('ล้างข้อมูลทั้งหมดแล้ว', 'warning');
+            menuDropdown.classList.remove('show');
         });
         
-        document.querySelector(SELECTORS.copyJsonBtn).addEventListener('click', () => {
+        document.querySelector(SELECTORS.copyJsonBtn).addEventListener('click', (e) => {
+            e.preventDefault();
             navigator.clipboard.writeText(JSON.stringify(buildPayload(), null, 2))
                 .then(() => showToast('คัดลอก JSON แล้ว', 'success'))
                 .catch(() => showToast('คัดลอกล้มเหลว', 'error'));
+            menuDropdown.classList.remove('show');
         });
         
-        document.querySelector(SELECTORS.exportBtn).addEventListener('click', () => {
+        document.querySelector(SELECTORS.exportBtn).addEventListener('click', (e) => {
+            e.preventDefault();
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(buildPayload(), null, 2));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
@@ -646,32 +670,26 @@
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
             showToast('ส่งออกข้อมูลสำเร็จ', 'success');
+            menuDropdown.classList.remove('show');
         });
         
-        document.querySelector(SELECTORS.importBtn).addEventListener('click', async () => {
+        document.querySelector(SELECTORS.importBtn).addEventListener('click', async (e) => {
+            e.preventDefault();
             const payload = await showImportModal();
             if (payload) loadPayload(payload);
+            menuDropdown.classList.remove('show');
         });
 
-        // Menu Dropdown
+        // Menu Dropdown Toggle
         document.querySelector(SELECTORS.menuBtn).addEventListener('click', () => {
-            document.querySelector(SELECTORS.menuDropdown).classList.toggle('show');
+            menuDropdown.classList.toggle('show');
         });
         window.addEventListener('click', (e) => {
             if (!e.target.closest('.menu-container')) {
-                document.querySelector(SELECTORS.menuDropdown).classList.remove('show');
+                menuDropdown.classList.remove('show');
             }
         });
         
-        // Form Submission
-        orderForm.addEventListener("submit", (e) => {
-            e.preventDefault();
-            document.querySelector(SELECTORS.payloadInput).value = JSON.stringify(buildPayload());
-            // In a real scenario, you might use fetch() here. For now, we just show a toast.
-            showToast("ส่งข้อมูลแล้ว...", "success");
-            // e.target.submit(); // Uncomment to allow actual form submission
-        });
-
         // Initial Load from localStorage
         try {
             const storedData = localStorage.getItem(STORAGE_KEY);
