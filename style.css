@@ -23,7 +23,10 @@
     --glass-bg: rgba(252, 252, 255, 0.6);
     --glass-border: rgba(144, 144, 154, 0.25);
 
-    /* Dark Theme (WIP - using light for now as per base file) */
+    /* --- NEW: Item Type Colors --- */
+    --curtain-color: var(--primary-light);
+    --deco-color: #00897B; /* Teal */
+    --wallpaper-color: #F57C00; /* Amber/Orange */
 }
 
 :root {
@@ -202,6 +205,8 @@ i.ph {
     border-radius: var(--border-radius-md);
     background-color: var(--background);
     padding: 0.75rem;
+    border-left: 5px solid var(--outline); /* Default left border */
+    transition: border-left-color var(--transition-speed);
 }
 .item-card.is-suspended {
     opacity: 0.5;
@@ -220,8 +225,22 @@ i.ph {
     align-items: center;
     gap: 0.5rem;
     font-size: 1rem;
+    font-weight: 500; /* Make title slightly bolder */
     color: var(--on-surface-variant);
+    transition: color var(--transition-speed);
 }
+
+/* --- NEW: Color Coding Rules --- */
+.set-item { border-left-color: var(--curtain-color); }
+.set-item .item-title { color: var(--curtain-color); }
+
+.deco-item { border-left-color: var(--deco-color); }
+.deco-item .item-title { color: var(--deco-color); }
+
+.wallpaper-item { border-left-color: var(--wallpaper-color); }
+.wallpaper-item .item-title { color: var(--wallpaper-color); }
+/* --- End Color Coding Rules --- */
+
 
 .item-actions {
     display: flex;
