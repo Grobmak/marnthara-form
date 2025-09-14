@@ -142,6 +142,17 @@
             cancelBtn.onclick = () => cleanup(false);
         });
     }
+    
+    function formatPriceInput(event) {
+        let input = event.target;
+        let value = input.value.replace(/,/g, '');
+        if (value === '' || isNaN(value)) {
+            input.value = '';
+            return;
+        }
+        let number = parseFloat(value);
+        input.value = fmt(number, 0, true);
+    }
 
     function addRoom(prefill) {
         if (isLocked) return;
@@ -215,11 +226,17 @@
         if (!frag) { console.error("Deco template not found."); return; }
         decoWrap.appendChild(frag);
         const created = decoWrap.querySelector(`${SELECTORS.decoItem}:last-of-type`);
+        
+        const priceInput = created.querySelector('[name="deco_price_sqyd"]');
+        if(priceInput) {
+            priceInput.addEventListener('input', formatPriceInput);
+        }
+
         if (prefill) {
             created.querySelector('[name="deco_type"]').value = prefill.type || "";
             created.querySelector('[name="deco_width_m"]').value = prefill.width_m ?? "";
             created.querySelector('[name="deco_height_m"]').value = prefill.height_m ?? "";
-            created.querySelector('[name="deco_price_sqyd"]').value = fmt(prefill.price_sqyd, 0, true) ?? "";
+            created.querySelector('[name="deco_price_sqyd"]').value = fmt(prefill.price_sqyd, 0, true);
             if (prefill.is_suspended) {
                 created.dataset.suspended = 'true';
                 created.classList.add('is-suspended');
@@ -238,10 +255,15 @@
         if (!frag) { console.error("Wallpaper template not found."); return; }
         wallpaperWrap.appendChild(frag);
         const created = wallpaperWrap.querySelector(`${SELECTORS.wallpaperItem}:last-of-type`);
+        
+        const priceInput = created.querySelector('[name="wallpaper_price_roll"]');
+        if(priceInput) {
+            priceInput.addEventListener('input', formatPriceInput);
+        }
 
         if (prefill) {
             created.querySelector('[name="wallpaper_height_m"]').value = prefill.height_m ?? "";
-            created.querySelector('[name="wallpaper_price_roll"]').value = fmt(prefill.price_per_roll, 0, true) ?? "";
+            created.querySelector('[name="wallpaper_price_roll"]').value = fmt(prefill.price_per_roll, 0, true);
             (prefill.widths || []).forEach(w => addWall(created.querySelector('[data-act="add-wall"]'), w));
             if (prefill.is_suspended) {
                 created.dataset.suspended = 'true';
@@ -262,7 +284,7 @@
         if (!wallsContainer) return;
         const frag = document.querySelector(SELECTORS.wallTpl)?.content?.cloneNode(true);
         if (!frag) { console.error("Wall template not found."); return; }
-        if (prefillWidth) {
+        if (prefillWidth !== undefined) {
             frag.querySelector('input[name="wall_width_m"]').value = prefillWidth;
         }
         wallsContainer.appendChild(frag);
@@ -375,7 +397,7 @@
                     return;
                 }
                 const w = clamp01(deco.querySelector('[name="deco_width_m"]')?.value), h = clamp01(deco.querySelector('[name="deco_height_m"]')?.value);
-                const price = clamp01(deco.querySelector('[name="deco_price_sqyd"]')?.value);
+                const price = toNum(deco.querySelector('[name="deco_price_sqyd"]')?.value);
                 const areaSqyd = w * h * SQM_TO_SQYD;
                 const decoPrice = Math.round(areaSqyd * price);
                 if (summaryEl) summaryEl.innerHTML = `ราคา: <span class="price">${fmt(decoPrice, 0, true)}</span> บ. • พื้นที่: <span class="price">${fmt(areaSqyd, 2)}</span> ตร.หลา`;
@@ -388,7 +410,7 @@
                     return;
                 }
                 const h = clamp01(wallpaper.querySelector('[name="wallpaper_height_m"]')?.value);
-                const pricePerRoll = clamp01(wallpaper.querySelector('[name="wallpaper_price_roll"]')?.value);
+                const pricePerRoll = toNum(wallpaper.querySelector('[name="wallpaper_price_roll"]')?.value);
                 const totalWidth = Array.from(wallpaper.querySelectorAll('input[name="wall_width_m"]')).reduce((sum, el) => sum + clamp01(el.value), 0);
                 const rollsNeeded = CALC.wallpaperRolls(totalWidth, h);
                 const wallpaperPrice = Math.round(rollsNeeded * pricePerRoll);
