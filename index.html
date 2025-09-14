@@ -24,16 +24,7 @@
                     <span class="material-symbols-outlined">more_vert</span>
                 </button>
                 <div id="menuDropdown" class="menu-dropdown">
-                    <a href="#" id="copyTextLink" class="menu-action-link">
-                        <span class="material-symbols-outlined">content_copy</span>
-                        <span>คัดลอกสรุป</span>
-                    </a>
-                    <a href="#" id="submitLink" class="menu-action-link primary-action">
-                        <span class="material-symbols-outlined">send</span>
-                        <span>ส่งข้อมูล</span>
-                    </a>
-                    <hr>
-                    <a href="#" id="copyJsonLink">Copy JSON</a>
+                    <a href="#" id="copyJsonBtn">Copy JSON</a>
                     <a href="#" id="importBtn">Import Data</a>
                     <a href="#" id="exportBtn">Export Data</a>
                     <hr>
@@ -97,6 +88,16 @@
                 <strong>รวมสุทธิ:</strong>
                 <span><span id="grandTotal">0</span> บาท</span>
             </div>
+        </div>
+        <div class="footer-actions">
+            <button type="button" id="copyTextBtn" class="btn btn-secondary">
+                <span class="material-symbols-outlined">content_copy</span>
+                <span>คัดลอกสรุป</span>
+            </button>
+            <button type="submit" form="orderForm" id="submitBtn" class="btn btn-primary">
+                <span class="material-symbols-outlined">send</span>
+                <span>ส่งข้อมูล</span>
+            </button>
         </div>
     </footer>
 
@@ -162,7 +163,7 @@
             </footer>
         </section>
     </template>
-    
+
     <template id="setTpl">
         <div class="item-card set-item" data-set>
             <div class="item-header">
@@ -172,9 +173,11 @@
                 </h4>
                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><span class="material-symbols-outlined">pause_circle</span><span data-suspend-text class="hidden"></span></button>
-                    <button type="button" class="btn-icon" data-act="del-set" title="ลบรายการนี้"><span class="material-symbols-outlined">delete_outline</span></button>
+                    <button type="button" class="btn-icon" data-act="clear-set" title="ล้างข้อมูล"><span class="material-symbols-outlined">backspace</span></button>
+                    <button type="button" class="btn-icon" data-act="del-set" title="ลบ"><span class="material-symbols-outlined">delete_outline</span></button>
                 </div>
             </div>
+            
             <div class="item-grid">
                 <div class="form-group">
                     <label>กว้าง (ม.)</label>
@@ -186,59 +189,65 @@
                 </div>
                 <div class="form-group">
                     <label>รูปแบบ</label>
-                    <select name="set_style" required>
+                    <select name="set_style">
                         <option value="ลอน">ลอน</option>
                         <option value="ตาไก่">ตาไก่</option>
                         <option value="จีบ">จีบ</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>ประเภทผ้า</label>
-                    <select name="fabric_variant" required>
+                    <label>ชนิดผ้า</label>
+                    <select name="fabric_variant">
                         <option value="ทึบ">ทึบ</option>
+                        <option value="ทึบ&โปร่ง">ทึบ & โปร่ง</option>
                         <option value="โปร่ง">โปร่ง</option>
-                        <option value="ทึบ&โปร่ง">ทึบ&โปร่ง</option>
                     </select>
                 </div>
-                <div class="form-group" data-fabric-wrap>
-                    <label>ราคาผ้าทึบ/ม.</label>
+                <div class="form-group">
+                    <label>ราคาผ้าทึบ</label>
                     <select name="set_price_per_m"></select>
                 </div>
                 <div class="form-group" data-sheer-wrap>
-                    <label>ราคาผ้าโปร่ง/ม.</label>
+                    <label>ราคาผ้าโปร่ง</label>
                     <select name="sheer_price_per_m"></select>
                 </div>
             </div>
+
             <div class="item-summary">
-                <div data-set-opaque-track></div>
-                <div data-set-sheer-track></div>
-                <div data-set-yardage-opaque></div>
-                <div data-set-yardage-sheer></div>
-                <div data-set-price-opaque></div>
-                <div data-set-price-sheer></div>
-                <div class="item-total-price" data-set-price-total></div>
+                <div data-set-price-opaque>0</div>
+                <div data-set-yardage-opaque>0.00</div>
+                <div data-set-opaque-track>0.00</div>
+                <div data-set-price-sheer>0</div>
+                <div data-set-yardage-sheer>0.00</div>
+                <div data-set-sheer-track>0.00</div>
+                <div class="item-total-price" data-set-price-total>0</div>
             </div>
         </div>
     </template>
 
     <template id="decoTpl">
         <div class="item-card deco-item" data-deco-item>
-            <div class="item-header">
+             <div class="item-header">
                 <h4 class="item-title">
                     <span class="material-symbols-outlined">deck</span>
-                    <input type="text" name="deco_type" placeholder="ชื่อรายการ">
+                    <span data-item-title></span>
                 </h4>
                 <div class="item-actions">
-                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><span class="material-symbols-outlined">pause_circle</span></button>
-                    <button type="button" class="btn-icon" data-act="del-deco" title="ลบรายการนี้"><span class="material-symbols-outlined">delete_outline</span></button>
+                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><span class="material-symbols-outlined">pause_circle</span><span data-suspend-text class="hidden"></span></button>
+                    <button type="button" class="btn-icon" data-act="clear-deco" title="ล้างข้อมูล"><span class="material-symbols-outlined">backspace</span></button>
+                    <button type="button" class="btn-icon" data-act="del-deco" title="ลบ"><span class="material-symbols-outlined">delete_outline</span></button>
                 </div>
             </div>
             <div class="item-grid three-col">
                 <div class="form-group">
+                    <label>ประเภท</label>
+                    <input type="text" name="deco_type" placeholder="เช่น มู่ลี่">
+                </div>
+                <div class="form-group">
                     <label>กว้าง (ม.)</label>
                     <input type="number" step="0.01" name="deco_width_m" placeholder="0.00">
                 </div>
-                <div class="form-group">
+                 <div class="form-group">
                     <label>สูง (ม.)</label>
                     <input type="number" step="0.01" name="deco_height_m" placeholder="0.00">
                 </div>
@@ -253,14 +262,15 @@
     
     <template id="wallpaperTpl">
         <div class="item-card wallpaper-item" data-wallpaper-item>
-            <div class="item-header">
+             <div class="item-header">
                 <h4 class="item-title">
                     <span class="material-symbols-outlined">wallpaper</span>
-                    วอลเปเปอร์
+                    <span data-item-title></span>
                 </h4>
-                <div class="item-actions">
-                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><span class="material-symbols-outlined">pause_circle</span></button>
-                    <button type="button" class="btn-icon" data-act="del-wallpaper" title="ลบรายการนี้"><span class="material-symbols-outlined">delete_outline</span></button>
+                 <div class="item-actions">
+                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><span class="material-symbols-outlined">pause_circle</span><span data-suspend-text class="hidden"></span></button>
+                    <button type="button" class="btn-icon" data-act="clear-wallpaper" title="ล้างข้อมูล"><span class="material-symbols-outlined">backspace</span></button>
+                    <button type="button" class="btn-icon" data-act="del-wallpaper" title="ลบ"><span class="material-symbols-outlined">delete_outline</span></button>
                 </div>
             </div>
             <div class="item-grid">
@@ -276,7 +286,7 @@
             <div class="walls-section">
                 <label>ความกว้างผนัง (ม.)</label>
                 <div class="walls-container" data-walls-container>
-                </div>
+                    </div>
                 <button type="button" class="btn btn-secondary btn-small" data-act="add-wall">
                     <span class="material-symbols-outlined">add</span> เพิ่มผนัง
                 </button>
@@ -293,6 +303,6 @@
             </button>
         </div>
     </template>
-    
+
 </body>
 </html>
