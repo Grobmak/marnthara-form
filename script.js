@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.1.0-redesigned";
+    const APP_VERSION = "input-ui/4.2.0-refined";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4"; // Keep v4 for data compatibility
     const SQM_TO_SQYD = 1.19599;
@@ -472,8 +472,8 @@
         const lockBtn = document.querySelector(SELECTORS.lockBtn);
         if (!lockBtn) return;
         lockBtn.classList.toggle('is-locked', isLocked);
-        lockBtn.querySelector('.lock-text').textContent = isLocked ? 'ปลดล็อค' : 'ล็อก';
-        lockBtn.querySelector('.lock-icon').className = isLocked ? 'ph-fill ph-lock-key lock-icon' : 'ph-fill ph-lock-key-open lock-icon';
+        // lockBtn.querySelector('.lock-text').textContent = isLocked ? 'ปลดล็อค' : 'ล็อก'; // Removed text change
+        lockBtn.querySelector('.lock-icon').className = isLocked ? 'ph ph-lock-key lock-icon' : 'ph ph-lock-key-open lock-icon'; // Use non-filled icons
         
         document.querySelectorAll('input, select, textarea, button').forEach(el => {
             const isExempt = el.closest('.summary-footer') || el.closest('.main-header') || el.closest('.modal-wrapper');

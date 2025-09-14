@@ -182,7 +182,7 @@ i.ph {
     border-bottom-color: var(--primary);
 }
 .room-brief {
-    font-size: 0.8rem;
+    font-size: 0.875rem; /* Increased */
     color: var(--on-surface-variant);
     text-align: right;
     white-space: nowrap;
@@ -301,7 +301,7 @@ i.ph {
 /* --- FORM ELEMENTS --- */
 .form-group { display: flex; flex-direction: column; }
 .form-group label {
-    font-size: 0.8rem;
+    font-size: 0.875rem; /* Increased */
     color: var(--on-surface-variant);
     margin-bottom: 0.25rem;
 }
@@ -389,7 +389,7 @@ input[inputmode="numeric"] { text-align: right; }
     padding: 0.4rem 0.8rem;
     border-radius: var(--border-radius-sm);
     border: none;
-    font-size: 0.8rem;
+    font-size: 0.9rem; /* Increased */
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
@@ -414,6 +414,8 @@ input[inputmode="numeric"] { text-align: right; }
     cursor: pointer;
 }
 #lockBtn.is-locked { color: var(--danger); }
+#menuBtn .ph { font-size: 1.6rem; } /* Increased 3-dot icon */
+
 .add-room-container { text-align: center; margin-top: 1rem; }
 
 /* --- FOOTER & SUMMARY (Compact) --- */
@@ -436,7 +438,7 @@ input[inputmode="numeric"] { text-align: right; }
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto;
     gap: 0.1rem 1rem;
-    font-size: 0.75rem;
+    font-size: 0.85rem; /* Increased */
     max-width: 800px;
     margin: 0 auto;
     color: var(--on-surface-variant);
@@ -462,7 +464,11 @@ input[inputmode="numeric"] { text-align: right; }
     border-top: 1px solid var(--outline);
 }
 .grand-total span { color: var(--primary); }
-.grand-total span::after { content: ' บาท'; font-size: 0.8rem; font-weight: normal; }
+.grand-total span span::after {
+    content: ' บาท';
+    font-size: 0.9rem; /* Adjusted */
+    font-weight: normal;
+}
 
 
 /* --- MODALS & TOASTS --- */
