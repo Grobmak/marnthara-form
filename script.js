@@ -495,7 +495,7 @@
         lockBtn.classList.toggle('btn-primary', !isLocked);
         lockBtn.classList.toggle('btn-danger', isLocked);
         const lockTextEl = lockBtn.querySelector('.lock-text');
-        if (lockTextEl) lockTextEl.textContent = isLocked ? 'ปลดล็อค' : 'ล็อค';
+        if (lockTextEl) lockTextEl.textContent = isLocked ? 'ปลดล็อค' : 'ล็อก';
         const lockIconEl = lockBtn.querySelector('.lock-icon');
         if (lockIconEl) lockIconEl.textContent = isLocked ? '🔓' : '🔒';
     }
@@ -620,9 +620,10 @@
     }
 
     // Event listeners
-    roomsEl.addEventListener("input", debounce(saveData));
-    roomsEl.addEventListener("change", debounce(saveData));
-    document.querySelector('#customerInfo').addEventListener("input", debounce(saveData));
+    // Removed old listeners and replaced with a single function that handles both.
+    const debouncedRecalcAndSave = debounce(() => { recalcAll(); saveData(); });
+    orderForm.addEventListener("input", debouncedRecalcAndSave);
+    orderForm.addEventListener("change", debouncedRecalcAndSave);
 
     orderForm.addEventListener("click", e => {
         const btn = e.target.closest('button[data-act]');
