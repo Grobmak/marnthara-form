@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marnthara - Quotation Tool</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -20,23 +16,22 @@
         <h1>Marnthara Quotation</h1>
         <div class="header-actions">
             <button id="lockBtn" class="header-btn" title="Lock/Unlock Form">
-                <ion-icon name="lock-open-outline" class="lock-icon-open"></ion-icon>
-                <ion-icon name="lock-closed-outline" class="lock-icon-closed"></ion-icon>
+                <i class="ph-fill ph-lock-key-open lock-icon"></i>
                 <span class="lock-text">ล็อก</span>
             </button>
             <div class="menu-container">
                 <button id="menuBtn" class="header-btn" title="Menu">
-                    <ion-icon name="ellipsis-vertical"></ion-icon>
+                    <i class="ph-bold ph-dots-three-vertical"></i>
                 </button>
                 <div id="menuDropdown" class="menu-dropdown">
-                    <a href="#" id="copyTextMenuBtn"><ion-icon name="copy-outline"></ion-icon><span>คัดลอกสรุป</span></a>
-                    <a href="#" id="submitMenuBtn"><ion-icon name="send-outline"></ion-icon><span>ส่งข้อมูล</span></a>
+                    <a href="#" id="copyTextBtn"><i class="ph ph-copy"></i> คัดลอกสรุป</a>
+                    <a href="#" id="submitBtn"><i class="ph ph-paper-plane-tilt"></i> ส่งข้อมูล</a>
                     <hr>
-                    <a href="#" id="copyJsonBtn"><ion-icon name="code-outline"></ion-icon>Copy JSON</a>
-                    <a href="#" id="importBtn"><ion-icon name="log-in-outline"></ion-icon>Import Data</a>
-                    <a href="#" id="exportBtn"><ion-icon name="download-outline"></ion-icon>Export Data</a>
+                    <a href="#" id="copyJsonBtn"><i class="ph ph-code"></i> Copy JSON</a>
+                    <a href="#" id="importBtn"><i class="ph ph-upload-simple"></i> Import Data</a>
+                    <a href="#" id="exportBtn"><i class="ph ph-download-simple"></i> Export Data</a>
                     <hr>
-                    <a href="#" id="clearAllBtn" class="danger"><ion-icon name="trash-outline"></ion-icon>Clear All Data</a>
+                    <a href="#" id="clearAllBtn" class="danger"><i class="ph ph-trash"></i> Clear All Data</a>
                 </div>
             </div>
         </div>
@@ -49,10 +44,10 @@
             <details class="card" open>
                 <summary class="card-header">
                     <h2>
-                        <ion-icon name="person-outline"></ion-icon>
+                        <i class="ph-bold ph-user"></i>
                         ข้อมูลลูกค้า
                     </h2>
-                    <ion-icon name="chevron-down-outline" class="expand-icon"></ion-icon>
+                    <i class="ph-bold ph-caret-down expand-icon"></i>
                 </summary>
                 <div class="card-content" id="customerInfo">
                     <div class="form-group">
@@ -74,7 +69,7 @@
             
             <div class="add-room-container">
                 <button type="button" class="btn btn-secondary" id="addRoomFooterBtn">
-                    <ion-icon name="add-circle-outline"></ion-icon>
+                    <i class="ph-bold ph-house-line"></i>
                     <span>เพิ่มห้อง</span>
                 </button>
             </div>
@@ -89,11 +84,9 @@
             <div><strong>รางทึบ:</strong> <span id="grandOpaqueTrack">0.00 ม.</span></div>
             <div><strong>รางโปร่ง:</strong> <span id="grandSheerTrack">0.00 ม.</span></div>
             <div class="total-items">
-                <strong><span id="setCount">0</span> ชุด</strong>
-                <small>(ผ้าม่าน <span id="setCountSets">0</span>, อื่นๆ <span id="setCountDeco">0</span>)</small>
+                <small>รวม <span id="setCount">0</span> รายการ</small>
             </div>
             <div class="grand-total">
-                <strong>รวมสุทธิ:</strong>
                 <span><span id="grandTotal">0</span> บาท</span>
             </div>
         </div>
@@ -144,13 +137,11 @@
                 <div class="form-group">
                     <input type="text" name="room_name" class="room-name-input" placeholder="ห้อง 01">
                 </div>
-                <div class="room-actions">
-                    <div class="room-brief" data-room-brief></div>
-                    <button type="button" class="btn-icon" data-act="del-room" title="ลบห้องนี้">
-                        <ion-icon name="trash-outline"></ion-icon>
-                    </button>
-                    <ion-icon name="chevron-down-outline" class="expand-icon"></ion-icon>
-                </div>
+                <div class="room-brief" data-room-brief></div>
+                 <i class="ph-bold ph-caret-down expand-icon"></i>
+                <button type="button" class="btn-icon" data-act="del-room" title="ลบห้องนี้">
+                    <i class="ph ph-trash"></i>
+                </button>
             </summary>
             <div class="card-content">
                 <div class="items-container" data-sets></div>
@@ -158,9 +149,9 @@
                 <div class="items-container" data-wallpapers></div>
             </div>
             <footer class="card-footer">
-                <button type="button" class="btn-chip" data-act="add-set"><ion-icon name="grid-outline"></ion-icon>เพิ่มผ้าม่าน</button>
-                <button type="button" class="btn-chip" data-act="add-deco"><ion-icon name="cube-outline"></ion-icon>เพิ่มตกแต่ง</button>
-                <button type="button" class="btn-chip" data-act="add-wallpaper"><ion-icon name="image-outline"></ion-icon>เพิ่มวอลเปเปอร์</button>
+                <button type="button" class="btn-chip" data-act="add-set"><i class="ph ph-blinds"></i>เพิ่มผ้าม่าน</button>
+                <button type="button" class="btn-chip" data-act="add-deco"><i class="ph ph-paint-roller"></i>เพิ่มตกแต่ง</button>
+                <button type="button" class="btn-chip" data-act="add-wallpaper"><i class="ph ph-file-image"></i>เพิ่มวอลเปเปอร์</button>
             </footer>
         </details>
     </template>
@@ -169,13 +160,13 @@
         <div class="item-card set-item" data-set>
             <div class="item-header">
                 <h4 class="item-title">
-                    <ion-icon name="grid-outline"></ion-icon>
+                    <i class="ph ph-blinds"></i>
                     <span data-item-title></span>
                 </h4>
                 <div class="item-actions">
-                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><ion-icon name="pause-circle-outline"></ion-icon></button>
-                    <button type="button" class="btn-icon" data-act="clear-set" title="ล้างข้อมูล"><ion-icon name="refresh-outline"></ion-icon></button>
-                    <button type="button" class="btn-icon" data-act="del-set" title="ลบ"><ion-icon name="close-circle-outline"></ion-icon></button>
+                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph ph-pause-circle"></i></button>
+                    <button type="button" class="btn-icon" data-act="clear-set" title="ล้างข้อมูล"><i class="ph ph-eraser"></i></button>
+                    <button type="button" class="btn-icon" data-act="del-set" title="ลบ"><i class="ph ph-x"></i></button>
                 </div>
             </div>
             
@@ -230,13 +221,13 @@
         <div class="item-card deco-item" data-deco-item>
              <div class="item-header">
                 <h4 class="item-title">
-                    <ion-icon name="cube-outline"></ion-icon>
+                    <i class="ph ph-paint-roller"></i>
                     <span data-item-title></span>
                 </h4>
                 <div class="item-actions">
-                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><ion-icon name="pause-circle-outline"></ion-icon></button>
-                    <button type="button" class="btn-icon" data-act="clear-deco" title="ล้างข้อมูล"><ion-icon name="refresh-outline"></ion-icon></button>
-                    <button type="button" class="btn-icon" data-act="del-deco" title="ลบ"><ion-icon name="close-circle-outline"></ion-icon></button>
+                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph ph-pause-circle"></i></button>
+                    <button type="button" class="btn-icon" data-act="clear-deco" title="ล้างข้อมูล"><i class="ph ph-eraser"></i></button>
+                    <button type="button" class="btn-icon" data-act="del-deco" title="ลบ"><i class="ph ph-x"></i></button>
                 </div>
             </div>
             <div class="item-grid three-col">
@@ -265,13 +256,13 @@
         <div class="item-card wallpaper-item" data-wallpaper-item>
              <div class="item-header">
                 <h4 class="item-title">
-                    <ion-icon name="image-outline"></ion-icon>
+                    <i class="ph ph-file-image"></i>
                     <span data-item-title></span>
                 </h4>
                  <div class="item-actions">
-                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><ion-icon name="pause-circle-outline"></ion-icon></button>
-                    <button type="button" class="btn-icon" data-act="clear-wallpaper" title="ล้างข้อมูล"><ion-icon name="refresh-outline"></ion-icon></button>
-                    <button type="button" class="btn-icon" data-act="del-wallpaper" title="ลบ"><ion-icon name="close-circle-outline"></ion-icon></button>
+                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph ph-pause-circle"></i></button>
+                    <button type="button" class="btn-icon" data-act="clear-wallpaper" title="ล้างข้อมูล"><i class="ph ph-eraser"></i></button>
+                    <button type="button" class="btn-icon" data-act="del-wallpaper" title="ลบ"><i class="ph ph-x"></i></button>
                 </div>
             </div>
             <div class="item-grid">
@@ -289,7 +280,7 @@
                 <div class="walls-container" data-walls-container>
                     </div>
                 <button type="button" class="btn btn-secondary btn-small" data-act="add-wall">
-                    <ion-icon name="add-outline"></ion-icon> เพิ่มผนัง
+                    <i class="ph ph-plus"></i> เพิ่มผนัง
                 </button>
             </div>
              <div class="item-summary single-line" data-wallpaper-summary></div>
@@ -300,7 +291,7 @@
         <div class="wall-input-row">
             <input type="number" step="0.01" name="wall_width_m" placeholder="0.00">
             <button type="button" class="btn-icon btn-icon-small" data-act="del-wall" title="ลบผนัง">
-                <ion-icon name="close-outline"></ion-icon>
+                <i class="ph ph-x"></i>
             </button>
         </div>
     </template>

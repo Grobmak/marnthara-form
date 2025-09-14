@@ -1,9 +1,9 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.1.0-ios-glass";
+    const APP_VERSION = "input-ui/4.1.0-redesigned";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
-    const STORAGE_KEY = "marnthara.input.v4"; // Data structure is compatible, no key change needed
+    const STORAGE_KEY = "marnthara.input.v4"; // Keep v4 for data compatibility
     const SQM_TO_SQYD = 1.19599;
 
     const PRICING = {
@@ -35,7 +35,7 @@
 
     const SELECTORS = {
         orderForm: '#orderForm', roomsContainer: '#rooms', roomTpl: '#roomTpl', setTpl: '#setTpl', decoTpl: '#decoTpl', wallpaperTpl: '#wallpaperTpl', wallTpl: '#wallTpl',
-        payloadInput: '#payload', copyJsonBtn: '#copyJsonBtn', clearAllBtn: '#clearAllBtn',
+        payloadInput: '#payload', clearAllBtn: '#clearAllBtn', copyJsonBtn: '#copyJsonBtn',
         lockBtn: '#lockBtn', addRoomFooterBtn: '#addRoomFooterBtn',
         grandTotal: '#grandTotal', setCount: '#setCount', grandFabric: '#grandFabric', grandSheerFabric: '#grandSheerFabric',
         modal: '#confirmationModal', modalTitle: '#modalTitle', modalBody: '#modalBody', modalConfirm: '#modalConfirm', modalCancel: '#modalCancel',
@@ -44,15 +44,13 @@
         wallpapersContainer: '[data-wallpapers]', wallpaperItem: '[data-wallpaper-item]', wallsContainer: '[data-walls-container]',
         sheerWrap: '[data-sheer-wrap]',
         roomNameInput: 'input[name="room_name"]',
-        setCountSets: '#setCountSets', setCountDeco: '#setCountDeco',
         toastContainer: '#toast-container',
         grandOpaqueTrack: '#grandOpaqueTrack', grandSheerTrack: '#grandSheerTrack',
-        copyOptionsModal: '#copyOptionsModal', copyOptionsConfirm: '#copyOptionsConfirm', copyOptionsCancel: '#copyOptionsCancel',
+        copyTextBtn: '#copyTextBtn', copyOptionsModal: '#copyOptionsModal', copyOptionsConfirm: '#copyOptionsConfirm', copyOptionsCancel: '#copyOptionsCancel',
         copyCustomerInfo: '#copyCustomerInfo', copyRoomDetails: '#copyRoomDetails', copySummary: '#copySummary',
         menuBtn: '#menuBtn', menuDropdown: '#menuDropdown', importBtn: '#importBtn', exportBtn: '#exportBtn',
         importModal: '#importModal', importJsonArea: '#importJsonArea', importConfirm: '#importConfirm', importCancel: '#importCancel',
-        // --- MOVED BUTTONS ---
-        copyTextMenuBtn: '#copyTextMenuBtn', submitMenuBtn: '#submitMenuBtn'
+        submitBtn: '#submitBtn' // Moved to menu
     };
 
     // --- STATE ---
@@ -262,8 +260,10 @@
     function suspendItem(item, isSuspended, notify = true) {
         item.dataset.suspended = isSuspended;
         item.classList.toggle('is-suspended', isSuspended);
-        const suspendIcon = item.querySelector('[data-act="toggle-suspend"] ion-icon');
-        if (suspendIcon) suspendIcon.name = isSuspended ? 'play-circle-outline' : 'pause-circle-outline';
+        const suspendIcon = item.querySelector('[data-act="toggle-suspend"] i');
+        if (suspendIcon) {
+            suspendIcon.className = isSuspended ? 'ph ph-play-circle' : 'ph ph-pause-circle';
+        }
         if (notify) showToast(`รายการถูก${isSuspended ? 'ระงับ' : 'ใช้งาน'}แล้ว`, 'warning');
     }
 
@@ -373,10 +373,7 @@
         // Update summary footer
         document.querySelector(SELECTORS.grandTotal).textContent = fmt(grand, 0, true);
         const allItems = document.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`);
-        const curtainSets = document.querySelectorAll(SELECTORS.set);
         document.querySelector(SELECTORS.setCount).textContent = allItems.length;
-        document.querySelector(SELECTORS.setCountSets).textContent = curtainSets.length;
-        document.querySelector(SELECTORS.setCountDeco).textContent = allItems.length - curtainSets.length;
         document.querySelector(SELECTORS.grandFabric).textContent = fmt(grandOpaqueYards, 2) + " หลา";
         document.querySelector(SELECTORS.grandSheerFabric).textContent = fmt(grandSheerYards, 2) + " หลา";
         document.querySelector(SELECTORS.grandOpaqueTrack).textContent = fmt(grandOpaqueTrack, 2) + " ม.";
@@ -476,6 +473,7 @@
         if (!lockBtn) return;
         lockBtn.classList.toggle('is-locked', isLocked);
         lockBtn.querySelector('.lock-text').textContent = isLocked ? 'ปลดล็อค' : 'ล็อก';
+        lockBtn.querySelector('.lock-icon').className = isLocked ? 'ph-fill ph-lock-key lock-icon' : 'ph-fill ph-lock-key-open lock-icon';
         
         document.querySelectorAll('input, select, textarea, button').forEach(el => {
             const isExempt = el.closest('.summary-footer') || el.closest('.main-header') || el.closest('.modal-wrapper');
@@ -555,23 +553,22 @@
         return summary;
     }
 
-    function handleSubmit() {
-        const form = document.querySelector(SELECTORS.orderForm);
-        form.querySelector(SELECTORS.payloadInput).value = JSON.stringify(buildPayload());
+    function handleFormSubmit() {
+        const orderForm = document.querySelector(SELECTORS.orderForm);
+        orderForm.action = WEBHOOK_URL;
+        document.querySelector(SELECTORS.payloadInput).value = JSON.stringify(buildPayload());
         // In a real scenario, you might use fetch() here. For now, we just show a toast.
         showToast("ส่งข้อมูลแล้ว...", "success");
-        // form.submit(); // Uncomment to allow actual form submission
+        // orderForm.submit(); // Uncomment to allow actual form submission
     }
 
     // --- EVENT LISTENERS & INITIALIZATION ---
     function init() {
         const orderForm = document.querySelector(SELECTORS.orderForm);
         const roomsEl = document.querySelector(SELECTORS.roomsContainer);
-        orderForm.action = WEBHOOK_URL;
         
-        const debouncedRecalcAndSave = debounce(() => { recalcAll(); saveData(); });
+        const debouncedRecalcAndSave = debounce(() => { recalcAll(); saveData(); }, 150);
         orderForm.addEventListener("input", e => {
-            // Format numeric inputs with commas for better readability
             if(e.target.name === 'deco_price_sqyd' || e.target.name === 'wallpaper_price_roll') {
                  const value = toNum(e.target.value);
                  e.target.value = value > 0 ? value.toLocaleString('en-US') : '';
@@ -580,10 +577,11 @@
         });
         orderForm.addEventListener("change", debouncedRecalcAndSave);
 
-        // Main event delegation for all actions
+        // Event delegation for all dynamic actions
         orderForm.addEventListener("click", e => {
             const btn = e.target.closest('button[data-act]');
             if (!btn) return;
+            e.preventDefault(); // Prevent summary click from toggling details
             const action = btn.dataset.act;
             const roomEl = btn.closest(SELECTORS.room);
 
@@ -608,7 +606,6 @@
                     saveData();
                 }
             };
-
             if (actions[action]) actions[action]();
         });
 
@@ -621,10 +618,10 @@
         document.querySelector(SELECTORS.addRoomFooterBtn).addEventListener('click', () => addRoom());
         document.querySelector(SELECTORS.lockBtn).addEventListener('click', toggleLock);
         
-        // --- HEADER & MENU ACTIONS ---
+        // --- Menu Actions ---
         const menuDropdown = document.querySelector(SELECTORS.menuDropdown);
         
-        document.querySelector(SELECTORS.copyTextMenuBtn).addEventListener('click', async (e) => {
+        document.querySelector(SELECTORS.copyTextBtn).addEventListener('click', async (e) => {
             e.preventDefault();
             const options = await showCopyOptionsModal();
             if (!options) return;
@@ -633,13 +630,13 @@
                 .catch(() => showToast('คัดลอกล้มเหลว', 'error'));
             menuDropdown.classList.remove('show');
         });
-
-        document.querySelector(SELECTORS.submitMenuBtn).addEventListener('click', (e) => {
+        
+        document.querySelector(SELECTORS.submitBtn).addEventListener('click', (e) => {
             e.preventDefault();
-            handleSubmit();
+            handleFormSubmit();
             menuDropdown.classList.remove('show');
         });
-        
+
         document.querySelector(SELECTORS.clearAllBtn).addEventListener('click', async (e) => {
             e.preventDefault();
             if (isLocked || !await showConfirmation('ล้างข้อมูลทั้งหมด', 'คำเตือน! การกระทำนี้จะลบข้อมูลทั้งหมด ไม่สามารถกู้คืนได้')) return;
@@ -675,9 +672,9 @@
         
         document.querySelector(SELECTORS.importBtn).addEventListener('click', async (e) => {
             e.preventDefault();
+            menuDropdown.classList.remove('show');
             const payload = await showImportModal();
             if (payload) loadPayload(payload);
-            menuDropdown.classList.remove('show');
         });
 
         // Menu Dropdown Toggle
