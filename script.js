@@ -1,13 +1,3 @@
-/*
-AI Instructions:
-This is a personal quotation tool for a small company, used via https://grobmak.github.io/marnthara-form/ and primarily on mobile devices.
-- Please analyze and optimize the JavaScript logic for the application.
-- Refine all calculation functions for accuracy and efficiency.
-- Improve data handling, including data storage and retrieval from LocalStorage.
-- Clean and refactor the code for better maintainability and error handling.
-- The final code must be production-ready and fully functional.
-*/
-
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
