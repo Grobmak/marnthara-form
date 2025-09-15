@@ -38,7 +38,7 @@
         payloadInput: '#payload', clearAllBtn: '#clearAllBtn', copyJsonBtn: '#copyJsonBtn',
         lockBtn: '#lockBtn', addRoomFooterBtn: '#addRoomFooterBtn', lockText: '#lockText',
         grandTotal: '#grandTotal', setCount: '#setCount',
-        detailedSummaryContainer: '#detailed-material-summary',
+        detailedSummaryContainer: '#detailed-material-summary', // ADDED
         modal: '#confirmationModal', modalTitle: '#modalTitle', modalBody: '#modalBody', modalConfirm: '#modalConfirm', modalCancel: '#modalCancel',
         room: '[data-room]', set: '[data-set]', setsContainer: '[data-sets]',
         decorationsContainer: '[data-decorations]', decoItem: '[data-deco-item]',
@@ -287,7 +287,6 @@
         let grand = 0, grandOpaqueYards = 0, grandSheerYards = 0, grandOpaqueTrack = 0, grandSheerTrack = 0;
         let totalWallpaperRolls = 0;
         let hasDoubleBracket = false;
-        let pricedItemCount = 0; // For counting items with price > 0
         const decoCounts = {};
         
         document.querySelectorAll(SELECTORS.room).forEach(room => {
@@ -295,7 +294,7 @@
             
             // CURTAIN SETS
             room.querySelectorAll(SELECTORS.set).forEach(set => {
-                let opaquePrice = 0, sheerPrice = 0;
+                let opaquePrice = 0, sheerPrice = 0, opaqueYards = 0, sheerYards = 0, opaqueTrack = 0, sheerTrack = 0;
                 
                 if (set.dataset.suspended !== 'true') {
                     const w = clamp01(set.querySelector('input[name="width_m"]')?.value);
@@ -312,29 +311,34 @@
                             const baseRaw = clamp01(set.querySelector('select[name="set_price_per_m"]')?.value);
                             if (baseRaw > 0) {
                                 opaquePrice = Math.round((baseRaw + sPlus + hPlus) * w);
-                                grandOpaqueYards += CALC.fabricYardage(style, w);
-                                grandOpaqueTrack += w;
+                                opaqueYards = CALC.fabricYardage(style, w);
+                                opaqueTrack = w;
                             }
                         }
                         if (variant.includes("โปร่ง")) {
                             const sheerBase = clamp01(set.querySelector('select[name="sheer_price_per_m"]')?.value);
                             if (sheerBase > 0) {
                                 sheerPrice = Math.round((sheerBase + sPlus + hPlus) * w);
-                                grandSheerYards += CALC.fabricYardage(style, w);
-                                grandSheerTrack += w;
+                                sheerYards = CALC.fabricYardage(style, w);
+                                sheerTrack = w;
                             }
                         }
                     }
                 }
                 
-                const totalPrice = opaquePrice + sheerPrice;
-                if(totalPrice > 0) pricedItemCount++;
-
-                set.querySelector('[data-set-price-total]').textContent = fmt(totalPrice, 0, true);
+                set.querySelector('[data-set-price-total]').textContent = fmt(opaquePrice + sheerPrice, 0, true);
                 set.querySelector('[data-set-price-opaque]').textContent = fmt(opaquePrice, 0, true);
                 set.querySelector('[data-set-price-sheer]').textContent = fmt(sheerPrice, 0, true);
+                set.querySelector('[data-set-yardage-opaque]').textContent = fmt(opaqueYards, 2);
+                set.querySelector('[data-set-yardage-sheer]').textContent = fmt(sheerYards, 2);
+                set.querySelector('[data-set-opaque-track]').textContent = fmt(opaqueTrack, 2);
+                set.querySelector('[data-set-sheer-track]').textContent = fmt(sheerTrack, 2);
                 
-                roomSum += totalPrice;
+                roomSum += opaquePrice + sheerPrice;
+                grandOpaqueYards += opaqueYards;
+                grandSheerYards += sheerYards;
+                grandOpaqueTrack += opaqueTrack;
+                grandSheerTrack += sheerTrack;
             });
             
             // DECORATIONS
@@ -347,12 +351,9 @@
                     areaSqyd = w * h * SQM_TO_SQYD;
                     decoPrice = Math.round(areaSqyd * price);
 
-                    if (decoPrice > 0) {
-                        pricedItemCount++;
-                        const type = deco.querySelector('[name="deco_type"]').value.trim();
-                        if(type) {
-                            decoCounts[type] = (decoCounts[type] || 0) + 1;
-                        }
+                    const type = deco.querySelector('[name="deco_type"]').value.trim();
+                    if(type) {
+                        decoCounts[type] = (decoCounts[type] || 0) + 1;
                     }
                 }
                 deco.querySelector('[data-deco-summary]').innerHTML = `ราคา: <b>${fmt(decoPrice, 0, true)}</b> บ. • พื้นที่: <b>${fmt(areaSqyd, 2)}</b> ตร.หลา`;
@@ -367,30 +368,27 @@
                     const pricePerRoll = clamp01(wallpaper.querySelector('[name="wallpaper_price_roll"]')?.value);
                     const totalWidth = Array.from(wallpaper.querySelectorAll('input[name="wall_width_m"]')).reduce((sum, el) => sum + clamp01(el.value), 0);
                     rollsNeeded = CALC.wallpaperRolls(totalWidth, h);
-                    
-                    wallpaperPrice = Math.round(rollsNeeded * pricePerRoll);
-                    if(wallpaperPrice > 0) {
-                        pricedItemCount++;
-                        if (Number.isFinite(rollsNeeded)) {
-                            totalWallpaperRolls += rollsNeeded;
-                        }
+                    if (Number.isFinite(rollsNeeded)) {
+                        totalWallpaperRolls += rollsNeeded;
                     }
+                    wallpaperPrice = Math.round(rollsNeeded * pricePerRoll);
                     areaSqm = totalWidth * h;
                 }
                 wallpaper.querySelector('[data-wallpaper-summary]').innerHTML = `ราคา: <b>${fmt(wallpaperPrice, 0, true)}</b> บ. • พื้นที่: <b>${fmt(areaSqm, 2)}</b> ตร.ม. • ใช้ <b>${rollsNeeded}</b> ม้วน`;
                 roomSum += wallpaperPrice;
             });
-            
+
+            const itemCount = room.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"]), ${SELECTORS.decoItem}:not([data-suspended="true"]), ${SELECTORS.wallpaperItem}:not([data-suspended="true"])`).length;
+            room.querySelector('[data-room-brief]').innerHTML = `<span>${itemCount} รายการ • ${fmt(roomSum, 0, true)} บาท</span>`;
             grand += roomSum;
-            const activeItemsInRoom = Array.from(room.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`)).filter(item => item.dataset.suspended !== 'true');
-            room.querySelector('[data-room-brief]').innerHTML = `<span>${activeItemsInRoom.length} รายการ • ${fmt(roomSum, 0, true)} บาท</span>`;
         });
         
         // Update summary footer
         document.querySelector(SELECTORS.grandTotal).textContent = fmt(grand, 0, true);
-        document.querySelector(SELECTORS.setCount).textContent = pricedItemCount;
+        const allActiveItems = document.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"]), ${SELECTORS.decoItem}:not([data-suspended="true"]), ${SELECTORS.wallpaperItem}:not([data-suspended="true"])`);
+        document.querySelector(SELECTORS.setCount).textContent = allActiveItems.length;
 
-        // --- UPDATE DETAILED MATERIAL SUMMARY ---
+        // --- UPDATE DETAILED MATERIAL SUMMARY (NEW) ---
         const summaryContainer = document.querySelector(SELECTORS.detailedSummaryContainer);
         if(summaryContainer) {
             let html = '';

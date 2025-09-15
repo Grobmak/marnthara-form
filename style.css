@@ -252,49 +252,36 @@ i.ph {
     margin-bottom: 0.75rem;
 }
 
-/* --- ITEM SUMMARY (GENERAL & DECO/WALLPAPER) --- */
 .item-summary {
     background-color: var(--surface);
     border-radius: var(--border-radius-md);
     padding: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--on-surface-variant);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.25rem 0.5rem;
+    align-items: center;
+    position: relative;
     border: 1px solid var(--outline-variant);
 }
 .item-summary.single-line {
-    text-align: center;
-    padding: 0.75rem;
-}
-
-/* --- ITEM SUMMARY (CURTAIN SET SPECIFIC) --- */
-.set-item .item-summary {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.75rem;
-}
-.price-breakdown {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    width: 100%;
-    text-align: center;
-    font-size: 0.9rem;
-}
-.price-breakdown small {
     display: block;
-    color: var(--on-surface-variant);
-    font-size: 0.8rem;
-}
-.price-breakdown span {
-    font-weight: 500;
-    color: var(--on-surface);
-}
-.price-breakdown span::after {
-    content: ' บ.';
-    font-weight: normal;
-    color: var(--on-surface-variant);
+    text-align: center;
+    padding: 0.75rem;
 }
 
-.item-total-price {
+.set-item .item-summary::before {
+    content: "ทึบ | โปร่ง";
+    position: absolute;
+    writing-mode: vertical-rl; text-orientation: mixed;
+    left: -1rem; top: 50%; transform: translateY(-50%);
+    font-size: 0.65rem; color: var(--outline); line-height: 1.2;
+}
+
+.item-summary > div { text-align: right; }
+.item-summary .item-total-price {
+    grid-column: 1 / -1;
     text-align: center;
     font-size: 1.1rem;
     font-weight: 700;
@@ -303,9 +290,8 @@ i.ph {
     border-top: 1px solid var(--outline-variant);
     margin-top: 0.25rem;
 }
-.item-total-price::before { content: "รวม: "; font-weight: normal; color: var(--on-surface-variant); }
-.item-total-price::after { content: " บ."; }
-
+.item-summary .item-total-price::before { content: "รวม: "; font-weight: normal; color: var(--on-surface-variant); }
+.item-summary .item-total-price::after { content: " บ."; }
 
 /* --- WALLPAPER SPECIFIC --- */
 .walls-section {
