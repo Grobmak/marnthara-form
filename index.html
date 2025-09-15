@@ -49,13 +49,15 @@
                     <i class="ph-bold ph-caret-down expand-icon"></i>
                 </summary>
                 <div class="card-content" id="customerInfo">
-                    <div class="form-group">
-                        <label for="customer_name">ชื่อลูกค้า</label>
-                        <input type="text" id="customer_name" name="customer_name" placeholder="ระบุชื่อ">
-                    </div>
-                    <div class="form-group">
-                        <label for="customer_phone">เบอร์โทรศัพท์</label>
-                        <input type="tel" id="customer_phone" name="customer_phone" placeholder="ระบุเบอร์โทร">
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="customer_name">ชื่อลูกค้า</label>
+                            <input type="text" id="customer_name" name="customer_name" placeholder="ระบุชื่อ">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer_phone">เบอร์โทรศัพท์</label>
+                            <input type="tel" id="customer_phone" name="customer_phone" placeholder="ระบุเบอร์โทร">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="customer_address">ที่อยู่</label>
@@ -90,7 +92,6 @@
             </div>
         </div>
     </footer>
-
 
     <div id="confirmationModal" class="modal-wrapper">
         <div class="modal-content">
@@ -129,7 +130,6 @@
         </div>
     </div>
 
-
     <template id="roomTpl">
         <details class="card room-card" data-room open>
             <summary>
@@ -165,7 +165,7 @@
                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph-bold ph-pause-circle"></i></button>
                     <button type="button" class="btn-icon" data-act="clear-set" title="ล้างข้อมูล"><i class="ph-bold ph-eraser"></i></button>
-                    <button type="button" class="btn-icon" data-act="del-set" title="ลบ"><i class="ph-bold ph-x"></i></button>
+                    <button type="button" class="btn-icon danger" data-act="del-set" title="ลบ"><i class="ph-bold ph-x"></i></button>
                 </div>
             </div>
             
@@ -226,7 +226,7 @@
                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph-bold ph-pause-circle"></i></button>
                     <button type="button" class="btn-icon" data-act="clear-deco" title="ล้างข้อมูล"><i class="ph-bold ph-eraser"></i></button>
-                    <button type="button" class="btn-icon" data-act="del-deco" title="ลบ"><i class="ph-bold ph-x"></i></button>
+                    <button type="button" class="btn-icon danger" data-act="del-deco" title="ลบ"><i class="ph-bold ph-x"></i></button>
                 </div>
             </div>
             <div class="item-grid">
@@ -261,7 +261,7 @@
                  <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph-bold ph-pause-circle"></i></button>
                     <button type="button" class="btn-icon" data-act="clear-wallpaper" title="ล้างข้อมูล"><i class="ph-bold ph-eraser"></i></button>
-                    <button type="button" class="btn-icon" data-act="del-wallpaper" title="ลบ"><i class="ph-bold ph-x"></i></button>
+                    <button type="button" class="btn-icon danger" data-act="del-wallpaper" title="ลบ"><i class="ph-bold ph-x"></i></button>
                 </div>
             </div>
             <div class="item-grid">
@@ -289,7 +289,7 @@
     <template id="wallTpl">
         <div class="wall-input-row">
             <input type="number" step="0.01" name="wall_width_m" placeholder="0.00">
-            <button type="button" class="btn-icon btn-icon-small" data-act="del-wall" title="ลบผนัง">
+            <button type="button" class="btn-icon btn-icon-small danger" data-act="del-wall" title="ลบผนัง">
                 <i class="ph-bold ph-x"></i>
             </button>
         </div>
