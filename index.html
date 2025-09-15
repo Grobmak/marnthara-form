@@ -145,8 +145,8 @@
                     <input type="text" name="room_name" class="room-name-input" placeholder="ห้อง 01">
                 </div>
                 <div class="room-brief" data-room-brief></div>
-                <i class="ph-bold ph-caret-down expand-icon"></i>
-                <button type="button" class="btn-icon danger" data-act="del-room" title="ลบห้องนี้">
+                 <i class="ph-bold ph-caret-down expand-icon"></i>
+                <button type="button" class="btn-icon" data-act="del-room" title="ลบห้องนี้">
                     <i class="ph-bold ph-trash"></i>
                 </button>
             </summary>
@@ -162,7 +162,7 @@
             </footer>
         </details>
     </template>
-    
+
     <template id="setTpl">
         <div class="item-card set-item" data-set>
             <div class="item-header">
@@ -173,22 +173,21 @@
                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph-bold ph-pause-circle"></i></button>
                     <button type="button" class="btn-icon" data-act="clear-set" title="ล้างข้อมูล"><i class="ph-bold ph-eraser"></i></button>
-                    <button type="button" class="btn-icon danger" data-act="del-set" title="ลบ"><i class="ph-bold ph-trash"></i></button>
+                    <button type="button" class="btn-icon danger" data-act="del-set" title="ลบ"><i class="ph-bold ph-x"></i></button>
                 </div>
             </div>
+            
             <div class="item-grid">
                 <div class="form-group">
-                    <label>ความกว้าง (ม.)</label>
+                    <label>กว้าง (ม.)</label>
                     <input type="number" step="0.01" name="width_m" placeholder="0.00">
                 </div>
                 <div class="form-group">
-                    <label>ความสูง (ม.)</label>
+                    <label>สูง (ม.)</label>
                     <input type="number" step="0.01" name="height_m" placeholder="0.00">
                 </div>
-            </div>
-            <div class="item-grid">
                 <div class="form-group">
-                    <label>สไตล์</label>
+                    <label>รูปแบบ</label>
                     <select name="set_style">
                         <option value="ลอน">ลอน</option>
                         <option value="ตาไก่">ตาไก่</option>
@@ -199,62 +198,62 @@
                     <label>ชนิดผ้า</label>
                     <select name="fabric_variant">
                         <option value="ทึบ">ทึบ</option>
+                        <option value="ทึบ&โปร่ง">ทึบ & โปร่ง</option>
                         <option value="โปร่ง">โปร่ง</option>
-                        <option value="ทึบ&โปร่ง">ทึบ&โปร่ง</option>
                     </select>
                 </div>
-            </div>
-            <div class="item-grid">
-                 <div class="form-group">
-                    <label>ราคา/ม. (ผ้าทึบ)</label>
+                <div class="form-group">
+                    <label>ราคาผ้าทึบ</label>
                     <select name="set_price_per_m"></select>
                 </div>
                 <div class="form-group" data-sheer-wrap>
-                    <label>ราคา/ม. (ผ้าโปร่ง)</label>
+                    <label>ราคาผ้าโปร่ง</label>
                     <select name="sheer_price_per_m"></select>
                 </div>
             </div>
+
             <div class="item-summary set-summary">
                 <div class="summary-price-item">
-                    <span>ผ้าทึบ</span>
-                    <strong><span data-set-price-opaque>0</span></strong>
+                    <span>ทึบ</span>
+                    <strong data-set-price-opaque>0</strong>
                 </div>
                 <div class="summary-price-item">
-                    <span>ผ้าโปร่ง</span>
-                    <strong><span data-set-price-sheer>0</span></strong>
+                    <span>โปร่ง</span>
+                    <strong data-set-price-sheer>0</strong>
                 </div>
-                <div class="summary-price-item">
-                    <span>รวม</span>
-                    <strong><span data-set-price-total>0</span></strong>
-                </div>
-                <div class="item-summary-line item-total-price" data-set-total></div>
+                <div class="item-total-price" data-set-price-total>0</div>
+                <div data-set-yardage-opaque hidden>0.00</div>
+                <div data-set-opaque-track hidden>0.00</div>
+                <div data-set-yardage-sheer hidden>0.00</div>
+                <div data-set-sheer-track hidden>0.00</div>
             </div>
         </div>
     </template>
-    
+
     <template id="decoTpl">
         <div class="item-card deco-item" data-deco-item>
-            <div class="item-header">
+             <div class="item-header">
                 <h4 class="item-title">
-                    <i class="ph-bold ph-paint-brush"></i>
-                    <span class="deco-type-display"></span>: ของตกแต่ง
+                    <i class="ph-bold ph-paint-roller"></i>
+                    <span data-item-title></span>: ตกแต่ง <span class="deco-type-display"></span>
                 </h4>
                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph-bold ph-pause-circle"></i></button>
-                    <button type="button" class="btn-icon danger" data-act="del-deco" title="ลบ"><i class="ph-bold ph-trash"></i></button>
+                    <button type="button" class="btn-icon" data-act="clear-deco" title="ล้างข้อมูล"><i class="ph-bold ph-eraser"></i></button>
+                    <button type="button" class="btn-icon danger" data-act="del-deco" title="ลบ"><i class="ph-bold ph-x"></i></button>
                 </div>
             </div>
             <div class="item-grid">
                 <div class="form-group">
                     <label>ประเภท</label>
-                    <input type="text" name="deco_type" placeholder="เช่น มู่ลี่">
+                    <input type="text" name="deco_type" placeholder="เช่น มู่ลี่ไม้, ม่านม้วน">
                 </div>
                 <div class="form-group">
-                    <label>ความกว้าง (ม.)</label>
+                    <label>กว้าง (ม.)</label>
                     <input type="number" step="0.01" name="deco_width_m" placeholder="0.00">
                 </div>
-                <div class="form-group">
-                    <label>ความสูง (ม.)</label>
+                 <div class="form-group">
+                    <label>สูง (ม.)</label>
                     <input type="number" step="0.01" name="deco_height_m" placeholder="0.00">
                 </div>
                 <div class="form-group">
@@ -262,20 +261,21 @@
                     <input type="text" inputmode="numeric" name="deco_price_sqyd" placeholder="0">
                 </div>
             </div>
-            <div class="item-summary" data-deco-summary></div>
+            <div class="item-summary single-line" data-deco-summary></div>
         </div>
     </template>
-
+    
     <template id="wallpaperTpl">
         <div class="item-card wallpaper-item" data-wallpaper-item>
-            <div class="item-header">
+             <div class="item-header">
                 <h4 class="item-title">
-                    <i class="ph-bold ph-wall"></i>
-                    วอลเปเปอร์
+                    <i class="ph-bold ph-file-image"></i>
+                    <span data-item-title></span>: วอลเปเปอร์
                 </h4>
-                <div class="item-actions">
+                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph-bold ph-pause-circle"></i></button>
-                    <button type="button" class="btn-icon danger" data-act="del-wallpaper" title="ลบ"><i class="ph-bold ph-trash"></i></button>
+                    <button type="button" class="btn-icon" data-act="clear-wallpaper" title="ล้างข้อมูล"><i class="ph-bold ph-eraser"></i></button>
+                    <button type="button" class="btn-icon danger" data-act="del-wallpaper" title="ลบ"><i class="ph-bold ph-x"></i></button>
                 </div>
             </div>
             <div class="item-grid">
@@ -296,15 +296,18 @@
                     <i class="ph-bold ph-plus"></i> เพิ่มผนัง
                 </button>
             </div>
-            <div class="item-summary single-line" data-wallpaper-summary></div>
+             <div class="item-summary single-line" data-wallpaper-summary></div>
         </div>
     </template>
     
     <template id="wallTpl">
         <div class="wall-input-row">
             <input type="number" step="0.01" name="wall_width_m" placeholder="0.00">
-            <button type="button" class="btn-icon btn-icon-small danger" data-act="del-wall" title="ลบ"><i class="ph-bold ph-x"></i></button>
+            <button type="button" class="btn-icon btn-icon-small danger" data-act="del-wall" title="ลบผนัง">
+                <i class="ph-bold ph-x"></i>
+            </button>
         </div>
     </template>
+
 </body>
 </html>
