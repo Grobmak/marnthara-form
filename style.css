@@ -45,11 +45,11 @@
 
     /* Item Type Colors */
     --curtain-color: #4A5C9B; /* Primary */
-    --curtain-container-color: hsla(229, 36%, 60%, 0.1);
+    --curtain-container-color: hsla(229, 36%, 90%, 1);
     --deco-color: #00897B; /* Teal */
-    --deco-container-color: hsla(174, 100%, 27%, 0.1);
+    --deco-container-color: hsla(174, 100%, 90%, 1);
     --wallpaper-color: #F57C00; /* Amber/Orange */
-    --wallpaper-container-color: hsla(31, 100%, 48%, 0.1);
+    --wallpaper-container-color: hsla(31, 100%, 90%, 1);
 }
 
 * {
@@ -233,6 +233,11 @@ i.ph {
     color: var(--on-surface-variant);
     transition: color var(--transition-speed);
 }
+.deco-type-display {
+    color: var(--on-surface);
+    font-weight: normal;
+}
+
 
 /* Color Coding Rules */
 .set-item { border-left-color: var(--curtain-color); background-color: var(--curtain-container-color); }
@@ -255,32 +260,44 @@ i.ph {
 .item-summary {
     background-color: var(--surface);
     border-radius: var(--border-radius-md);
-    padding: 0.5rem;
+    padding: 0.75rem;
     font-size: 0.8rem;
     color: var(--on-surface-variant);
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0.25rem 0.5rem;
-    align-items: center;
-    position: relative;
     border: 1px solid var(--outline-variant);
 }
 .item-summary.single-line {
-    display: block;
     text-align: center;
-    padding: 0.75rem;
 }
 
-.set-item .item-summary::before {
-    content: "ทึบ | โปร่ง";
-    position: absolute;
-    writing-mode: vertical-rl; text-orientation: mixed;
-    left: -1rem; top: 50%; transform: translateY(-50%);
-    font-size: 0.65rem; color: var(--outline); line-height: 1.2;
+/* NEW Curtain Summary Style */
+.set-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    align-items: center;
 }
-
-.item-summary > div { text-align: right; }
-.item-summary .item-total-price {
+.summary-price-item {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    background-color: var(--surface-container);
+    padding: 0.25rem;
+    border-radius: var(--border-radius-sm);
+}
+.summary-price-item span {
+    font-size: 0.75rem;
+}
+.summary-price-item strong {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--on-surface);
+}
+.summary-price-item strong::after {
+    content: ' บ.';
+    font-size: 0.7rem;
+    font-weight: normal;
+}
+.set-summary .item-total-price {
     grid-column: 1 / -1;
     text-align: center;
     font-size: 1.1rem;
@@ -290,8 +307,9 @@ i.ph {
     border-top: 1px solid var(--outline-variant);
     margin-top: 0.25rem;
 }
-.item-summary .item-total-price::before { content: "รวม: "; font-weight: normal; color: var(--on-surface-variant); }
-.item-summary .item-total-price::after { content: " บ."; }
+.set-summary .item-total-price::before { content: "รวม: "; font-weight: normal; color: var(--on-surface-variant); }
+.set-summary .item-total-price::after { content: " บ."; }
+
 
 /* --- WALLPAPER SPECIFIC --- */
 .walls-section {
@@ -392,7 +410,14 @@ input[inputmode="numeric"] { text-align: right; }
     cursor: pointer;
     transition: all var(--transition-speed);
 }
-.btn-chip:hover { background-color: var(--primary-container); border-color: var(--primary); }
+.btn-chip:hover { 
+    filter: brightness(0.95);
+}
+/* Color-coded buttons */
+.btn-chip.btn-curtain { background-color: var(--curtain-container-color); border-color: var(--curtain-color); color: var(--curtain-color); }
+.btn-chip.btn-deco { background-color: var(--deco-container-color); border-color: var(--deco-color); color: var(--deco-color); }
+.btn-chip.btn-wallpaper { background-color: var(--wallpaper-container-color); border-color: var(--wallpaper-color); color: var(--wallpaper-color); }
+
 
 .header-btn {
     display: inline-flex; align-items: center; justify-content: center;

@@ -156,9 +156,9 @@
                 <div class="items-container" data-wallpapers></div>
             </div>
             <footer class="card-footer">
-                <button type="button" class="btn-chip" data-act="add-set">เพิ่มผ้าม่าน</button>
-                <button type="button" class="btn-chip" data-act="add-deco">เพิ่มตกแต่ง</button>
-                <button type="button" class="btn-chip" data-act="add-wallpaper">เพิ่มวอลเปเปอร์</button>
+                <button type="button" class="btn-chip btn-curtain" data-act="add-set">เพิ่มผ้าม่าน</button>
+                <button type="button" class="btn-chip btn-deco" data-act="add-deco">เพิ่มตกแต่ง</button>
+                <button type="button" class="btn-chip btn-wallpaper" data-act="add-wallpaper">เพิ่มวอลเปเปอร์</button>
             </footer>
         </details>
     </template>
@@ -168,7 +168,7 @@
             <div class="item-header">
                 <h4 class="item-title">
                     <i class="ph-bold ph-blinds"></i>
-                    <span data-item-title></span>
+                    <span data-item-title></span>: ผ้าม่าน
                 </h4>
                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph-bold ph-pause-circle"></i></button>
@@ -212,14 +212,20 @@
                 </div>
             </div>
 
-            <div class="item-summary">
-                <div data-set-price-opaque>0</div>
-                <div data-set-yardage-opaque>0.00</div>
-                <div data-set-opaque-track>0.00</div>
-                <div data-set-price-sheer>0</div>
-                <div data-set-yardage-sheer>0.00</div>
-                <div data-set-sheer-track>0.00</div>
+            <div class="item-summary set-summary">
+                <div class="summary-price-item">
+                    <span>ทึบ</span>
+                    <strong data-set-price-opaque>0</strong>
+                </div>
+                <div class="summary-price-item">
+                    <span>โปร่ง</span>
+                    <strong data-set-price-sheer>0</strong>
+                </div>
                 <div class="item-total-price" data-set-price-total>0</div>
+                <div data-set-yardage-opaque hidden>0.00</div>
+                <div data-set-opaque-track hidden>0.00</div>
+                <div data-set-yardage-sheer hidden>0.00</div>
+                <div data-set-sheer-track hidden>0.00</div>
             </div>
         </div>
     </template>
@@ -229,7 +235,7 @@
              <div class="item-header">
                 <h4 class="item-title">
                     <i class="ph-bold ph-paint-roller"></i>
-                    <span data-item-title></span>
+                    <span data-item-title></span>: ตกแต่ง <span class="deco-type-display"></span>
                 </h4>
                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph-bold ph-pause-circle"></i></button>
@@ -264,7 +270,7 @@
              <div class="item-header">
                 <h4 class="item-title">
                     <i class="ph-bold ph-file-image"></i>
-                    <span data-item-title></span>
+                    <span data-item-title></span>: วอลเปเปอร์
                 </h4>
                  <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph-bold ph-pause-circle"></i></button>
