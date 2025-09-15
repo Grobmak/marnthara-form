@@ -20,7 +20,7 @@
             </button>
             <div class="menu-container">
                 <button id="menuBtn" class="header-btn" title="Menu">
-                    <i class="ph-bold ph-dots-three-vertical"></i>
+                    <i class="ph-bold ph-dots-three-outline"></i>
                 </button>
                 <div id="menuDropdown" class="menu-dropdown">
                     <a href="#" id="copyTextBtn"><i class="ph ph-copy"></i> คัดลอกสรุป</a>
@@ -68,6 +68,24 @@
 
             <div id="rooms"></div>
             
+            <details class="card">
+                <summary>
+                    <h2>
+                        <i class="ph-bold ph-package"></i>
+                        สรุปวัสดุ
+                    </h2>
+                    <i class="ph-bold ph-caret-down expand-icon"></i>
+                </summary>
+                <div class="card-content">
+                    <div class="material-summary-grid">
+                        <div><strong>ผ้าทึบ:</strong> <span id="grandFabric">0.00 หลา</span></div>
+                        <div><strong>ผ้าโปร่ง:</strong> <span id="grandSheerFabric">0.00 หลา</span></div>
+                        <div><strong>รางทึบ:</strong> <span id="grandOpaqueTrack">0.00 ม.</span></div>
+                        <div><strong>รางโปร่ง:</strong> <span id="grandSheerTrack">0.00 ม.</span></div>
+                    </div>
+                </div>
+            </details>
+
             <div class="add-room-container">
                 <button type="button" class="btn btn-secondary" id="addRoomFooterBtn">
                     <i class="ph-bold ph-house-line"></i>
@@ -80,10 +98,6 @@
 
     <footer class="summary-footer">
         <div class="summary-grid">
-            <div><strong>ผ้าทึบ:</strong> <span id="grandFabric">0.00 หลา</span></div>
-            <div><strong>ผ้าโปร่ง:</strong> <span id="grandSheerFabric">0.00 หลา</span></div>
-            <div><strong>รางทึบ:</strong> <span id="grandOpaqueTrack">0.00 ม.</span></div>
-            <div><strong>รางโปร่ง:</strong> <span id="grandSheerTrack">0.00 ม.</span></div>
             <div class="total-items">
                 <small>รวม <span id="setCount">0</span> รายการ</small>
             </div>
