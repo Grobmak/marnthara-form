@@ -68,7 +68,7 @@
 
             <div id="rooms"></div>
             
-            <details class="card">
+            <details class="card" open>
                 <summary>
                     <h2>
                         <i class="ph-bold ph-package"></i>
@@ -76,14 +76,8 @@
                     </h2>
                     <i class="ph-bold ph-caret-down expand-icon"></i>
                 </summary>
-                <div class="card-content">
-                    <div class="material-summary-grid">
-                        <div><strong>ผ้าทึบ:</strong> <span id="grandFabric">0.00 หลา</span></div>
-                        <div><strong>ผ้าโปร่ง:</strong> <span id="grandSheerFabric">0.00 หลา</span></div>
-                        <div><strong>รางทึบ:</strong> <span id="grandOpaqueTrack">0.00 ม.</span></div>
-                        <div><strong>รางโปร่ง:</strong> <span id="grandSheerTrack">0.00 ม.</span></div>
+                <div class="card-content" id="detailed-material-summary">
                     </div>
-                </div>
             </details>
 
             <div class="add-room-container">
@@ -162,9 +156,9 @@
                 <div class="items-container" data-wallpapers></div>
             </div>
             <footer class="card-footer">
-                <button type="button" class="btn-chip" data-act="add-set"><i class="ph ph-blinds"></i>เพิ่มผ้าม่าน</button>
-                <button type="button" class="btn-chip" data-act="add-deco"><i class="ph ph-paint-roller"></i>เพิ่มตกแต่ง</button>
-                <button type="button" class="btn-chip" data-act="add-wallpaper"><i class="ph ph-file-image"></i>เพิ่มวอลเปเปอร์</button>
+                <button type="button" class="btn-chip" data-act="add-set">เพิ่มผ้าม่าน</button>
+                <button type="button" class="btn-chip" data-act="add-deco">เพิ่มตกแต่ง</button>
+                <button type="button" class="btn-chip" data-act="add-wallpaper">เพิ่มวอลเปเปอร์</button>
             </footer>
         </details>
     </template>
@@ -246,7 +240,7 @@
             <div class="item-grid">
                 <div class="form-group">
                     <label>ประเภท</label>
-                    <input type="text" name="deco_type" placeholder="เช่น มู่ลี่">
+                    <input type="text" name="deco_type" placeholder="เช่น มู่ลี่ไม้, ม่านม้วน">
                 </div>
                 <div class="form-group">
                     <label>กว้าง (ม.)</label>

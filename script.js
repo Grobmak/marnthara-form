@@ -27,7 +27,7 @@
         wallpaperRolls: (totalWidth, height) => {
             if (totalWidth <= 0 || height <= 0) return 0;
             const stripsPerRoll = Math.floor(10 / height);
-            if (stripsPerRoll === 0) return Infinity;
+            if (stripsPerRoll === 0) return Infinity; // Prevent division by zero
             const stripsNeeded = Math.ceil(totalWidth / 0.53);
             return Math.ceil(stripsNeeded / stripsPerRoll);
         }
@@ -37,7 +37,8 @@
         orderForm: '#orderForm', roomsContainer: '#rooms', roomTpl: '#roomTpl', setTpl: '#setTpl', decoTpl: '#decoTpl', wallpaperTpl: '#wallpaperTpl', wallTpl: '#wallTpl',
         payloadInput: '#payload', clearAllBtn: '#clearAllBtn', copyJsonBtn: '#copyJsonBtn',
         lockBtn: '#lockBtn', addRoomFooterBtn: '#addRoomFooterBtn', lockText: '#lockText',
-        grandTotal: '#grandTotal', setCount: '#setCount', grandFabric: '#grandFabric', grandSheerFabric: '#grandSheerFabric',
+        grandTotal: '#grandTotal', setCount: '#setCount',
+        detailedSummaryContainer: '#detailed-material-summary', // ADDED
         modal: '#confirmationModal', modalTitle: '#modalTitle', modalBody: '#modalBody', modalConfirm: '#modalConfirm', modalCancel: '#modalCancel',
         room: '[data-room]', set: '[data-set]', setsContainer: '[data-sets]',
         decorationsContainer: '[data-decorations]', decoItem: '[data-deco-item]',
@@ -45,7 +46,6 @@
         sheerWrap: '[data-sheer-wrap]',
         roomNameInput: 'input[name="room_name"]',
         toastContainer: '#toast-container',
-        grandOpaqueTrack: '#grandOpaqueTrack', grandSheerTrack: '#grandSheerTrack',
         copyTextBtn: '#copyTextBtn', copyOptionsModal: '#copyOptionsModal', copyOptionsConfirm: '#copyOptionsConfirm', copyOptionsCancel: '#copyOptionsCancel',
         copyCustomerInfo: '#copyCustomerInfo', copyRoomDetails: '#copyRoomDetails', copySummary: '#copySummary',
         menuBtn: '#menuBtn', menuDropdown: '#menuDropdown', importBtn: '#importBtn', exportBtn: '#exportBtn',
@@ -285,6 +285,9 @@
     
     function recalcAll() {
         let grand = 0, grandOpaqueYards = 0, grandSheerYards = 0, grandOpaqueTrack = 0, grandSheerTrack = 0;
+        let totalWallpaperRolls = 0;
+        let hasDoubleBracket = false;
+        const decoCounts = {};
         
         document.querySelectorAll(SELECTORS.room).forEach(room => {
             let roomSum = 0;
@@ -301,8 +304,10 @@
                     const sPlus = stylePlus(style);
                     const hPlus = heightPlus(h);
 
+                    if(variant === "ทึบ&โปร่ง") hasDoubleBracket = true;
+
                     if (w > 0 && h > 0) {
-                        if (variant === "ทึบ" || variant === "ทึบ&โปร่ง") {
+                        if (variant.includes("ทึบ")) {
                             const baseRaw = clamp01(set.querySelector('select[name="set_price_per_m"]')?.value);
                             if (baseRaw > 0) {
                                 opaquePrice = Math.round((baseRaw + sPlus + hPlus) * w);
@@ -310,7 +315,7 @@
                                 opaqueTrack = w;
                             }
                         }
-                        if (variant === "โปร่ง" || variant === "ทึบ&โปร่ง") {
+                        if (variant.includes("โปร่ง")) {
                             const sheerBase = clamp01(set.querySelector('select[name="sheer_price_per_m"]')?.value);
                             if (sheerBase > 0) {
                                 sheerPrice = Math.round((sheerBase + sPlus + hPlus) * w);
@@ -345,6 +350,11 @@
                     const price = clamp01(deco.querySelector('[name="deco_price_sqyd"]')?.value);
                     areaSqyd = w * h * SQM_TO_SQYD;
                     decoPrice = Math.round(areaSqyd * price);
+
+                    const type = deco.querySelector('[name="deco_type"]').value.trim();
+                    if(type) {
+                        decoCounts[type] = (decoCounts[type] || 0) + 1;
+                    }
                 }
                 deco.querySelector('[data-deco-summary]').innerHTML = `ราคา: <b>${fmt(decoPrice, 0, true)}</b> บ. • พื้นที่: <b>${fmt(areaSqyd, 2)}</b> ตร.หลา`;
                 roomSum += decoPrice;
@@ -358,6 +368,9 @@
                     const pricePerRoll = clamp01(wallpaper.querySelector('[name="wallpaper_price_roll"]')?.value);
                     const totalWidth = Array.from(wallpaper.querySelectorAll('input[name="wall_width_m"]')).reduce((sum, el) => sum + clamp01(el.value), 0);
                     rollsNeeded = CALC.wallpaperRolls(totalWidth, h);
+                    if (Number.isFinite(rollsNeeded)) {
+                        totalWallpaperRolls += rollsNeeded;
+                    }
                     wallpaperPrice = Math.round(rollsNeeded * pricePerRoll);
                     areaSqm = totalWidth * h;
                 }
@@ -365,19 +378,50 @@
                 roomSum += wallpaperPrice;
             });
 
-            const itemCount = room.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`).length;
+            const itemCount = room.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"]), ${SELECTORS.decoItem}:not([data-suspended="true"]), ${SELECTORS.wallpaperItem}:not([data-suspended="true"])`).length;
             room.querySelector('[data-room-brief]').innerHTML = `<span>${itemCount} รายการ • ${fmt(roomSum, 0, true)} บาท</span>`;
             grand += roomSum;
         });
         
         // Update summary footer
         document.querySelector(SELECTORS.grandTotal).textContent = fmt(grand, 0, true);
-        const allItems = document.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`);
-        document.querySelector(SELECTORS.setCount).textContent = allItems.length;
-        document.querySelector(SELECTORS.grandFabric).textContent = fmt(grandOpaqueYards, 2) + " หลา";
-        document.querySelector(SELECTORS.grandSheerFabric).textContent = fmt(grandSheerYards, 2) + " หลา";
-        document.querySelector(SELECTORS.grandOpaqueTrack).textContent = fmt(grandOpaqueTrack, 2) + " ม.";
-        document.querySelector(SELECTORS.grandSheerTrack).textContent = fmt(grandSheerTrack, 2) + " ม.";
+        const allActiveItems = document.querySelectorAll(`${SELECTORS.set}:not([data-suspended="true"]), ${SELECTORS.decoItem}:not([data-suspended="true"]), ${SELECTORS.wallpaperItem}:not([data-suspended="true"])`);
+        document.querySelector(SELECTORS.setCount).textContent = allActiveItems.length;
+
+        // --- UPDATE DETAILED MATERIAL SUMMARY (NEW) ---
+        const summaryContainer = document.querySelector(SELECTORS.detailedSummaryContainer);
+        if(summaryContainer) {
+            let html = '';
+            // Curtain Section
+            if (grandOpaqueYards > 0 || grandSheerYards > 0) {
+                html += `<h4><i class="ph-bold ph-blinds"></i> ผ้าม่าน</h4><ul>`;
+                if (grandOpaqueYards > 0) html += `<li>ผ้าทึบ: <b>${fmt(grandOpaqueYards)}</b> หลา</li>`;
+                if (grandSheerYards > 0) html += `<li>ผ้าโปร่ง: <b>${fmt(grandSheerYards)}</b> หลา</li>`;
+                if (grandOpaqueTrack > 0) html += `<li>รางทึบ: <b>${fmt(grandOpaqueTrack)}</b> ม.</li>`;
+                if (grandSheerTrack > 0) html += `<li>รางโปร่ง: <b>${fmt(grandSheerTrack)}</b> ม.</li>`;
+                if (hasDoubleBracket) html += `<li class="summary-note">** มีรายการที่ต้องใช้ขาสองชั้น</li>`;
+                html += `</ul>`;
+            }
+            // Decoration Section
+            if (Object.keys(decoCounts).length > 0) {
+                 html += `<h4><i class="ph-bold ph-paint-roller"></i> งานตกแต่ง</h4><ul>`;
+                 for (const type in decoCounts) {
+                     html += `<li>${type}: <b>${decoCounts[type]}</b> ชุด</li>`;
+                 }
+                 html += `</ul>`;
+            }
+            // Wallpaper Section
+            if (totalWallpaperRolls > 0) {
+                 html += `<h4><i class="ph-bold ph-file-image"></i> วอลเปเปอร์</h4><ul>`;
+                 html += `<li>จำนวนที่ต้องใช้: <b>${totalWallpaperRolls}</b> ม้วน</li>`;
+                 html += `</ul>`;
+            }
+            
+            if (html === '') {
+                html = '<p class="empty-summary">ยังไม่มีรายการวัสดุ</p>';
+            }
+            summaryContainer.innerHTML = html;
+        }
     }
 
     function buildPayload() {
@@ -548,9 +592,16 @@
 
         if (options.summary) {
             summary += `--------------------\n`;
-            summary += `ผ้าทึบ: ${document.querySelector(SELECTORS.grandFabric).textContent}\n`;
-            summary += `ผ้าโปร่ง: ${document.querySelector(SELECTORS.grandSheerFabric).textContent}\n`;
-            summary += `**รวมราคาสุทธิ: ${fmt(grandTotal, 0, true)} บาท**\n`;
+            const summaryNode = document.querySelector(SELECTORS.detailedSummaryContainer);
+            if(summaryNode) {
+                 summaryNode.querySelectorAll('h4').forEach(h4 => {
+                     summary += `\n${h4.textContent.trim()}\n`;
+                     h4.nextElementSibling.querySelectorAll('li').forEach(li => {
+                        summary += `- ${li.textContent.replace(/:\s+/g, ': ')}\n`;
+                     });
+                 });
+            }
+            summary += `\n**รวมราคาสุทธิ: ${fmt(grandTotal, 0, true)} บาท**\n`;
         }
         return summary;
     }
@@ -583,7 +634,7 @@
         orderForm.addEventListener("click", e => {
             const btn = e.target.closest('button[data-act]');
             if (!btn) return;
-            e.preventDefault(); // Prevent summary click from toggling details
+
             const action = btn.dataset.act;
             const roomEl = btn.closest(SELECTORS.room);
 
@@ -608,7 +659,10 @@
                     saveData();
                 }
             };
-            if (actions[action]) actions[action]();
+            if (actions[action]) {
+                e.preventDefault();
+                actions[action]();
+            }
         });
 
         roomsEl.addEventListener('change', e => {
@@ -701,6 +755,7 @@
             localStorage.removeItem(STORAGE_KEY); 
             addRoom();
         }
+        recalcAll();
         updateLockState();
     }
 
