@@ -36,7 +36,7 @@
     const SELECTORS = {
         orderForm: '#orderForm', roomsContainer: '#rooms', roomTpl: '#roomTpl', setTpl: '#setTpl', decoTpl: '#decoTpl', wallpaperTpl: '#wallpaperTpl', wallTpl: '#wallTpl',
         payloadInput: '#payload', clearAllBtn: '#clearAllBtn', copyJsonBtn: '#copyJsonBtn',
-        lockBtn: '#lockBtn', addRoomFooterBtn: '#addRoomFooterBtn',
+        lockBtn: '#lockBtn', addRoomFooterBtn: '#addRoomFooterBtn', lockText: '#lockText',
         grandTotal: '#grandTotal', setCount: '#setCount', grandFabric: '#grandFabric', grandSheerFabric: '#grandSheerFabric',
         modal: '#confirmationModal', modalTitle: '#modalTitle', modalBody: '#modalBody', modalConfirm: '#modalConfirm', modalCancel: '#modalCancel',
         room: '[data-room]', set: '[data-set]', setsContainer: '[data-sets]',
@@ -50,7 +50,7 @@
         copyCustomerInfo: '#copyCustomerInfo', copyRoomDetails: '#copyRoomDetails', copySummary: '#copySummary',
         menuBtn: '#menuBtn', menuDropdown: '#menuDropdown', importBtn: '#importBtn', exportBtn: '#exportBtn',
         importModal: '#importModal', importJsonArea: '#importJsonArea', importConfirm: '#importConfirm', importCancel: '#importCancel',
-        submitBtn: '#submitBtn' // Moved to menu
+        submitBtn: '#submitBtn'
     };
 
     // --- STATE ---
@@ -262,7 +262,7 @@
         item.classList.toggle('is-suspended', isSuspended);
         const suspendIcon = item.querySelector('[data-act="toggle-suspend"] i');
         if (suspendIcon) {
-            suspendIcon.className = isSuspended ? 'ph ph-play-circle' : 'ph ph-pause-circle';
+            suspendIcon.className = isSuspended ? 'ph-bold ph-play-circle' : 'ph-bold ph-pause-circle';
         }
         if (notify) showToast(`รายการถูก${isSuspended ? 'ระงับ' : 'ใช้งาน'}แล้ว`, 'warning');
     }
@@ -472,8 +472,10 @@
         const lockBtn = document.querySelector(SELECTORS.lockBtn);
         if (!lockBtn) return;
         lockBtn.classList.toggle('is-locked', isLocked);
-        // lockBtn.querySelector('.lock-text').textContent = isLocked ? 'ปลดล็อค' : 'ล็อก'; // Removed text change
-        lockBtn.querySelector('.lock-icon').className = isLocked ? 'ph ph-lock-key lock-icon' : 'ph ph-lock-key-open lock-icon'; // Use non-filled icons
+        lockBtn.title = isLocked ? 'ปลดล็อคฟอร์ม' : 'ล็อคฟอร์ม';
+        lockBtn.querySelector('.lock-icon').className = isLocked ? 'ph-bold ph-lock-key lock-icon' : 'ph-bold ph-lock-key-open lock-icon';
+        const lockTextEl = document.querySelector(SELECTORS.lockText);
+        if (lockTextEl) lockTextEl.textContent = isLocked ? 'ปลดล็อค' : 'ล็อก';
         
         document.querySelectorAll('input, select, textarea, button').forEach(el => {
             const isExempt = el.closest('.summary-footer') || el.closest('.main-header') || el.closest('.modal-wrapper');

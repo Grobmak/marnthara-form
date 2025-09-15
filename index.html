@@ -16,8 +16,7 @@
         <h1>Marnthara Quotation</h1>
         <div class="header-actions">
             <button id="lockBtn" class="header-btn" title="Lock/Unlock Form">
-                <i class="ph ph-lock-key-open lock-icon"></i>
-                <span class="lock-text">ล็อก</span>
+                <i class="ph-bold ph-lock-key-open lock-icon"></i>
             </button>
             <div class="menu-container">
                 <button id="menuBtn" class="header-btn" title="Menu">
@@ -42,9 +41,9 @@
             <input type="hidden" id="payload" name="payload">
 
             <details class="card" open>
-                <summary class="card-header">
+                <summary>
                     <h2>
-                        <i class="ph-bold ph-user"></i>
+                        <i class="ph-bold ph-user-circle"></i>
                         ข้อมูลลูกค้า
                     </h2>
                     <i class="ph-bold ph-caret-down expand-icon"></i>
@@ -133,14 +132,14 @@
 
     <template id="roomTpl">
         <details class="card room-card" data-room open>
-            <summary class="card-header">
+            <summary>
                 <div class="form-group">
                     <input type="text" name="room_name" class="room-name-input" placeholder="ห้อง 01">
                 </div>
                 <div class="room-brief" data-room-brief></div>
                  <i class="ph-bold ph-caret-down expand-icon"></i>
                 <button type="button" class="btn-icon" data-act="del-room" title="ลบห้องนี้">
-                    <i class="ph ph-trash"></i>
+                    <i class="ph-bold ph-trash"></i>
                 </button>
             </summary>
             <div class="card-content">
@@ -160,13 +159,13 @@
         <div class="item-card set-item" data-set>
             <div class="item-header">
                 <h4 class="item-title">
-                    <i class="ph ph-blinds"></i>
+                    <i class="ph-bold ph-blinds"></i>
                     <span data-item-title></span>
                 </h4>
                 <div class="item-actions">
-                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph ph-pause-circle"></i></button>
-                    <button type="button" class="btn-icon" data-act="clear-set" title="ล้างข้อมูล"><i class="ph ph-eraser"></i></button>
-                    <button type="button" class="btn-icon" data-act="del-set" title="ลบ"><i class="ph ph-x"></i></button>
+                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph-bold ph-pause-circle"></i></button>
+                    <button type="button" class="btn-icon" data-act="clear-set" title="ล้างข้อมูล"><i class="ph-bold ph-eraser"></i></button>
+                    <button type="button" class="btn-icon" data-act="del-set" title="ลบ"><i class="ph-bold ph-x"></i></button>
                 </div>
             </div>
             
@@ -221,16 +220,16 @@
         <div class="item-card deco-item" data-deco-item>
              <div class="item-header">
                 <h4 class="item-title">
-                    <i class="ph ph-paint-roller"></i>
+                    <i class="ph-bold ph-paint-roller"></i>
                     <span data-item-title></span>
                 </h4>
                 <div class="item-actions">
-                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph ph-pause-circle"></i></button>
-                    <button type="button" class="btn-icon" data-act="clear-deco" title="ล้างข้อมูล"><i class="ph ph-eraser"></i></button>
-                    <button type="button" class="btn-icon" data-act="del-deco" title="ลบ"><i class="ph ph-x"></i></button>
+                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph-bold ph-pause-circle"></i></button>
+                    <button type="button" class="btn-icon" data-act="clear-deco" title="ล้างข้อมูล"><i class="ph-bold ph-eraser"></i></button>
+                    <button type="button" class="btn-icon" data-act="del-deco" title="ลบ"><i class="ph-bold ph-x"></i></button>
                 </div>
             </div>
-            <div class="item-grid three-col">
+            <div class="item-grid">
                 <div class="form-group">
                     <label>ประเภท</label>
                     <input type="text" name="deco_type" placeholder="เช่น มู่ลี่">
@@ -256,13 +255,13 @@
         <div class="item-card wallpaper-item" data-wallpaper-item>
              <div class="item-header">
                 <h4 class="item-title">
-                    <i class="ph ph-file-image"></i>
+                    <i class="ph-bold ph-file-image"></i>
                     <span data-item-title></span>
                 </h4>
                  <div class="item-actions">
-                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph ph-pause-circle"></i></button>
-                    <button type="button" class="btn-icon" data-act="clear-wallpaper" title="ล้างข้อมูล"><i class="ph ph-eraser"></i></button>
-                    <button type="button" class="btn-icon" data-act="del-wallpaper" title="ลบ"><i class="ph ph-x"></i></button>
+                    <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน"><i class="ph-bold ph-pause-circle"></i></button>
+                    <button type="button" class="btn-icon" data-act="clear-wallpaper" title="ล้างข้อมูล"><i class="ph-bold ph-eraser"></i></button>
+                    <button type="button" class="btn-icon" data-act="del-wallpaper" title="ลบ"><i class="ph-bold ph-x"></i></button>
                 </div>
             </div>
             <div class="item-grid">
@@ -279,8 +278,8 @@
                 <label>ความกว้างผนัง (ม.)</label>
                 <div class="walls-container" data-walls-container>
                     </div>
-                <button type="button" class="btn btn-secondary btn-small" data-act="add-wall">
-                    <i class="ph ph-plus"></i> เพิ่มผนัง
+                <button type="button" class="btn btn-secondary" data-act="add-wall" style="padding: 0.5rem 1rem; border-radius: 20px;">
+                    <i class="ph-bold ph-plus"></i> เพิ่มผนัง
                 </button>
             </div>
              <div class="item-summary single-line" data-wallpaper-summary></div>
@@ -291,7 +290,7 @@
         <div class="wall-input-row">
             <input type="number" step="0.01" name="wall_width_m" placeholder="0.00">
             <button type="button" class="btn-icon btn-icon-small" data-act="del-wall" title="ลบผนัง">
-                <i class="ph ph-x"></i>
+                <i class="ph-bold ph-x"></i>
             </button>
         </div>
     </template>
