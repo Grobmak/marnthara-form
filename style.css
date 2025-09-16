@@ -229,9 +229,12 @@ i.ph {
     align-items: center;
     gap: 0.5rem;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 700;
     color: var(--on-surface-variant);
     transition: color var(--transition-speed);
+}
+.item-title > span {
+    font-weight: 700;
 }
 .deco-type-display {
     color: var(--on-surface);
@@ -313,12 +316,26 @@ input[type="text"], input[type="tel"], input[type="number"], textarea, select {
     color: var(--on-surface);
     font-family: var(--font-family);
     font-size: 1rem;
-    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed), background-color var(--transition-speed);
 }
+
 input:disabled, select:disabled, textarea:disabled {
-    background-color: rgba(120, 120, 120, 0.1);
+    background-color: transparent;
+    color: var(--on-surface);
+    border-color: transparent;
     cursor: not-allowed;
+    opacity: 1;
+    -webkit-text-fill-color: var(--on-surface);
 }
+/* Specific override for select arrow when disabled */
+select:disabled {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 0.75rem; /* Remove space for arrow */
+}
+
+
 input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--primary);

@@ -525,10 +525,6 @@
     function renumber() {
         document.querySelectorAll(SELECTORS.room).forEach((room, rIdx) => {
             room.querySelector(SELECTORS.roomNameInput).placeholder = `ห้อง ${String(rIdx + 1).padStart(2, "0")}`;
-            const items = room.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`);
-            items.forEach((item, iIdx) => {
-                item.querySelector("[data-item-title]").textContent = `รายการที่ ${iIdx + 1}`;
-            });
         });
     }
 
@@ -653,20 +649,28 @@
                  const value = toNum(e.target.value);
                  e.target.value = value > 0 ? value.toLocaleString('en-US') : '';
             }
-            // Update decoration title dynamically
-            if (e.target.name === 'deco_type') {
-                const itemCard = e.target.closest(SELECTORS.decoItem);
-                if (itemCard) {
-                    const displayEl = itemCard.querySelector('.deco-type-display');
-                    if (displayEl) {
-                        displayEl.textContent = e.target.value ? `(${e.target.value})` : '';
-                    }
+            debouncedRecalcAndSave();
+        });
+        
+        const handleDecoTypeChange = (target) => {
+            const itemCard = target.closest(SELECTORS.decoItem);
+            if (itemCard) {
+                const displayEl = itemCard.querySelector('.deco-type-display');
+                if (displayEl) {
+                    const selectedText = target.options[target.selectedIndex]?.text || target.value;
+                    displayEl.textContent = selectedText ? `(${selectedText})` : '';
                 }
             }
             debouncedRecalcAndSave();
-        });
+        };
 
-        orderForm.addEventListener("change", debouncedRecalcAndSave);
+        orderForm.addEventListener("change", e => {
+            if (e.target.name === 'deco_type') {
+                 handleDecoTypeChange(e.target);
+            } else {
+                 debouncedRecalcAndSave();
+            }
+        });
 
         // Event delegation for all dynamic actions
         orderForm.addEventListener("click", e => {
@@ -687,7 +691,7 @@
                 'del-wallpaper': () => performActionWithConfirmation(btn, { confirm: true, title: 'ลบรายการ', body: 'ยืนยันการลบรายการวอลเปเปอร์?', selector: SELECTORS.wallpaperItem, action: (item) => item.remove(), toast: 'ลบรายการวอลเปเปอร์แล้ว' }),
                 'del-wall': () => performActionWithConfirmation(btn, { confirm: true, title: 'ลบผนัง', body: 'ยืนยันการลบผนังนี้?', selector: '.wall-input-row', action: (item) => item.remove() }),
                 'clear-set': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในจุดนี้?', selector: SELECTORS.set, action: (item) => { item.querySelectorAll('input, select').forEach(el => { el.value = el.name === 'fabric_variant' ? 'ทึบ' : el.name === 'set_style' ? 'ลอน' : ''; }); toggleSetFabricUI(item); }, toast: 'ล้างข้อมูลผ้าม่านแล้ว' }),
-                'clear-deco': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในรายการนี้?', selector: SELECTORS.decoItem, action: (item) => { item.querySelectorAll('input').forEach(el => el.value = ''); item.querySelector('.deco-type-display').textContent = ''; }, toast: 'ล้างข้อมูลตกแต่งแล้ว' }),
+                'clear-deco': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในรายการนี้?', selector: SELECTORS.decoItem, action: (item) => { item.querySelectorAll('input, select').forEach(el => el.value = ''); item.querySelector('.deco-type-display').textContent = ''; }, toast: 'ล้างข้อมูลตกแต่งแล้ว' }),
                 'clear-wallpaper': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในรายการนี้?', selector: SELECTORS.wallpaperItem, action: (item) => { item.querySelectorAll('input').forEach(el => el.value = ''); item.querySelector(SELECTORS.wallsContainer).innerHTML = ''; addWall(item.querySelector('[data-act="add-wall"]')); }, toast: 'ล้างข้อมูลวอลเปเปอร์แล้ว' }),
                 'toggle-suspend': () => {
                     const item = btn.closest('.set-item, .deco-item, .wallpaper-item');
