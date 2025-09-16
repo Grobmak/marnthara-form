@@ -260,6 +260,11 @@
             frag.querySelector('input[name="wall_width_m"]').value = prefillWidth;
         }
         wallsContainer.appendChild(frag);
+        
+        const newWallInput = wallsContainer.querySelector('.wall-input-row:last-of-type input');
+        if (newWallInput) {
+            newWallInput.focus();
+        }
     }
     
     function suspendItem(item, isSuspended, notify = true) {
@@ -334,9 +339,16 @@
                     }
                 }
                 
-                set.querySelector('[data-set-price-total]').textContent = fmt(opaquePrice + sheerPrice, 0, true);
-                set.querySelector('[data-set-price-opaque]').textContent = fmt(opaquePrice, 0, true);
-                set.querySelector('[data-set-price-sheer]').textContent = fmt(sheerPrice, 0, true);
+                const totalSetPrice = opaquePrice + sheerPrice;
+                let summaryHtml = `ราคา: <b>${fmt(totalSetPrice, 0, true)}</b> บ.`;
+                const details = [];
+                if (opaquePrice > 0) details.push(`ทึบ: ${fmt(opaquePrice, 0, true)}`);
+                if (sheerPrice > 0) details.push(`โปร่ง: ${fmt(sheerPrice, 0, true)}`);
+                if (details.length > 0 && totalSetPrice > 0) {
+                    summaryHtml += ` <small>(${details.join(', ')})</small>`;
+                }
+                set.querySelector('[data-set-summary]').innerHTML = summaryHtml;
+
                 set.querySelector('[data-set-yardage-opaque]').textContent = fmt(opaqueYards, 2);
                 set.querySelector('[data-set-yardage-sheer]').textContent = fmt(sheerYards, 2);
                 set.querySelector('[data-set-opaque-track]').textContent = fmt(opaqueTrack, 2);
@@ -673,7 +685,7 @@
                 'del-set': () => performActionWithConfirmation(btn, { confirm: true, title: 'ลบจุด', body: 'ยืนยันการลบจุดติดตั้งนี้?', selector: SELECTORS.set, action: (item) => item.remove(), toast: 'ลบจุดผ้าม่านแล้ว' }),
                 'del-deco': () => performActionWithConfirmation(btn, { confirm: true, title: 'ลบรายการ', body: 'ยืนยันการลบรายการตกแต่งนี้?', selector: SELECTORS.decoItem, action: (item) => item.remove(), toast: 'ลบรายการตกแต่งแล้ว' }),
                 'del-wallpaper': () => performActionWithConfirmation(btn, { confirm: true, title: 'ลบรายการ', body: 'ยืนยันการลบรายการวอลเปเปอร์?', selector: SELECTORS.wallpaperItem, action: (item) => item.remove(), toast: 'ลบรายการวอลเปเปอร์แล้ว' }),
-                'del-wall': () => performActionWithConfirmation(btn, { selector: '.wall-input-row', action: (item) => item.remove() }),
+                'del-wall': () => performActionWithConfirmation(btn, { confirm: true, title: 'ลบผนัง', body: 'ยืนยันการลบผนังนี้?', selector: '.wall-input-row', action: (item) => item.remove() }),
                 'clear-set': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในจุดนี้?', selector: SELECTORS.set, action: (item) => { item.querySelectorAll('input, select').forEach(el => { el.value = el.name === 'fabric_variant' ? 'ทึบ' : el.name === 'set_style' ? 'ลอน' : ''; }); toggleSetFabricUI(item); }, toast: 'ล้างข้อมูลผ้าม่านแล้ว' }),
                 'clear-deco': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในรายการนี้?', selector: SELECTORS.decoItem, action: (item) => { item.querySelectorAll('input').forEach(el => el.value = ''); item.querySelector('.deco-type-display').textContent = ''; }, toast: 'ล้างข้อมูลตกแต่งแล้ว' }),
                 'clear-wallpaper': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในรายการนี้?', selector: SELECTORS.wallpaperItem, action: (item) => { item.querySelectorAll('input').forEach(el => el.value = ''); item.querySelector(SELECTORS.wallsContainer).innerHTML = ''; addWall(item.querySelector('[data-act="add-wall"]')); }, toast: 'ล้างข้อมูลวอลเปเปอร์แล้ว' }),

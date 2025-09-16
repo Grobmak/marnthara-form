@@ -261,54 +261,17 @@ i.ph {
     background-color: var(--surface);
     border-radius: var(--border-radius-md);
     padding: 0.75rem;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: var(--on-surface-variant);
     border: 1px solid var(--outline-variant);
 }
 .item-summary.single-line {
     text-align: center;
 }
-
-/* NEW Curtain Summary Style */
-.set-summary {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    align-items: center;
-}
-.summary-price-item {
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    background-color: var(--surface-container);
-    padding: 0.25rem;
-    border-radius: var(--border-radius-sm);
-}
-.summary-price-item span {
-    font-size: 0.75rem;
-}
-.summary-price-item strong {
-    font-size: 1rem;
-    font-weight: 700;
+.item-summary b {
     color: var(--on-surface);
-}
-.summary-price-item strong::after {
-    content: ' บ.';
-    font-size: 0.7rem;
-    font-weight: normal;
-}
-.set-summary .item-total-price {
-    grid-column: 1 / -1;
-    text-align: center;
-    font-size: 1.1rem;
     font-weight: 700;
-    color: var(--primary);
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--outline-variant);
-    margin-top: 0.25rem;
 }
-.set-summary .item-total-price::before { content: "รวม: "; font-weight: normal; color: var(--on-surface-variant); }
-.set-summary .item-total-price::after { content: " บ."; }
 
 
 /* --- WALLPAPER SPECIFIC --- */
@@ -453,10 +416,10 @@ input[inputmode="numeric"] { text-align: right; }
 }
 #detailed-material-summary ul {
     list-style: none;
-    padding: 0 0 0 0.5rem;
+    padding: 0;
     margin: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
 }
 #detailed-material-summary li {
@@ -473,7 +436,7 @@ input[inputmode="numeric"] { text-align: right; }
     background-color: var(--primary-container) !important;
     color: var(--on-primary-container) !important;
     font-weight: 500;
-    grid-column: 1 / -1;
+    width: 100%;
     text-align: center;
 }
 .empty-summary {
@@ -540,17 +503,30 @@ input[inputmode="numeric"] { text-align: right; }
 .checkbox-group label { display: flex; align-items: center; gap: 0.5rem; }
 
 #toast-container {
-    position: fixed; top: 1rem; right: 1rem;
-    z-index: 300; display: flex; flex-direction: column; gap: 0.5rem;
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
 }
 .toast {
-    background-color: var(--on-surface); color: var(--surface);
-    padding: 0.75rem 1.25rem; border-radius: var(--border-radius-md);
+    background-color: var(--on-surface);
+    color: var(--surface);
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-md);
-    transform: translateX(120%); opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    transform: translateY(-150%);
+    transition: transform 0.4s ease, opacity 0.4s ease;
 }
-.toast.show { transform: translateX(0); opacity: 1; }
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
 .toast-success { background-color: #2E7D32; color: white; }
 .toast-warning { background-color: #ED6C02; color: white; }
 .toast-error { background-color: #D32F2F; color: white; }
