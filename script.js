@@ -83,10 +83,27 @@
     function showToast(message, type = 'default') {
         const container = document.querySelector(SELECTORS.toastContainer);
         if (!container) return;
+
+        const icons = {
+            success: 'ph-bold ph-check-circle',
+            warning: 'ph-bold ph-warning',
+            error: 'ph-bold ph-x-circle',
+            default: 'ph-bold ph-info'
+        };
+
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
-        toast.textContent = message;
+        
+        const icon = document.createElement('i');
+        icon.className = icons[type] || icons.default;
+        
+        const text = document.createTextNode(message);
+        
+        toast.appendChild(icon);
+        toast.appendChild(text);
+        
         container.appendChild(toast);
+
         setTimeout(() => toast.classList.add('show'), 10);
         setTimeout(() => {
             toast.classList.remove('show');
@@ -525,6 +542,14 @@
     function renumber() {
         document.querySelectorAll(SELECTORS.room).forEach((room, rIdx) => {
             room.querySelector(SELECTORS.roomNameInput).placeholder = `ห้อง ${String(rIdx + 1).padStart(2, "0")}`;
+            const items = room.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`);
+            const totalItemsInRoom = items.length;
+            items.forEach((item, iIdx) => {
+                const titleEl = item.querySelector("[data-item-title]");
+                if (titleEl) {
+                    titleEl.textContent = `รายการที่ ${iIdx + 1}/${totalItemsInRoom}`;
+                }
+            });
         });
     }
 
@@ -661,15 +686,16 @@
                     displayEl.textContent = selectedText ? `(${selectedText})` : '';
                 }
             }
-            debouncedRecalcAndSave();
         };
 
         orderForm.addEventListener("change", e => {
             if (e.target.name === 'deco_type') {
                  handleDecoTypeChange(e.target);
-            } else {
-                 debouncedRecalcAndSave();
+            } 
+            if (e.target.matches('select[name="fabric_variant"]')) {
+                toggleSetFabricUI(e.target.closest(SELECTORS.set));
             }
+            debouncedRecalcAndSave();
         });
 
         // Event delegation for all dynamic actions
@@ -704,12 +730,6 @@
             if (actions[action]) {
                 e.preventDefault();
                 actions[action]();
-            }
-        });
-
-        orderForm.addEventListener('change', e => {
-            if (e.target.matches('select[name="fabric_variant"]')) {
-                toggleSetFabricUI(e.target.closest(SELECTORS.set));
             }
         });
 
