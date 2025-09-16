@@ -331,7 +331,7 @@ select:disabled {
 }
 
 textarea { resize: vertical; }
-input[inputmode="numeric"] { text-align: right; }
+input[inputmode="numeric"] { text-align: left; }
 
 /* --- BUTTONS --- */
 .btn {
