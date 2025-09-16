@@ -267,7 +267,7 @@
         item.classList.toggle('is-suspended', isSuspended);
         const suspendIcon = item.querySelector('[data-act="toggle-suspend"] i');
         if (suspendIcon) {
-            suspendIcon.className = isSuspended ? 'ri-play-circle-line' : 'ri-pause-circle-line';
+            suspendIcon.className = isSuspended ? 'ph-bold ph-play-circle' : 'ph-bold ph-pause-circle';
         }
         if (notify) showToast(`รายการถูก${isSuspended ? 'ระงับ' : 'ใช้งาน'}แล้ว`, 'warning');
     }
@@ -409,7 +409,7 @@
             let html = '';
             // Curtain Section
             if (grandOpaqueYards > 0 || grandSheerYards > 0) {
-                html += `<h4><i class="ri-blinds-line"></i> ผ้าม่าน</h4><ul>`;
+                html += `<h4><i class="ph-bold ph-blinds"></i> ผ้าม่าน</h4><ul>`;
                 if (grandOpaqueYards > 0) html += `<li>ผ้าทึบ: <b>${fmt(grandOpaqueYards)}</b> หลา</li>`;
                 if (grandSheerYards > 0) html += `<li>ผ้าโปร่ง: <b>${fmt(grandSheerYards)}</b> หลา</li>`;
                 if (grandOpaqueTrack > 0) html += `<li>รางทึบ: <b>${fmt(grandOpaqueTrack)}</b> ม.</li>`;
@@ -419,7 +419,7 @@
             }
             // Decoration Section
             if (Object.keys(decoCounts).length > 0) {
-                 html += `<h4><i class="ri-paint-roller-line"></i> งานตกแต่ง</h4><ul>`;
+                 html += `<h4><i class="ph-bold ph-paint-roller"></i> งานตกแต่ง</h4><ul>`;
                  for (const type in decoCounts) {
                      html += `<li>${type}: <b>${decoCounts[type]}</b> ชุด</li>`;
                  }
@@ -427,7 +427,7 @@
             }
             // Wallpaper Section
             if (totalWallpaperRolls > 0) {
-                 html += `<h4><i class="ri-image-line"></i> วอลเปเปอร์</h4><ul>`;
+                 html += `<h4><i class="ph-bold ph-file-image"></i> วอลเปเปอร์</h4><ul>`;
                  html += `<li>จำนวนที่ต้องใช้: <b>${totalWallpaperRolls}</b> ม้วน</li>`;
                  html += `</ul>`;
             }
@@ -532,7 +532,7 @@
         if (!lockBtn) return;
         lockBtn.classList.toggle('is-locked', isLocked);
         lockBtn.title = isLocked ? 'ปลดล็อคฟอร์ม' : 'ล็อคฟอร์ม';
-        lockBtn.querySelector('.lock-icon').className = isLocked ? 'ri-lock-line lock-icon' : 'ri-lock-unlock-line lock-icon';
+        lockBtn.querySelector('.lock-icon').className = isLocked ? 'ph-bold ph-lock-key lock-icon' : 'ph-bold ph-lock-key-open lock-icon';
         const lockTextEl = document.querySelector(SELECTORS.lockText);
         if (lockTextEl) lockTextEl.textContent = isLocked ? 'ปลดล็อค' : 'ล็อก';
         
