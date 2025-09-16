@@ -52,8 +52,8 @@
     --shadow-lg: 0 10px 30px var(--shadow-color);
 
     /* Liquid Glass Effect */
-    --glass-bg: rgba(254, 251, 255, 0.85); 
-    --glass-border: rgba(198, 198, 208, 0.7);
+    --glass-bg: rgba(254, 251, 255, 0.75); 
+    --glass-border: rgba(198, 198, 208, 0.6);
 
     /* Item Type Colors */
     --curtain-color: #4A5C9B; /* Primary */
@@ -109,7 +109,6 @@ i.ph {
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: var(--shadow-sm);
 }
 
 .main-header h1 {
@@ -209,10 +208,7 @@ i.ph {
     white-space: nowrap;
     padding: 0 0.5rem;
 }
-.room-brief b {
-    color: var(--primary);
-    font-weight: 700;
-}
+
 
 /* --- ITEM CARD STYLING --- */
 .items-container {
@@ -224,7 +220,7 @@ i.ph {
 .item-card {
     border: 1px solid var(--outline-variant);
     border-radius: var(--border-radius-md);
-    padding: 1rem;
+    padding: 0.75rem;
     border-left: 5px solid var(--outline);
     transition: border-left-color var(--transition-speed), background-color var(--transition-speed);
 }
@@ -275,33 +271,20 @@ i.ph {
     margin-bottom: 0.75rem;
 }
 
-/* --- NEW: Redesigned Item Summary --- */
-.item-summary-grid {
+.item-summary {
     background-color: var(--surface);
     border-radius: var(--border-radius-md);
     padding: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--on-surface-variant);
     border: 1px solid var(--outline-variant);
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 0.75rem;
+}
+.item-summary.single-line {
     text-align: center;
 }
-.summary-item {
-    display: flex;
-    flex-direction: column;
-}
-.summary-item small {
-    font-size: 0.8rem;
-    color: var(--on-surface-variant);
-    margin-bottom: 0.1rem;
-}
-.summary-item b {
-    font-size: 1.2rem;
+.item-summary b {
     color: var(--on-surface);
     font-weight: 700;
-}
-.summary-item b.price {
-    color: var(--primary);
 }
 
 
@@ -332,41 +315,40 @@ i.ph {
 
 .form-group { display: flex; flex-direction: column; }
 .form-group label {
-    font-size: 0.9rem; 
-    color: var(--on-surface-variant);
-    margin-bottom: 0.35rem; 
-    padding-left: 0.5rem;
+    font-size: 0.875rem; color: var(--on-surface-variant);
+    margin-bottom: 0.25rem; padding-left: 0.5rem;
 }
 input[type="text"], input[type="tel"], input[type="number"], textarea, select {
     width: 100%;
     padding: 0.75rem;
     border-radius: var(--border-radius-md);
     border: 1px solid var(--outline);
-    background-color: var(--surface-container-high);
+    background-color: var(--surface-container);
     color: var(--on-surface);
     font-family: var(--font-family);
     font-size: 1rem;
     transition: border-color var(--transition-speed), box-shadow var(--transition-speed), background-color var(--transition-speed);
 }
 
-/* --- NEW: Enhanced Disabled/Locked Styles --- */
+/* MODIFIED: Makes disabled inputs clear and readable, not greyed out */
 input:disabled, select:disabled, textarea:disabled {
-    background-color: var(--surface-container);
+    background-color: transparent;
     color: var(--on-surface);
-    border: 1px dashed var(--outline-variant);
+    border-color: transparent;
     cursor: not-allowed;
-    opacity: 1;
-    -webkit-text-fill-color: var(--on-surface); /* Ensures text color on iOS */
+    opacity: 1; /* Ensure full opacity */
+    -webkit-text-fill-color: var(--on-surface); /* Override browser default text color */
     box-shadow: none;
-    padding-right: 0.75rem; /* Consistent padding */
+    /* The padding is kept to maintain layout alignment */
 }
-
+/* Specific override for select arrow when disabled */
 select:disabled {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-image: none; /* Hide arrow */
+    padding-right: 0.75rem; /* Remove space for arrow */
 }
+
 
 input:focus, select:focus, textarea:focus {
     outline: none;
@@ -520,26 +502,15 @@ input[inputmode="numeric"] { text-align: right; }
     color: var(--on-surface-variant);
     font-size: 0.875rem;
 }
-.summary-grid .grand-total-label {
-    grid-column: 2 / 3;
+.summary-grid .grand-total {
     text-align: right;
-    font-size: 0.9rem;
-    color: var(--on-surface-variant);
-    font-weight: 500;
+    font-size: 1.3rem; font-weight: 700;
+    color: var(--on-surface);
 }
-.summary-grid .grand-total-value {
-    grid-column: 2 / 3;
-    grid-row: 1 / 2;
-    text-align: right;
-    font-size: 1.5rem; 
-    font-weight: 700;
-    color: var(--primary);
-}
-.grand-total-value span::after {
+.grand-total span { color: var(--primary); }
+.grand-total span span::after {
     content: ' บาท';
-    font-size: 0.9rem; 
-    font-weight: normal;
-    color: var(--on-surface-variant);
+    font-size: 0.9rem; font-weight: normal;
 }
 
 /* --- MODALS & TOASTS --- */
