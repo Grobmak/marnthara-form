@@ -15,8 +15,9 @@
     <header class="main-header">
         <h1>Marnthara Quotation</h1>
         <div class="header-actions">
-            <button id="lockBtn" class="header-btn" title="ล็อคฟอร์ม/ปลดล็อคฟอร์ม">
+            <button id="lockBtn" class="btn" title="ล็อค/ปลดล็อคฟอร์ม">
                 <i class="ph-bold ph-lock-key-open lock-icon"></i>
+                <span id="lockText">ล็อก</span>
             </button>
             <div class="menu-container">
                 <button id="menuBtn" class="header-btn" title="Menu">
@@ -144,11 +145,13 @@
                 <div class="form-group">
                     <input type="text" name="room_name" class="room-name-input" placeholder="ห้อง 01">
                 </div>
-                <div class="room-brief" data-room-brief></div>
-                 <i class="ph-bold ph-caret-down expand-icon"></i>
-                <button type="button" class="btn-icon" data-act="del-room" title="ลบห้องนี้">
-                    <i class="ph-bold ph-trash"></i>
-                </button>
+                <div class="room-summary-controls">
+                    <div class="room-brief" data-room-brief></div>
+                    <i class="ph-bold ph-caret-down expand-icon"></i>
+                    <button type="button" class="btn-icon danger" data-act="del-room" title="ลบห้องนี้">
+                        <i class="ph-bold ph-trash"></i>
+                    </button>
+                </div>
             </summary>
             <div class="card-content">
                 <div class="items-container" data-sets></div>

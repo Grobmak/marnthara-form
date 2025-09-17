@@ -149,6 +149,7 @@ i.ph {
     padding: 0.5rem 0.5rem 0.5rem 1.25rem;
     cursor: pointer;
     background-color: transparent;
+    gap: 0.5rem;
 }
 .card summary::-webkit-details-marker { display: none; }
 
@@ -156,7 +157,6 @@ i.ph {
     transition: transform var(--transition-speed) ease;
     font-size: 1.5rem;
     color: var(--on-surface-variant);
-    margin: 0 0.5rem;
 }
 .card[open] > summary .expand-icon {
     transform: rotate(180deg);
@@ -186,8 +186,14 @@ i.ph {
     background-color: var(--surface-container);
 }
 
-.room-card summary { padding-bottom: 0.5rem; }
-.room-card summary .form-group { flex-grow: 1; margin-right: 0.5rem; }
+.room-card summary { padding: 0.5rem; }
+.room-card summary .form-group { flex-grow: 1; margin: 0; }
+.room-summary-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
 
 .room-name-input {
     font-size: 1.2rem;
@@ -411,8 +417,21 @@ input[inputmode="numeric"] { text-align: left; }
     transition: all var(--transition-speed);
 }
 .header-btn:hover { background-color: var(--surface-container-high); color: var(--primary); }
-#lockBtn.is-locked { color: var(--danger); background-color: var(--danger-container); }
-#lockBtn .ph { font-size: 1.25rem; }
+#lockBtn {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    min-width: 90px;
+    border-radius: var(--border-radius-xl);
+    border: 1px solid var(--outline-variant);
+}
+#lockBtn.is-locked {
+    color: var(--on-danger);
+    background-color: var(--danger);
+    border-color: var(--danger);
+}
+#lockBtn:not(.is-locked) { color: var(--on-surface-variant); background-color: var(--surface); }
+#lockBtn .ph { font-size: 1.1rem; }
 #menuBtn .ph { font-size: 1.6rem; }
 
 .add-room-container { text-align: center; margin-top: 1rem; }
