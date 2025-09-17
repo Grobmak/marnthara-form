@@ -81,7 +81,7 @@
                     </div>
             </details>
             
-            <details class="card" id="actualCostCard">
+            <details class="card" id="actualCostCard" style="display: none;">
                 <summary>
                     <h2>
                         <i class="ph-bold ph-wallet"></i>
@@ -120,10 +120,17 @@
                             <label for="cost_delivery">ค่าขนส่ง</label>
                             <input type="text" inputmode="numeric" id="cost_delivery" name="cost_delivery" placeholder="0">
                         </div>
-                        <div class="form-group">
-                            <label for="cost_other">ค่าใช้จ่ายอื่นๆ</label>
-                            <input type="text" inputmode="numeric" id="cost_other" name="cost_other" placeholder="0">
                         </div>
+                     <div class="flex-row">
+                        <div id="other-costs-container" class="form-grid-2" style="margin-top: 1rem;"></div>
+                        <button type="button" class="btn-sm btn-secondary" id="addOtherCostBtn" style="margin-top: 1rem;">
+                            <i class="ph-bold ph-plus"></i> เพิ่มค่าใช้จ่ายอื่นๆ
+                        </button>
+                    </div>
+                     <div class="profit-summary">
+                        <hr>
+                        <h4>รวมต้นทุน: <span id="totalCostDisplay">0</span> บ.</h4>
+                        <h4>กำไร: <span id="profitDisplay">0</span> บ. (<span id="profitPercentDisplay">0%</span>)</h4>
                     </div>
                 </div>
             </details>
@@ -134,7 +141,6 @@
                     <span>เพิ่มห้อง</span>
                 </button>
             </div>
-
         </form>
     </main>
 
@@ -158,18 +164,19 @@
             <p id="modalBody"></p>
             <div class="modal-actions">
                 <button id="modalCancel" class="btn btn-secondary">ยกเลิก</button>
-                <button id="modalConfirm" class="btn btn-danger">ยืนยัน</button>
+                <button id="modalConfirm" class="btn btn-primary">ตกลง</button>
             </div>
         </div>
     </div>
     
     <div id="copyOptionsModal" class="modal-wrapper">
         <div class="modal-content">
-            <h3>เลือกข้อมูลที่จะคัดลอก</h3>
-            <div class="checkbox-group">
-                <label><input type="checkbox" id="copyCustomerInfo" checked> ข้อมูลลูกค้า</label>
-                <label><input type="checkbox" id="copyRoomDetails" checked> รายละเอียดทั้งหมด</label>
-                <label><input type="checkbox" id="copySummary" checked> สรุปยอดรวม</label>
+            <h3 id="modalTitle">คัดลอกข้อมูล</h3>
+            <div class="form-group text-left">
+                <p>เลือกส่วนที่ต้องการคัดลอก:</p>
+                <label class="checkbox-label"><input type="checkbox" id="copyCustomerInfo" checked> ข้อมูลลูกค้า</label>
+                <label class="checkbox-label"><input type="checkbox" id="copyRoomDetails" checked> รายละเอียดแต่ละห้อง</label>
+                <label class="checkbox-label"><input type="checkbox" id="copySummary" checked> สรุปยอดรวม</label>
             </div>
             <div class="modal-actions">
                 <button id="copyOptionsCancel" class="btn btn-secondary">ยกเลิก</button>
@@ -180,190 +187,15 @@
     
     <div id="importModal" class="modal-wrapper">
         <div class="modal-content">
-            <h3>นำเข้าข้อมูล (JSON)</h3>
-            <textarea id="importJsonArea" rows="10" placeholder="วางข้อมูล JSON ที่นี่"></textarea>
+            <h3>นำเข้าข้อมูล</h3>
+            <p>วางข้อมูล JSON ที่ได้จากการส่งออก:</p>
+            <textarea id="importJsonArea" rows="5" placeholder="วางข้อมูล JSON ที่นี่..."></textarea>
             <div class="modal-actions">
                 <button id="importCancel" class="btn btn-secondary">ยกเลิก</button>
                 <button id="importConfirm" class="btn btn-primary">นำเข้า</button>
             </div>
         </div>
     </div>
-    
-    <template id="roomTpl">
-        <details class="card room-card" data-room open>
-            <summary>
-                <div class="form-group">
-                    <input type="text" name="room_name" class="room-name-input" placeholder="ห้อง 01">
-                </div>
-                <div class="room-summary-controls">
-                    <div class="room-brief" data-room-brief></div>
-                    <i class="ph-bold ph-caret-down expand-icon"></i>
-                    <button type="button" class="btn-icon danger" data-act="del-room" title="ลบห้องนี้">
-                        <i class="ph-bold ph-trash"></i>
-                    </button>
-                </div>
-            </summary>
-            <div class="card-content">
-                <div class="items-container" data-sets></div>
-                <div class="items-container" data-decorations></div>
-                <div class="items-container" data-wallpapers></div>
-            </div>
-            <footer class="card-footer">
-                <button type="button" class="btn-chip btn-curtain" data-act="add-set">เพิ่มผ้าม่าน</button>
-                <button type="button" class="btn-chip btn-deco" data-act="add-deco">เพิ่มตกแต่ง</button>
-                <button type="button" class="btn-chip btn-wallpaper" data-act="add-wallpaper">เพิ่มวอลล์เปเปอร์</button>
-            </footer>
-        </details>
-    </template>
-
-    <template id="setTpl">
-        <div class="item-card set-item" data-set>
-            <div class="item-header">
-                <h4 class="item-title">
-                    <i class="ph-bold ph-ruler"></i>
-                    <span>ผ้าม่าน</span>
-                    <small data-set-summary></small>
-                </h4>
-                <div class="item-actions">
-                    <button type="button" class="btn-icon btn-icon-small" data-act="toggle-suspend" title="ระงับรายการนี้">
-                        <i class="ph-bold ph-pause-circle"></i>
-                    </button>
-                    <button type="button" class="btn-icon btn-icon-small danger" data-act="del-set" title="ลบรายการนี้">
-                        <i class="ph-bold ph-x"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="item-grid">
-                <div class="form-group">
-                    <label>กว้าง (ม.)</label>
-                    <input type="number" step="0.01" name="width_m" placeholder="0.00">
-                </div>
-                <div class="form-group">
-                    <label>สูง (ม.)</label>
-                    <input type="number" step="0.01" name="height_m" placeholder="0.00">
-                </div>
-                <div class="form-group">
-                    <label>สไตล์</label>
-                    <select name="set_style">
-                        <option value="ลอน">ลอน</option>
-                        <option value="จีบ">จีบ</option>
-                        <option value="ตาไก่">ตาไก่</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>แบบ</label>
-                    <select name="fabric_variant">
-                        <option value="ทึบ">ทึบ (ผืนเดียว)</option>
-                        <option value="โปร่ง">โปร่ง (ผืนเดียว)</option>
-                        <option value="ทึบ&โปร่ง">ทึบ + โปร่ง</option>
-                    </select>
-                </div>
-                <div class="form-group" data-fabric-wrap>
-                    <label>ราคาผ้าทึบ/ม.</label>
-                    <select name="set_price_per_m"></select>
-                </div>
-                <div class="form-group" data-sheer-wrap>
-                    <label>ราคาผ้าโปร่ง/ม.</label>
-                    <select name="sheer_price_per_m"></select>
-                </div>
-            </div>
-            <div class="item-summary single-line">
-                <p>ราคา: <b><span data-set-price>0</span></b> บ.</p>
-            </div>
-        </div>
-    </template>
-
-    <template id="decoTpl">
-        <div class="item-card deco-item" data-deco-item>
-            <div class="item-header">
-                <h4 class="item-title">
-                    <i class="ph-bold ph-paint-brush-broad"></i>
-                    <span>งานตกแต่ง</span>
-                    <span class="deco-type-display"></span>
-                    <small data-deco-summary></small>
-                </h4>
-                <div class="item-actions">
-                    <button type="button" class="btn-icon btn-icon-small" data-act="toggle-suspend" title="ระงับรายการนี้">
-                        <i class="ph-bold ph-pause-circle"></i>
-                    </button>
-                    <button type="button" class="btn-icon btn-icon-small danger" data-act="del-deco" title="ลบรายการนี้">
-                        <i class="ph-bold ph-x"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="item-grid">
-                <div class="form-group">
-                    <label>รายการ</label>
-                    <input type="text" name="deco_type" placeholder="เช่น ม่านม้วน, ม่านปรับแสง">
-                </div>
-                <div class="form-group">
-                    <label>กว้าง (ม.)</label>
-                    <input type="number" step="0.01" name="deco_width_m" placeholder="0.00">
-                </div>
-                <div class="form-group">
-                    <label>สูง (ม.)</label>
-                    <input type="number" step="0.01" name="deco_height_m" placeholder="0.00">
-                </div>
-                <div class="form-group">
-                    <label>ราคา/ตร.หลา</label>
-                    <input type="text" inputmode="numeric" name="deco_price_sqyd" placeholder="0">
-                </div>
-            </div>
-            <div class="item-summary single-line">
-                <p>ราคา: <b><span data-deco-price>0</span></b> บ.</p>
-            </div>
-        </div>
-    </template>
-
-    <template id="wallpaperTpl">
-        <div class="item-card wallpaper-item" data-wallpaper-item>
-            <div class="item-header">
-                <h4 class="item-title">
-                    <i class="ph-bold ph-image-square"></i>
-                    <span>วอลล์เปเปอร์</span>
-                    <small data-wallpaper-summary></small>
-                </h4>
-                <div class="item-actions">
-                    <button type="button" class="btn-icon btn-icon-small" data-act="toggle-suspend" title="ระงับรายการนี้">
-                        <i class="ph-bold ph-pause-circle"></i>
-                    </button>
-                    <button type="button" class="btn-icon btn-icon-small danger" data-act="del-wallpaper" title="ลบรายการนี้">
-                        <i class="ph-bold ph-x"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="item-grid">
-                <div class="form-group">
-                    <label>สูง (ม.)</label>
-                    <input type="number" step="0.01" name="wallpaper_height_m" placeholder="0.00">
-                </div>
-                <div class="form-group">
-                    <label>ราคา/ม้วน</label>
-                    <input type="text" inputmode="numeric" name="wallpaper_price_roll" placeholder="0">
-                </div>
-            </div>
-            <div class="walls-section">
-                <label>ความกว้างผนัง (ม.)</label>
-                <div class="walls-container" data-walls-container>
-                    </div>
-                <button type="button" class="btn btn-secondary" data-act="add-wall" style="padding: 0.3rem 0.6rem; border-radius: 20px;">
-                    <i class="ph-bold ph-plus"></i> เพิ่มผนัง
-                </button>
-            </div>
-             <div class="item-summary single-line">
-                <p>ราคา: <b><span data-wallpaper-price>0</span></b> บ.</p>
-            </div>
-        </div>
-    </template>
-    
-    <template id="wallTpl">
-        <div class="wall-input-row">
-            <input type="number" step="0.01" name="wall_width_m" placeholder="0.00">
-            <button type="button" class="btn-icon btn-icon-small danger" data-act="del-wall" title="ลบผนังนี้">
-                <i class="ph-bold ph-x"></i>
-            </button>
-        </div>
-    </template>
 
 </body>
 </html>
