@@ -11,8 +11,8 @@
         sheer: [1000, 1100, 1200, 1300, 1400, 1500],
         style_surcharge: { "ลอน": 200, "ตาไก่": 0, "จีบ": 0 },
         height: [
-            { threshold: 3.2, add_per_m: 300 },
-            { threshold: 2.8, add_per_m: 200 },
+            { threshold: 3.2, add_per_m: 300 }, 
+            { threshold: 2.8, add_per_m: 200 }, 
             { threshold: 2.5, add_per_m: 150 }
         ],
     };
@@ -56,7 +56,6 @@
     // --- STATE ---
     let roomCount = 0;
     let isLocked = false;
-    let lastSavedStateJSON = ''; // **[ADDED]** For tracking unsaved changes
 
     // --- UTILITY FUNCTIONS ---
     const toNum = v => {
@@ -67,9 +66,9 @@
     const clamp01 = v => Math.max(0, toNum(v));
     const fmt = (n, fixed = 2, asCurrency = false) => {
         if (!Number.isFinite(n)) return "0";
-        return n.toLocaleString("th-TH", {
-            minimumFractionDigits: asCurrency ? 0 : fixed,
-            maximumFractionDigits: asCurrency ? 0 : fixed
+        return n.toLocaleString("th-TH", { 
+            minimumFractionDigits: asCurrency ? 0 : fixed, 
+            maximumFractionDigits: asCurrency ? 0 : fixed 
         });
     };
     const debounce = (fn, ms = 150) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
@@ -191,7 +190,7 @@
         selectEl.innerHTML = `<option value="" hidden>เลือกราคา</option>`;
         prices.forEach(p => {
             const option = document.createElement('option');
-            option.value = p;
+            option.value = p; 
             option.textContent = p.toLocaleString("th-TH");
             selectEl.appendChild(option);
         });
@@ -520,11 +519,8 @@
     }
     
     // --- PERSISTENCE ---
-    // **[MODIFIED]** saveData now updates the state tracker
     function saveData() {
-        const currentPayload = buildPayload();
-        lastSavedStateJSON = JSON.stringify(currentPayload, null, 2);
-        localStorage.setItem(STORAGE_KEY, lastSavedStateJSON);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPayload()));
     }
     
     function loadPayload(payload) {
@@ -533,7 +529,7 @@
         document.querySelector('input[name="customer_address"]').value = payload.customer_address || '';
         document.querySelector('input[name="customer_phone"]').value = payload.customer_phone || '';
         
-        document.querySelector(SELECTORS.roomsContainer).innerHTML = "";
+        document.querySelector(SELECTORS.roomsContainer).innerHTML = ""; 
         roomCount = 0;
         
         if (payload.rooms.length > 0) payload.rooms.forEach(addRoom);
@@ -696,7 +692,7 @@
         orderForm.addEventListener("change", e => {
             if (e.target.name === 'deco_type') {
                  handleDecoTypeChange(e.target);
-            }
+            } 
             if (e.target.matches('select[name="fabric_variant"]')) {
                 toggleSetFabricUI(e.target.closest(SELECTORS.set));
             }
@@ -809,28 +805,17 @@
                 menuDropdown.classList.remove('show');
             }
         });
-
-        // **[ADDED]** Confirmation on page exit
-        window.addEventListener('beforeunload', (e) => {
-            const currentStateJSON = JSON.stringify(buildPayload(), null, 2);
-            if (currentStateJSON !== lastSavedStateJSON) {
-                e.preventDefault();
-                e.returnValue = ''; // Required for cross-browser compatibility
-            }
-        });
         
         // Initial Load from localStorage
         try {
             const storedData = localStorage.getItem(STORAGE_KEY);
             if (storedData) {
                 loadPayload(JSON.parse(storedData));
-                lastSavedStateJSON = storedData; // **[MODIFIED]** Sync state tracker
             } else {
                 addRoom();
-                // **[MODIFIED]** saveData() is already called in addRoom()
             }
         } catch(err) {
-            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(STORAGE_KEY); 
             addRoom();
         }
         recalcAll();
