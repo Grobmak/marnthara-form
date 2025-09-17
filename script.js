@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.5.0-centralized-cost-v2";
+    const APP_VERSION = "input-ui/4.5.1-bug-fix";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4"; // Keep v4 for data compatibility
     const SQM_TO_SQYD = 1.19599;
@@ -562,10 +562,10 @@
             }
         };
 
-        const customerForm = document.querySelector('#customerInfo');
-        new FormData(customerForm).forEach((value, key) => {
-            payload.customer[key] = value;
-        });
+        const customerInfo = document.querySelector('#customerInfo');
+        payload.customer.customer_name = customerInfo.querySelector('#customer_name').value;
+        payload.customer.customer_phone = customerInfo.querySelector('#customer_phone').value;
+        payload.customer.customer_address = customerInfo.querySelector('#customer_address').value;
         
         // Serialize predefined costs
         const predefinedCostsContainer = document.querySelector('#actual-costs-container');
@@ -596,13 +596,17 @@
                 const fabric_yardage = toNum(setEl.dataset.fabric_yardage);
                 if (is_suspended && total_price === 0) return;
                 
-                const data = Object.fromEntries(new FormData(setEl).entries());
+                const data = {
+                    width_m: toNum(setEl.querySelector('[name="width_m"]').value),
+                    height_m: toNum(setEl.querySelector('[name="height_m"]').value),
+                    set_style: setEl.querySelector('[name="set_style"]').value,
+                    fabric_variant: setEl.querySelector('[name="fabric_variant"]').value,
+                    set_price_per_m: toNum(setEl.querySelector('[name="set_price_per_m"]').value),
+                    sheer_price_per_m: toNum(setEl.querySelector('[name="sheer_price_per_m"]').value)
+                };
+
                 roomData.sets.push({
                     ...data,
-                    width_m: toNum(data.width_m),
-                    height_m: toNum(data.height_m),
-                    price_per_m_raw: toNum(data.price_per_m_raw),
-                    sheer_price_per_m: toNum(data.sheer_price_per_m),
                     total_price_incl_surcharge: total_price,
                     fabric_yardage: fabric_yardage,
                     is_suspended
@@ -614,12 +618,15 @@
                 const total_price = toNum(decoEl.dataset.total_price);
                 if (is_suspended && total_price === 0) return;
                 
-                const data = Object.fromEntries(new FormData(decoEl).entries());
+                const data = {
+                    deco_type: decoEl.querySelector('[name="deco_type"]').value,
+                    deco_width_m: toNum(decoEl.querySelector('[name="deco_width_m"]').value),
+                    deco_height_m: toNum(decoEl.querySelector('[name="deco_height_m"]').value),
+                    deco_price_sqyd: toNum(decoEl.querySelector('[name="deco_price_sqyd"]').value)
+                };
+
                 roomData.decorations.push({
                     ...data,
-                    width_m: toNum(data.deco_width_m),
-                    height_m: toNum(data.deco_height_m),
-                    price_sqyd: toNum(data.deco_price_sqyd),
                     total_price: total_price,
                     is_suspended
                 });
@@ -891,6 +898,24 @@
             sheerWrap.style.display = 'flex';
             setPriceInput.disabled = false;
         }
+    }
+
+    function renumber() {
+        document.querySelectorAll(SELECTORS.room).forEach((roomEl, roomIndex) => {
+            roomEl.querySelector(SELECTORS.roomNameInput).placeholder = `ชื่อห้อง #${roomIndex + 1}`;
+        });
+        document.querySelectorAll(SELECTORS.set).forEach((setEl, setIndex) => {
+            const title = setEl.querySelector('.item-title > span');
+            if (title) title.textContent = `ผ้าม่าน #${setIndex + 1}`;
+        });
+        document.querySelectorAll(SELECTORS.decoItem).forEach((decoEl, decoIndex) => {
+            const title = decoEl.querySelector('.item-title > span');
+            if (title) title.textContent = `ของตกแต่ง #${decoIndex + 1}`;
+        });
+        document.querySelectorAll(SELECTORS.wallpaperItem).forEach((wallpaperEl, wallpaperIndex) => {
+            const title = wallpaperEl.querySelector('.item-title > span');
+            if (title) title.textContent = `วอลล์เปเปอร์ #${wallpaperIndex + 1}`;
+        });
     }
 
     // --- START THE APP ---

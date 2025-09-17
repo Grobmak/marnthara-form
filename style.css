@@ -473,17 +473,17 @@ i.ph {
 .btn-icon:hover {
     background-color: var(--surface-container-high);
 }
-.btn-icon i {
-    font-size: 1.25em;
-}
-.btn-icon-small {
-    padding: 0.25rem;
-}
 .btn-icon.danger {
     color: var(--danger);
 }
 .btn-icon.danger:hover {
     background-color: var(--danger-container);
+}
+.btn-icon-small {
+    padding: 0.25rem;
+}
+.btn-icon i {
+    font-size: 1.25em;
 }
 
 .btn-sm {
