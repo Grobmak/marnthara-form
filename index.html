@@ -80,6 +80,53 @@
                 <div class="card-content" id="detailed-material-summary">
                     </div>
             </details>
+            
+            <details class="card" id="actualCostCard">
+                <summary>
+                    <h2>
+                        <i class="ph-bold ph-wallet"></i>
+                        สรุปต้นทุนจริง (ภายใน)
+                    </h2>
+                    <i class="ph-bold ph-caret-down expand-icon"></i>
+                </summary>
+                <div class="card-content">
+                    <div class="form-group">
+                        <label for="actual_selling_price">ราคาขายจริง (สุทธิ)</label>
+                        <input type="text" inputmode="numeric" id="actual_selling_price" name="actual_selling_price" placeholder="0">
+                    </div>
+                    <hr>
+                    <div class="form-grid-2" id="actual-costs-container">
+                        <div class="form-group">
+                            <label for="cost_fabric">ต้นทุนผ้าทั้งหมด</label>
+                            <input type="text" inputmode="numeric" id="cost_fabric" name="cost_fabric" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="cost_sewing">ค่าตัดเย็บ</label>
+                            <input type="text" inputmode="numeric" id="cost_sewing" name="cost_sewing" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="cost_track">ต้นทุนราง</label>
+                            <input type="text" inputmode="numeric" id="cost_track" name="cost_track" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="cost_deco">ต้นทุนของตกแต่ง</label>
+                            <input type="text" inputmode="numeric" id="cost_deco" name="cost_deco" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="cost_wallpaper">ต้นทุนวอลล์เปเปอร์</label>
+                            <input type="text" inputmode="numeric" id="cost_wallpaper" name="cost_wallpaper" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="cost_delivery">ค่าขนส่ง</label>
+                            <input type="text" inputmode="numeric" id="cost_delivery" name="cost_delivery" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="cost_other">ค่าใช้จ่ายอื่นๆ</label>
+                            <input type="text" inputmode="numeric" id="cost_other" name="cost_other" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+            </details>
 
             <div class="add-room-container">
                 <button type="button" class="btn btn-secondary" id="addRoomFooterBtn">
@@ -95,7 +142,9 @@
         <div class="summary-grid">
             <div class="total-items">
                 <medium>รวม <span id="setCount">0</span> รายการ</medium>
-                <medium class="actual-profit-text" style="display: none;">กำไร <b><span id="grandProfit">0</span></b> บ.</medium>
+                <medium class="actual-profit-text" style="display: none;">
+                    กำไร <b><span id="grandProfit">0</span></b> บ. (<span id="grandProfitPercent">0%</span>)
+                </medium>
             </div>
             <div class="grand-total">
                 <span>ยอดรวม <br><b><span id="grandTotal">0</span></b> บ.</span>
@@ -218,23 +267,8 @@
                     <select name="sheer_price_per_m"></select>
                 </div>
             </div>
-            <div class="item-summary">
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label>ราคาขายจริง (สุทธิ)</label>
-                        <input type="text" inputmode="numeric" name="set_actual_selling_price" placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label>ต้นทุนจริง (รวม)</label>
-                        <input type="text" inputmode="numeric" name="set_actual_cost" placeholder="0">
-                    </div>
-                </div>
-                <div class="summary-details">
-                    <p><b>สรุปการใช้งาน:</b>
-                        ผ้าทึบ: <b data-set-yardage-opaque>0.00</b> หลา, รางทึบ: <b data-set-opaque-track>0.00</b> ม.
-                        ผ้าโปร่ง: <b data-set-yardage-sheer>0.00</b> หลา, รางโปร่ง: <b data-set-sheer-track>0.00</b> ม.
-                    </p>
-                </div>
+            <div class="item-summary single-line">
+                <p>ราคา: <b><span data-set-price>0</span></b> บ.</p>
             </div>
         </div>
     </template>
@@ -275,17 +309,8 @@
                     <input type="text" inputmode="numeric" name="deco_price_sqyd" placeholder="0">
                 </div>
             </div>
-            <div class="item-summary">
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label>ราคาขายจริง (สุทธิ)</label>
-                        <input type="text" inputmode="numeric" name="deco_actual_selling_price" placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label>ต้นทุนจริง (รวม)</label>
-                        <input type="text" inputmode="numeric" name="deco_actual_cost" placeholder="0">
-                    </div>
-                </div>
+            <div class="item-summary single-line">
+                <p>ราคา: <b><span data-deco-price>0</span></b> บ.</p>
             </div>
         </div>
     </template>
@@ -325,18 +350,8 @@
                     <i class="ph-bold ph-plus"></i> เพิ่มผนัง
                 </button>
             </div>
-             <div class="item-summary">
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label>ราคาขายจริง (สุทธิ)</label>
-                        <input type="text" inputmode="numeric" name="wallpaper_actual_selling_price" placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label>ต้นทุนจริง (รวม)</label>
-                        <input type="text" inputmode="numeric" name="wallpaper_actual_cost" placeholder="0">
-                    </div>
-                </div>
-                <div class="item-summary single-line" data-wallpaper-summary></div>
+             <div class="item-summary single-line">
+                <p>ราคา: <b><span data-wallpaper-price>0</span></b> บ.</p>
             </div>
         </div>
     </template>
