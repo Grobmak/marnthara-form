@@ -46,11 +46,12 @@
     --outline: #CBD5E0;
     --outline-variant: #A0AEC0;
 
-    /* Softer Shadows */
+    /* Softer Shadows with Glow Effect */
     --shadow-color: rgba(92, 107, 192, 0.12);
+    --glow-color: rgba(92, 107, 192, 0.25); /* Glow color based on --primary */
     --shadow-sm: 0 1px 3px var(--shadow-color);
-    --shadow-md: 0 4px 12px var(--shadow-color);
-    --shadow-lg: 0 10px 30px var(--shadow-color);
+    --shadow-md: 0 4px 12px var(--shadow-color), 0 2px 15px var(--glow-color); /* Added glow layer */
+    --shadow-lg: 0 10px 20px var(--shadow-color), 0 5px 25px var(--glow-color); /* Enhanced glow layer */
 
     /* Liquid Glass Effect */
     --glass-bg: rgba(255, 255, 255, 0.8); 
