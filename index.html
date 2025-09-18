@@ -115,11 +115,29 @@
     
     <div id="copyOptionsModal" class="modal-wrapper">
         <div class="modal-content">
-            <h3>เลือกข้อมูลที่จะคัดลอก</h3>
-            <div class="checkbox-group">
-                <label><input type="checkbox" id="copyCustomerInfo" checked> ข้อมูลลูกค้า</label>
-                <label><input type="checkbox" id="copyRoomDetails" checked> รายละเอียดทั้งหมด</label>
-                <label><input type="checkbox" id="copySummary" checked> สรุปยอดรวม</label>
+            <h3>เลือกรูปแบบสรุปที่จะคัดลอก</h3>
+            <div class="radio-button-group">
+                <label>
+                    <input type="radio" name="copy_option" value="customer">
+                    <div class="radio-button-content">
+                        <strong>ส่งให้ลูกค้า</strong>
+                        <small>สรุปราคาแบบย่อ พร้อมข้อมูลติดต่อ</small>
+                    </div>
+                </label>
+                <label>
+                    <input type="radio" name="copy_option" value="seamstress">
+                    <div class="radio-button-content">
+                        <strong>ส่งช่างเย็บผ้า</strong>
+                        <small>รายละเอียดขนาด, รูปแบบ, รหัสผ้า สำหรับผลิต</small>
+                    </div>
+                </label>
+                <label>
+                    <input type="radio" name="copy_option" value="owner">
+                    <div class="radio-button-content">
+                        <strong>รายละเอียดทั้งหมด (สำหรับร้านค้า)</strong>
+                        <small>ข้อมูลทั้งหมดสำหรับทำบัญชีและสรุปวัสดุ</small>
+                    </div>
+                </label>
             </div>
             <div class="modal-actions">
                 <button id="copyOptionsCancel" class="btn btn-secondary">ยกเลิก</button>
@@ -147,10 +165,16 @@
                 </div>
                 <div class="room-summary-controls">
                     <div class="room-brief" data-room-brief></div>
-                    <i class="ph-bold ph-caret-down expand-icon"></i>
-                    <button type="button" class="btn-icon danger" data-act="del-room" title="ลบห้องนี้">
-                        <i class="ph-bold ph-trash"></i>
-                    </button>
+                    <div class="room-options-container">
+                        <button type="button" class="btn-icon" data-act="toggle-room-menu" title="ตัวเลือกห้อง">
+                            <i class="ph-bold ph-dots-three-vertical"></i>
+                        </button>
+                        <div class="room-options-menu">
+                            <a href="#" data-act="toggle-suspend-room"><i class="ph ph-pause-circle"></i> <span>ระงับห้อง</span></a>
+                            <a href="#" data-act="clear-room"><i class="ph ph-eraser"></i> ล้างข้อมูลในห้อง</a>
+                            <a href="#" data-act="del-room" class="danger"><i class="ph ph-trash"></i> ลบห้องนี้</a>
+                        </div>
+                    </div>
                 </div>
             </summary>
             <div class="card-content">
@@ -212,6 +236,22 @@
                 <div class="form-group" data-sheer-wrap>
                     <label>ราคาผ้าโปร่ง</label>
                     <select name="sheer_price_per_m"></select>
+                </div>
+                <div class="form-group">
+                    <label>รหัสผ้า</label>
+                    <input type="text" name="fabric_code" placeholder="-">
+                </div>
+                <div class="form-group">
+                    <label>รูปแบบเปิด</label>
+                    <select name="opening_style">
+                        <option value="แยกกลาง">แยกกลาง</option>
+                        <option value="รวบซ้าย">รวบซ้าย</option>
+                        <option value="รวบขวา">รวบขวา</option>
+                    </select>
+                </div>
+                <div class="form-group full-width-item">
+                    <label>หมายเหตุ</label>
+                    <input type="text" name="notes" placeholder="เช่น ติดตั้งเหนือขอบวงกบ 15 ซม.">
                 </div>
             </div>
 
