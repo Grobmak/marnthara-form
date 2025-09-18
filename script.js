@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.3.1-hotfix";
+    const APP_VERSION = "input-ui/4.3.2-ux-enhanced";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4"; // Keep v4 for data compatibility
     const SQM_TO_SQYD = 1.19599;
@@ -77,6 +77,30 @@
         for (const entry of sorted) { if (h > entry.threshold) return entry.add_per_m; }
         return 0;
     };
+
+    const animateAndScroll = (element) => {
+        if (!element) return;
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.classList.add('item-created');
+        element.addEventListener('animationend', () => {
+            element.classList.remove('item-created');
+        }, { once: true });
+    };
+
+    function animateAndRemove(item) {
+        if (!item) return;
+        const parentContainer = item.parentElement.closest('.card, .items-container');
+        if (parentContainer) {
+            parentContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        item.classList.add('item-removing');
+        item.addEventListener('animationend', () => {
+            item.remove();
+            renumber();
+            recalcAll();
+            saveData();
+        }, { once: true });
+    }
 
     // --- UI FUNCTIONS (Toasts, Modals) ---
     function showToast(message, type = 'default') {
@@ -182,8 +206,10 @@
         renumber();
         recalcAll();
         saveData();
-        created.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        if (!prefill) showToast('เพิ่มห้องใหม่แล้ว', 'success');
+        if (!prefill) {
+            showToast('เพิ่มห้องใหม่แล้ว', 'success');
+            animateAndScroll(created);
+        }
     }
     
     function populatePriceOptions(selectEl, prices) {
@@ -219,6 +245,8 @@
             created.querySelector('select[name="opening_style"]').value = prefill.opening_style || "แยกกลาง";
             created.querySelector('input[name="notes"]').value = prefill.notes || "";
             if (prefill.is_suspended) suspendItem(created, true, false);
+        } else {
+             animateAndScroll(created);
         }
         toggleSetFabricUI(created);
         renumber();
@@ -245,6 +273,8 @@
                 displayEl.textContent = `(${type})`;
             }
             if (prefill.is_suspended) suspendItem(created, true, false);
+        } else {
+            animateAndScroll(created);
         }
         renumber();
         recalcAll();
@@ -266,6 +296,7 @@
             if (prefill.is_suspended) suspendItem(created, true, false);
         } else {
             addWall(created.querySelector('[data-act="add-wall"]'));
+            animateAndScroll(created);
         }
         renumber();
         recalcAll();
@@ -282,9 +313,10 @@
         }
         wallsContainer.appendChild(frag);
         
-        const newWallInput = wallsContainer.querySelector('.wall-input-row:last-of-type input');
-        if (newWallInput) {
-            newWallInput.focus();
+        const newWallInputRow = wallsContainer.querySelector('.wall-input-row:last-of-type');
+        if (newWallInputRow) {
+            animateAndScroll(newWallInputRow);
+            newWallInputRow.querySelector('input').focus();
         }
     }
     
@@ -318,15 +350,21 @@
 
     async function performActionWithConfirmation(btn, actionConfig) {
         if (isLocked) return;
+        
         if (actionConfig.confirm && !await showConfirmation(actionConfig.title, actionConfig.body)) return;
         
         const item = btn.closest(actionConfig.selector);
-        if (item) {
+        if (!item) return;
+
+        if (actionConfig.toast) showToast(actionConfig.toast, 'success');
+
+        if (actionConfig.isRemoval) {
+            actionConfig.action(item); 
+        } else {
             actionConfig.action(item, btn);
             renumber();
             recalcAll();
             saveData();
-            if (actionConfig.toast) showToast(actionConfig.toast, 'success');
         }
     }
 
@@ -872,11 +910,11 @@
                     suspendRoom(roomEl, isSuspended);
                 },
                 'clear-room': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูลในห้อง', body: 'ยืนยันการลบทุกรายการในห้องนี้?', selector: SELECTORS.room, action: (item) => { item.querySelector(SELECTORS.setsContainer).innerHTML = ""; item.querySelector(SELECTORS.decorationsContainer).innerHTML = ""; item.querySelector(SELECTORS.wallpapersContainer).innerHTML = ""; }, toast: 'ล้างข้อมูลในห้องแล้ว' }),
-                'del-room': () => performActionWithConfirmation(btn, { confirm: true, title: 'ลบห้อง', body: 'ยืนยันการลบห้องนี้?', selector: SELECTORS.room, action: (item) => item.remove(), toast: 'ลบห้องแล้ว' }),
-                'del-set': () => performActionWithConfirmation(btn, { confirm: true, title: 'ลบจุด', body: 'ยืนยันการลบจุดติดตั้งนี้?', selector: SELECTORS.set, action: (item) => item.remove(), toast: 'ลบจุดผ้าม่านแล้ว' }),
-                'del-deco': () => performActionWithConfirmation(btn, { confirm: true, title: 'ลบรายการ', body: 'ยืนยันการลบรายการตกแต่งนี้?', selector: SELECTORS.decoItem, action: (item) => item.remove(), toast: 'ลบรายการตกแต่งแล้ว' }),
-                'del-wallpaper': () => performActionWithConfirmation(btn, { confirm: true, title: 'ลบรายการ', body: 'ยืนยันการลบรายการวอลเปเปอร์?', selector: SELECTORS.wallpaperItem, action: (item) => item.remove(), toast: 'ลบรายการวอลเปเปอร์แล้ว' }),
-                'del-wall': () => performActionWithConfirmation(btn, { confirm: false, selector: '.wall-input-row', action: (item) => item.remove() }),
+                'del-room': () => performActionWithConfirmation(btn, { confirm: true, isRemoval: true, title: 'ลบห้อง', body: 'ยืนยันการลบห้องนี้?', selector: SELECTORS.room, action: animateAndRemove, toast: 'ลบห้องแล้ว' }),
+                'del-set': () => performActionWithConfirmation(btn, { confirm: true, isRemoval: true, title: 'ลบจุด', body: 'ยืนยันการลบจุดติดตั้งนี้?', selector: SELECTORS.set, action: animateAndRemove, toast: 'ลบจุดผ้าม่านแล้ว' }),
+                'del-deco': () => performActionWithConfirmation(btn, { confirm: true, isRemoval: true, title: 'ลบรายการ', body: 'ยืนยันการลบรายการตกแต่งนี้?', selector: SELECTORS.decoItem, action: animateAndRemove, toast: 'ลบรายการตกแต่งแล้ว' }),
+                'del-wallpaper': () => performActionWithConfirmation(btn, { confirm: true, isRemoval: true, title: 'ลบรายการ', body: 'ยืนยันการลบรายการวอลเปเปอร์?', selector: SELECTORS.wallpaperItem, action: animateAndRemove, toast: 'ลบรายการวอลเปเปอร์แล้ว' }),
+                'del-wall': () => performActionWithConfirmation(btn, { confirm: false, isRemoval: true, selector: '.wall-input-row', action: animateAndRemove }),
                 'clear-set': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในจุดนี้?', selector: SELECTORS.set, action: (item) => { item.querySelectorAll('input, select').forEach(el => { el.value = el.name === 'fabric_variant' ? 'ทึบ' : el.name === 'set_style' ? 'ลอน' : el.name === 'opening_style' ? 'แยกกลาง' : ''; }); toggleSetFabricUI(item); }, toast: 'ล้างข้อมูลผ้าม่านแล้ว' }),
                 'clear-deco': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในรายการนี้?', selector: SELECTORS.decoItem, action: (item) => { item.querySelectorAll('input, select').forEach(el => el.value = ''); item.querySelector('.deco-type-display').textContent = ''; }, toast: 'ล้างข้อมูลตกแต่งแล้ว' }),
                 'clear-wallpaper': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในรายการนี้?', selector: SELECTORS.wallpaperItem, action: (item) => { item.querySelectorAll('input').forEach(el => el.value = ''); item.querySelector(SELECTORS.wallsContainer).innerHTML = ''; addWall(item.querySelector('[data-act="add-wall"]')); }, toast: 'ล้างข้อมูลวอลเปเปอร์แล้ว' }),
