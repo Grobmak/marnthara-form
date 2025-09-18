@@ -91,40 +91,6 @@ i.ph {
     vertical-align: middle;
 }
 
-/* --- ANIMATIONS FOR UX --- */
-@keyframes flash-in {
-    0% { background-color: var(--success-container); }
-    100% { background-color: var(--surface); }
-}
-
-@keyframes fade-out-shrink {
-    from {
-        opacity: 1;
-        transform: scaleY(1);
-        max-height: 500px; /* Adjust as needed */
-    }
-    to {
-        opacity: 0;
-        transform: scaleY(0.8);
-        max-height: 0;
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-        border-width: 0 !important;
-    }
-}
-
-.newly-added {
-    animation: flash-in 0.8s ease-out;
-}
-
-.is-deleting {
-    animation: fade-out-shrink 0.4s ease-out forwards;
-    overflow: hidden;
-}
-
-
 /* --- LAYOUT & CONTAINERS --- */
 #app-container {
     max-width: 800px;
