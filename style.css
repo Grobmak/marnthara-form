@@ -227,7 +227,10 @@ i.ph {
     background-color: var(--surface-container);
 }
 
-.room-card summary { padding: 0.5rem; }
+/* MODIFIED: Increased padding-right to prevent overlap with the absolute positioned 3-dot menu */
+.room-card summary { 
+    padding: 0.5rem 50px 0.5rem 0.5rem; 
+}
 .room-card summary .form-group { flex-grow: 1; margin: 0; }
 .room-summary-controls {
     display: flex;
