@@ -144,10 +144,6 @@ i.ph {
     opacity: 0.6;
 }
 
-/* <<< SOLUTION: Allow menu to be visible when room card is open >>> */
-.room-card[open] {
-    overflow: visible;
-}
 
 .card summary {
     list-style: none;
