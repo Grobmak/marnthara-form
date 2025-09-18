@@ -65,6 +65,39 @@
     --wallpaper-container-color: hsl(16, 25%, 97%);
 }
 
+/* --- ANIMATIONS --- */
+@keyframes flash-in {
+    0% { background-color: var(--primary-container); }
+    100% { background-color: transparent; }
+}
+.flash-in {
+    animation: flash-in 0.7s ease-out forwards;
+}
+
+@keyframes fade-out-and-shrink {
+    from {
+        opacity: 1;
+        transform: scale(1);
+        max-height: 500px; /* Adjust as needed */
+        margin-bottom: 1.5rem; /* Match original margin */
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+        max-height: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        border-width: 0;
+    }
+}
+.fade-out {
+    overflow: hidden;
+    transition: margin var(--transition-speed) ease-out, padding var(--transition-speed) ease-out;
+    animation: fade-out-and-shrink 0.4s ease-in-out forwards;
+}
+
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -130,9 +163,13 @@ i.ph {
     border: 1px solid var(--outline);
     margin-bottom: 1.5rem;
     box-shadow: var(--shadow-md);
-    overflow: hidden;
     transition: all var(--transition-speed) ease-in-out;
 }
+.room-card {
+    position: relative; /* Needed for absolute positioning of the menu */
+    overflow: visible; /* Allow menu to show outside card bounds */
+}
+
 @media (hover: hover) {
     .card:hover {
         transform: translateY(-2px);
@@ -220,9 +257,12 @@ i.ph {
     padding: 0 0.5rem;
 }
 
-/* --- ROOM OPTIONS MENU --- */
+/* --- ROOM OPTIONS MENU (FIXED) --- */
 .room-options-container {
-    position: relative;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 21;
 }
 .room-options-menu {
     position: absolute; top: calc(100% + 4px); right: 0;
@@ -257,7 +297,6 @@ i.ph {
     border-radius: var(--border-radius-md);
     border-left: 5px solid var(--outline-variant);
     transition: all var(--transition-speed);
-    overflow: hidden;
 }
 .item-card.is-suspended {
     opacity: 0.5;
