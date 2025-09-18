@@ -65,39 +65,6 @@
     --wallpaper-container-color: hsl(16, 25%, 97%);
 }
 
-/* --- ANIMATIONS --- */
-@keyframes flash-in {
-    0% { background-color: var(--primary-container); }
-    100% { background-color: transparent; }
-}
-.flash-in {
-    animation: flash-in 0.7s ease-out forwards;
-}
-
-@keyframes fade-out-and-shrink {
-    from {
-        opacity: 1;
-        transform: scale(1);
-        max-height: 500px; /* Adjust as needed */
-        margin-bottom: 1.5rem; /* Match original margin */
-    }
-    to {
-        opacity: 0;
-        transform: scale(0.95);
-        max-height: 0;
-        margin-bottom: 0;
-        padding-top: 0;
-        padding-bottom: 0;
-        border-width: 0;
-    }
-}
-.fade-out {
-    overflow: hidden;
-    transition: margin var(--transition-speed) ease-out, padding var(--transition-speed) ease-out;
-    animation: fade-out-and-shrink 0.4s ease-in-out forwards;
-}
-
-
 * {
     box-sizing: border-box;
     margin: 0;
@@ -123,6 +90,40 @@ i.ph {
     font-size: 1.25em;
     vertical-align: middle;
 }
+
+/* --- ANIMATIONS FOR UX --- */
+@keyframes flash-in {
+    0% { background-color: var(--success-container); }
+    100% { background-color: var(--surface); }
+}
+
+@keyframes fade-out-shrink {
+    from {
+        opacity: 1;
+        transform: scaleY(1);
+        max-height: 500px; /* Adjust as needed */
+    }
+    to {
+        opacity: 0;
+        transform: scaleY(0.8);
+        max-height: 0;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        border-width: 0 !important;
+    }
+}
+
+.newly-added {
+    animation: flash-in 0.8s ease-out;
+}
+
+.is-deleting {
+    animation: fade-out-shrink 0.4s ease-out forwards;
+    overflow: hidden;
+}
+
 
 /* --- LAYOUT & CONTAINERS --- */
 #app-container {
@@ -163,13 +164,9 @@ i.ph {
     border: 1px solid var(--outline);
     margin-bottom: 1.5rem;
     box-shadow: var(--shadow-md);
+    overflow: hidden;
     transition: all var(--transition-speed) ease-in-out;
 }
-.room-card {
-    position: relative; /* Needed for absolute positioning of the menu */
-    overflow: visible; /* Allow menu to show outside card bounds */
-}
-
 @media (hover: hover) {
     .card:hover {
         transform: translateY(-2px);
@@ -227,10 +224,7 @@ i.ph {
     background-color: var(--surface-container);
 }
 
-/* MODIFIED: Increased padding-right to prevent overlap with the absolute positioned 3-dot menu */
-.room-card summary { 
-    padding: 0.5rem 50px 0.5rem 0.5rem; 
-}
+.room-card summary { padding: 0.5rem; }
 .room-card summary .form-group { flex-grow: 1; margin: 0; }
 .room-summary-controls {
     display: flex;
@@ -260,12 +254,9 @@ i.ph {
     padding: 0 0.5rem;
 }
 
-/* --- ROOM OPTIONS MENU (FIXED) --- */
+/* --- ROOM OPTIONS MENU --- */
 .room-options-container {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    z-index: 21;
+    position: relative;
 }
 .room-options-menu {
     position: absolute; top: calc(100% + 4px); right: 0;
@@ -300,6 +291,7 @@ i.ph {
     border-radius: var(--border-radius-md);
     border-left: 5px solid var(--outline-variant);
     transition: all var(--transition-speed);
+    overflow: hidden;
 }
 .item-card.is-suspended {
     opacity: 0.5;
