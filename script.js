@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.3.0-refined";
+    const APP_VERSION = "input-ui/4.3.1-hotfix";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4"; // Keep v4 for data compatibility
     const SQM_TO_SQYD = 1.19599;
@@ -494,9 +494,9 @@
     function buildPayload() {
         const payload = {
             app_version: APP_VERSION,
-            customer_name: document.querySelector('input[name="customer_name"]')?.value || '',
-            customer_phone: document.querySelector('input[name="customer_phone"]')?.value || '',
-            customer_address: document.querySelector('input[name="customer_address"]')?.value || '',
+            customer_name: document.querySelector('[name="customer_name"]')?.value || '',
+            customer_phone: document.querySelector('[name="customer_phone"]')?.value || '',
+            customer_address: document.querySelector('[name="customer_address"]')?.value || '',
             rooms: []
         };
         
@@ -552,9 +552,10 @@
     
     function loadPayload(payload) {
         if (!payload || !payload.rooms) { showToast("ข้อมูลไม่ถูกต้อง", "error"); return; }
-        document.querySelector('input[name="customer_name"]').value = payload.customer_name || '';
-        document.querySelector('input[name="customer_address"]').value = payload.customer_address || '';
-        document.querySelector('input[name="customer_phone"]').value = payload.customer_phone || '';
+        // FIX: Use attribute selectors without tags to work for both <input> and <textarea>
+        document.querySelector('[name="customer_name"]').value = payload.customer_name || '';
+        document.querySelector('[name="customer_address"]').value = payload.customer_address || '';
+        document.querySelector('[name="customer_phone"]').value = payload.customer_phone || '';
         
         document.querySelector(SELECTORS.roomsContainer).innerHTML = ""; 
         roomCount = 0;
