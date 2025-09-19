@@ -719,6 +719,12 @@ input[inputmode="numeric"] { text-align: left; }
 .fab-button.btn-deco { background-color: var(--deco-container-color); color: var(--deco-color); }
 .fab-button.btn-wallpaper { background-color: var(--wallpaper-container-color); color: var(--wallpaper-color); }
 
+/* --- OVERLAY FOR POP-UP MANAGEMENT --- */
+#app-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 80; /* Must be below pop-ups but above content */
+}
 
 /* --- UTILITIES --- */
 .hidden { display: none !important; }
