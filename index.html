@@ -3,531 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marnthara - Quotation Tool</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="script.js" defer></script>
+    <title>Marnthara Form</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+    <style>
+        :root {
+            --bs-body-font-family: 'IBM Plex Sans Thai', sans-serif;
+            --bs-primary: #4a90e2; /* A modern blue */
+            --bs-secondary: #50e3c2; /* A vibrant teal */
+            --bs-light: #f8f9fa;
+            --bs-dark: #343a40;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-color: #e0e0e0;
+            --input-bg: rgba(0, 0, 0, 0.2);
+            --input-border: rgba(255, 255, 255, 0.1);
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            background: linear-gradient(135deg, #2c3e50, #4ca1af);
+            color: var(--text-color);
+            padding-top: 1rem;
+        }
+
+        .container {
+            max-width: 600px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem; /* Increased border-radius */
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px 0 var(--shadow-color);
+            transition: all 0.3s ease;
+            overflow: hidden; /* Ensures child elements conform to border-radius */
+        }
+        
+        .card:hover {
+            box-shadow: 0 12px 40px 0 var(--shadow-color);
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-bottom: 1px solid var(--glass-border);
+            border-top-left-radius: 1.5rem;
+            border-top-right-radius: 1.5rem;
+        }
+        
+        .card-header h2 {
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-color);
+            border-radius: 0.75rem; /* Rounded inputs */
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+             background: var(--bs-primary);
+             border: none;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(var(--bs-primary-rgb), 0.3);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--bs-secondary);
+            color: var(--bs-secondary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bs-secondary);
+            color: var(--bs-dark);
+        }
+        
+        .summary-section {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .summary-section h4 {
+            font-weight: 600;
+            color: #fff;
+            border-bottom: 2px solid var(--bs-primary);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-section p {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .summary-section span {
+            font-weight: 700;
+            color: var(--bs-secondary);
+            font-size: 1.25rem;
+        }
+        
+        #toast-container {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1055;
+            min-width: 250px;
+        }
+        .toast {
+            background-color: rgba(40, 167, 69, 0.9);
+            color: white;
+            border-radius: 0.75rem;
+            border: none;
+            backdrop-filter: blur(5px);
+        }
+
+    </style>
 </head>
+
 <body>
-
+    <div class="container pb-5">
+        <div class="card" id="wallpaper-card">
+            <div class="card-header">
+                <h2><i class="ph-fill ph-paint-roller"></i>คำนวณวอลล์เปเปอร์</h2>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label for="wallpaper-width" class="form-label">กว้าง (เมตร)</label>
+                        <input type="number" id="wallpaper-width" class="form-control" placeholder="เช่น 5.0">
+                    </div>
+                    <div class="col-6">
+                        <label for="wallpaper-height" class="form-label">สูง (เมตร)</label>
+                        <input type="number" id="wallpaper-height" class="form-control" placeholder="เช่น 2.8">
+                    </div>
+                    <div class="col-6">
+                        <label for="wallpaper-price" class="form-label">ราคา (ต่อม้วน)</label>
+                        <input type="number" id="wallpaper-price" class="form-control" value="950">
+                    </div>
+                    <div class="col-6">
+                        <label for="wallpaper-labor-cost" class="form-label">ค่าช่างติดตั้ง (ต่อม้วน)</label>
+                        <input type="number" id="wallpaper-labor-cost" class="form-control" value="200">
+                    </div>
+                </div>
+                <div data-wallpaper-summary class="summary-section">
+                    <h4><i class="ph-fill ph-receipt"></i> สรุปราคา</h4>
+                    <p>จำนวนที่ต้องใช้: <span id="wallpaper-rolls-needed">0</span> ม้วน</p>
+                    <hr class="border-light border-opacity-25">
+                    <p>ราคาวอลล์เปเปอร์: <span id="wallpaper-price-summary">0</span> บาท</p>
+                    <p>ค่าติดตั้ง: <span id="wallpaper-labor-summary">0</span> บาท</p>
+                    <hr class="border-light border-opacity-50">
+                    <p class="mb-0 fs-5"><strong>รวมทั้งสิ้น: <span id="wallpaper-total-summary">0</span> บาท</strong></p>
+                </div>
+                <div class="d-grid gap-2 mt-4">
+                    <button class="btn btn-secondary" onclick="copyWallpaperSummary()">
+                        <i class="ph-fill ph-copy-simple"></i> คัดลอกสรุป
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div id="toast-container"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <header class="main-header">
-        <h1>Marnthara Quotation</h1>
-        <div class="header-actions">
-            <button id="lockBtn" class="btn" title="ล็อค/ปลดล็อคฟอร์ม">
-                <i class="ph-bold ph-lock-key-open lock-icon"></i>
-                <span id="lockText">ล็อก</span>
-            </button>
-            <div class="menu-container">
-                <button id="menuBtn" class="header-btn" title="Menu">
-                    <i class="ph-bold ph-dots-three-outline"></i>
-                </button>
-                <div id="menuDropdown" class="menu-dropdown">
-                    <a href="#" id="copyTextBtn"><i class="ph ph-copy"></i> คัดลอกสรุป</a>
-                    <a href="#" id="submitBtn"><i class="ph ph-paper-plane-tilt"></i> ส่งข้อมูล</a>
-                    <hr>
-                    <a href="#" id="copyJsonBtn"><i class="ph ph-code"></i> Copy JSON</a>
-                    <a href="#" id="importBtn"><i class="ph ph-upload-simple"></i> Import Data</a>
-                    <a href="#" id="exportBtn"><i class="ph ph-download-simple"></i> Export Data</a>
-                    <hr>
-                    <a href="#" id="clearAllBtn" class="danger"><i class="ph ph-trash"></i> Clear All Data</a>
-                </div>
-            </div>
-        </div>
-    </header>
+    <script>
+        // --- Wallpaper Calculation Logic ---
+        const wallpaperInputs = ['wallpaper-width', 'wallpaper-height', 'wallpaper-price', 'wallpaper-labor-cost'];
+        wallpaperInputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', calculateWallpaper);
+            }
+        });
 
-    <main id="app-container">
-        <form id="orderForm" novalidate>
-            <input type="hidden" id="payload" name="payload">
+        function calculateWallpaper() {
+            const width = parseFloat(document.getElementById('wallpaper-width').value) || 0;
+            const height = parseFloat(document.getElementById('wallpaper-height').value) || 0;
+            const pricePerRoll = parseFloat(document.getElementById('wallpaper-price').value) || 0;
+            const laborCostPerRoll = parseFloat(document.getElementById('wallpaper-labor-cost').value) || 0;
 
-            <details class="card" open>
-                <summary>
-                    <h2>
-                        <i class="ph-bold ph-user-circle"></i>
-                        ข้อมูลลูกค้า
-                    </h2>
-                    <i class="ph-bold ph-caret-down expand-icon"></i>
-                </summary>
-                <div class="card-content" id="customerInfo">
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label for="customer_name">ชื่อลูกค้า</label>
-                            <input type="text" id="customer_name" name="customer_name" placeholder="ระบุชื่อ">
-                        </div>
-                        <div class="form-group">
-                            <label for="customer_phone">เบอร์โทรศัพท์</label>
-                            <input type="tel" id="customer_phone" name="customer_phone" placeholder="ระบุเบอร์โทร">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="customer_address">ที่อยู่</label>
-                        <textarea id="customer_address" name="customer_address" placeholder="ระบุที่อยู่" rows="2"></textarea>
-                    </div>
-                </div>
-            </details>
+            if (width <= 0 || height <= 0) {
+                resetWallpaperSummary();
+                return;
+            }
 
-            <div id="rooms"></div>
+            // --- สูตรคำนวณใหม่ตามหลักการติดตั้งจริง ---
+            // New calculation logic based on real-world installation
+            const rollWidth = 0.53; // Standard wallpaper width in meters
+            const rollLength = 10;  // Standard wallpaper length in meters
+            const trimAllowance = 0.10; // Add 10cm for trimming top and bottom
+
+            // 1. Calculate how many vertical strips are needed to cover the width
+            const stripsNeeded = Math.ceil(width / rollWidth);
+
+            // 2. Calculate how many full-height strips can be cut from a single roll
+            const stripsPerRoll = Math.floor(rollLength / (height + trimAllowance));
             
-            <details class="card">
-                <summary>
-                    <h2>
-                        <i class="ph-bold ph-package"></i>
-                        สรุปวัสดุ
-                    </h2>
-                    <i class="ph-bold ph-caret-down expand-icon"></i>
-                </summary>
-                <div class="card-content" id="detailed-material-summary">
-                    </div>
-            </details>
+            let numRolls = 0;
+            if (stripsPerRoll > 0) {
+                // 3. Calculate total rolls needed, always rounding up
+                numRolls = Math.ceil(stripsNeeded / stripsPerRoll);
+            }
+            // --- จบส่วนสูตรคำนวณใหม่ ---
 
-            <div class="add-room-container">
-                <button type="button" class="btn btn-secondary" id="addRoomFooterBtn">
-                    <i class="ph-bold ph-house-line"></i>
-                    <span>เพิ่มห้อง</span>
-                </button>
-            </div>
+            const wallpaperPrice = numRolls * pricePerRoll;
+            const laborPrice = numRolls * laborCostPerRoll;
+            const totalPrice = wallpaperPrice + laborPrice;
 
-        </form>
-    </main>
+            // Update UI
+            document.getElementById('wallpaper-rolls-needed').textContent = numRolls.toLocaleString();
+            document.getElementById('wallpaper-price-summary').textContent = wallpaperPrice.toLocaleString('th-TH', { style: 'currency', currency: 'THB' }).replace('฿','');
+            document.getElementById('wallpaper-labor-summary').textContent = laborPrice.toLocaleString('th-TH', { style: 'currency', currency: 'THB' }).replace('฿','');
+            document.getElementById('wallpaper-total-summary').textContent = totalPrice.toLocaleString('th-TH', { style: 'currency', currency: 'THB' }).replace('฿','');
+        }
+        
+        function resetWallpaperSummary() {
+            document.getElementById('wallpaper-rolls-needed').textContent = '0';
+            document.getElementById('wallpaper-price-summary').textContent = '0';
+            document.getElementById('wallpaper-labor-summary').textContent = '0';
+            document.getElementById('wallpaper-total-summary').textContent = '0';
+        }
 
-    <footer class="summary-footer">
-        <div class="summary-grid">
-            <div class="total-items">
-                <medium>รวม <span id="setCount">0</span> รายการ</medium>
-            </div>
-            <div class="grand-total">
-                <span><span id="grandTotal">0</span></span>
-            </div>
-        </div>
-    </footer>
+        function copyWallpaperSummary() {
+            const width = parseFloat(document.getElementById('wallpaper-width').value) || 0;
+            const height = parseFloat(document.getElementById('wallpaper-height').value) || 0;
+            
+            if (width <= 0 || height <= 0) {
+                showToast('กรุณากรอกขนาดผนัง');
+                return;
+            }
 
-    <div id="confirmationModal" class="modal-wrapper">
-        <div class="modal-content">
-            <h3 id="modalTitle"></h3>
-            <p id="modalBody"></p>
-            <div class="modal-actions">
-                <button id="modalCancel" class="btn btn-secondary">ยกเลิก</button>
-                <button id="modalConfirm" class="btn btn-danger">ยืนยัน</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="copyOptionsModal" class="modal-wrapper">
-        <div class="modal-content">
-            <h3>เลือกรูปแบบสรุปที่จะคัดลอก</h3>
-            <div class="radio-button-group">
-                <label>
-                    <input type="radio" name="copy_option" value="customer">
-                    <div class="radio-button-content">
-                        <strong>ส่งให้ลูกค้า</strong>
-                        <small>สรุปราคาแบบย่อ พร้อมข้อมูลติดต่อ</small>
-                    </div>
-                </label>
-                <label>
-                    <input type="radio" name="copy_option" value="seamstress">
-                    <div class="radio-button-content">
-                        <strong>ส่งช่างเย็บผ้า</strong>
-                        <small>รายละเอียดขนาด, รูปแบบ, รหัสผ้า สำหรับผลิต</small>
-                    </div>
-                </label>
-                <label>
-                    <input type="radio" name="copy_option" value="owner">
-                    <div class="radio-button-content">
-                        <strong>รายละเอียดทั้งหมด (สำหรับร้านค้า)</strong>
-                        <small>ข้อมูลทั้งหมดสำหรับทำบัญชีและสรุปวัสดุ</small>
-                    </div>
-                </label>
-            </div>
-            <div class="modal-actions">
-                <button id="copyOptionsCancel" class="btn btn-secondary">ยกเลิก</button>
-                <button id="copyOptionsConfirm" class="btn btn-primary">คัดลอก</button>
-            </div>
-        </div>
-    </div>
+            const numRolls = document.getElementById('wallpaper-rolls-needed').textContent;
+            const wallpaperPrice = document.getElementById('wallpaper-price-summary').textContent;
+            const laborPrice = document.getElementById('wallpaper-labor-summary').textContent;
+            const totalPrice = document.getElementById('wallpaper-total-summary').textContent;
+            const pricePerRoll = parseFloat(document.getElementById('wallpaper-price').value) || 0;
+            const laborCostPerRoll = parseFloat(document.getElementById('wallpaper-labor-cost').value) || 0;
 
-    <div id="importModal" class="modal-wrapper">
-        <div class="modal-content">
-            <h3>นำเข้าข้อมูล (JSON)</h3>
-            <textarea id="importJsonArea" rows="10" placeholder="วางข้อมูล JSON ที่นี่"></textarea>
-            <div class="modal-actions">
-                <button id="importCancel" class="btn btn-secondary">ยกเลิก</button>
-                <button id="importConfirm" class="btn btn-primary">นำเข้า</button>
-            </div>
-        </div>
-    </div>
-    
-    <template id="roomTpl">
-        <details class="card room-card" data-room>
-            <summary>
-                <div class="form-group">
-                    <input type="text" name="room_name" class="room-name-input" placeholder="ห้องที่ 1">
-                    <i class="ph-bold ph-pencil-simple room-name-icon"></i>
-                </div>
-                <small class="room-brief"></small>
-                <div class="room-summary-controls">
-                    <button type="button" class="btn-icon" data-act="toggle-suspend-room" title="ระงับ/ใช้งานห้อง">
-                        <i class="ph-bold ph-pause-circle"></i>
-                        <span>ระงับห้อง</span>
-                    </button>
-                    <div class="room-options-container">
-<<<<<<< HEAD
-                        <button type="button" class="btn-icon" data-act="toggle-room-menu" title="ตัวเลือกเพิ่มเติม">
-                            <i class="ph-bold ph-dots-three-outline-vertical"></i>
-                        </button>
-                        <div class="room-options-menu">
-                            <a href="#" data-act="remove-room" class="danger">
-                                <i class="ph-bold ph-trash"></i> ลบห้อง
-                            </a>
-=======
-                        <button type="button" class="btn-icon header-btn" data-act="toggle-room-menu" title="Room Options">
-                            <i class="ph-bold ph-dots-three-outline-vertical"></i>
-                        </button>
-                        <div class="room-options-menu">
-                            <a href="#" data-act="add-set"><i class="ph ph-ruler"></i> เพิ่มผ้าม่าน</a>
-                            <a href="#" data-act="add-deco"><i class="ph ph-paint-brush-house"></i> เพิ่มงานตกแต่ง</a>
-                            <a href="#" data-act="add-wallpaper"><i class="ph ph-frame-corners"></i> เพิ่มวอลล์เปเปอร์</a>
-                            <hr>
-                            <a href="#" data-act="toggle-suspend-room"><i class="ph-bold ph-pause-circle"></i> <span>ระงับห้อง</span></a>
-                            <a href="#" class="danger" data-act="remove-room" data-confirm-title="ลบห้อง" data-confirm-body="คุณแน่ใจหรือไม่ว่าต้องการลบห้องนี้?"><i class="ph-bold ph-trash"></i> ลบห้อง</a>
->>>>>>> parent of aa8f231 (+)
-                        </div>
-                    </div>
-                </div>
-            </summary>
-            <div class="card-content">
-                <div class="add-item-container">
-                    <button type="button" class="btn btn-secondary" data-act="add-set">
-                        <i class="ph-bold ph-ruler"></i>
-                        <span>เพิ่มผ้าม่าน</span>
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-act="add-deco">
-                        <i class="ph-bold ph-paint-brush-house"></i>
-                        <span>เพิ่มงานตกแต่ง</span>
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-act="add-wallpaper">
-                        <i class="ph-bold ph-frame-corners"></i>
-                        <span>เพิ่มวอลล์เปเปอร์</span>
-                    </button>
-                </div>
-                <div class="items-container" data-sets></div>
-                <div class="items-container" data-decorations></div>
-                <div class="items-container" data-wallpapers></div>
-<<<<<<< HEAD
-                <div class="card-footer">
-                    <button type="button" class="btn" data-act="add-set">
-                        <i class="ph-bold ph-curtains"></i> เพิ่มผ้าม่าน
-                    </button>
-                    <button type="button" class="btn" data-act="add-deco">
-                        <i class="ph-bold ph-circles-three-plus"></i> เพิ่มของตกแต่ง
-                    </button>
-                    <button type="button" class="btn" data-act="add-wallpaper">
-                        <i class="ph-bold ph-image-square"></i> เพิ่มวอลล์เปเปอร์
-                    </button>
-=======
-                <div class="card-footer room-summary-footer">
-                    <div>
-                        <strong>รวม:</strong> <span data-room-summary>0</span> บ.
-                    </div>
->>>>>>> parent of aa8f231 (+)
-                </div>
-            </div>
-        </details>
-    </template>
-    
-    <template id="setTpl">
-        <div class="item-card set-item" data-set>
-            <div class="item-header">
-                <div class="item-title">
-<<<<<<< HEAD
-                    <i class="ph-bold ph-curtains"></i> 
-                    <span>ผ้าม่าน</span> 
-                    <small data-set-count></small>
-                </div>
-                <div class="item-controls">
-                    <button type="button" class="btn-icon btn-icon-small" data-act="toggle-suspend" title="ระงับ/ใช้งาน">
-                        <i class="ph-bold ph-pause-circle"></i>
-                    </button>
-                    <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-item" title="ลบรายการ">
-=======
-                    <i class="ph-bold ph-ruler"></i>
-                    <span>ผ้าม่าน</span>
-                    <small data-set-code></small>
-                </div>
-                <div class="item-actions">
-                    <button type="button" class="btn-icon btn-icon-small" data-act="toggle-suspend" title="ระงับ/ใช้งาน">
-                        <i class="ph-bold ph-pause-circle"></i>
-                    </button>
-                    <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-set" data-confirm-title="ลบผ้าม่าน" data-confirm-body="คุณแน่ใจหรือไม่ว่าต้องการลบรายการผ้าม่านนี้?">
->>>>>>> parent of aa8f231 (+)
-                        <i class="ph-bold ph-x"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="item-content">
-<<<<<<< HEAD
-                <div class="form-grid-3">
-                    <div class="form-group">
-                        <label>กว้าง (ม.)</label>
-                        <input type="number" step="0.01" name="width_m" placeholder="0.00" required>
-                    </div>
-                    <div class="form-group">
-                        <label>สูง (ม.)</label>
-                        <input type="number" step="0.01" name="height_m" placeholder="0.00" required>
-=======
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label>ความกว้าง (ม.)</label>
-                        <input type="number" step="0.01" name="width_m" placeholder="0.00">
-                    </div>
-                    <div class="form-group">
-                        <label>ความสูง (ม.)</label>
-                        <input type="number" step="0.01" name="height_m" placeholder="0.00">
-                    </div>
-                    <div class="form-group">
-                        <label>รหัสผ้า</label>
-                        <input type="text" name="fabric_code" placeholder="เช่น F-2415-1">
->>>>>>> parent of aa8f231 (+)
-                    </div>
-                    <div class="form-group">
-                        <label>รูปแบบ</label>
-                        <select name="set_style">
-                            <option value="ลอน">ลอน</option>
-                            <option value="ตาไก่">ตาไก่</option>
-                            <option value="จีบ">จีบ</option>
-                        </select>
-                    </div>
-                </div>
-<<<<<<< HEAD
-                
-                <div class="form-grid-3">
-                    <div class="form-group">
-                        <label>ชนิดผ้า</label>
-                        <select name="fabric_variant">
-                            <option value="ทึบ">ทึบ</option>
-                            <option value="โปร่ง">โปร่ง</option>
-                            <option value="ทึบ&โปร่ง">ทึบ & โปร่ง</option>
-                        </select>
-                    </div>
-                    <div class="form-group" data-opaque-wrap>
-                        <label>ราคาผ้าทึบ</label>
-                        <select name="set_price_per_m"></select>
-                    </div>
-                    <div class="form-group hidden" data-sheer-wrap>
-                        <label>ราคาผ้าโปร่ง</label>
-                        <select name="sheer_price_per_m"></select>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>รหัสผ้า (ถ้ามี)</label>
-                    <input type="text" name="fabric_code" placeholder="-">
-                </div>
-                <div class="form-group">
-                    <label>รูปแบบเปิด</label>
-                    <select name="opening_style">
-                        <option value="แยกกลาง">แยกกลาง</option>
-                        <option value="รวบข้างซ้าย">รวบข้างซ้าย</option>
-                        <option value="รวบข้างขวา">รวบข้างขวา</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>หมายเหตุ</label>
-                    <input type="text" name="notes" placeholder="-">
-                </div>
-            </div>
-            <div class="item-summary" data-set-summary></div>
-            <div class="item-footer">
-                <medium>
-                    <small>ทึบ</small>
-                    <b><span data-set-yardage-opaque>0</span></b> 
-                    <small>หลา</small> 
-                    / 
-                    <b><span data-set-opaque-track>0</span></b> 
-                    <small>ม.ราง</small>
-                </medium>
-                <medium>
-                    <small>โปร่ง</small>
-                    <b><span data-set-yardage-sheer>0</span></b>
-                    <small>หลา</small>
-                    /
-                    <b><span data-set-sheer-track>0</span></b>
-                    <small>ม.ราง</small>
-                </medium>
-            </div>
-=======
-                <div class="form-group">
-                    <label>ชนิดผ้า</label>
-                    <select name="fabric_variant">
-                        <option value="ทึบ">ทึบ (ไม่โปร่งแสง)</option>
-                        <option value="โปร่ง">โปร่ง (ซับใน)</option>
-                        <option value="ทึบ&โปร่ง">ทึบ + โปร่ง (2 ชั้น)</option>
-                    </select>
-                </div>
-                <div class="form-grid-2">
-                    <div class="form-group" data-sheer-wrap>
-                        <label>ราคาผ้าทึบ (บ./ม.)</label>
-                        <select name="set_price_per_m"></select>
-                    </div>
-                    <div class="form-group" data-sheer-wrap>
-                        <label>ราคาผ้าโปร่ง (บ./ม.)</label>
-                        <select name="sheer_price_per_m" disabled></select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>หมายเหตุ</label>
-                    <input type="text" name="notes" placeholder="เช่น ริม, กล่อง, มอเตอร์...">
-                </div>
-            </div>
-            <div class="item-summary" data-set-summary></div>
->>>>>>> parent of aa8f231 (+)
-        </div>
-    </template>
-    
-    <template id="decoTpl">
-        <div class="item-card deco-item" data-deco-item>
-            <div class="item-header">
-                <div class="item-title">
-<<<<<<< HEAD
-                    <i class="ph-bold ph-circles-three-plus"></i> 
-                    <span>ของตกแต่ง</span> 
-                    <small data-deco-count></small>
-                </div>
-                <div class="item-controls">
-                     <button type="button" class="btn-icon btn-icon-small" data-act="toggle-suspend" title="ระงับ/ใช้งาน">
-                        <i class="ph-bold ph-pause-circle"></i>
-                    </button>
-                    <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-item" title="ลบรายการ">
-=======
-                    <i class="ph-bold ph-paint-brush-house"></i>
-                    <span>งานตกแต่ง</span>
-                    <small class="deco-type-display"></small>
-                </div>
-                <div class="item-actions">
-                    <button type="button" class="btn-icon btn-icon-small" data-act="toggle-suspend" title="ระงับ/ใช้งาน">
-                        <i class="ph-bold ph-pause-circle"></i>
-                    </button>
-                    <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-deco" data-confirm-title="ลบงานตกแต่ง" data-confirm-body="คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?">
->>>>>>> parent of aa8f231 (+)
-                        <i class="ph-bold ph-x"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="item-content">
-<<<<<<< HEAD
-                 <div class="form-grid-3">
-                    <div class="form-group">
-                        <label>ประเภท</label>
-                        <input type="text" name="deco_type" placeholder="-">
-                    </div>
-                    <div class="form-group">
-                        <label>กว้าง (ม.)</label>
-                        <input type="number" step="0.01" name="deco_width_m" placeholder="0.00" required>
-                    </div>
-                    <div class="form-group">
-                        <label>สูง (ม.)</label>
-                        <input type="number" step="0.01" name="deco_height_m" placeholder="0.00" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>ราคา/ตร.หลา</label>
-                    <input type="text" inputmode="numeric" name="deco_price_sqyd" placeholder="0">
-                </div>
-            </div>
-             <div class="item-summary" data-deco-summary></div>
-=======
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label>ชนิดงาน</label>
-                        <input type="text" name="deco_type" placeholder="เช่น มู่ลี่, ฉากกั้น">
-                    </div>
-                    <div class="form-group">
-                        <label>ราคา (บ./ตร.หลา)</label>
-                        <input type="text" inputmode="numeric" name="deco_price_sqyd" placeholder="0">
-                    </div>
-                </div>
-                <div class="form-grid-2">
-                    <div class="form-group">
-                        <label>ความกว้าง (ม.)</label>
-                        <input type="number" step="0.01" name="deco_width_m" placeholder="0.00">
-                    </div>
-                    <div class="form-group">
-                        <label>ความสูง (ม.)</label>
-                        <input type="number" step="0.01" name="deco_height_m" placeholder="0.00">
-                    </div>
-                </div>
-            </div>
-            <div class="item-summary" data-deco-summary></div>
->>>>>>> parent of aa8f231 (+)
-        </div>
-    </template>
+            const summaryForCustomer = `สรุปรายการวอลล์เปเปอร์
+ขนาด: กว้าง ${width} x สูง ${height} เมตร
+รวมทั้งสิ้น: ${totalPrice} บาท
+(ราคานี้รวมค่าติดตั้งแล้ว)
 
-    <template id="wallpaperTpl">
-        <div class="item-card wallpaper-item" data-wallpaper-item>
-            <div class="item-header">
-                <div class="item-title">
-<<<<<<< HEAD
-                    <i class="ph-bold ph-image-square"></i> 
-                    <span>วอลล์เปเปอร์</span> 
-                    <small data-wallpaper-count></small>
-                </div>
-                <div class="item-controls">
-                    <button type="button" class="btn-icon btn-icon-small" data-act="toggle-suspend" title="ระงับ/ใช้งาน">
-                        <i class="ph-bold ph-pause-circle"></i>
-                    </button>
-                    <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-item" title="ลบรายการ">
-=======
-                    <i class="ph-bold ph-frame-corners"></i>
-                    <span>วอลล์เปเปอร์</span>
-                </div>
-                <div class="item-actions">
-                    <button type="button" class="btn-icon btn-icon-small" data-act="toggle-suspend" title="ระงับ/ใช้งาน">
-                        <i class="ph-bold ph-pause-circle"></i>
-                    </button>
-                    <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-wallpaper" data-confirm-title="ลบวอลล์เปเปอร์" data-confirm-body="คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?">
->>>>>>> parent of aa8f231 (+)
-                        <i class="ph-bold ph-x"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="item-grid">
-                <div class="form-group">
-                    <label>สูง (ม.)</label>
-                    <input type="number" step="0.01" name="wallpaper_height_m" placeholder="0.00">
-                </div>
-                <div class="form-group">
-                    <label>ราคา/ม้วน</label>
-                    <input type="text" inputmode="numeric" name="wallpaper_price_roll" placeholder="0">
-                </div>
-                <div class="form-group">
-                    <label>ค่าช่าง/ม้วน</label>
-                    <input type="text" inputmode="numeric" name="wallpaper_install_roll" placeholder="0">
-                </div>
-            </div>
-            <div class="walls-section">
-                <label>ความกว้างผนัง (ม.)</label>
-                <div class="walls-container" data-walls-container>
+ขอบคุณค่ะ/ครับ`;
+
+            const summaryForShop = `รายละเอียดทั้งหมด (สำหรับร้านค้า)
+ขนาด: กว้าง ${width} x สูง ${height} เมตร
+จำนวนวอลล์เปเปอร์: ${numRolls} ม้วน
+ราคาต่อม้วน: ${pricePerRoll} บาท
+ค่าติดตั้งต่อม้วน: ${laborCostPerRoll} บาท
+---
+ราคาวอลล์เปเปอร์: ${wallpaperPrice} บาท
+ค่าติดตั้ง: ${laborPrice} บาท
+รวมทั้งสิ้น: ${totalPrice} บาท`;
+
+            const fullText = `${summaryForCustomer}\n\n====================\n\n${summaryForShop}`;
+
+            navigator.clipboard.writeText(fullText).then(() => {
+                showToast('คัดลอกสรุปรายการแล้ว');
+            }, (err) => {
+                console.error('Could not copy text: ', err);
+                showToast('คัดลอกไม่สำเร็จ');
+            });
+        }
+        
+        function showToast(message) {
+            const toastContainer = document.getElementById('toast-container');
+            const toastId = 'toast-' + Date.now();
+            const toastHTML = `
+                <div id="${toastId}" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
-                <button type="button" class="btn btn-secondary" data-act="add-wall" style="padding: 0.3rem 0.6rem; border-radius: 20px;">
-                    <i class="ph-bold ph-plus"></i> เพิ่มผนัง
-                </button>
-            </div>
-             <div class="item-summary single-line" data-wallpaper-summary></div>
-        </div>
-    </template>
-    
-    <template id="wallTpl">
-        <div class="wall-input-row">
-            <input type="number" step="0.01" name="wall_width_m" placeholder="0.00">
-<<<<<<< HEAD
-            <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-wall">
-                <i class="ph-bold ph-x"></i>
-            </button>
-=======
-            <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-wall" title="ลบผนัง"><i class="ph-bold ph-x"></i></button>
->>>>>>> parent of aa8f231 (+)
-        </div>
-    </template>
-    
+                </div>
+            `;
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+        
+        // Initial calculation on page load
+        window.onload = () => {
+            calculateWallpaper();
+        };
+
+    </script>
+
 </body>
 </html>
