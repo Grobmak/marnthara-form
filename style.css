@@ -638,16 +638,17 @@ input[inputmode="numeric"] { text-align: left; }
 .menu-dropdown hr { border: none; border-top: 1px solid var(--outline); margin: 0.25rem 0; }
 
 
-/* --- FLOATING ACTION BUTTON (FAB) --- */
+/* --- FLOATING ACTION BUTTON (FAB) [REVISED] --- */
 .fab-container {
     position: fixed;
-    bottom: calc(env(safe-area-inset-bottom, 0rem) + 80px); /* Adjust for summary footer */
+    bottom: calc(env(safe-area-inset-bottom, 0rem) + 85px); /* Adjusted for summary footer */
     right: 1.5rem;
     z-index: 150;
     display: flex;
     flex-direction: column-reverse;
-    align-items: center;
-    gap: 1rem;
+    align-items: flex-end; /* Align items to the right */
+    -webkit-transform: translateZ(0); /* Promotes hardware acceleration to prevent render glitches */
+    transform: translateZ(0);
 }
 .fab-main {
     width: 56px;
@@ -668,53 +669,38 @@ input[inputmode="numeric"] { text-align: left; }
 .fab-actions {
     display: flex;
     flex-direction: column-reverse;
+    align-items: flex-end;
     gap: 1rem;
     transition: all 0.3s ease;
 }
 .fab-action-item {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 0.75rem;
+    /* This now styles the <button> directly */
     opacity: 0;
-    transform: translateY(20px) scale(0.9);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
+    transform: translateY(10px) scale(0.95);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Extended FAB Styling */
+    padding: 0.75rem 1.2rem 0.75rem 1rem; /* More padding on the right for balance */
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-md);
+    width: max-content;
+    font-size: 0.9rem;
+    font-weight: 700;
 }
 .fab-container.active .fab-action-item {
     opacity: 1;
     transform: translateY(0) scale(1);
 }
 /* Staggered animation */
-.fab-container.active .fab-action-item:nth-child(1) { transition-delay: 0.1s; }
-.fab-container.active .fab-action-item:nth-child(2) { transition-delay: 0.15s; }
-.fab-container.active .fab-action-item:nth-child(3) { transition-delay: 0.2s; }
-.fab-container.active .fab-action-item:nth-child(4) { transition-delay: 0.25s; }
+.fab-container.active .fab-action-item:nth-of-type(1) { transition-delay: 0.12s; }
+.fab-container.active .fab-action-item:nth-of-type(2) { transition-delay: 0.08s; }
+.fab-container.active .fab-action-item:nth-of-type(3) { transition-delay: 0.04s; }
+.fab-container.active .fab-action-item:nth-of-type(4) { transition-delay: 0s; }
 
-.fab-action-item .fab-label {
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius-sm);
-    box-shadow: var(--shadow-md);
-    color: var(--on-surface);
-    font-size: 0.9rem;
-    font-weight: 500;
-    white-space: nowrap;
-}
-.fab-action-item .fab-button {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--border-radius-md);
-    padding: 0;
-    box-shadow: var(--shadow-md);
-    font-size: 1.25rem;
-}
 /* Color coding for action buttons */
-.fab-button.btn-curtain { background-color: var(--curtain-container-color); color: var(--on-primary-container); }
-.fab-button.btn-deco { background-color: var(--deco-container-color); color: var(--deco-color); }
-.fab-button.btn-wallpaper { background-color: var(--wallpaper-container-color); color: var(--wallpaper-color); }
+.fab-action-item.btn-curtain { background-color: var(--curtain-container-color); color: var(--on-primary-container); }
+.fab-action-item.btn-deco { background-color: var(--deco-container-color); color: var(--deco-color); }
+.fab-action-item.btn-wallpaper { background-color: var(--wallpaper-container-color); color: var(--wallpaper-color); }
 
 
 /* --- UTILITIES --- */

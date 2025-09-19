@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/5.0.0-fab";
+    const APP_VERSION = "input-ui/5.1.0-fab-revised";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4"; // Keep v4 for data compatibility
     const SQM_TO_SQYD = 1.19599;
@@ -627,7 +627,6 @@
         if (payload.rooms.length > 0) payload.rooms.forEach(addRoom);
         else addRoom();
 
-        // Set the last room as active after loading
         const lastRoom = document.querySelector(`${SELECTORS.room}:last-of-type`);
         if (lastRoom) setActiveRoom(lastRoom);
 
@@ -883,20 +882,20 @@
         // orderForm.submit();
     }
     
-    // --- FAB (Floating Action Button) LOGIC ---
+    // --- FAB (Floating Action Button) LOGIC [REVISED] ---
     const fabContainer = document.querySelector(SELECTORS.fabContainer);
     const fabActionsContainer = fabContainer.querySelector(SELECTORS.fabActions);
 
     function createFabAction(config) {
-        const item = document.createElement('div');
-        item.className = 'fab-action-item';
-        item.innerHTML = `
-            <span class="fab-label">${config.label}</span>
-            <button class="btn fab-button ${config.className}" data-act="${config.action}" title="${config.label}">
-                <i class="ph-bold ${config.icon}"></i>
-            </button>
+        const button = document.createElement('button');
+        button.className = `btn fab-action-item ${config.className}`;
+        button.dataset.act = config.action;
+        button.title = config.label;
+        button.innerHTML = `
+            <i class="ph-bold ${config.icon}"></i>
+            <span>${config.label}</span>
         `;
-        return item;
+        return button;
     }
 
     function updateFabActions() {
@@ -961,14 +960,11 @@
             debouncedRecalcAndSave();
         });
 
-        // Event delegation for all dynamic actions
         document.body.addEventListener("click", e => {
             const btn = e.target.closest('[data-act]');
             if (!btn) return;
 
-            // Handle actions inside FAB menu
-            const fabAction = btn.closest('.fab-action-item');
-            if (fabAction) {
+            if (btn.closest(SELECTORS.fabActions)) {
                 toggleFabMenu(false);
             }
 
@@ -979,12 +975,10 @@
             if (roomMenu) roomMenu.classList.remove('show');
 
             const actions = {
-                // FAB Actions
                 'add-room': () => addRoom(),
                 'add-set': () => addSet(activeRoomEl),
                 'add-deco': () => addDeco(activeRoomEl),
                 'add-wallpaper': () => addWallpaper(activeRoomEl),
-                // Other Actions
                 'add-wall': () => addWall(btn),
                 'toggle-room-menu': () => {
                      e.preventDefault();
@@ -1021,7 +1015,6 @@
 
         document.querySelector(SELECTORS.lockBtn).addEventListener('click', toggleLock);
         
-        // --- Menu Actions ---
         const menuDropdown = document.querySelector(SELECTORS.menuDropdown);
         
         document.querySelector(SELECTORS.copyTextBtn).addEventListener('click', async (e) => {
@@ -1089,31 +1082,27 @@
             if (payload) loadPayload(payload);
         });
         
-        // --- NEW FAB and Global Event Listeners ---
         document.querySelector(SELECTORS.fabMainBtn).addEventListener('click', (e) => {
             e.stopPropagation();
             toggleFabMenu();
         });
 
         window.addEventListener('click', (e) => {
-            // Set active room on interaction
             const clickedRoom = e.target.closest(SELECTORS.room);
             if (clickedRoom) {
                 setActiveRoom(clickedRoom);
             }
 
-            // Close popups when clicking outside
             if (!e.target.closest('.menu-container')) menuDropdown.classList.remove('show');
             if (!e.target.closest('[data-act="toggle-room-menu"]')) document.querySelectorAll('.room-options-menu.show').forEach(m => m.classList.remove('show'));
             if (!e.target.closest(SELECTORS.fabContainer)) toggleFabMenu(false);
         });
 
         document.querySelector(SELECTORS.menuBtn).addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent window listener from closing it immediately
+            e.stopPropagation(); 
             menuDropdown.classList.toggle('show');
         });
 
-        // Initial Load from localStorage
         try {
             const storedData = localStorage.getItem(STORAGE_KEY);
             if (storedData) {
@@ -1127,7 +1116,6 @@
             addRoom();
         }
 
-        // Set initial active room
         if (!activeRoomEl) {
             setActiveRoom(document.querySelector(SELECTORS.room));
         }
@@ -1136,6 +1124,5 @@
         updateLockState();
     }
 
-    // --- START THE APP ---
     document.addEventListener('DOMContentLoaded', init);
 })();
