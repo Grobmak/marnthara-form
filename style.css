@@ -641,14 +641,15 @@ input[inputmode="numeric"] { text-align: left; }
 /* --- FLOATING ACTION BUTTON (FAB) [REVISED] --- */
 .fab-container {
     position: fixed;
-    bottom: calc(env(safe-area-inset-bottom, 0rem) + 85px); /* Adjusted for summary footer */
+    bottom: calc(env(safe-area-inset-bottom, 0rem) + 85px);
     right: 1.5rem;
     z-index: 150;
     display: flex;
     flex-direction: column-reverse;
-    align-items: flex-end; /* Align items to the right */
-    -webkit-transform: translateZ(0); /* Promotes hardware acceleration to prevent render glitches */
-    transform: translateZ(0);
+    align-items: flex-end;
+    /* --- BUG FIX --- */
+    /* This hints to the browser to optimize the element for transform changes, preventing rendering glitches. */
+    will-change: transform;
 }
 .fab-main {
     width: 56px;
@@ -674,13 +675,10 @@ input[inputmode="numeric"] { text-align: left; }
     transition: all 0.3s ease;
 }
 .fab-action-item {
-    /* This now styles the <button> directly */
     opacity: 0;
     transform: translateY(10px) scale(0.95);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* Extended FAB Styling */
-    padding: 0.75rem 1.2rem 0.75rem 1rem; /* More padding on the right for balance */
+    padding: 0.75rem 1.2rem 0.75rem 1rem;
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-md);
     width: max-content;
@@ -691,9 +689,9 @@ input[inputmode="numeric"] { text-align: left; }
     opacity: 1;
     transform: translateY(0) scale(1);
 }
-/* Staggered animation */
-.fab-container.active .fab-action-item:nth-of-type(1) { transition-delay: 0.12s; }
-.fab-container.active .fab-action-item:nth-of-type(2) { transition-delay: 0.08s; }
+/* Staggered animation (Revised for snappier feel) */
+.fab-container.active .fab-action-item:nth-of-type(1) { transition-delay: 0.1s; }
+.fab-container.active .fab-action-item:nth-of-type(2) { transition-delay: 0.07s; }
 .fab-container.active .fab-action-item:nth-of-type(3) { transition-delay: 0.04s; }
 .fab-container.active .fab-action-item:nth-of-type(4) { transition-delay: 0s; }
 
