@@ -171,6 +171,7 @@
                         <span>ระงับห้อง</span>
                     </button>
                     <div class="room-options-container">
+<<<<<<< HEAD
                         <button type="button" class="btn-icon" data-act="toggle-room-menu" title="ตัวเลือกเพิ่มเติม">
                             <i class="ph-bold ph-dots-three-outline-vertical"></i>
                         </button>
@@ -178,14 +179,41 @@
                             <a href="#" data-act="remove-room" class="danger">
                                 <i class="ph-bold ph-trash"></i> ลบห้อง
                             </a>
+=======
+                        <button type="button" class="btn-icon header-btn" data-act="toggle-room-menu" title="Room Options">
+                            <i class="ph-bold ph-dots-three-outline-vertical"></i>
+                        </button>
+                        <div class="room-options-menu">
+                            <a href="#" data-act="add-set"><i class="ph ph-ruler"></i> เพิ่มผ้าม่าน</a>
+                            <a href="#" data-act="add-deco"><i class="ph ph-paint-brush-house"></i> เพิ่มงานตกแต่ง</a>
+                            <a href="#" data-act="add-wallpaper"><i class="ph ph-frame-corners"></i> เพิ่มวอลล์เปเปอร์</a>
+                            <hr>
+                            <a href="#" data-act="toggle-suspend-room"><i class="ph-bold ph-pause-circle"></i> <span>ระงับห้อง</span></a>
+                            <a href="#" class="danger" data-act="remove-room" data-confirm-title="ลบห้อง" data-confirm-body="คุณแน่ใจหรือไม่ว่าต้องการลบห้องนี้?"><i class="ph-bold ph-trash"></i> ลบห้อง</a>
+>>>>>>> parent of aa8f231 (+)
                         </div>
                     </div>
                 </div>
             </summary>
             <div class="card-content">
+                <div class="add-item-container">
+                    <button type="button" class="btn btn-secondary" data-act="add-set">
+                        <i class="ph-bold ph-ruler"></i>
+                        <span>เพิ่มผ้าม่าน</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-act="add-deco">
+                        <i class="ph-bold ph-paint-brush-house"></i>
+                        <span>เพิ่มงานตกแต่ง</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-act="add-wallpaper">
+                        <i class="ph-bold ph-frame-corners"></i>
+                        <span>เพิ่มวอลล์เปเปอร์</span>
+                    </button>
+                </div>
                 <div class="items-container" data-sets></div>
                 <div class="items-container" data-decorations></div>
                 <div class="items-container" data-wallpapers></div>
+<<<<<<< HEAD
                 <div class="card-footer">
                     <button type="button" class="btn" data-act="add-set">
                         <i class="ph-bold ph-curtains"></i> เพิ่มผ้าม่าน
@@ -196,6 +224,12 @@
                     <button type="button" class="btn" data-act="add-wallpaper">
                         <i class="ph-bold ph-image-square"></i> เพิ่มวอลล์เปเปอร์
                     </button>
+=======
+                <div class="card-footer room-summary-footer">
+                    <div>
+                        <strong>รวม:</strong> <span data-room-summary>0</span> บ.
+                    </div>
+>>>>>>> parent of aa8f231 (+)
                 </div>
             </div>
         </details>
@@ -205,6 +239,7 @@
         <div class="item-card set-item" data-set>
             <div class="item-header">
                 <div class="item-title">
+<<<<<<< HEAD
                     <i class="ph-bold ph-curtains"></i> 
                     <span>ผ้าม่าน</span> 
                     <small data-set-count></small>
@@ -214,11 +249,23 @@
                         <i class="ph-bold ph-pause-circle"></i>
                     </button>
                     <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-item" title="ลบรายการ">
+=======
+                    <i class="ph-bold ph-ruler"></i>
+                    <span>ผ้าม่าน</span>
+                    <small data-set-code></small>
+                </div>
+                <div class="item-actions">
+                    <button type="button" class="btn-icon btn-icon-small" data-act="toggle-suspend" title="ระงับ/ใช้งาน">
+                        <i class="ph-bold ph-pause-circle"></i>
+                    </button>
+                    <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-set" data-confirm-title="ลบผ้าม่าน" data-confirm-body="คุณแน่ใจหรือไม่ว่าต้องการลบรายการผ้าม่านนี้?">
+>>>>>>> parent of aa8f231 (+)
                         <i class="ph-bold ph-x"></i>
                     </button>
                 </div>
             </div>
             <div class="item-content">
+<<<<<<< HEAD
                 <div class="form-grid-3">
                     <div class="form-group">
                         <label>กว้าง (ม.)</label>
@@ -227,6 +274,20 @@
                     <div class="form-group">
                         <label>สูง (ม.)</label>
                         <input type="number" step="0.01" name="height_m" placeholder="0.00" required>
+=======
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>ความกว้าง (ม.)</label>
+                        <input type="number" step="0.01" name="width_m" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>ความสูง (ม.)</label>
+                        <input type="number" step="0.01" name="height_m" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>รหัสผ้า</label>
+                        <input type="text" name="fabric_code" placeholder="เช่น F-2415-1">
+>>>>>>> parent of aa8f231 (+)
                     </div>
                     <div class="form-group">
                         <label>รูปแบบ</label>
@@ -237,6 +298,7 @@
                         </select>
                     </div>
                 </div>
+<<<<<<< HEAD
                 
                 <div class="form-grid-3">
                     <div class="form-group">
@@ -293,6 +355,32 @@
                     <small>ม.ราง</small>
                 </medium>
             </div>
+=======
+                <div class="form-group">
+                    <label>ชนิดผ้า</label>
+                    <select name="fabric_variant">
+                        <option value="ทึบ">ทึบ (ไม่โปร่งแสง)</option>
+                        <option value="โปร่ง">โปร่ง (ซับใน)</option>
+                        <option value="ทึบ&โปร่ง">ทึบ + โปร่ง (2 ชั้น)</option>
+                    </select>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group" data-sheer-wrap>
+                        <label>ราคาผ้าทึบ (บ./ม.)</label>
+                        <select name="set_price_per_m"></select>
+                    </div>
+                    <div class="form-group" data-sheer-wrap>
+                        <label>ราคาผ้าโปร่ง (บ./ม.)</label>
+                        <select name="sheer_price_per_m" disabled></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>หมายเหตุ</label>
+                    <input type="text" name="notes" placeholder="เช่น ริม, กล่อง, มอเตอร์...">
+                </div>
+            </div>
+            <div class="item-summary" data-set-summary></div>
+>>>>>>> parent of aa8f231 (+)
         </div>
     </template>
     
@@ -300,6 +388,7 @@
         <div class="item-card deco-item" data-deco-item>
             <div class="item-header">
                 <div class="item-title">
+<<<<<<< HEAD
                     <i class="ph-bold ph-circles-three-plus"></i> 
                     <span>ของตกแต่ง</span> 
                     <small data-deco-count></small>
@@ -309,11 +398,23 @@
                         <i class="ph-bold ph-pause-circle"></i>
                     </button>
                     <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-item" title="ลบรายการ">
+=======
+                    <i class="ph-bold ph-paint-brush-house"></i>
+                    <span>งานตกแต่ง</span>
+                    <small class="deco-type-display"></small>
+                </div>
+                <div class="item-actions">
+                    <button type="button" class="btn-icon btn-icon-small" data-act="toggle-suspend" title="ระงับ/ใช้งาน">
+                        <i class="ph-bold ph-pause-circle"></i>
+                    </button>
+                    <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-deco" data-confirm-title="ลบงานตกแต่ง" data-confirm-body="คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?">
+>>>>>>> parent of aa8f231 (+)
                         <i class="ph-bold ph-x"></i>
                     </button>
                 </div>
             </div>
             <div class="item-content">
+<<<<<<< HEAD
                  <div class="form-grid-3">
                     <div class="form-group">
                         <label>ประเภท</label>
@@ -334,13 +435,38 @@
                 </div>
             </div>
              <div class="item-summary" data-deco-summary></div>
+=======
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>ชนิดงาน</label>
+                        <input type="text" name="deco_type" placeholder="เช่น มู่ลี่, ฉากกั้น">
+                    </div>
+                    <div class="form-group">
+                        <label>ราคา (บ./ตร.หลา)</label>
+                        <input type="text" inputmode="numeric" name="deco_price_sqyd" placeholder="0">
+                    </div>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>ความกว้าง (ม.)</label>
+                        <input type="number" step="0.01" name="deco_width_m" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>ความสูง (ม.)</label>
+                        <input type="number" step="0.01" name="deco_height_m" placeholder="0.00">
+                    </div>
+                </div>
+            </div>
+            <div class="item-summary" data-deco-summary></div>
+>>>>>>> parent of aa8f231 (+)
         </div>
     </template>
-    
+
     <template id="wallpaperTpl">
         <div class="item-card wallpaper-item" data-wallpaper-item>
             <div class="item-header">
                 <div class="item-title">
+<<<<<<< HEAD
                     <i class="ph-bold ph-image-square"></i> 
                     <span>วอลล์เปเปอร์</span> 
                     <small data-wallpaper-count></small>
@@ -350,6 +476,16 @@
                         <i class="ph-bold ph-pause-circle"></i>
                     </button>
                     <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-item" title="ลบรายการ">
+=======
+                    <i class="ph-bold ph-frame-corners"></i>
+                    <span>วอลล์เปเปอร์</span>
+                </div>
+                <div class="item-actions">
+                    <button type="button" class="btn-icon btn-icon-small" data-act="toggle-suspend" title="ระงับ/ใช้งาน">
+                        <i class="ph-bold ph-pause-circle"></i>
+                    </button>
+                    <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-wallpaper" data-confirm-title="ลบวอลล์เปเปอร์" data-confirm-body="คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?">
+>>>>>>> parent of aa8f231 (+)
                         <i class="ph-bold ph-x"></i>
                     </button>
                 </div>
@@ -383,11 +519,15 @@
     <template id="wallTpl">
         <div class="wall-input-row">
             <input type="number" step="0.01" name="wall_width_m" placeholder="0.00">
+<<<<<<< HEAD
             <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-wall">
                 <i class="ph-bold ph-x"></i>
             </button>
+=======
+            <button type="button" class="btn-icon btn-icon-small danger" data-act="remove-wall" title="ลบผนัง"><i class="ph-bold ph-x"></i></button>
+>>>>>>> parent of aa8f231 (+)
         </div>
     </template>
-
+    
 </body>
 </html>
