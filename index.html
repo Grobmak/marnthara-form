@@ -24,14 +24,14 @@
                     <i class="ph-bold ph-dots-three-outline"></i>
                 </button>
                 <div id="menuDropdown" class="menu-dropdown">
-                    <a href="#" id="copyTextBtn"><i class="ph-bold ph-copy"></i> คัดลอกสรุป</a>
-                    <a href="#" id="submitBtn"><i class="ph-bold ph-paper-plane-tilt"></i> ส่งข้อมูล</a>
+                    <a href="#" id="copyTextBtn"><i class="ph ph-copy"></i> คัดลอกสรุป</a>
+                    <a href="#" id="submitBtn"><i class="ph ph-paper-plane-tilt"></i> ส่งข้อมูล</a>
                     <hr>
-                    <a href="#" id="copyJsonBtn"><i class="ph-bold ph-code"></i> Copy JSON</a>
-                    <a href="#" id="importBtn"><i class="ph-bold ph-upload-simple"></i> Import Data</a>
-                    <a href="#" id="exportBtn"><i class="ph-bold ph-download-simple"></i> Export Data</a>
+                    <a href="#" id="copyJsonBtn"><i class="ph ph-code"></i> Copy JSON</a>
+                    <a href="#" id="importBtn"><i class="ph ph-upload-simple"></i> Import Data</a>
+                    <a href="#" id="exportBtn"><i class="ph ph-download-simple"></i> Export Data</a>
                     <hr>
-                    <a href="#" id="clearAllBtn" class="danger"><i class="ph-bold ph-trash"></i> Clear All Data</a>
+                    <a href="#" id="clearAllBtn" class="danger"><i class="ph ph-trash"></i> Clear All Data</a>
                 </div>
             </div>
         </div>
@@ -80,6 +80,14 @@
                 <div class="card-content" id="detailed-material-summary">
                     </div>
             </details>
+
+            <div class="add-room-container">
+                <button type="button" class="btn btn-secondary" id="addRoomFooterBtn">
+                    <i class="ph-bold ph-house-line"></i>
+                    <span>เพิ่มห้อง</span>
+                </button>
+            </div>
+
         </form>
     </main>
 
@@ -93,14 +101,6 @@
             </div>
         </div>
     </footer>
-
-    <div id="fabContainer" class="fab-container">
-        <div class="fab-actions">
-            </div>
-        <button id="fabMainBtn" class="btn fab-main" title="เพิ่มรายการ">
-            <i class="ph-bold ph-plus"></i>
-        </button>
-    </div>
 
     <div id="confirmationModal" class="modal-wrapper">
         <div class="modal-content">
@@ -170,9 +170,9 @@
                             <i class="ph-bold ph-dots-three-vertical"></i>
                         </button>
                         <div class="room-options-menu">
-                            <a href="#" data-act="toggle-suspend-room"><i class="ph-bold ph-pause-circle"></i> <span>ระงับห้อง</span></a>
-                            <a href="#" data-act="clear-room"><i class="ph-bold ph-eraser"></i> ล้างข้อมูลในห้อง</a>
-                            <a href="#" data-act="del-room" class="danger"><i class="ph-bold ph-trash"></i> ลบห้องนี้</a>
+                            <a href="#" data-act="toggle-suspend-room"><i class="ph ph-pause-circle"></i> <span>ระงับห้อง</span></a>
+                            <a href="#" data-act="clear-room"><i class="ph ph-eraser"></i> ล้างข้อมูลในห้อง</a>
+                            <a href="#" data-act="del-room" class="danger"><i class="ph ph-trash"></i> ลบห้องนี้</a>
                         </div>
                     </div>
                 </div>
@@ -182,6 +182,11 @@
                 <div class="items-container" data-decorations></div>
                 <div class="items-container" data-wallpapers></div>
             </div>
+            <footer class="card-footer">
+                <button type="button" class="btn-chip btn-curtain" data-act="add-set">เพิ่มผ้าม่าน</button>
+                <button type="button" class="btn-chip btn-deco" data-act="add-deco">เพิ่มตกแต่ง</button>
+                <button type="button" class="btn-chip btn-wallpaper" data-act="add-wallpaper">เพิ่มวอลเปเปอร์</button>
+            </footer>
         </details>
     </template>
 
@@ -322,10 +327,6 @@
                     <label>ราคา/ม้วน</label>
                     <input type="text" inputmode="numeric" name="wallpaper_price_roll" placeholder="0">
                 </div>
-                <div class="form-group">
-                    <label>ค่าช่าง/ม้วน</label>
-                    <input type="text" inputmode="numeric" name="wallpaper_install_cost" placeholder="0" value="300">
-                </div>
             </div>
             <div class="walls-section">
                 <label>ความกว้างผนัง (ม.)</label>
@@ -348,6 +349,5 @@
         </div>
     </template>
 
-    <div id="app-overlay" class="hidden"></div>
 </body>
 </html>
