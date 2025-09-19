@@ -24,10 +24,14 @@
             if (style === "ลอน") return (width * 2.6 + 0.6) / 0.9;
             return 0;
         },
+        // --- MODIFIED: Wallpaper roll calculation ---
         wallpaperRolls: (totalWidth, height) => {
             if (totalWidth <= 0 || height <= 0) return 0;
-            const stripsPerRoll = Math.floor(10 / height);
-            if (stripsPerRoll === 0) return Infinity; // Prevent division by zero
+            // Professional waste calculation:
+            // For walls > 2.5m high, calculate strips precisely based on roll length.
+            // For standard walls <= 2.5m, assume higher waste by conservatively estimating only 3 usable strips per 10m roll, to account for pattern matching and trimming.
+            const stripsPerRoll = (height > 2.5) ? Math.floor(10 / height) : 3;
+            if (stripsPerRoll <= 0) return Infinity; // Prevent division by zero for heights >= 10m
             const stripsNeeded = Math.ceil(totalWidth / 0.53);
             return Math.ceil(stripsNeeded / stripsPerRoll);
         }
@@ -292,6 +296,8 @@
         if (prefill) {
             created.querySelector('[name="wallpaper_height_m"]').value = prefill.height_m ?? "";
             created.querySelector('[name="wallpaper_price_roll"]').value = fmt(prefill.price_per_roll, 0, true) ?? "";
+            // MODIFIED: Pre-fill installation cost, defaulting to 300 for old data
+            created.querySelector('[name="wallpaper_install_cost"]').value = fmt(prefill.install_cost_per_roll ?? 300, 0, true);
             (prefill.widths || []).forEach(w => addWall(created.querySelector('[data-act="add-wall"]'), w));
             if (prefill.is_suspended) suspendItem(created, true, false);
         } else {
@@ -461,27 +467,39 @@
                 roomSum += decoPrice;
             });
             
-            // WALLPAPERS
+            // --- MODIFIED: Wallpaper calculation logic ---
             room.querySelectorAll(SELECTORS.wallpaperItem).forEach(wallpaper => {
-                let wallpaperPrice = 0, areaSqm = 0, rollsNeeded = 0;
+                let totalItemPrice = 0, materialPrice = 0, installPrice = 0, areaSqm = 0, rollsNeeded = 0;
+                
                 if (wallpaper.dataset.suspended !== 'true' && !isRoomSuspended) {
                     const h = clamp01(wallpaper.querySelector('[name="wallpaper_height_m"]')?.value);
                     const pricePerRoll = clamp01(wallpaper.querySelector('[name="wallpaper_price_roll"]')?.value);
+                    const installCostPerRoll = clamp01(wallpaper.querySelector('[name="wallpaper_install_cost"]')?.value);
                     const totalWidth = Array.from(wallpaper.querySelectorAll('input[name="wall_width_m"]')).reduce((sum, el) => sum + clamp01(el.value), 0);
+                    
                     rollsNeeded = CALC.wallpaperRolls(totalWidth, h);
                     
-                    wallpaperPrice = Math.round(rollsNeeded * pricePerRoll);
+                    materialPrice = Math.round(rollsNeeded * pricePerRoll);
+                    installPrice = Math.round(rollsNeeded * installCostPerRoll);
+                    totalItemPrice = materialPrice + installPrice;
                     areaSqm = totalWidth * h;
 
-                    if (wallpaperPrice > 0) {
+                    if (totalItemPrice > 0) {
                        pricedItemCount++;
                         if (Number.isFinite(rollsNeeded)) {
                             totalWallpaperRolls += rollsNeeded;
                         }
                     }
                 }
-                wallpaper.querySelector('[data-wallpaper-summary]').innerHTML = `ราคา: <b>${fmt(wallpaperPrice, 0, true)}</b> บ. • พื้นที่: <b>${fmt(areaSqm, 2)}</b> ตร.ม. • ใช้ <b>${rollsNeeded}</b> ม้วน`;
-                roomSum += wallpaperPrice;
+                
+                let summaryHtml = `รวม: <b>${fmt(totalItemPrice, 0, true)}</b> บ.`;
+                if (totalItemPrice > 0) {
+                    summaryHtml += ` <small>(วอลล์: ${fmt(materialPrice, 0, true)}, ค่าช่าง: ${fmt(installPrice, 0, true)})</small>`;
+                }
+                summaryHtml += ` • ใช้ <b>${rollsNeeded}</b> ม้วน`;
+
+                wallpaper.querySelector('[data-wallpaper-summary]').innerHTML = summaryHtml;
+                roomSum += totalItemPrice;
             });
 
             const itemCount = room.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`).length;
@@ -570,10 +588,12 @@
                 });
             });
 
+            // --- MODIFIED: Add install_cost_per_roll to payload ---
             roomEl.querySelectorAll(SELECTORS.wallpaperItem).forEach(wallpaperEl => {
                 roomData.wallpapers.push({
                     height_m: toNum(wallpaperEl.querySelector('[name="wallpaper_height_m"]')?.value),
                     price_per_roll: toNum(wallpaperEl.querySelector('[name="wallpaper_price_roll"]')?.value),
+                    install_cost_per_roll: toNum(wallpaperEl.querySelector('[name="wallpaper_install_cost"]')?.value),
                     widths: Array.from(wallpaperEl.querySelectorAll('[name="wall_width_m"]')).map(el => toNum(el.value)),
                     is_suspended: wallpaperEl.dataset.suspended === 'true',
                 });
@@ -693,7 +713,10 @@
                 if (wp.is_suspended) return;
                 const totalWidth = wp.widths.reduce((a,b) => a + b, 0);
                 const rolls = CALC.wallpaperRolls(totalWidth, wp.height_m);
-                const wpPrice = Math.round(rolls * wp.price_per_roll);
+                const materialPrice = Math.round(rolls * wp.price_per_roll);
+                const installPrice = Math.round(rolls * (wp.install_cost_per_roll || 0));
+                const wpPrice = materialPrice + installPrice;
+
                 if (wpPrice > 0) {
                     roomTotal += wpPrice;
                     hasContent = true;
@@ -803,6 +826,7 @@
                 summary += `   - ราคา: ${fmt(deco.price_sqyd,0,true)}/ตร.หลา\n`;
             });
             
+            // --- MODIFIED: Update Owner summary for wallpaper ---
             room.wallpapers.forEach((wp, wIdx) => {
                  if (wp.is_suspended) {
                     summary += ` - วอลเปเปอร์ #${wIdx + 1}: -- ระงับ --\n`; return;
@@ -810,13 +834,16 @@
                 const totalWidth = wp.widths.reduce((a, b) => a + b, 0);
                 const areaSqm = totalWidth * wp.height_m;
                 const rolls = CALC.wallpaperRolls(totalWidth, wp.height_m);
-                const wpPrice = Math.round(rolls * wp.price_per_roll);
+                
+                const materialPrice = Math.round(rolls * wp.price_per_roll);
+                const installPrice = Math.round(rolls * (wp.install_cost_per_roll || 0));
+                const wpPrice = materialPrice + installPrice;
                 roomTotal += wpPrice;
                 
                 summary += ` - วอลเปเปอร์ #${wIdx+1} - รวม ${fmt(wpPrice,0,true)} บ.\n`;
                 summary += `   - ขนาดสูง: ${fmt(wp.height_m, 2)} ม. | พื้นที่: ${fmt(areaSqm,2)} ตร.ม.\n`;
                 summary += `   - ผนังกว้าง: ${wp.widths.map(w => fmt(w,2)).join(', ')} (รวม ${fmt(totalWidth,2)} ม.)\n`;
-                summary += `   - ราคา: ${fmt(wp.price_per_roll,0,true)}/ม้วน | ใช้ ${rolls} ม้วน\n`;
+                summary += `   - ราคา: ${fmt(wp.price_per_roll,0,true)}/ม้วน | ค่าช่าง: ${fmt(wp.install_cost_per_roll || 0, 0, true)}/ม้วน | ใช้ ${rolls} ม้วน\n`;
             });
             summary += `   **รวมยอดห้องนี้: ${fmt(roomTotal, 0, true)} บาท**\n\n`;
             grandTotal += roomTotal;
@@ -854,7 +881,8 @@
         const debouncedRecalcAndSave = debounce(() => { recalcAll(); saveData(); }, 150);
 
         orderForm.addEventListener("input", e => {
-            if(e.target.name === 'deco_price_sqyd' || e.target.name === 'wallpaper_price_roll') {
+            // MODIFIED: Also format the new install cost field
+            if(e.target.name === 'deco_price_sqyd' || e.target.name === 'wallpaper_price_roll' || e.target.name === 'wallpaper_install_cost') {
                  const value = toNum(e.target.value);
                  e.target.value = value > 0 ? value.toLocaleString('en-US') : '';
             }
@@ -917,7 +945,8 @@
                 'del-wall': () => performActionWithConfirmation(btn, { confirm: false, isRemoval: true, selector: '.wall-input-row', action: animateAndRemove }),
                 'clear-set': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในจุดนี้?', selector: SELECTORS.set, action: (item) => { item.querySelectorAll('input, select').forEach(el => { el.value = el.name === 'fabric_variant' ? 'ทึบ' : el.name === 'set_style' ? 'ลอน' : el.name === 'opening_style' ? 'แยกกลาง' : ''; }); toggleSetFabricUI(item); }, toast: 'ล้างข้อมูลผ้าม่านแล้ว' }),
                 'clear-deco': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในรายการนี้?', selector: SELECTORS.decoItem, action: (item) => { item.querySelectorAll('input, select').forEach(el => el.value = ''); item.querySelector('.deco-type-display').textContent = ''; }, toast: 'ล้างข้อมูลตกแต่งแล้ว' }),
-                'clear-wallpaper': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในรายการนี้?', selector: SELECTORS.wallpaperItem, action: (item) => { item.querySelectorAll('input').forEach(el => el.value = ''); item.querySelector(SELECTORS.wallsContainer).innerHTML = ''; addWall(item.querySelector('[data-act="add-wall"]')); }, toast: 'ล้างข้อมูลวอลเปเปอร์แล้ว' }),
+                // MODIFIED: Reset wallpaper fields to their defaults
+                'clear-wallpaper': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในรายการนี้?', selector: SELECTORS.wallpaperItem, action: (item) => { item.querySelectorAll('input').forEach(el => { el.value = (el.name === 'wallpaper_install_cost') ? '300' : ''; }); item.querySelector(SELECTORS.wallsContainer).innerHTML = ''; addWall(item.querySelector('[data-act="add-wall"]')); }, toast: 'ล้างข้อมูลวอลเปเปอร์แล้ว' }),
                 'toggle-suspend': () => {
                     const item = btn.closest('.set-item, .deco-item, .wallpaper-item');
                     const isSuspended = !(item.dataset.suspended === 'true');
