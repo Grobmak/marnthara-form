@@ -80,14 +80,6 @@
                 <div class="card-content" id="detailed-material-summary">
                     </div>
             </details>
-
-            <div class="add-room-container">
-                <button type="button" class="btn btn-secondary" id="addRoomFooterBtn">
-                    <i class="ph-bold ph-house-line"></i>
-                    <span>เพิ่มห้อง</span>
-                </button>
-            </div>
-
         </form>
     </main>
 
@@ -101,6 +93,14 @@
             </div>
         </div>
     </footer>
+
+    <div id="fabContainer" class="fab-container">
+        <div class="fab-actions">
+            </div>
+        <button id="fabMainBtn" class="btn fab-main" title="เพิ่มรายการ">
+            <i class="ph-bold ph-plus"></i>
+        </button>
+    </div>
 
     <div id="confirmationModal" class="modal-wrapper">
         <div class="modal-content">
@@ -182,11 +182,6 @@
                 <div class="items-container" data-decorations></div>
                 <div class="items-container" data-wallpapers></div>
             </div>
-            <footer class="card-footer">
-                <button type="button" class="btn-chip btn-curtain" data-act="add-set">เพิ่มผ้าม่าน</button>
-                <button type="button" class="btn-chip btn-deco" data-act="add-deco">เพิ่มตกแต่ง</button>
-                <button type="button" class="btn-chip btn-wallpaper" data-act="add-wallpaper">เพิ่มวอลเปเปอร์</button>
-            </footer>
         </details>
     </template>
 
