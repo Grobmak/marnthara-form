@@ -68,7 +68,7 @@
             </details>
 
             <div id="rooms"></div>
-            
+
             <details class="card">
                 <summary>
                     <h2>
@@ -112,7 +112,7 @@
             </div>
         </div>
     </div>
-    
+
     <div id="copyOptionsModal" class="modal-wrapper">
         <div class="modal-content">
             <h3>เลือกรูปแบบสรุปที่จะคัดลอก</h3>
@@ -145,7 +145,7 @@
             </div>
         </div>
     </div>
-    
+
     <div id="importModal" class="modal-wrapper">
         <div class="modal-content">
             <h3>นำเข้าข้อมูล (JSON)</h3>
@@ -203,7 +203,7 @@
                     <button type="button" class="btn-icon danger" data-act="del-set" title="ลบ"><i class="ph-bold ph-x"></i></button>
                 </div>
             </div>
-            
+
             <div class="item-grid">
                 <div class="form-group">
                     <label>กว้าง (ม.)</label>
@@ -267,7 +267,7 @@
         <div class="item-card deco-item" data-deco-item>
              <div class="item-header">
                 <h4 class="item-title">
-                    <span data-item-title></span>:&nbsp;<span>ตกแต่ง</span> 
+                    <span data-item-title></span>:&nbsp;<span>ตกแต่ง</span>
                     <span class="deco-type-display"></span>
                 </h4>
                 <div class="item-actions">
@@ -305,7 +305,7 @@
             <div class="item-summary single-line" data-deco-summary></div>
         </div>
     </template>
-    
+
     <template id="wallpaperTpl">
         <div class="item-card wallpaper-item" data-wallpaper-item>
              <div class="item-header">
@@ -322,6 +322,10 @@
                 <div class="form-group">
                     <label>สูง (ม.)</label>
                     <input type="number" step="0.01" name="wallpaper_height_m" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label>รหัสวอลล์เปเปอร์</label>
+                    <input type="text" name="wallpaper_code" placeholder="-">
                 </div>
                 <div class="form-group">
                     <label>ราคา/ม้วน</label>
@@ -343,7 +347,7 @@
              <div class="item-summary single-line" data-wallpaper-summary></div>
         </div>
     </template>
-    
+
     <template id="wallTpl">
         <div class="wall-input-row">
             <input type="number" step="0.01" name="wall_width_m" placeholder="0.00">
