@@ -211,6 +211,19 @@ i.ph {
     flex-shrink: 0;
 }
 
+/* MODIFICATION: Enhanced Room Menu Button Visibility */
+.room-summary-controls .btn-icon[data-act="toggle-room-menu"] {
+    border: 1px solid var(--outline-variant);
+    background-color: var(--surface-container);
+    width: 36px;
+    height: 36px;
+}
+.room-summary-controls .btn-icon[data-act="toggle-room-menu"]:hover {
+    background-color: var(--surface-container-high);
+    border-color: var(--primary);
+}
+
+
 .room-name-input {
     font-size: 1.2rem;
     font-weight: 700;
