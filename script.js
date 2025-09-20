@@ -44,6 +44,7 @@
         decorationsContainer: '[data-decorations]', decoItem: '[data-deco-item]',
         wallpapersContainer: '[data-wallpapers]', wallpaperItem: '[data-wallpaper-item]', wallsContainer: '[data-walls-container]',
         sheerWrap: '[data-sheer-wrap]',
+        sheerCodeWrap: '[data-sheer-code-wrap]', // MODIFIED: Added selector
         roomNameInput: 'input[name="room_name"]',
         toastContainer: '#toast-container',
         copyTextBtn: '#copyTextBtn', copyOptionsModal: '#copyOptionsModal', copyOptionsConfirm: '#copyOptionsConfirm', copyOptionsCancel: '#copyOptionsCancel',
@@ -230,6 +231,7 @@
             created.querySelector('select[name="set_price_per_m"]').value = prefill.price_per_m_raw || "";
             created.querySelector('select[name="sheer_price_per_m"]').value = prefill.sheer_price_per_m || "";
             created.querySelector('input[name="fabric_code"]').value = prefill.fabric_code || "";
+            created.querySelector('input[name="sheer_fabric_code"]').value = prefill.sheer_fabric_code || ""; // MODIFIED: Populate new field
             created.querySelector('select[name="opening_style"]').value = prefill.opening_style || "แยกกลาง";
             created.querySelector('select[name="track_color"]').value = prefill.track_color || "ขาว";
             created.querySelector('input[name="notes"]').value = prefill.notes || "";
@@ -555,6 +557,7 @@
                     price_per_m_raw: toNum(setEl.querySelector('select[name="set_price_per_m"]')?.value),
                     sheer_price_per_m: toNum(setEl.querySelector('select[name="sheer_price_per_m"]')?.value),
                     fabric_code: setEl.querySelector('input[name="fabric_code"]')?.value || '',
+                    sheer_fabric_code: setEl.querySelector('input[name="sheer_fabric_code"]')?.value || '', // MODIFIED: Save new field
                     opening_style: setEl.querySelector('select[name="opening_style"]')?.value || '',
                     track_color: setEl.querySelector('select[name="track_color"]')?.value || '',
                     notes: setEl.querySelector('input[name="notes"]')?.value || '',
@@ -630,6 +633,7 @@
         const variant = setEl.querySelector('select[name="fabric_variant"]').value;
         const hasSheer = variant === "โปร่ง" || variant === "ทึบ&โปร่ง";
         setEl.querySelector(SELECTORS.sheerWrap)?.classList.toggle("hidden", !hasSheer);
+        setEl.querySelector(SELECTORS.sheerCodeWrap)?.classList.toggle("hidden", !hasSheer); // MODIFIED: Toggle new field
     }
 
     function updateLockState() {
@@ -742,7 +746,13 @@
                  summary += `  กว้าง ${fmt(set.width_m, 2)} x สูง ${fmt(set.height_m, 2)} ม.\n`;
                  summary += `รูปแบบ: ${set.style}\n`;
                  summary += `การเปิด: ${set.opening_style}\n`;
-                 summary += `รหัสผ้า: ${set.fabric_code || '-'}\n`;
+                 // MODIFIED: Improved logic for fabric codes
+                 if (set.fabric_variant === "ทึบ&โปร่ง") {
+                    summary += `รหัสผ้าทึบ: ${set.fabric_code || '-'}\n`;
+                    summary += `รหัสผ้าโปร่ง: ${set.sheer_fabric_code || '-'}\n`;
+                 } else {
+                    summary += `รหัสผ้า: ${set.fabric_code || '-'}\n`;
+                 }
                  summary += `หมายเหตุ: ${set.notes || '-'}\n`;
              });
              summary += `--------------------\n`;
@@ -794,11 +804,13 @@
                 summary += `\n*ผ้าม่าน #${sIdx+1} (${set.style}, ${set.fabric_variant})*\n`;
                 summary += `  - ราคา: ${fmt(setTotal,0,true)} บ.\n`;
                 summary += `  - ขนาด: ${fmt(set.width_m, 2)}x${fmt(set.height_m, 2)} ม.\n`;
+                // MODIFIED: Improved logic for fabric codes
                 if(opaquePrice > 0) {
-                    summary += `  - ทึบ: ${fmt(set.price_per_m_raw,0,true)}/ม. (ใช้ ${fmt(opaqueYards)} หลา)\n`;
+                    summary += `  - ทึบ: ${fmt(set.price_per_m_raw,0,true)}/ม. (ใช้ ${fmt(opaqueYards)} หลา, รหัส: ${set.fabric_code || '-'}) \n`;
                 }
                  if(sheerPrice > 0) {
-                    summary += `  - โปร่ง: ${fmt(set.sheer_price_per_m,0,true)}/ม. (ใช้ ${fmt(sheerYards)} หลา)\n`;
+                    const sheerCode = (set.fabric_variant === "ทึบ&โปร่ง") ? set.sheer_fabric_code : set.fabric_code;
+                    summary += `  - โปร่ง: ${fmt(set.sheer_price_per_m,0,true)}/ม. (ใช้ ${fmt(sheerYards)} หลา, รหัส: ${sheerCode || '-'}) \n`;
                 }
                 if (set.width_m > 0) {
                     summary += `  - ราง: สี${set.track_color}, ${fmt(set.width_m)} ม.\n`;
@@ -875,16 +887,19 @@
             room.sets.forEach(set => {
                 if (set.is_suspended || set.width_m <= 0) return;
                 
-                const opaqueYards = CALC.fabricYardage(set.style, set.width_m);
+                const fabricYards = CALC.fabricYardage(set.style, set.width_m);
+                
+                // MODIFIED: Corrected logic for fabric codes and yardage
                 if (set.fabric_variant.includes("ทึบ")) {
                     sections.curtains += `\n*ผ้าทึบ #${itemCounter}*\n`;
                     sections.curtains += ` • รหัส: ${set.fabric_code || '-'}\n`;
-                    sections.curtains += ` • จำนวน: ${fmt(opaqueYards)} หลา\n`;
+                    sections.curtains += ` • จำนวน: ${fmt(fabricYards)} หลา\n`;
                 }
                 if (set.fabric_variant.includes("โปร่ง")) {
+                     const sheerCode = (set.fabric_variant === "ทึบ&โปร่ง") ? set.sheer_fabric_code : set.fabric_code;
                      sections.curtains += `\n*ผ้าโปร่ง #${itemCounter}*\n`;
-                     sections.curtains += ` • รหัส: ${set.fabric_code || '-'}\n`;
-                     sections.curtains += ` • จำนวน: ${fmt(opaqueYards)} หลา\n`;
+                     sections.curtains += ` • รหัส: ${sheerCode || '-'}\n`;
+                     sections.curtains += ` • จำนวน: ${fmt(fabricYards)} หลา\n`;
                 }
 
                 sections.curtains += `\n*ราง #${itemCounter}*\n`;
@@ -974,7 +989,6 @@
             if (e.target.matches('select[name="fabric_variant"]')) {
                 toggleSetFabricUI(e.target.closest(SELECTORS.set));
             }
-            // MODIFICATION: No need for `track_color` change handler as it's now a select
             debouncedRecalcAndSave();
         });
 
@@ -1098,7 +1112,6 @@
         document.querySelector(SELECTORS.exportBtn).addEventListener('click', (e) => {
             e.preventDefault();
             const payload = buildPayload();
-            // MODIFICATION: Add customer name to filename
             const customerName = payload.customer_name.trim();
             const cleanName = customerName.replace(/[^a-zA-Z0-9ก-๙_.\s-]/g, '').replace(/\s+/g, '-').substring(0, 30);
             const dateStamp = new Date().toISOString().split('T')[0];

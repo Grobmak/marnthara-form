@@ -62,8 +62,8 @@
     --curtain-container-color: hsl(220, 100%, 98%);
     --deco-color: #4DB6AC; /* Muted Teal */
     --deco-container-color: hsl(174, 80%, 98%);
-    --wallpaper-color: #A47864; /* PANTONE Mocha Mousse */
-    --wallpaper-container-color: hsl(23, 25%, 98%);
+    --wallpaper-color: #6A7B5A; /* MODIFIED: Muted Olive Green for better contrast */
+    --wallpaper-container-color: hsl(88, 15%, 98%); /* MODIFIED: Adjusted to match new hue */
 }
 
 * {
