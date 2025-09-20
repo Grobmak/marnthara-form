@@ -165,17 +165,6 @@
                 </div>
                 <div class="room-summary-controls">
                     <div class="room-brief" data-room-brief></div>
-                    
-                    <button type="button" class="btn-icon summary-action-btn" data-act="add-set" title="เพิ่มผ้าม่าน">
-                        <i class="ph-bold ph-blinds"></i>
-                    </button>
-                    <button type="button" class="btn-icon summary-action-btn" data-act="add-deco" title="เพิ่มตกแต่ง">
-                        <i class="ph-bold ph-paint-roller"></i>
-                    </button>
-                    <button type="button" class="btn-icon summary-action-btn" data-act="add-wallpaper" title="เพิ่มวอลเปเปอร์">
-                        <i class="ph-bold ph-file-image"></i>
-                    </button>
-                    
                     <div class="room-options-container">
                         <button type="button" class="btn-icon" data-act="toggle-room-menu" title="ตัวเลือกห้อง">
                             <i class="ph-bold ph-dots-three-vertical"></i>
@@ -193,7 +182,12 @@
                 <div class="items-container" data-decorations></div>
                 <div class="items-container" data-wallpapers></div>
             </div>
-            </details>
+            <footer class="card-footer">
+                <button type="button" class="btn-chip btn-curtain" data-act="add-set">เพิ่มผ้าม่าน</button>
+                <button type="button" class="btn-chip btn-deco" data-act="add-deco">เพิ่มตกแต่ง</button>
+                <button type="button" class="btn-chip btn-wallpaper" data-act="add-wallpaper">เพิ่มวอลเปเปอร์</button>
+            </footer>
+        </details>
     </template>
 
     <template id="setTpl">

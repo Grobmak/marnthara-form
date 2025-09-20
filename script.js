@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.3.3-ux-revised";
+    const APP_VERSION = "input-ui/4.3.4-ux-reverted";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4"; // Keep v4 for data compatibility
     const SQM_TO_SQYD = 1.19599;
@@ -235,8 +235,8 @@
         populatePriceOptions(created.querySelector('select[name="sheer_price_per_m"]'), PRICING.sheer);
 
         if (prefill) {
-            created.querySelector('input[name="width_m"]').value = prefill.width_m ?? "";
-            created.querySelector('input[name="height_m"]').value = prefill.height_m ?? "";
+            created.querySelector('input[name="width_m"]').value = prefill.width_m > 0 ? prefill.width_m.toFixed(2) : "";
+            created.querySelector('input[name="height_m"]').value = prefill.height_m > 0 ? prefill.height_m.toFixed(2) : "";
             created.querySelector('select[name="set_style"]').value = prefill.style || "ลอน";
             created.querySelector('select[name="fabric_variant"]').value = prefill.fabric_variant || "ทึบ";
             created.querySelector('select[name="set_price_per_m"]').value = prefill.price_per_m_raw || "";
@@ -265,8 +265,8 @@
         if (prefill) {
             const type = prefill.type || "";
             created.querySelector('[name="deco_type"]').value = type;
-            created.querySelector('[name="deco_width_m"]').value = prefill.width_m ?? "";
-            created.querySelector('[name="deco_height_m"]').value = prefill.height_m ?? "";
+            created.querySelector('[name="deco_width_m"]').value = prefill.width_m > 0 ? prefill.width_m.toFixed(2) : "";
+            created.querySelector('[name="deco_height_m"]').value = prefill.height_m > 0 ? prefill.height_m.toFixed(2) : "";
             created.querySelector('[name="deco_price_sqyd"]').value = fmt(prefill.price_sqyd, 0, true) ?? "";
             const displayEl = created.querySelector('.deco-type-display');
             if (displayEl && type) {
@@ -290,7 +290,7 @@
         const created = wallpaperWrap.querySelector(`${SELECTORS.wallpaperItem}:last-of-type`);
 
         if (prefill) {
-            created.querySelector('[name="wallpaper_height_m"]').value = prefill.height_m ?? "";
+            created.querySelector('[name="wallpaper_height_m"]').value = prefill.height_m > 0 ? prefill.height_m.toFixed(2) : "";
             created.querySelector('[name="wallpaper_price_roll"]').value = fmt(prefill.price_per_roll, 0, true) ?? "";
             created.querySelector('[name="wallpaper_install_cost"]').value = fmt(prefill.install_cost_per_roll ?? 300, 0, true);
             (prefill.widths || []).forEach(w => addWall(created.querySelector('[data-act="add-wall"]'), w));
@@ -310,7 +310,7 @@
         const frag = document.querySelector(SELECTORS.wallTpl)?.content?.cloneNode(true);
         if (!frag || !wallsContainer) return;
         if (prefillWidth) {
-            frag.querySelector('input[name="wall_width_m"]').value = prefillWidth;
+            frag.querySelector('input[name="wall_width_m"]').value = prefillWidth > 0 ? prefillWidth.toFixed(2) : "";
         }
         wallsContainer.appendChild(frag);
         
@@ -896,7 +896,6 @@
             debouncedRecalcAndSave();
         });
 
-        // Event delegation for all dynamic actions
         orderForm.addEventListener("click", e => {
             const btn = e.target.closest('[data-act]');
             if (!btn) return;
@@ -921,7 +920,6 @@
                      const card = btn.closest('.room-card');
                      const isOpening = !menu.classList.contains('show');
                      
-                     // Close all other menus first
                      document.querySelectorAll('.room-options-menu.show').forEach(m => {
                          m.classList.remove('show');
                          m.closest('.room-card')?.classList.remove('overflow-visible');
