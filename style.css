@@ -146,6 +146,11 @@ i.ph {
         border-color: var(--primary-container);
     }
 }
+
+/* MODIFIED: Add position relative for room menu positioning */
+.room-card {
+    position: relative;
+}
 .room-card.is-suspended {
     opacity: 0.6;
 }
@@ -198,11 +203,14 @@ i.ph {
 
 .room-card summary { padding: 0.5rem; }
 .room-card summary .form-group { flex-grow: 1; margin: 0; }
+
+/* MODIFIED: Adjust summary controls to make space for the absolute-positioned menu */
 .room-summary-controls {
     display: flex;
     align-items: center;
     gap: 0.25rem;
     flex-shrink: 0;
+    padding-right: 44px; /* Space for the 3-dot button */
 }
 
 .room-name-input {
@@ -226,9 +234,12 @@ i.ph {
     padding: 0 0.5rem;
 }
 
-/* --- ROOM OPTIONS MENU --- */
+/* --- ROOM OPTIONS MENU (MODIFIED FOR BUG FIX) --- */
 .room-options-container {
-    position: relative;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 20;
 }
 .room-options-menu {
     position: absolute; top: calc(100% + 4px); right: 0;
