@@ -93,12 +93,14 @@ i.ph {
 }
 
 /* --- LAYOUT & CONTAINERS --- */
+/* MODIFICATION: Constrain max-width to enforce mobile-like view */
 #app-container {
-    max-width: 800px;
+    max-width: 600px;
     margin: 0 auto;
     padding: 1rem;
 }
 
+/* MODIFICATION: Constrain header width to match the app container */
 .main-header {
     background: var(--glass-bg);
     backdrop-filter: blur(24px);
@@ -113,7 +115,7 @@ i.ph {
     z-index: 100;
     border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
     margin: 0 auto 1rem;
-    max-width: 824px;
+    max-width: 624px;
     width: calc(100% - 8px);
     box-shadow: var(--shadow-md);
 }
@@ -348,9 +350,11 @@ i.ph {
 .item-grid, .walls-section {
     padding: 0.75rem;
 }
+
+/* MODIFICATION: Force item grid to always be 2 columns */
 .item-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
 }
 
@@ -372,8 +376,12 @@ i.ph {
 .wall-input-row { display: flex; align-items: center; gap: 0.25rem; }
 
 /* --- FORM ELEMENTS --- */
-.form-grid-2 { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-@media (min-width: 420px) { .form-grid-2 { grid-template-columns: 1fr 1fr; gap: 0.75rem; } }
+/* MODIFICATION: Force customer info grid to always be 2 columns */
+.form-grid-2 { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 0.75rem; 
+}
 
 .form-group { display: flex; flex-direction: column; }
 .form-group.full-width-item { grid-column: 1 / -1; }
