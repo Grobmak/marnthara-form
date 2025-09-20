@@ -270,7 +270,8 @@ i.ph {
     border-left: 5px solid var(--outline-variant);
     transition: all var(--transition-speed);
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.07); /* Enhanced shadow */
+    border-top: 3px solid transparent; /* Added for visual separation */
 }
 .item-card.is-suspended {
     opacity: 0.5;
@@ -299,21 +300,30 @@ i.ph {
 
 
 /* Color Coding Rules */
-.set-item { border-left-color: var(--curtain-color); }
+.set-item { 
+    border-left-color: var(--curtain-color);
+    border-top-color: var(--curtain-color);
+}
 .set-item .item-title { color: var(--on-primary-container); }
 .set-item .item-header {
     background-color: var(--curtain-container-color);
     border-bottom: 1px solid hsl(220, 100%, 95%);
 }
 
-.deco-item { border-left-color: var(--deco-color); }
+.deco-item { 
+    border-left-color: var(--deco-color);
+    border-top-color: var(--deco-color);
+}
 .deco-item .item-title, .deco-type-display { color: var(--deco-color); }
 .deco-item .item-header {
     background-color: var(--deco-container-color);
     border-bottom: 1px solid hsl(174, 80%, 95%);
 }
 
-.wallpaper-item { border-left-color: var(--wallpaper-color); }
+.wallpaper-item { 
+    border-left-color: var(--wallpaper-color);
+    border-top-color: var(--wallpaper-color);
+}
 .wallpaper-item .item-title { color: var(--wallpaper-color); }
 .wallpaper-item .item-header {
     background-color: var(--wallpaper-container-color);
@@ -377,14 +387,15 @@ input:focus, select:focus, textarea:focus {
     background-color: var(--surface);
 }
 
-/* Clearer Disabled State */
+/* Clearer Disabled State - MODIFIED */
 input:disabled, select:disabled, textarea:disabled {
     background-color: var(--surface-container-high);
-    color: var(--on-surface-variant);
+    color: var(--on-surface); /* Darker color for readability */
     border-color: var(--outline);
     cursor: not-allowed;
-    opacity: 0.7;
-    -webkit-text-fill-color: var(--on-surface-variant);
+    opacity: 0.8;
+    font-weight: 700; /* Bolder text */
+    -webkit-text-fill-color: var(--on-surface); /* Ensure color change on webkit */
     box-shadow: none;
 }
 select:disabled {
