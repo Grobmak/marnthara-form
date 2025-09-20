@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.3.5-ux-reverted";
+    const APP_VERSION = "input-ui/4.3.6-ux-reverted";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4"; // Keep v4 for data compatibility
     const SQM_TO_SQYD = 1.19599;
@@ -796,11 +796,27 @@
                 summary += ` - ผ้าม่าน #${sIdx+1}: [${set.style}, ${set.fabric_variant}] - รวม ${fmt(setTotal,0,true)} บ.\n`;
                 summary += `   - ขนาด: ${fmt(set.width_m, 2)}x${fmt(set.height_m, 2)} ม.\n`;
                 if(opaquePrice > 0) {
-                    summary += `   - ผ้าทึบ: ราคา ${fmt(set.price_per_m_raw,0,true)}/ม. | ใช้ ${fmt(opaqueYards)} หลา | ราง ${fmt(set.width_m)} ม.\n`;
+                    summary += `   - ผ้าทึบ: ราคา ${fmt(set.price_per_m_raw,0,true)}/ม. | ใช้ ${fmt(opaqueYards)} หลา\n`;
                 }
                  if(sheerPrice > 0) {
-                    summary += `   - ผ้าโปร่ง: ราคา ${fmt(set.sheer_price_per_m,0,true)}/ม. | ใช้ ${fmt(sheerYards)} หลา | ราง ${fmt(set.width_m)} ม.\n`;
+                    summary += `   - ผ้าโปร่ง: ราคา ${fmt(set.sheer_price_per_m,0,true)}/ม. | ใช้ ${fmt(sheerYards)} หลา\n`;
                 }
+
+                // --- NEW HARDWARE REPORTING LOGIC ---
+                let hardwareDetails = [];
+                if (set.fabric_variant.includes("ทึบ") && set.width_m > 0) {
+                    hardwareDetails.push(`รางทึบ ${fmt(set.width_m)} ม.`);
+                }
+                if (set.fabric_variant.includes("โปร่ง") && set.width_m > 0) {
+                    hardwareDetails.push(`รางโปร่ง ${fmt(set.width_m)} ม.`);
+                }
+                if (set.fabric_variant === "ทึบ&โปร่ง") {
+                    hardwareDetails.push("**ต้องใช้ขาสองชั้น**");
+                }
+                if (hardwareDetails.length > 0) {
+                    summary += `   - อุปกรณ์ราง: ${hardwareDetails.join(' | ')}\n`;
+                }
+                // --- END OF NEW LOGIC ---
             });
 
             room.decorations.forEach((deco, dIdx) => {
