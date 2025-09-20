@@ -525,14 +525,14 @@
                 html += `</ul>`;
             }
             if (Object.keys(decoCounts).length > 0) {
-                 html += `<h4><i class="ph-bold ph-paint-roller"></i> งานตกแต่ง</h4><ul>`;
+                 html += `<h4><i class="ph-bold ph-file-image"></i> งานตกแต่ง</h4><ul>`;
                  for (const type in decoCounts) {
                      html += `<li>${type}: <b>${decoCounts[type]}</b> ชุด</li>`;
                  }
                  html += `</ul>`;
             }
             if (totalWallpaperRolls > 0) {
-                 html += `<h4><i class="ph-bold ph-file-image"></i> วอลเปเปอร์</h4><ul>`;
+                 html += `<h4><i class="ph-bold ph-paint-roller"></i> วอลเปเปอร์</h4><ul>`;
                  html += `<li>จำนวนที่ต้องใช้: <b>${totalWallpaperRolls}</b> ม้วน</li>`;
                  html += `</ul>`;
             }
