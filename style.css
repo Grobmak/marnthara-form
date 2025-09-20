@@ -136,9 +136,16 @@ i.ph {
     border: 1px solid var(--outline);
     margin-bottom: 1.5rem;
     box-shadow: var(--shadow-md);
-    overflow: hidden;
+    overflow: hidden; /* Default behavior */
     transition: all var(--transition-speed) ease-in-out;
 }
+
+/* NEW: Class to temporarily allow menu overflow */
+.card.overflow-visible {
+    overflow: visible;
+}
+
+
 @media (hover: hover) {
     .card:hover {
         transform: translateY(-3px);
@@ -147,14 +154,9 @@ i.ph {
     }
 }
 
-/* MODIFIED: Add position relative for room menu positioning */
-.room-card {
-    position: relative;
-}
 .room-card.is-suspended {
     opacity: 0.6;
 }
-
 
 .card summary {
     list-style: none;
@@ -190,27 +192,31 @@ i.ph {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-}
-
-.card-footer {
-    padding: 0.75rem 1.25rem;
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    border-top: 1px solid var(--outline);
-    background-color: var(--surface-container);
+    border-top: 1px solid var(--outline); /* Add separator */
 }
 
 .room-card summary { padding: 0.5rem; }
 .room-card summary .form-group { flex-grow: 1; margin: 0; }
 
-/* MODIFIED: Adjust summary controls to make space for the absolute-positioned menu */
 .room-summary-controls {
     display: flex;
     align-items: center;
     gap: 0.25rem;
     flex-shrink: 0;
-    padding-right: 44px; /* Space for the 3-dot button */
+}
+
+/* NEW: Styles for the new action buttons in the summary */
+.summary-action-btn {
+    width: 36px;
+    height: 36px;
+    background-color: var(--surface-container);
+}
+.summary-action-btn:hover {
+    background-color: var(--primary-container);
+    color: var(--on-primary-container);
+}
+.summary-action-btn .ph {
+    font-size: 1.2rem;
 }
 
 .room-name-input {
@@ -234,12 +240,9 @@ i.ph {
     padding: 0 0.5rem;
 }
 
-/* --- ROOM OPTIONS MENU (MODIFIED FOR BUG FIX) --- */
+/* --- ROOM OPTIONS MENU (Reverted to original structure) --- */
 .room-options-container {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    z-index: 20;
+    position: relative;
 }
 .room-options-menu {
     position: absolute; top: calc(100% + 4px); right: 0;
@@ -433,29 +436,6 @@ input[inputmode="numeric"] { text-align: left; }
 .btn-icon.danger:hover { background-color: var(--danger-container); color: var(--danger); }
 .btn-icon-small { width: 32px; height: 32px; }
 .btn-icon-small .ph { font-size: 1rem; }
-
-.btn-chip {
-    background-color: var(--surface);
-    color: var(--on-surface-variant);
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius-sm);
-    border: 1px solid var(--outline);
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition-speed);
-}
-.btn-chip:hover { 
-    background-color: var(--surface-container-high);
-    border-color: var(--outline-variant);
-}
-/* Color-coded buttons */
-.btn-chip.btn-curtain { color: var(--on-primary-container); }
-.btn-chip.btn-curtain:hover { background-color: var(--primary-container); border-color: var(--primary); }
-.btn-chip.btn-deco { color: var(--deco-color); }
-.btn-chip.btn-deco:hover { background-color: var(--deco-container-color); border-color: var(--deco-color); }
-.btn-chip.btn-wallpaper { color: var(--wallpaper-color); }
-.btn-chip.btn-wallpaper:hover { background-color: var(--wallpaper-container-color); border-color: var(--wallpaper-color); }
 
 .header-btn {
     display: inline-flex; align-items: center; justify-content: center;

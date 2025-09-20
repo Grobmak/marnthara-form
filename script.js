@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.3.2-ux-enhanced";
+    const APP_VERSION = "input-ui/4.3.3-ux-revised";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4"; // Keep v4 for data compatibility
     const SQM_TO_SQYD = 1.19599;
@@ -24,14 +24,10 @@
             if (style === "ลอน") return (width * 2.6 + 0.6) / 0.9;
             return 0;
         },
-        // --- MODIFIED: Wallpaper roll calculation ---
         wallpaperRolls: (totalWidth, height) => {
             if (totalWidth <= 0 || height <= 0) return 0;
-            // Professional waste calculation:
-            // For walls > 2.5m high, calculate strips precisely based on roll length.
-            // For standard walls <= 2.5m, assume higher waste by conservatively estimating only 3 usable strips per 10m roll, to account for pattern matching and trimming.
             const stripsPerRoll = (height > 2.5) ? Math.floor(10 / height) : 3;
-            if (stripsPerRoll <= 0) return Infinity; // Prevent division by zero for heights >= 10m
+            if (stripsPerRoll <= 0) return Infinity; 
             const stripsNeeded = Math.ceil(totalWidth / 0.53);
             return Math.ceil(stripsNeeded / stripsPerRoll);
         }
@@ -466,7 +462,7 @@
                 roomSum += decoPrice;
             });
             
-            // --- MODIFIED: Wallpaper calculation logic with Area Display ---
+            // WALLPAPERS
             room.querySelectorAll(SELECTORS.wallpaperItem).forEach(wallpaper => {
                 let totalItemPrice = 0, materialPrice = 0, installPrice = 0, areaSqm = 0, rollsNeeded = 0;
                 
@@ -506,15 +502,13 @@
             grand += roomSum;
         });
         
-        // Update summary footer
         document.querySelector(SELECTORS.grandTotal).textContent = fmt(grand, 0, true);
         document.querySelector(SELECTORS.setCount).textContent = pricedItemCount;
 
-        // --- UPDATE DETAILED MATERIAL SUMMARY ---
+        // UPDATE DETAILED MATERIAL SUMMARY
         const summaryContainer = document.querySelector(SELECTORS.detailedSummaryContainer);
         if(summaryContainer) {
             let html = '';
-            // Curtain Section
             if (grandOpaqueYards > 0 || grandSheerYards > 0) {
                 html += `<h4><i class="ph-bold ph-blinds"></i> ผ้าม่าน</h4><ul>`;
                 if (grandOpaqueYards > 0) html += `<li>ผ้าทึบ: <b>${fmt(grandOpaqueYards)}</b> หลา</li>`;
@@ -524,7 +518,6 @@
                 if (hasDoubleBracket) html += `<li class="summary-note">** มีรายการที่ต้องใช้ขาสองชั้น</li>`;
                 html += `</ul>`;
             }
-            // Decoration Section
             if (Object.keys(decoCounts).length > 0) {
                  html += `<h4><i class="ph-bold ph-paint-roller"></i> งานตกแต่ง</h4><ul>`;
                  for (const type in decoCounts) {
@@ -532,13 +525,11 @@
                  }
                  html += `</ul>`;
             }
-            // Wallpaper Section
             if (totalWallpaperRolls > 0) {
                  html += `<h4><i class="ph-bold ph-file-image"></i> วอลเปเปอร์</h4><ul>`;
                  html += `<li>จำนวนที่ต้องใช้: <b>${totalWallpaperRolls}</b> ม้วน</li>`;
                  html += `</ul>`;
             }
-            
             if (html === '') {
                 html = '<p class="empty-summary">ยังไม่มีรายการวัสดุ</p>';
             }
@@ -913,9 +904,11 @@
             const action = btn.dataset.act;
             const roomEl = btn.closest(SELECTORS.room);
 
-            // Close room menus when clicking an action inside them
             const roomMenu = btn.closest('.room-options-menu');
-            if (roomMenu) roomMenu.classList.remove('show');
+            if (roomMenu) {
+                roomMenu.classList.remove('show');
+                roomEl?.classList.remove('overflow-visible');
+            }
 
             const actions = {
                 'add-set': () => addSet(roomEl),
@@ -924,8 +917,20 @@
                 'add-wall': () => addWall(btn),
                 'toggle-room-menu': () => {
                      e.preventDefault();
-                     // MODIFIED: Selector now correctly finds the menu as the button's next sibling
-                     btn.nextElementSibling?.classList.toggle('show');
+                     const menu = btn.nextElementSibling;
+                     const card = btn.closest('.room-card');
+                     const isOpening = !menu.classList.contains('show');
+                     
+                     // Close all other menus first
+                     document.querySelectorAll('.room-options-menu.show').forEach(m => {
+                         m.classList.remove('show');
+                         m.closest('.room-card')?.classList.remove('overflow-visible');
+                     });
+
+                     if (isOpening) {
+                        menu.classList.add('show');
+                        card?.classList.add('overflow-visible');
+                     }
                 },
                 'toggle-suspend-room': () => {
                     e.preventDefault();
@@ -1032,14 +1037,13 @@
 
         // Menu & Popup Toggles
         window.addEventListener('click', (e) => {
-            // Close main menu
             if (!e.target.closest('.menu-container')) {
                 document.querySelector(SELECTORS.menuDropdown).classList.remove('show');
             }
-            // Close room menus
             if (!e.target.closest('.room-options-container')) {
                 document.querySelectorAll('.room-options-menu.show').forEach(menu => {
                     menu.classList.remove('show');
+                    menu.closest('.room-card')?.classList.remove('overflow-visible');
                 });
             }
         });
@@ -1064,6 +1068,5 @@
         updateLockState();
     }
 
-    // --- START THE APP ---
     document.addEventListener('DOMContentLoaded', init);
 })();
