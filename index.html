@@ -31,6 +31,7 @@
                     <a href="#" id="importBtn"><i class="ph ph-upload-simple"></i> Import Data</a>
                     <a href="#" id="exportBtn"><i class="ph ph-download-simple"></i> Export Data</a>
                     <hr>
+                    <a href="#" id="clearItemsBtn" class="danger"><i class="ph ph-wind"></i> Clear All Items</a>
                     <a href="#" id="clearAllBtn" class="danger"><i class="ph ph-trash"></i> Clear All Data</a>
                 </div>
             </div>
@@ -129,6 +130,13 @@
                     <div class="radio-button-content">
                         <strong>ส่งช่างเย็บผ้า</strong>
                         <small>รายละเอียดขนาด, รูปแบบ, รหัสผ้า สำหรับผลิต</small>
+                    </div>
+                </label>
+                 <label>
+                    <input type="radio" name="copy_option" value="purchase_order">
+                    <div class="radio-button-content">
+                        <strong>รายการสั่งของ (สำหรับเซลล์)</strong>
+                        <small>สรุปวัสดุสำหรับสั่งซื้อ, ตัดข้อความเหมาะกับ LINE</small>
                     </div>
                 </label>
                 <label>
@@ -245,6 +253,10 @@
                         <option value="รวบขวา">รวบขวา</option>
                     </select>
                 </div>
+                 <div class="form-group">
+                    <label>สีราง</label>
+                    <input type="text" name="track_color" placeholder="-">
+                </div>
                 <div class="form-group">
                     <label>รหัสผ้า</label>
                     <input type="text" name="fabric_code" placeholder="-">
@@ -306,6 +318,10 @@
                     <input type="text" name="deco_code" placeholder="-">
                 </div>
             </div>
+             <div class="form-group full-width-item" style="padding: 0 0.75rem 0.75rem;">
+                <label>หมายเหตุ</label>
+                <input type="text" name="deco_notes" placeholder="-">
+            </div>
             <div class="item-summary single-line" data-deco-summary></div>
         </div>
     </template>
@@ -339,6 +355,10 @@
                     <label>รหัสวอลล์เปเปอร์</label>
                     <input type="text" name="wallpaper_code" placeholder="-">
                 </div>
+            </div>
+            <div class="form-group full-width-item" style="padding: 0 0.75rem 0.75rem;">
+                <label>หมายเหตุ</label>
+                <input type="text" name="wallpaper_notes" placeholder="-">
             </div>
             <div class="walls-section">
                 <label>ความกว้างผนัง (ม.)</label>

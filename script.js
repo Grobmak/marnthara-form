@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.3.7-ux-reverted";
+    const APP_VERSION = "input-ui/4.3.8-ux-reverted";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4"; // Keep v4 for data compatibility
     const SQM_TO_SQYD = 1.19599;
@@ -49,7 +49,8 @@
         copyTextBtn: '#copyTextBtn', copyOptionsModal: '#copyOptionsModal', copyOptionsConfirm: '#copyOptionsConfirm', copyOptionsCancel: '#copyOptionsCancel',
         menuBtn: '#menuBtn', menuDropdown: '#menuDropdown', importBtn: '#importBtn', exportBtn: '#exportBtn',
         importModal: '#importModal', importJsonArea: '#importJsonArea', importConfirm: '#importConfirm', importCancel: '#importCancel',
-        submitBtn: '#submitBtn'
+        submitBtn: '#submitBtn',
+        clearItemsBtn: '#clearItemsBtn'
     };
 
     // --- STATE ---
@@ -243,6 +244,7 @@
             created.querySelector('select[name="sheer_price_per_m"]').value = prefill.sheer_price_per_m || "";
             created.querySelector('input[name="fabric_code"]').value = prefill.fabric_code || "";
             created.querySelector('select[name="opening_style"]').value = prefill.opening_style || "แยกกลาง";
+            created.querySelector('input[name="track_color"]').value = prefill.track_color || "";
             created.querySelector('input[name="notes"]').value = prefill.notes || "";
             if (prefill.is_suspended) suspendItem(created, true, false);
         } else {
@@ -269,6 +271,7 @@
             created.querySelector('[name="deco_height_m"]').value = prefill.height_m > 0 ? prefill.height_m.toFixed(2) : "";
             created.querySelector('[name="deco_price_sqyd"]').value = fmt(prefill.price_sqyd, 0, true) ?? "";
             created.querySelector('[name="deco_code"]').value = prefill.deco_code || "";
+            created.querySelector('[name="deco_notes"]').value = prefill.deco_notes || "";
             const displayEl = created.querySelector('.deco-type-display');
             if (displayEl && type) {
                 displayEl.textContent = `(${type})`;
@@ -295,6 +298,7 @@
             created.querySelector('[name="wallpaper_code"]').value = prefill.wallpaper_code || "";
             created.querySelector('[name="wallpaper_price_roll"]').value = fmt(prefill.price_per_roll, 0, true) ?? "";
             created.querySelector('[name="wallpaper_install_cost"]').value = fmt(prefill.install_cost_per_roll ?? 300, 0, true);
+            created.querySelector('[name="wallpaper_notes"]').value = prefill.wallpaper_notes || "";
             (prefill.widths || []).forEach(w => addWall(created.querySelector('[data-act="add-wall"]'), w));
             if (prefill.is_suspended) suspendItem(created, true, false);
         } else {
@@ -565,6 +569,7 @@
                     sheer_price_per_m: toNum(setEl.querySelector('select[name="sheer_price_per_m"]')?.value),
                     fabric_code: setEl.querySelector('input[name="fabric_code"]')?.value || '',
                     opening_style: setEl.querySelector('select[name="opening_style"]')?.value || '',
+                    track_color: setEl.querySelector('input[name="track_color"]')?.value || '',
                     notes: setEl.querySelector('input[name="notes"]')?.value || '',
                     is_suspended: setEl.dataset.suspended === 'true',
                 });
@@ -577,6 +582,7 @@
                     height_m: toNum(decoEl.querySelector('[name="deco_height_m"]')?.value),
                     price_sqyd: toNum(decoEl.querySelector('[name="deco_price_sqyd"]')?.value),
                     deco_code: decoEl.querySelector('[name="deco_code"]')?.value || '',
+                    deco_notes: decoEl.querySelector('[name="deco_notes"]')?.value || '',
                     is_suspended: decoEl.dataset.suspended === 'true',
                 });
             });
@@ -587,6 +593,7 @@
                     wallpaper_code: wallpaperEl.querySelector('[name="wallpaper_code"]')?.value || '',
                     price_per_roll: toNum(wallpaperEl.querySelector('[name="wallpaper_price_roll"]')?.value),
                     install_cost_per_roll: toNum(wallpaperEl.querySelector('[name="wallpaper_install_cost"]')?.value),
+                    wallpaper_notes: wallpaperEl.querySelector('[name="wallpaper_notes"]')?.value || '',
                     widths: Array.from(wallpaperEl.querySelectorAll('[name="wall_width_m"]')).map(el => toNum(el.value)),
                     is_suspended: wallpaperEl.dataset.suspended === 'true',
                 });
@@ -804,7 +811,6 @@
                     summary += `   - ผ้าโปร่ง: ราคา ${fmt(set.sheer_price_per_m,0,true)}/ม. | ใช้ ${fmt(sheerYards)} หลา\n`;
                 }
 
-                // --- NEW HARDWARE REPORTING LOGIC ---
                 let hardwareDetails = [];
                 if (set.fabric_variant.includes("ทึบ") && set.width_m > 0) {
                     hardwareDetails.push(`รางทึบ ${fmt(set.width_m)} ม.`);
@@ -818,7 +824,6 @@
                 if (hardwareDetails.length > 0) {
                     summary += `   - อุปกรณ์ราง: ${hardwareDetails.join(' | ')}\n`;
                 }
-                // --- END OF NEW LOGIC ---
             });
 
             room.decorations.forEach((deco, dIdx) => {
@@ -872,6 +877,67 @@
              });
         }
         summary += `\n**รวมราคาสุทธิทั้งหมด: ${fmt(grandTotal, 0, true)} บาท**\n`;
+        return summary;
+    }
+
+    function buildPurchaseOrderSummary(payload) {
+        let summary = `--- รายการสั่งของ ---\nลูกค้า: ${payload.customer_name || '-'}\n\n`;
+        let itemCounter = 1;
+
+        const sections = { curtains: '', decorations: '', wallpapers: '' };
+
+        payload.rooms.forEach(room => {
+            if (room.is_suspended) return;
+
+            room.sets.forEach(set => {
+                if (set.is_suspended || set.width_m <= 0) return;
+                sections.curtains += `\n--- ผ้าม่าน (${itemCounter++}) ---\n`;
+                
+                const opaqueYards = CALC.fabricYardage(set.style, set.width_m);
+                if (set.fabric_variant.includes("ทึบ")) {
+                    sections.curtains += ` • ผ้าทึบ: ${set.fabric_code || '-'} (${fmt(opaqueYards)} หลา)\n`;
+                }
+                if (set.fabric_variant.includes("โปร่ง")) {
+                     sections.curtains += ` • ผ้าโปร่ง: ${set.fabric_code || '-'} (${fmt(opaqueYards)} หลา)\n`;
+                }
+
+                sections.curtains += ` • ราง${set.style}: สี${set.track_color || '-'} ขนาด ${fmt(set.width_m)} ม. (1 เส้น)\n`;
+                if (set.fabric_variant === "ทึบ&โปร่ง") {
+                    sections.curtains += `**[!] เตือน: ต้องใช้ขาสองชั้น**\n`;
+                }
+            });
+
+            room.decorations.forEach(deco => {
+                 if (deco.is_suspended || deco.width_m <= 0) return;
+                 sections.decorations += `\n--- ${deco.type || 'ตกแต่ง'} (${itemCounter++}) ---\n`;
+                 sections.decorations += ` • รหัส: ${deco.deco_code || '-'}\n`;
+                 sections.decorations += ` • ขนาด: ${fmt(deco.width_m)} x ${fmt(deco.height_m)} ม.\n`;
+                 if(deco.deco_notes) sections.decorations += ` • หมายเหตุ: ${deco.deco_notes}\n`;
+                 sections.decorations += ` • [ ] แนบรูป\n`;
+            });
+
+            room.wallpapers.forEach(wp => {
+                if (wp.is_suspended || wp.height_m <= 0) return;
+                const totalWidth = wp.widths.reduce((a, b) => a + b, 0);
+                if (totalWidth <= 0) return;
+                const rolls = CALC.wallpaperRolls(totalWidth, wp.height_m);
+
+                sections.wallpapers += `\n--- วอลเปเปอร์ (${itemCounter++}) ---\n`;
+                sections.wallpapers += ` • รหัส: ${wp.wallpaper_code || '-'}\n`;
+                sections.wallpapers += ` • จำนวน: ${rolls} ม้วน\n`;
+                if(wp.wallpaper_notes) sections.wallpapers += ` • หมายเหตุ: ${wp.wallpaper_notes}\n`;
+                sections.wallpapers += ` • [ ] แนบรูป\n`;
+            });
+        });
+
+        if (sections.curtains) { summary += `📌 *ผ้าม่านและอุปกรณ์*${sections.curtains}\n`; }
+        if (sections.decorations) { summary += `📌 *รายการตกแต่ง*${sections.decorations}\n`; }
+        if (sections.wallpapers) { summary += `📌 *วอลเปเปอร์*${sections.wallpapers}\n`; }
+
+        if (!sections.curtains && !sections.decorations && !sections.wallpapers) {
+            return "ไม่มีรายการสินค้าที่ต้องสั่งซื้อ";
+        }
+
         return summary;
     }
 
@@ -995,14 +1061,11 @@
             const payload = buildPayload();
             let textToCopy = '';
 
-            if (option === 'customer') {
-                textToCopy = buildCustomerSummary(payload);
-            } else if (option === 'seamstress') {
-                textToCopy = buildSeamstressSummary(payload);
-            } else if (option === 'owner') {
-                textToCopy = buildOwnerSummary(payload);
-            }
-
+            if (option === 'customer') textToCopy = buildCustomerSummary(payload);
+            else if (option === 'seamstress') textToCopy = buildSeamstressSummary(payload);
+            else if (option === 'owner') textToCopy = buildOwnerSummary(payload);
+            else if (option === 'purchase_order') textToCopy = buildPurchaseOrderSummary(payload);
+            
             navigator.clipboard.writeText(textToCopy)
                 .then(() => showToast('คัดลอกข้อความสำเร็จ', 'success'))
                 .catch(() => showToast('คัดลอกล้มเหลว', 'error'));
@@ -1015,9 +1078,20 @@
             menuDropdown.classList.remove('show');
         });
 
+        document.querySelector(SELECTORS.clearItemsBtn).addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (isLocked || !await showConfirmation('ล้างรายการทั้งหมด', 'ยืนยันการล้างรายการสินค้าทั้งหมด (ข้อมูลลูกค้าจะยังคงอยู่)')) return;
+            document.querySelector(SELECTORS.roomsContainer).innerHTML = "";
+            roomCount = 0;
+            addRoom();
+            saveData();
+            showToast('ล้างทุกรายการแล้ว', 'warning');
+            menuDropdown.classList.remove('show');
+        });
+
         document.querySelector(SELECTORS.clearAllBtn).addEventListener('click', async (e) => {
             e.preventDefault();
-            if (isLocked || !await showConfirmation('ล้างข้อมูลทั้งหมด', 'คำเตือน! การกระทำนี้จะลบข้อมูลทั้งหมด ไม่สามารถกู้คืนได้')) return;
+            if (isLocked || !await showConfirmation('ล้างข้อมูลทั้งหมด', 'คำเตือน! การกระทำนี้จะลบข้อมูลทั้งหมดและข้อมูลลูกค้า ไม่สามารถกู้คืนได้')) return;
             document.querySelector(SELECTORS.roomsContainer).innerHTML = "";
             roomCount = 0;
             document.querySelectorAll('#customerInfo input, #customerInfo textarea').forEach(i => i.value = "");
