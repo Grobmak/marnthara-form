@@ -1,6 +1,6 @@
 /* style.css */
 /* --- GLOBAL SETUP & THEME V3 (2025 Liquid Glass Trend) --- */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;500;700&display=swap');
 
 :root {
     --font-family: 'Noto Sans Thai', sans-serif;
@@ -374,7 +374,7 @@ i.ph {
 
 /* --- FORM ELEMENTS --- */
 .form-grid-2 { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-@media (min-width: 500px) { .form-grid-2 { grid-template-columns: 1fr 1fr; gap: 0.75rem; } }
+@media (min-width: 300px) { .form-grid-2 { grid-template-columns: 1fr 1fr; gap: 0.75rem; } }
 
 .form-group { display: flex; flex-direction: column; }
 .form-group.full-width-item { grid-column: 1 / -1; }
@@ -571,7 +571,7 @@ input[inputmode="numeric"] { text-align: left; }
 .modal-wrapper.visible { opacity: 1; visibility: visible; }
 .modal-content {
     background: var(--surface); border-radius: var(--border-radius-lg);
-    padding: 1.5rem; width: 90%; max-width: 400px;
+    padding: 1.5rem; width: 90%; max-width: 300px;
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
