@@ -350,7 +350,8 @@ i.ph {
 }
 .item-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    /* MODIFICATION: Changed from auto-fit to a fixed 2-column layout */
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
 }
 
