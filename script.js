@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.3.6-ux-reverted";
+    const APP_VERSION = "input-ui/4.3.7-ux-reverted";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4"; // Keep v4 for data compatibility
     const SQM_TO_SQYD = 1.19599;
@@ -268,6 +268,7 @@
             created.querySelector('[name="deco_width_m"]').value = prefill.width_m > 0 ? prefill.width_m.toFixed(2) : "";
             created.querySelector('[name="deco_height_m"]').value = prefill.height_m > 0 ? prefill.height_m.toFixed(2) : "";
             created.querySelector('[name="deco_price_sqyd"]').value = fmt(prefill.price_sqyd, 0, true) ?? "";
+            created.querySelector('[name="deco_code"]').value = prefill.deco_code || "";
             const displayEl = created.querySelector('.deco-type-display');
             if (displayEl && type) {
                 displayEl.textContent = `(${type})`;
@@ -575,6 +576,7 @@
                     width_m: toNum(decoEl.querySelector('[name="deco_width_m"]')?.value),
                     height_m: toNum(decoEl.querySelector('[name="deco_height_m"]')?.value),
                     price_sqyd: toNum(decoEl.querySelector('[name="deco_price_sqyd"]')?.value),
+                    deco_code: decoEl.querySelector('[name="deco_code"]')?.value || '',
                     is_suspended: decoEl.dataset.suspended === 'true',
                 });
             });
@@ -827,7 +829,7 @@
                 const decoPrice = Math.round(areaSqyd * deco.price_sqyd);
                 roomTotal += decoPrice;
 
-                summary += ` - ${deco.type || 'ตกแต่ง'} #${dIdx+1} - รวม ${fmt(decoPrice,0,true)} บ.\n`;
+                summary += ` - ${deco.type || 'ตกแต่ง'} #${dIdx+1} [รหัส: ${deco.deco_code || '-'}] - รวม ${fmt(decoPrice,0,true)} บ.\n`;
                 summary += `   - ขนาด: ${fmt(deco.width_m, 2)}x${fmt(deco.height_m, 2)} ม. (${fmt(areaSqyd,2)} ตร.หลา)\n`;
                 summary += `   - ราคา: ${fmt(deco.price_sqyd,0,true)}/ตร.หลา\n`;
             });
