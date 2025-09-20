@@ -35,7 +35,7 @@
 
     const SELECTORS = {
         orderForm: '#orderForm', roomsContainer: '#rooms', roomTpl: '#roomTpl', setTpl: '#setTpl', decoTpl: '#decoTpl', wallpaperTpl: '#wallpaperTpl', wallTpl: '#wallTpl',
-        payloadInput: '#payload', clearAllBtn: '#clearAllBtn', copyJsonBtn: '#copyJsonBtn',
+        payloadInput: '#payload', clearAllBtn: '#clearAllBtn',
         lockBtn: '#lockBtn', addRoomFooterBtn: '#addRoomFooterBtn', lockText: '#lockText',
         grandTotal: '#grandTotal', setCount: '#setCount',
         detailedSummaryContainer: '#detailed-material-summary',
@@ -47,8 +47,7 @@
         roomNameInput: 'input[name="room_name"]',
         toastContainer: '#toast-container',
         copyTextBtn: '#copyTextBtn', copyOptionsModal: '#copyOptionsModal', copyOptionsConfirm: '#copyOptionsConfirm', copyOptionsCancel: '#copyOptionsCancel',
-        menuBtn: '#menuBtn', menuDropdown: '#menuDropdown', importBtn: '#importBtn', exportBtn: '#exportBtn',
-        importModal: '#importModal', importJsonArea: '#importJsonArea', importConfirm: '#importConfirm', importCancel: '#importCancel',
+        menuBtn: '#menuBtn', menuDropdown: '#menuDropdown', importBtn: '#importBtn', exportBtn: '#exportBtn', fileImporter: '#fileImporter',
         submitBtn: '#submitBtn',
         clearItemsBtn: '#clearItemsBtn'
     };
@@ -169,18 +168,6 @@
         if (!await showModal(SELECTORS.copyOptionsModal)) return false;
         const selected = modalEl.querySelector('input[name="copy_option"]:checked');
         return selected ? selected.value : false;
-    }
-
-    async function showImportModal() {
-        const importJsonArea = document.querySelector(SELECTORS.importJsonArea);
-        importJsonArea.value = '';
-        if (!await showModal(SELECTORS.importModal)) return false;
-        try {
-            return JSON.parse(importJsonArea.value);
-        } catch (e) {
-            showToast("ข้อมูล JSON ไม่ถูกต้อง", "error");
-            return false;
-        }
     }
 
     // --- CORE DOM MANIPULATION ---
@@ -952,6 +939,7 @@
     // --- EVENT LISTENERS & INITIALIZATION ---
     function init() {
         const orderForm = document.querySelector(SELECTORS.orderForm);
+        const fileImporter = document.querySelector(SELECTORS.fileImporter);
 
         const debouncedRecalcAndSave = debounce(() => { recalcAll(); saveData(); }, 150);
 
@@ -1101,14 +1089,6 @@
             menuDropdown.classList.remove('show');
         });
 
-        document.querySelector(SELECTORS.copyJsonBtn).addEventListener('click', (e) => {
-            e.preventDefault();
-            navigator.clipboard.writeText(JSON.stringify(buildPayload(), null, 2))
-                .then(() => showToast('คัดลอก JSON แล้ว', 'success'))
-                .catch(() => showToast('คัดลอกล้มเหลว', 'error'));
-            menuDropdown.classList.remove('show');
-        });
-
         document.querySelector(SELECTORS.exportBtn).addEventListener('click', (e) => {
             e.preventDefault();
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(buildPayload(), null, 2));
@@ -1122,11 +1102,28 @@
             menuDropdown.classList.remove('show');
         });
 
-        document.querySelector(SELECTORS.importBtn).addEventListener('click', async (e) => {
+        document.querySelector(SELECTORS.importBtn).addEventListener('click', (e) => {
             e.preventDefault();
             menuDropdown.classList.remove('show');
-            const payload = await showImportModal();
-            if (payload) loadPayload(payload);
+            fileImporter.click();
+        });
+        
+        fileImporter.addEventListener('change', (e) => {
+            if (!e.target.files || !e.target.files[0]) return;
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = (event) => {
+                try {
+                    const payload = JSON.parse(event.target.result);
+                    loadPayload(payload);
+                } catch (err) {
+                    showToast('ไฟล์ JSON ไม่ถูกต้องหรือไม่สมบูรณ์', 'error');
+                }
+            };
+            
+            reader.readAsText(file);
+            e.target.value = null; // Reset to allow re-upload of the same file
         });
 
         // Menu & Popup Toggles

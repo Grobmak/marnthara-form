@@ -11,6 +11,7 @@
 <body>
 
     <div id="toast-container"></div>
+    <input type="file" id="fileImporter" accept=".json" class="hidden">
 
     <header class="main-header">
         <h1>Marnthara Quotation</h1>
@@ -27,7 +28,6 @@
                     <a href="#" id="copyTextBtn"><i class="ph ph-copy"></i> คัดลอกสรุป</a>
                     <a href="#" id="submitBtn"><i class="ph ph-paper-plane-tilt"></i> ส่งข้อมูล</a>
                     <hr>
-                    <a href="#" id="copyJsonBtn"><i class="ph ph-code"></i> Copy JSON</a>
                     <a href="#" id="importBtn"><i class="ph ph-upload-simple"></i> Import Data</a>
                     <a href="#" id="exportBtn"><i class="ph ph-download-simple"></i> Export Data</a>
                     <hr>
@@ -150,17 +150,6 @@
             <div class="modal-actions">
                 <button id="copyOptionsCancel" class="btn btn-secondary">ยกเลิก</button>
                 <button id="copyOptionsConfirm" class="btn btn-primary">คัดลอก</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="importModal" class="modal-wrapper">
-        <div class="modal-content">
-            <h3>นำเข้าข้อมูล (JSON)</h3>
-            <textarea id="importJsonArea" rows="10" placeholder="วางข้อมูล JSON ที่นี่"></textarea>
-            <div class="modal-actions">
-                <button id="importCancel" class="btn btn-secondary">ยกเลิก</button>
-                <button id="importConfirm" class="btn btn-primary">นำเข้า</button>
             </div>
         </div>
     </div>
