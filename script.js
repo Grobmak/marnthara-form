@@ -1103,8 +1103,8 @@
             const cleanName = customerName.replace(/[^a-zA-Z0-9ก-๙_.\s-]/g, '').replace(/\s+/g, '-').substring(0, 30);
             const dateStamp = new Date().toISOString().split('T')[0];
             const fileName = cleanName 
-                ? `marnthara-quote-${cleanName}-${dateStamp}.json` 
-                : `marnthara-quote-${dateStamp}.json`;
+                ? `mtr-${cleanName}-${dateStamp}.json` 
+                : `mtr-${dateStamp}.json`;
 
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
             const downloadAnchorNode = document.createElement('a');
