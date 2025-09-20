@@ -62,8 +62,9 @@
     --curtain-container-color: hsl(220, 100%, 98%);
     --deco-color: #4DB6AC; /* Muted Teal */
     --deco-container-color: hsl(174, 80%, 98%);
-    --wallpaper-color: #6A7B5A; /* MODIFIED: Muted Olive Green for better contrast */
-    --wallpaper-container-color: hsl(88, 15%, 98%); /* MODIFIED: Adjusted to match new hue */
+    /* MODIFIED: Changed wallpaper color for better contrast */
+    --wallpaper-color: #B35B47; /* Warm Terracotta/Burnt Umber */
+    --wallpaper-container-color: hsl(15, 50%, 98%); /* Adjusted to match new hue */
 }
 
 * {
@@ -340,7 +341,7 @@ i.ph {
 .wallpaper-item .item-title { color: var(--wallpaper-color); }
 .wallpaper-item .item-header {
     background-color: var(--wallpaper-container-color);
-    border-bottom: 1px solid hsl(23, 25%, 95%);
+    border-bottom: 1px solid hsl(15, 50%, 95%);
 }
 
 .item-actions { display: flex; align-items: center; gap: 0.25rem; }
