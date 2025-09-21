@@ -953,8 +953,8 @@
         const vat = subtotal * VAT_RATE;
         const grandTotal = subtotal + vat;
         
-        // CHANGE: Correctly call the ThaiBaht library using THB.ThaiBaht
-        const bahtText = `(${THB.ThaiBaht.bahtText(grandTotal)})`;
+        // --- FIX: Correctly call the ThaiBaht library. It's a global function, not an object. ---
+        const bahtText = `(${ThaiBaht(grandTotal)})`;
 
         const today = new Date();
         const dateString = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear() + 543}`;
