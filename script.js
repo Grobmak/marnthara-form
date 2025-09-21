@@ -13,7 +13,7 @@
         company_name: "ม่านธารา เดคคอร์",
         company_address: "65/8 หมู่ 2 ถ.พหลโยธิน ต.ท่าศาลา อ.เมือง จ.ลพบุรี 15000",
         company_phone: "082-552-5595, 092-985-9359",
-        company_logo_base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABTSURBVHhe7cEBDQAAAMKg909tDwcFAAAAAAAAAAAAAAAAAMDfA2nZAAE5QQk8AAAAAElFTkSuQmCC", // Placeholder 64x64 transparent PNG. Replace with your actual logo in base64 format.
+        company_logo_base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABTSURBVHhe7cEBDQAAAMKg909tDwcFAAAAAAAAAAAAAAAAAMDfA2nZAAE5QQk8AAAAAElFTSuQmCC", // Placeholder 64x64 transparent PNG. Replace with your actual logo in base64 format.
         // คุณสามารถแปลงไฟล์รูปภาพโลโก้เป็น Base64 ได้ที่เว็บ: https://www.base64-image.de/
     };
 
@@ -953,7 +953,7 @@
         const vat = subtotal * VAT_RATE;
         const grandTotal = subtotal + vat;
         
-        // --- FIX: Correctly call the ThaiBaht library. It's a global function, not an object. ---
+        // --- FIX: Correctly call the ThaiBaht function, which is now globally available from the specific library version ---
         const bahtText = `(${ThaiBaht(grandTotal)})`;
 
         const today = new Date();
@@ -978,7 +978,7 @@
                 // Header
                 {
                     columns: [
-                        { image: QUOTATION_CONFIG.company_logo_base64, width: 60, height: 60 },
+                        { image: QUOTATION_CONFIG.company_logo__base64, width: 60, height: 60 },
                         [
                             { text: QUOTATION_CONFIG.company_name, style: 'header' },
                             { text: QUOTATION_CONFIG.company_address },
