@@ -1,37 +1,19 @@
-<!-- FILE: index.html -->
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Marnthara - Tool</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
-  <!-- pdfmake + thai baht text -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js" integrity="sha512-w61kvDEdEhJPJLSAJpuL+RWp1+zTBUUpgPaP+6pcqCk78wQkOaExjnGWrVbovojeisWGQS7XZKz+gr3L+GPYLg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdn.jsdelivr.net/npm/thai-baht-text@latest/dist/thai-baht-text.min.js"></script>
-
-  <script src="script.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marnthara - Tool</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="script.js" defer></script>
 </head>
 <body>
-  <div id="toast-container"></div>
-  <input type="file" id="fileImporter" accept=".json" class="hidden">
 
-  <header class="main-header">
-    <h1>Marnthara</h1>
-    <div class="header-actions">
-      <button id="lockBtn" class="btn" title="ล็อค/ปลดล็อคฟอร์ม">
-        <i class="ph-bold ph-lock-key-open lock-icon"></i>
-        <span id="lockText">ล็อก</span>
-      </button>
+    <div id="toast-container"></div>
+    <input type="file" id="fileImporter" accept=".json" class="hidden">
 
-      <div class="menu-container">
-        <button id="menuBtn" class="header-btn" title="Menu">
-          <i class="ph-bold ph-dots-three-outline"></i>
-        </button>
-
-<<<<<<< HEAD
     <header class="main-header">
         <h1>Marnthara</h1>
         <div class="header-actions">
@@ -131,24 +113,9 @@
                 <button id="modalCancel" class="btn btn-secondary">ยกเลิก</button>
                 <button id="modalConfirm" class="btn btn-danger">ยืนยัน</button>
             </div>
-=======
-        <div id="menuDropdown" class="menu-dropdown">
-          <a href="#" id="copyTextBtn"><i class="ph ph-copy"></i> คัดลอกสรุป (ส่ง LINE)</a>
-          <a href="#" id="generatePdfBtn"><i class="ph ph-file-pdf"></i> สร้างใบเสนอราคา (PDF)</a>
-          <a href="#" id="submitBtn"><i class="ph ph-paper-plane-tilt"></i> ส่งข้อมูล (Webhook)</a>
-          <hr>
-          <a href="#" id="importBtn"><i class="ph ph-download-simple"></i> Import Data</a>
-          <a href="#" id="exportBtn"><i class="ph ph-upload-simple"></i> Export Data</a>
-          <hr>
-          <a href="#" id="clearItemsBtn" class="danger"><i class="ph ph-wind"></i> Clear All Items</a>
-          <a href="#" id="clearAllBtn" class="danger"><i class="ph ph-trash"></i> Clear All Data</a>
->>>>>>> parent of 566c6c3 (มั่ว 2)
         </div>
-      </div>
     </div>
-  </header>
 
-<<<<<<< HEAD
     <div id="copyOptionsModal" class="modal-wrapper">
         <div class="modal-content">
             <h3>เลือกสรุปที่จะคัดลอก</h3>
@@ -181,74 +148,47 @@
                         <small>ข้อมูลทั้งหมดสำหรับทำบัญชีและสรุปวัสดุ</small>
                     </div>
                 </label>
-=======
-  <main id="app-container">
-    <form id="orderForm" novalidate>
-      <input type="hidden" id="payload" name="payload">
-
-      <details class="card" open>
-        <summary>
-          <h2><i class="ph-bold ph-user-circle"></i> ข้อมูลลูกค้า</h2>
-          <i class="ph-bold ph-caret-down expand-icon"></i>
-        </summary>
-        <div class="card-content" id="customerInfo">
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label for="customer_name">ชื่อลูกค้า</label>
-              <input type="text" id="customer_name" name="customer_name" placeholder="ระบุชื่อ">
->>>>>>> parent of 566c6c3 (มั่ว 2)
             </div>
-            <div class="form-group">
-              <label for="customer_phone">เบอร์โทรศัพท์</label>
-              <input type="tel" id="customer_phone" name="customer_phone" placeholder="ระบุเบอร์โทร">
+            <div class="modal-actions">
+                <button id="copyOptionsCancel" class="btn btn-secondary">ยกเลิก</button>
+                <button id="copyOptionsConfirm" class="btn btn-primary">คัดลอก</button>
             </div>
-          </div>
-          <div class="form-group">
-            <label for="customer_address">ที่อยู่</label>
-            <textarea id="customer_address" name="customer_address" placeholder="ระบุที่อยู่" rows="2"></textarea>
-          </div>
         </div>
-      </details>
-
-      <div id="rooms"></div>
-
-      <details class="card">
-        <summary>
-          <h2><i class="ph-bold ph-package"></i> สรุปวัสดุ</h2>
-          <i class="ph-bold ph-caret-down expand-icon"></i>
-        </summary>
-        <div class="card-content" id="detailed-material-summary"></div>
-      </details>
-
-      <div class="add-room-container">
-        <button type="button" class="btn btn-secondary" id="addRoomFooterBtn">
-          <i class="ph-bold ph-house-line"></i>
-          <span>เพิ่มห้อง</span>
-        </button>
-      </div>
-    </form>
-  </main>
-
-  <footer class="summary-footer">
-    <div class="summary-grid">
-      <div class="total-items"><medium>รวม <span id="setCount">0</span> รายการ</medium></div>
-      <div class="grand-total"><span><span id="grandTotal">0</span></span></div>
     </div>
-  </footer>
 
-  <!-- Modals -->
-  <div id="confirmationModal" class="modal-wrapper">
-    <div class="modal-content">
-      <h3 id="modalTitle"></h3>
-      <p id="modalBody"></p>
-      <div class="modal-actions">
-        <button id="modalCancel" class="btn btn-secondary">ยกเลิก</button>
-        <button id="modalConfirm" class="btn btn-danger">ยืนยัน</button>
-      </div>
-    </div>
-  </div>
+    <template id="roomTpl">
+        <details class="card room-card" data-room open>
+            <summary>
+                <div class="form-group">
+                    <input type="text" name="room_name" class="room-name-input" placeholder="ห้อง 01">
+                </div>
+                <div class="room-summary-controls">
+                    <div class="room-brief" data-room-brief></div>
+                    <div class="room-options-container">
+                        <button type="button" class="btn-icon" data-act="toggle-room-menu" title="ตัวเลือกห้อง">
+                            <i class="ph-bold ph-dots-three-vertical"></i>
+                        </button>
+                        <div class="room-options-menu">
+                            <a href="#" data-act="toggle-suspend-room"><i class="ph ph-pause-circle"></i> <span>ระงับห้อง</span></a>
+                            <a href="#" data-act="clear-room"><i class="ph ph-eraser"></i> ล้างข้อมูลในห้อง</a>
+                            <a href="#" data-act="del-room" class="danger"><i class="ph ph-trash"></i> ลบห้องนี้</a>
+                        </div>
+                    </div>
+                </div>
+            </summary>
+            <div class="card-content">
+                <div class="items-container" data-sets></div>
+                <div class="items-container" data-decorations></div>
+                <div class="items-container" data-wallpapers></div>
+            </div>
+            <footer class="card-footer">
+                <button type="button" class="btn-chip btn-curtain" data-act="add-set">+ผ้าม่าน</button>
+                <button type="button" class="btn-chip btn-deco" data-act="add-deco">+ตกแต่ง</button>
+                <button type="button" class="btn-chip btn-wallpaper" data-act="add-wallpaper">+วอลเปเปอร์</button>
+            </footer>
+        </details>
+    </template>
 
-<<<<<<< HEAD
     <template id="setTpl">
         <div class="item-card set-item" data-set>
             <div class="item-header">
@@ -439,21 +379,6 @@
             </button>
         </div>
     </template>
-=======
-  <div id="copyOptionsModal" class="modal-wrapper">
-    <div class="modal-content">
-      <h3>เลือกสรุปที่จะคัดลอก(ส่ง LINE)</h3>
-      <div class="radio-button-group">
-        <label><input type="radio" name="copy_option" value="customer"> สรุปลูกค้า</label>
-        <label><input type="radio" name="copy_option" value="seamstress"> สรุปช่าง</label>
-        <label><input type="radio" name="copy_option" value="owner"> สรุปเจ้าของ</label>
-        <label><input type="radio" name="copy_option" value="purchase_order"> สร้าง Purchase Order</label>
-      </div>
-    </div>
-  </div>
->>>>>>> parent of 566c6c3 (มั่ว 2)
 
-  <!-- Templates (kept minimal here; original templates in your file remain compatible) -->
-  <!-- Keep the rest of templates (setTpl, decoTpl, wallpaperTpl, wallTpl, roomTpl) as in your original file. -->
 </body>
 </html>
