@@ -6,12 +6,15 @@
     <title>Marnthara - Tool</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="script.js" defer></script>
 </head>
 <body>
 
     <div id="toast-container"></div>
     <input type="file" id="fileImporter" accept=".json" class="hidden">
+
+    <div id="quotation-template"></div>
 
     <header class="main-header">
         <h1>Marnthara</h1>
@@ -25,11 +28,12 @@
                     <i class="ph-bold ph-dots-three-outline"></i>
                 </button>
                 <div id="menuDropdown" class="menu-dropdown">
-                    <a href="#" id="copyTextBtn"><i class="ph ph-copy"></i> คัดลอกสรุป</a>
+                    <a href="#" id="copyTextBtn"><i class="ph ph-copy-simple"></i> คัดลอกสรุป (ส่ง LINE)</a>
+                    <a href="#" id="exportPdfBtn"><i class="ph ph-file-pdf"></i> Export ใบเสนอราคา (PDF)</a>
                     <a href="#" id="submitBtn"><i class="ph ph-paper-plane-tilt"></i> ส่งข้อมูล</a>
                     <hr>
-                    <a href="#" id="importBtn"><i class="ph ph-download-simple"></i> Import Data</a>
-                    <a href="#" id="exportBtn"><i class="ph ph-upload-simple"></i> Export Data</a>
+                    <a href="#" id="importBtn"><i class="ph ph-download-simple"></i> Import Data (.json)</a>
+                    <a href="#" id="exportBtn"><i class="ph ph-upload-simple"></i> Export Data (.json)</a>
                     <hr>
                     <a href="#" id="clearItemsBtn" class="danger"><i class="ph ph-wind"></i> Clear All Items</a>
                     <a href="#" id="clearAllBtn" class="danger"><i class="ph ph-trash"></i> Clear All Data</a>
@@ -276,7 +280,8 @@
         <div class="item-card deco-item" data-deco-item>
              <div class="item-header">
                 <h4 class="item-title">
-                    <span data-item-title></span>:&nbsp;<span></span>
+                    <i class="ph-bold ph-file-image"></i>
+                    <span data-item-title></span>:&nbsp;<span>ตกแต่ง</span>
                     <span class="deco-type-display"></span>
                 </h4>
                 <div class="item-actions">
@@ -327,6 +332,7 @@
         <div class="item-card wallpaper-item" data-wallpaper-item>
              <div class="item-header">
                 <h4 class="item-title">
+                     <i class="ph-bold ph-paint-roller"></i>
                     <span data-item-title></span>:&nbsp;<span>วอลเปเปอร์</span>
                 </h4>
                  <div class="item-actions">
