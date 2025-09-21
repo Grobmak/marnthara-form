@@ -1,4 +1,3 @@
-// script.js (patched) — ทดแทนไฟล์เดิม
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
