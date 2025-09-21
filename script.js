@@ -78,11 +78,16 @@
     const clamp01 = v => Math.max(0, toNum(v));
     const fmt = (n, fixed = 2, asCurrency = false) => {
         if (!Number.isFinite(n)) return "0";
-        return n.toLocaleString("th-TH", {
+        const options = {
             minimumFractionDigits: asCurrency ? 0 : fixed,
             maximumFractionDigits: asCurrency ? 0 : fixed
-        });
+        };
+        // Use 'en-US' for number formatting in PDF to match example format
+        // Use 'th-TH' for UI display
+        const locale = document.getElementById('quotation-template')?.innerHTML ? 'en-US' : 'th-TH';
+        return n.toLocaleString(locale, options);
     };
+
     const debounce = (fn, ms = 150) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
     const stylePlus = s => PRICING.style_surcharge[s] ?? 0;
     const heightPlus = h => {
@@ -941,7 +946,7 @@
         // orderForm.submit(); // This is commented out by default
     }
 
-    // --- NEW: PDF Generation ---
+    // --- NEW: PDF Generation (REVISED TEMPLATE) ---
     async function generatePdfQuotation() {
         showToast('กำลังสร้างใบเสนอราคา...', 'default');
         const payload = buildPayload();
@@ -952,10 +957,8 @@
         }
 
         const today = new Date();
-        const dateThai = today.toLocaleDateString('th-TH', {
-            year: 'numeric', month: 'long', day: 'numeric'
-        });
-        const quoteNumber = `QT-${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}-${today.getHours().toString().padStart(2, '0')}${today.getMinutes().toString().padStart(2, '0')}`;
+        const dateThai = today.toLocaleDateString('th-TH', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const quoteNumber = `QT-${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
 
         let tableRows = '';
         let itemNo = 1;
@@ -964,7 +967,19 @@
         payload.rooms.forEach(room => {
             if (room.is_suspended) return;
             const roomName = room.room_name || 'ไม่ระบุชื่อห้อง';
-            tableRows += `<tr class="room-header"><td colspan="5">${roomName}</td></tr>`;
+            let hasItemsInRoom = false;
+
+            const roomItems = [];
+
+            // Gather items to check if room should be displayed
+            room.sets.forEach(set => { if (!set.is_suspended && (stylePlus(set.style) + heightPlus(set.height_m) + set.price_per_m_raw + set.sheer_price_per_m > 0)) hasItemsInRoom = true; });
+            room.decorations.forEach(deco => { if (!deco.is_suspended && deco.price_sqyd > 0) hasItemsInRoom = true; });
+            room.wallpapers.forEach(wp => { if (!wp.is_suspended && wp.price_per_roll > 0) hasItemsInRoom = true; });
+
+            if (!hasItemsInRoom) return;
+
+             tableRows += `<tr class="pdf-room-header"><td colspan="5">ห้อง: ${roomName}</td></tr>`;
+
 
             room.sets.forEach(set => {
                 if (set.is_suspended) return;
@@ -981,16 +996,16 @@
                 }
                 const totalSetPrice = opaquePrice + sheerPrice;
                 if (totalSetPrice > 0) {
-                    let desc = `ผ้าม่าน ${set.style} (${set.fabric_variant}) <br><small>ขนาด ${fmt(w)} x ${fmt(h)} ม.`;
+                    let desc = `ผ้าม่าน ${set.style} (${set.fabric_variant}) <br><small>ขนาด ${fmt(w,2)} x ${fmt(h,2)} ม.`;
                     if(set.notes) desc += ` - ${set.notes}`;
                     desc += '</small>';
                     tableRows += `
                         <tr>
-                            <td>${itemNo++}</td>
+                            <td class="pdf-text-center">${itemNo++}</td>
                             <td>${desc}</td>
-                            <td>1</td>
-                            <td>${fmt(totalSetPrice, 0, true)}</td>
-                            <td>${fmt(totalSetPrice, 0, true)}</td>
+                            <td class="pdf-text-center">1</td>
+                            <td class="pdf-text-right">${fmt(totalSetPrice, 2, true)}</td>
+                            <td class="pdf-text-right">${fmt(totalSetPrice, 2, true)}</td>
                         </tr>`;
                     subTotal += totalSetPrice;
                 }
@@ -1000,14 +1015,14 @@
                 const areaSqyd = deco.width_m * deco.height_m * SQM_TO_SQYD;
                 const decoPrice = Math.round(areaSqyd * deco.price_sqyd);
                 if (decoPrice > 0) {
-                    let desc = `${deco.type || 'งานตกแต่ง'} <br><small>รหัส: ${deco.deco_code || '-'}, ขนาด ${fmt(deco.width_m)} x ${fmt(deco.height_m)} ม.</small>`;
+                    let desc = `${deco.type || 'งานตกแต่ง'} <br><small>รหัส: ${deco.deco_code || '-'}, ขนาด ${fmt(deco.width_m,2)} x ${fmt(deco.height_m,2)} ม.</small>`;
                     tableRows += `
                          <tr>
-                            <td>${itemNo++}</td>
+                            <td class="pdf-text-center">${itemNo++}</td>
                             <td>${desc}</td>
-                            <td>1</td>
-                            <td>${fmt(decoPrice, 0, true)}</td>
-                            <td>${fmt(decoPrice, 0, true)}</td>
+                            <td class="pdf-text-center">1</td>
+                            <td class="pdf-text-right">${fmt(decoPrice, 2, true)}</td>
+                            <td class="pdf-text-right">${fmt(decoPrice, 2, true)}</td>
                         </tr>`;
                     subTotal += decoPrice;
                 }
@@ -1020,14 +1035,14 @@
                 const installPrice = Math.round(rolls * (wp.install_cost_per_roll || 0));
                 const wpPrice = materialPrice + installPrice;
                 if (wpPrice > 0) {
-                     let desc = `วอลเปเปอร์ <br><small>รหัส: ${wp.wallpaper_code || '-'}, สูง ${fmt(wp.height_m)} ม. (ใช้ ${rolls} ม้วน)</small>`;
+                     let desc = `วอลเปเปอร์ <br><small>รหัส: ${wp.wallpaper_code || '-'}, สูง ${fmt(wp.height_m,2)} ม. (ใช้ ${rolls} ม้วน)</small>`;
                      tableRows += `
                          <tr>
-                            <td>${itemNo++}</td>
+                            <td class="pdf-text-center">${itemNo++}</td>
                             <td>${desc}</td>
-                            <td>1</td>
-                            <td>${fmt(wpPrice, 0, true)}</td>
-                            <td>${fmt(wpPrice, 0, true)}</td>
+                            <td class="pdf-text-center">1</td>
+                            <td class="pdf-text-right">${fmt(wpPrice, 2, true)}</td>
+                            <td class="pdf-text-right">${fmt(wpPrice, 2, true)}</td>
                         </tr>`;
                     subTotal += wpPrice;
                 }
@@ -1036,80 +1051,121 @@
 
         const vatAmount = subTotal * SHOP_CONFIG.vatRate;
         const grandTotal = subTotal + vatAmount;
+        const vatDisplay = SHOP_CONFIG.vatRate > 0 ? `
+            <tr>
+                <td colspan="2" class="pdf-label">ภาษีมูลค่าเพิ่ม ${SHOP_CONFIG.vatRate * 100}%</td>
+                <td class="pdf-amount">${fmt(vatAmount, 2, true)}</td>
+            </tr>` : '';
 
         quotationEl.innerHTML = `
-            <div class="pdf-header">
-                <div class="shop-info">
-                    <img src="${SHOP_CONFIG.logoUrl}" alt="Logo" class="logo">
-                    <div>
+        <div class="pdf-container">
+            <header class="pdf-header">
+                <div class="pdf-shop-info">
+                    <img src="${SHOP_CONFIG.logoUrl}" alt="Logo" class="pdf-logo">
+                    <div class="pdf-shop-address">
                         <strong>${SHOP_CONFIG.name}</strong><br>
                         ${SHOP_CONFIG.address}<br>
-                        โทร: ${SHOP_CONFIG.phone}<br>
-                        เลขประจำตัวผู้เสียภาษี: ${SHOP_CONFIG.taxId}
+                        โทร: ${SHOP_CONFIG.phone} | เลขประจำตัวผู้เสียภาษี: ${SHOP_CONFIG.taxId}
                     </div>
                 </div>
-                <div class="quote-info">
-                    <h1>ใบเสนอราคา</h1>
-                    <p><strong>เลขที่:</strong> ${quoteNumber}</p>
-                    <p><strong>วันที่:</strong> ${dateThai}</p>
+                <div class="pdf-quote-details">
+                    <div class="pdf-title-box">
+                        <h1>ใบเสนอราคา / Quotation</h1>
+                    </div>
+                    <table class="pdf-quote-meta">
+                        <tr>
+                            <td>เลขที่:</td>
+                            <td>${quoteNumber}</td>
+                        </tr>
+                        <tr>
+                            <td>วันที่:</td>
+                            <td>${dateThai}</td>
+                        </tr>
+                    </table>
                 </div>
-            </div>
-            <div class="customer-info">
-                <strong>เรียน (ลูกค้า):</strong><br>
-                ${payload.customer_name || 'ไม่ได้ระบุชื่อ'}<br>
-                ${payload.customer_address || 'ไม่ได้ระบุที่อยู่'}<br>
-                โทร: ${payload.customer_phone || '-'}
-            </div>
-            <table class="items-table">
+            </header>
+
+            <section class="pdf-customer-details">
+                <div class="pdf-customer-info">
+                    <strong>ชื่อลูกค้า:</strong> ${payload.customer_name || '..............................................'}<br>
+                    <strong>ที่อยู่:</strong> ${payload.customer_address || '..............................................'}<br>
+                    <strong>โทร:</strong> ${payload.customer_phone || '..............................................'}
+                </div>
+                <div class="pdf-customer-meta">
+                     <strong>เงื่อนไขการชำระเงิน:</strong> ชำระมัดจำ 50%<br>
+                     <strong>ยืนราคา:</strong> 30 วัน
+                </div>
+            </section>
+
+            <table class="pdf-items-table">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>รายการ</th>
-                        <th>จำนวน</th>
-                        <th>ราคา/หน่วย</th>
-                        <th>ราคารวม</th>
+                        <th style="width:5%;">ลำดับ</th>
+                        <th style="width:50%;">รายการ</th>
+                        <th style="width:10%;">จำนวน</th>
+                        <th style="width:17.5%;">ราคา/หน่วย</th>
+                        <th style="width:17.5%;">จำนวนเงิน (บาท)</th>
                     </tr>
                 </thead>
-                <tbody>${tableRows}</tbody>
+                <tbody>
+                    ${tableRows}
+                </tbody>
             </table>
-            <div class="pdf-summary">
-                <div class="notes">
-                     <strong>หมายเหตุ:</strong>
+
+            <section class="pdf-summary-section">
+                <div class="pdf-amount-in-words">
+                    <strong>หมายเหตุ:</strong>
                     <ul>
-                        <li>ใบเสนอราคานี้มีอายุ 30 วัน</li>
                         <li>ราคานี้รวมค่าติดตั้งแล้ว</li>
-                        <li>ชำระมัดจำ 50% เพื่อยืนยันการสั่งผลิต</li>
+                        <li>ชำระมัดจำ 50% เพื่อยืนยันการสั่งผลิตสินค้า</li>
+                        <li>ใบเสนอราคานี้มีอายุ 30 วัน นับจากวันที่เสนอราคา</li>
                     </ul>
+                    <div class="pdf-amount-text">
+                        ( ${bahttext(grandTotal)} )
+                    </div>
                 </div>
-                <div class="totals">
-                    <p><span>รวมเป็นเงิน:</span> <span>${fmt(subTotal, 2, true)}</span></p>
-                    <p><span>ภาษีมูลค่าเพิ่ม ${SHOP_CONFIG.vatRate * 100}%:</span> <span>${fmt(vatAmount, 2, true)}</span></p>
-                    <p class="grand-total-pdf"><span>ยอดรวมสุทธิ:</span> <span>${fmt(grandTotal, 2, true)}</span></p>
+                <div class="pdf-totals-block">
+                    <table>
+                        <tr>
+                            <td colspan="2" class="pdf-label">รวมเป็นเงิน</td>
+                            <td class="pdf-amount">${fmt(subTotal, 2, true)}</td>
+                        </tr>
+                        ${vatDisplay}
+                        <tr class="pdf-grand-total">
+                            <td colspan="2" class="pdf-label">ยอดรวมสุทธิ</td>
+                            <td class="pdf-amount">${fmt(grandTotal, 2, true)}</td>
+                        </tr>
+                    </table>
                 </div>
-            </div>
-             <div class="grand-total-thai">
-                <strong>( ${bahttext(grandTotal)} )</strong>
-            </div>
-            <div class="pdf-footer">
-                <div class="signature">
-                    <p>_________________________</p>
-                    <p>(.................................................)</p>
+            </section>
+
+            <footer class="pdf-footer-section">
+                <div class="pdf-signature-box">
+                    <p>.................................................</p>
                     <p>ผู้เสนอราคา</p>
+                    <p>วันที่: ${dateThai}</p>
                 </div>
-                <div class="thank-you">
-                    ขอขอบคุณที่ให้ความไว้วางใจในบริการของเรา
+                <div class="pdf-signature-box pdf-company-stamp">
+                    <p><strong>${SHOP_CONFIG.name}</strong></p>
+                    <p>ขอขอบคุณที่ให้ความไว้วางใจในบริการของเรา</p>
                 </div>
-            </div>
+                <div class="pdf-signature-box">
+                     <p>.................................................</p>
+                    <p>ลูกค้า / ผู้มีอำนาจลงนาม</p>
+                    <p>วันที่: ......./......./............</p>
+                </div>
+            </footer>
+        </div>
         `;
 
         const customerName = payload.customer_name.trim().replace(/\s+/g, '-') || 'quote';
         const fileName = `${quoteNumber}_${customerName}.pdf`;
 
         const opt = {
-            margin:       [10, 10, 10, 10],
+            margin:       [5, 5, 5, 5],
             filename:     fileName,
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
+            html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
