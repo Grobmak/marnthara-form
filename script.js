@@ -62,7 +62,7 @@
         menuBtn: '#menuBtn', menuDropdown: '#menuDropdown', importBtn: '#importBtn', exportBtn: '#exportBtn', fileImporter: '#fileImporter',
         submitBtn: '#submitBtn',
         clearItemsBtn: '#clearItemsBtn',
-        exportPdfBtn: '#exportPdfBtn' // NEW
+        exportPdfBtn: '#exportPdfBtn'
     };
 
     // --- STATE ---
@@ -78,16 +78,27 @@
     const clamp01 = v => Math.max(0, toNum(v));
     const fmt = (n, fixed = 2, asCurrency = false) => {
         if (!Number.isFinite(n)) return "0";
-        const options = {
+<<<<<<< HEAD
+        return n.toLocaleString("th-TH", {
             minimumFractionDigits: asCurrency ? 0 : fixed,
             maximumFractionDigits: asCurrency ? 0 : fixed
+        });
+=======
+        const options = {
+            minimumFractionDigits: asCurrency ? 2 : fixed,
+            maximumFractionDigits: asCurrency ? 2 : fixed
         };
-        // Use 'en-US' for number formatting in PDF to match example format
-        // Use 'th-TH' for UI display
-        const locale = document.getElementById('quotation-template')?.innerHTML ? 'en-US' : 'th-TH';
-        return n.toLocaleString(locale, options);
+        return n.toLocaleString('en-US', options);
     };
-
+    const fmtTH = (n, fixed = 0) => {
+        if (!Number.isFinite(n)) return "0";
+         const options = {
+            minimumFractionDigits: fixed,
+            maximumFractionDigits: fixed
+        };
+        return n.toLocaleString('th-TH', options);
+>>>>>>> d7228c3 (PDF แก้หน้าเปล่า)
+    };
     const debounce = (fn, ms = 150) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
     const stylePlus = s => PRICING.style_surcharge[s] ?? 0;
     const heightPlus = h => {
@@ -96,11 +107,6 @@
         return 0;
     };
 
-    /**
-     * Converts a number to Thai text representation (Bahttext).
-     * @param {number} num The number to convert.
-     * @returns {string} The Thai text representation.
-     */
     function bahttext(num) {
         num = Number(num);
         if (isNaN(num)) return "ข้อมูลตัวเลขไม่ถูกต้อง";
@@ -325,7 +331,7 @@
             created.querySelector('[name="deco_type"]').value = type;
             created.querySelector('[name="deco_width_m"]').value = prefill.width_m > 0 ? prefill.width_m.toFixed(2) : "";
             created.querySelector('[name="deco_height_m"]').value = prefill.height_m > 0 ? prefill.height_m.toFixed(2) : "";
-            created.querySelector('[name="deco_price_sqyd"]').value = fmt(prefill.price_sqyd, 0, true) ?? "";
+            created.querySelector('[name="deco_price_sqyd"]').value = fmtTH(prefill.price_sqyd) ?? "";
             created.querySelector('[name="deco_code"]').value = prefill.deco_code || "";
             created.querySelector('[name="deco_notes"]').value = prefill.deco_notes || "";
             const displayEl = created.querySelector('.deco-type-display');
@@ -352,8 +358,8 @@
         if (prefill) {
             created.querySelector('[name="wallpaper_height_m"]').value = prefill.height_m > 0 ? prefill.height_m.toFixed(2) : "";
             created.querySelector('[name="wallpaper_code"]').value = prefill.wallpaper_code || "";
-            created.querySelector('[name="wallpaper_price_roll"]').value = fmt(prefill.price_per_roll, 0, true) ?? "";
-            created.querySelector('[name="wallpaper_install_cost"]').value = fmt(prefill.install_cost_per_roll ?? 300, 0, true);
+            created.querySelector('[name="wallpaper_price_roll"]').value = fmtTH(prefill.price_per_roll) ?? "";
+            created.querySelector('[name="wallpaper_install_cost"]').value = fmtTH(prefill.install_cost_per_roll ?? 300);
             created.querySelector('[name="wallpaper_notes"]').value = prefill.wallpaper_notes || "";
             (prefill.widths || []).forEach(w => addWall(created.querySelector('[data-act="add-wall"]'), w));
             if (prefill.is_suspended) suspendItem(created, true, false);
@@ -471,16 +477,16 @@
                     if (opaquePrice + sheerPrice > 0) pricedItemCount++;
                 }
                 const totalSetPrice = opaquePrice + sheerPrice;
-                let summaryHtml = `ราคา: <b>${fmt(totalSetPrice, 0, true)}</b> บ.`;
+                let summaryHtml = `ราคา: <b>${fmtTH(totalSetPrice)}</b> บ.`;
                 const details = [];
-                if (opaquePrice > 0) details.push(`ทึบ: ${fmt(opaquePrice, 0, true)}`);
-                if (sheerPrice > 0) details.push(`โปร่ง: ${fmt(sheerPrice, 0, true)}`);
+                if (opaquePrice > 0) details.push(`ทึบ: ${fmtTH(opaquePrice)}`);
+                if (sheerPrice > 0) details.push(`โปร่ง: ${fmtTH(sheerPrice)}`);
                 if (details.length > 0 && totalSetPrice > 0) summaryHtml += ` <small>(${details.join(', ')})</small>`;
                 set.querySelector('[data-set-summary]').innerHTML = summaryHtml;
-                set.querySelector('[data-set-yardage-opaque]').textContent = fmt(opaqueYards, 2);
-                set.querySelector('[data-set-opaque-track]').textContent = fmt(opaqueTrack, 2);
-                set.querySelector('[data-set-yardage-sheer]').textContent = fmt(sheerYards, 2);
-                set.querySelector('[data-set-sheer-track]').textContent = fmt(sheerTrack, 2);
+                set.querySelector('[data-set-yardage-opaque]').textContent = fmtTH(opaqueYards, 2);
+                set.querySelector('[data-set-opaque-track]').textContent = fmtTH(opaqueTrack, 2);
+                set.querySelector('[data-set-yardage-sheer]').textContent = fmtTH(sheerYards, 2);
+                set.querySelector('[data-set-sheer-track]').textContent = fmtTH(sheerTrack, 2);
                 roomSum += opaquePrice + sheerPrice;
                 grandOpaqueYards += opaqueYards;
                 grandSheerYards += sheerYards;
@@ -503,7 +509,7 @@
                         if(type) decoCounts[type] = (decoCounts[type] || 0) + 1;
                     }
                 }
-                deco.querySelector('[data-deco-summary]').innerHTML = `ราคา: <b>${fmt(decoPrice, 0, true)}</b> บ. • พื้นที่: <b>${fmt(areaSqyd, 2)}</b> ตร.หลา`;
+                deco.querySelector('[data-deco-summary]').innerHTML = `ราคา: <b>${fmtTH(decoPrice)}</b> บ. • พื้นที่: <b>${fmtTH(areaSqyd, 2)}</b> ตร.หลา`;
                 roomSum += decoPrice;
             });
 
@@ -525,19 +531,19 @@
                         if (Number.isFinite(rollsNeeded)) totalWallpaperRolls += rollsNeeded;
                     }
                 }
-                let summaryHtml = `รวม: <b>${fmt(totalItemPrice, 0, true)}</b> บ.`;
-                if (totalItemPrice > 0) summaryHtml += ` <small>(วอลล์: ${fmt(materialPrice, 0, true)}, ค่าช่าง: ${fmt(installPrice, 0, true)})</small>`;
-                summaryHtml += ` • พื้นที่: <b>${fmt(areaSqm, 2)}</b> ตร.ม. • ใช้: <b>${Number.isFinite(rollsNeeded) ? rollsNeeded : 'N/A'}</b> ม้วน`;
+                let summaryHtml = `รวม: <b>${fmtTH(totalItemPrice)}</b> บ.`;
+                if (totalItemPrice > 0) summaryHtml += ` <small>(วอลล์: ${fmtTH(materialPrice)}, ค่าช่าง: ${fmtTH(installPrice)})</small>`;
+                summaryHtml += ` • พื้นที่: <b>${fmtTH(areaSqm, 2)}</b> ตร.ม. • ใช้: <b>${Number.isFinite(rollsNeeded) ? rollsNeeded : 'N/A'}</b> ม้วน`;
                 wallpaper.querySelector('[data-wallpaper-summary]').innerHTML = summaryHtml;
                 roomSum += totalItemPrice;
             });
 
             const itemCount = room.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`).length;
-            room.querySelector('[data-room-brief]').innerHTML = `<span>${itemCount} รายการ • ${fmt(roomSum, 0, true)} บาท</span>`;
+            room.querySelector('[data-room-brief]').innerHTML = `<span>${itemCount} รายการ • ${fmtTH(roomSum)} บาท</span>`;
             grand += roomSum;
         });
 
-        document.querySelector(SELECTORS.grandTotal).textContent = fmt(grand, 0, true);
+        document.querySelector(SELECTORS.grandTotal).textContent = fmtTH(grand);
         document.querySelector(SELECTORS.setCount).textContent = pricedItemCount;
 
         // UPDATE DETAILED MATERIAL SUMMARY
@@ -546,10 +552,10 @@
             let html = '';
             if (grandOpaqueYards > 0 || grandSheerYards > 0) {
                 html += `<h4><i class="ph-bold ph-blinds"></i> ผ้าม่าน</h4><ul>`;
-                if (grandOpaqueYards > 0) html += `<li>ผ้าทึบ: <b>${fmt(grandOpaqueYards)}</b> หลา</li>`;
-                if (grandSheerYards > 0) html += `<li>ผ้าโปร่ง: <b>${fmt(grandSheerYards)}</b> หลา</li>`;
-                if (grandOpaqueTrack > 0) html += `<li>รางทึบ: <b>${fmt(grandOpaqueTrack)}</b> ม.</li>`;
-                if (grandSheerTrack > 0) html += `<li>รางโปร่ง: <b>${fmt(grandSheerTrack)}</b> ม.</li>`;
+                if (grandOpaqueYards > 0) html += `<li>ผ้าทึบ: <b>${fmtTH(grandOpaqueYards, 2)}</b> หลา</li>`;
+                if (grandSheerYards > 0) html += `<li>ผ้าโปร่ง: <b>${fmtTH(grandSheerYards, 2)}</b> หลา</li>`;
+                if (grandOpaqueTrack > 0) html += `<li>รางทึบ: <b>${fmtTH(grandOpaqueTrack, 2)}</b> ม.</li>`;
+                if (grandSheerTrack > 0) html += `<li>รางโปร่ง: <b>${fmtTH(grandSheerTrack, 2)}</b> ม.</li>`;
                 if (hasDoubleBracket) html += `<li class="summary-note">** มีรายการที่ต้องใช้ขาสองชั้น</li>`;
                 html += `</ul>`;
             }
@@ -662,7 +668,6 @@
     }
 
     // --- TEXT SUMMARY BUILDERS (LINE-Optimized) ---
-    // ... [All `build...Summary` functions remain unchanged] ...
     function buildCustomerSummary(payload) {
         let summary = "";
         let grandTotal = 0;
@@ -692,7 +697,7 @@
                 if (setPrice > 0) {
                     roomTotal += setPrice;
                     hasContent = true;
-                    roomDetailsText += `  - ผ้าม่าน #${sIdx + 1}: ${fmt(setPrice, 0, true)} บ.\n`;
+                    roomDetailsText += `  - ผ้าม่าน #${sIdx + 1}: ${fmtTH(setPrice)} บ.\n`;
                 }
             });
              room.decorations.forEach((deco, dIdx) => {
@@ -701,7 +706,7 @@
                 if(decoPrice > 0) {
                     roomTotal += decoPrice;
                     hasContent = true;
-                    roomDetailsText += `  - ${deco.type || 'ตกแต่ง'} #${dIdx + 1}: ${fmt(decoPrice, 0, true)} บ.\n`;
+                    roomDetailsText += `  - ${deco.type || 'ตกแต่ง'} #${dIdx + 1}: ${fmtTH(decoPrice)} บ.\n`;
                 }
             });
             room.wallpapers.forEach((wp, wIdx) => {
@@ -715,19 +720,19 @@
                 if (wpPrice > 0) {
                     roomTotal += wpPrice;
                     hasContent = true;
-                    roomDetailsText += `  - วอลเปเปอร์ #${wIdx + 1}: ${fmt(wpPrice, 0, true)} บ.\n`;
+                    roomDetailsText += `  - วอลเปเปอร์ #${wIdx + 1}: ${fmtTH(wpPrice)} บ.\n`;
                 }
             });
 
             if (hasContent) {
                 summary += `*ห้อง ${room.room_name || `ห้อง ${rIdx + 1}`}*\n`;
-                summary += `(รวม ${fmt(roomTotal, 0, true)} บ.)\n${roomDetailsText}\n`;
+                summary += `(รวม ${fmtTH(roomTotal)} บ.)\n${roomDetailsText}\n`;
             }
             grandTotal += roomTotal;
         });
 
         summary += `====================\n`;
-        summary += `*รวมราคาสุทธิ: ${fmt(grandTotal, 0, true)} บาท*\n`;
+        summary += `*รวมราคาสุทธิ: ${fmtTH(grandTotal)} บาท*\n`;
         return summary;
     }
 
@@ -748,7 +753,7 @@
              sets.forEach((set, sIdx) => {
                  summary += `\n*ชุดที่ ${sIdx + 1} (${set.fabric_variant})*\n`;
                  summary += `ขนาด:\n`;
-                 summary += `  กว้าง ${fmt(set.width_m, 2)} x สูง ${fmt(set.height_m, 2)} ม.\n`;
+                 summary += `  กว้าง ${fmtTH(set.width_m, 2)} x สูง ${fmtTH(set.height_m, 2)} ม.\n`;
                  summary += `รูปแบบ: ${set.style}\n`;
                  summary += `การเปิด: ${set.opening_style}\n`;
                  if (set.fabric_variant === "ทึบ&โปร่ง") {
@@ -805,17 +810,17 @@
                 roomTotal += setTotal;
 
                 summary += `\n*ผ้าม่าน #${sIdx+1} (${set.style}, ${set.fabric_variant})*\n`;
-                summary += `  - ราคา: ${fmt(setTotal,0,true)} บ.\n`;
-                summary += `  - ขนาด: ${fmt(set.width_m, 2)}x${fmt(set.height_m, 2)} ม.\n`;
+                summary += `  - ราคา: ${fmtTH(setTotal)} บ.\n`;
+                summary += `  - ขนาด: ${fmtTH(set.width_m, 2)}x${fmtTH(set.height_m, 2)} ม.\n`;
                 if(opaquePrice > 0) {
-                    summary += `  - ทึบ: ${fmt(set.price_per_m_raw,0,true)}/ม. (ใช้ ${fmt(opaqueYards)} หลา, รหัส: ${set.fabric_code || '-'}) \n`;
+                    summary += `  - ทึบ: ${fmtTH(set.price_per_m_raw)}/ม. (ใช้ ${fmtTH(opaqueYards, 2)} หลา, รหัส: ${set.fabric_code || '-'}) \n`;
                 }
                  if(sheerPrice > 0) {
                     const sheerCode = (set.fabric_variant === "ทึบ&โปร่ง") ? set.sheer_fabric_code : set.fabric_code;
-                    summary += `  - โปร่ง: ${fmt(set.sheer_price_per_m,0,true)}/ม. (ใช้ ${fmt(sheerYards)} หลา, รหัส: ${sheerCode || '-'}) \n`;
+                    summary += `  - โปร่ง: ${fmtTH(set.sheer_price_per_m)}/ม. (ใช้ ${fmtTH(sheerYards, 2)} หลา, รหัส: ${sheerCode || '-'}) \n`;
                 }
                 if (set.width_m > 0) {
-                    summary += `  - ราง: สี${set.track_color}, ${fmt(set.width_m)} ม.\n`;
+                    summary += `  - ราง: สี${set.track_color}, ${fmtTH(set.width_m, 2)} ม.\n`;
                 }
                 if (set.fabric_variant === "ทึบ&โปร่ง") {
                     summary += `  - **ต้องใช้ขาสองชั้น**\n`;
@@ -831,11 +836,11 @@
                 roomTotal += decoPrice;
 
                 summary += `\n*${deco.type || 'ตกแต่ง'} #${dIdx+1}*\n`;
-                summary += `  - ราคา: ${fmt(decoPrice,0,true)} บ.\n`;
+                summary += `  - ราคา: ${fmtTH(decoPrice)} บ.\n`;
                 summary += `  - รหัส: ${deco.deco_code || '-'}\n`;
-                summary += `  - ขนาด: ${fmt(deco.width_m, 2)}x${fmt(deco.height_m, 2)} ม.\n`;
-                summary += `  - พื้นที่: ${fmt(areaSqyd,2)} ตร.หลา\n`;
-                summary += `  - ราคา: ${fmt(deco.price_sqyd,0,true)}/ตร.หลา\n`;
+                summary += `  - ขนาด: ${fmtTH(deco.width_m, 2)}x${fmtTH(deco.height_m, 2)} ม.\n`;
+                summary += `  - พื้นที่: ${fmtTH(areaSqyd,2)} ตร.หลา\n`;
+                summary += `  - ราคา: ${fmtTH(deco.price_sqyd)}/ตร.หลา\n`;
             });
 
             room.wallpapers.forEach((wp, wIdx) => {
@@ -852,13 +857,13 @@
                 roomTotal += wpPrice;
 
                 summary += `\n*วอลเปเปอร์ #${wIdx+1}*\n`;
-                summary += `  - ราคา: ${fmt(wpPrice,0,true)} บ.\n`;
+                summary += `  - ราคา: ${fmtTH(wpPrice)} บ.\n`;
                 summary += `  - รหัส: ${wp.wallpaper_code || '-'}\n`;
-                summary += `  - สูง: ${fmt(wp.height_m, 2)} ม., กว้าง: ${fmt(totalWidth,2)} ม.\n`;
-                summary += `  - พื้นที่: ${fmt(areaSqm,2)} ตร.ม.\n`;
+                summary += `  - สูง: ${fmtTH(wp.height_m, 2)} ม., กว้าง: ${fmtTH(totalWidth,2)} ม.\n`;
+                summary += `  - พื้นที่: ${fmtTH(areaSqm,2)} ตร.ม.\n`;
                 summary += `  - คำนวณ: ใช้ ${rolls} ม้วน\n`;
             });
-            summary += `   *ยอดรวมห้องนี้: ${fmt(roomTotal, 0, true)} บาท*\n`;
+            summary += `   *ยอดรวมห้องนี้: ${fmtTH(roomTotal)} บาท*\n`;
             summary += `--------------------\n`;
             grandTotal += roomTotal;
         });
@@ -872,7 +877,7 @@
                  });
              });
         }
-        summary += `\n*รวมราคาสุทธิทั้งหมด: ${fmt(grandTotal, 0, true)} บาท*\n`;
+        summary += `\n*รวมราคาสุทธิทั้งหมด: ${fmtTH(grandTotal)} บาท*\n`;
         return summary;
     }
 
@@ -891,18 +896,18 @@
                 if (set.fabric_variant.includes("ทึบ")) {
                     sections.curtains += `\n*ผ้าทึบ #${itemCounter}*\n`;
                     sections.curtains += ` • รหัส: ${set.fabric_code || '-'}\n`;
-                    sections.curtains += ` • จำนวน: ${fmt(fabricYards)} หลา\n`;
+                    sections.curtains += ` • จำนวน: ${fmtTH(fabricYards, 2)} หลา\n`;
                 }
                 if (set.fabric_variant.includes("โปร่ง")) {
                      const sheerCode = (set.fabric_variant === "ทึบ&โปร่ง") ? set.sheer_fabric_code : set.fabric_code;
                      sections.curtains += `\n*ผ้าโปร่ง #${itemCounter}*\n`;
                      sections.curtains += ` • รหัส: ${sheerCode || '-'}\n`;
-                     sections.curtains += ` • จำนวน: ${fmt(fabricYards)} หลา\n`;
+                     sections.curtains += ` • จำนวน: ${fmtTH(fabricYards, 2)} หลา\n`;
                 }
                 sections.curtains += `\n*ราง #${itemCounter}*\n`;
                 sections.curtains += ` • รูปแบบ: ราง${set.style}\n`;
                 sections.curtains += ` • สี: ${set.track_color || '-'}\n`;
-                sections.curtains += ` • ขนาด: ${fmt(set.width_m)} ม. (1 เส้น)\n`;
+                sections.curtains += ` • ขนาด: ${fmtTH(set.width_m, 2)} ม. (1 เส้น)\n`;
                 if (set.fabric_variant === "ทึบ&โปร่ง") sections.curtains += `**[!] เตือน: ต้องใช้ขาสองชั้น**\n`;
                 itemCounter++;
             });
@@ -911,7 +916,7 @@
                  if (deco.is_suspended || deco.width_m <= 0) return;
                  sections.decorations += `\n*${deco.type || 'ตกแต่ง'} #${itemCounter}*\n`;
                  sections.decorations += ` • รหัส: ${deco.deco_code || '-'}\n`;
-                 sections.decorations += ` • ขนาด: ${fmt(deco.width_m)} x ${fmt(deco.height_m)} ม.\n`;
+                 sections.decorations += ` • ขนาด: ${fmtTH(deco.width_m, 2)} x ${fmtTH(deco.height_m, 2)} ม.\n`;
                  if(deco.deco_notes) sections.decorations += ` • โน้ต: ${deco.deco_notes}\n`;
                  sections.decorations += ` • [ ] แนบรูป\n`;
                  itemCounter++;
@@ -946,19 +951,23 @@
         // orderForm.submit(); // This is commented out by default
     }
 
-    // --- NEW: PDF Generation (REVISED TEMPLATE) ---
+<<<<<<< HEAD
+    // --- NEW: PDF Generation ---
+=======
+    // --- NEW: PDF Generation (REVISED & FIXED) ---
+>>>>>>> d7228c3 (PDF แก้หน้าเปล่า)
     async function generatePdfQuotation() {
         showToast('กำลังสร้างใบเสนอราคา...', 'default');
         const payload = buildPayload();
-        const quotationEl = document.querySelector('#quotation-template');
-        if (!quotationEl) {
-            showToast('ไม่พบเทมเพลตใบเสนอราคา', 'error');
-            return;
-        }
-
+        
+        // Create a temporary element to render the quotation content
+        const printableElement = document.createElement('div');
+        
         const today = new Date();
-        const dateThai = today.toLocaleDateString('th-TH', { year: 'numeric', month: '2-digit', day: '2-digit' });
-        const quoteNumber = `QT-${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
+        const dateThai = today.toLocaleDateString('th-TH', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        });
+        const quoteNumber = `QT-${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}-${today.getHours().toString().padStart(2, '0')}${today.getMinutes().toString().padStart(2, '0')}`;
 
         let tableRows = '';
         let itemNo = 1;
@@ -967,19 +976,22 @@
         payload.rooms.forEach(room => {
             if (room.is_suspended) return;
             const roomName = room.room_name || 'ไม่ระบุชื่อห้อง';
+<<<<<<< HEAD
+            tableRows += `<tr class="room-header"><td colspan="5">${roomName}</td></tr>`;
+=======
             let hasItemsInRoom = false;
 
-            const roomItems = [];
-
-            // Gather items to check if room should be displayed
-            room.sets.forEach(set => { if (!set.is_suspended && (stylePlus(set.style) + heightPlus(set.height_m) + set.price_per_m_raw + set.sheer_price_per_m > 0)) hasItemsInRoom = true; });
-            room.decorations.forEach(deco => { if (!deco.is_suspended && deco.price_sqyd > 0) hasItemsInRoom = true; });
-            room.wallpapers.forEach(wp => { if (!wp.is_suspended && wp.price_per_roll > 0) hasItemsInRoom = true; });
-
+            // Pre-check if there are any valid items in the room
+            if (room.sets.some(s => !s.is_suspended && s.width_m > 0 && s.price_per_m_raw > 0) ||
+                room.decorations.some(d => !d.is_suspended && d.width_m > 0 && d.price_sqyd > 0) ||
+                room.wallpapers.some(w => !w.is_suspended && w.widths.reduce((a, b) => a + b, 0) > 0 && w.price_per_roll > 0)) {
+                hasItemsInRoom = true;
+            }
+            
             if (!hasItemsInRoom) return;
 
-             tableRows += `<tr class="pdf-room-header"><td colspan="5">ห้อง: ${roomName}</td></tr>`;
-
+            tableRows += `<tr class="pdf-room-header"><td colspan="5">ห้อง: ${roomName}</td></tr>`;
+>>>>>>> d7228c3 (PDF แก้หน้าเปล่า)
 
             room.sets.forEach(set => {
                 if (set.is_suspended) return;
@@ -996,16 +1008,20 @@
                 }
                 const totalSetPrice = opaquePrice + sheerPrice;
                 if (totalSetPrice > 0) {
-                    let desc = `ผ้าม่าน ${set.style} (${set.fabric_variant}) <br><small>ขนาด ${fmt(w,2)} x ${fmt(h,2)} ม.`;
+<<<<<<< HEAD
+                    let desc = `ผ้าม่าน ${set.style} (${set.fabric_variant}) <br><small>ขนาด ${fmt(w)} x ${fmt(h)} ม.`;
+=======
+                    let desc = `ผ้าม่าน ${set.style} (${set.fabric_variant}) <br><small>ขนาด ${w.toFixed(2)} x ${h.toFixed(2)} ม.`;
+>>>>>>> d7228c3 (PDF แก้หน้าเปล่า)
                     if(set.notes) desc += ` - ${set.notes}`;
                     desc += '</small>';
                     tableRows += `
                         <tr>
-                            <td class="pdf-text-center">${itemNo++}</td>
+                            <td>${itemNo++}</td>
                             <td>${desc}</td>
-                            <td class="pdf-text-center">1</td>
-                            <td class="pdf-text-right">${fmt(totalSetPrice, 2, true)}</td>
-                            <td class="pdf-text-right">${fmt(totalSetPrice, 2, true)}</td>
+                            <td>1</td>
+                            <td>${fmt(totalSetPrice, 0, true)}</td>
+                            <td>${fmt(totalSetPrice, 0, true)}</td>
                         </tr>`;
                     subTotal += totalSetPrice;
                 }
@@ -1015,14 +1031,18 @@
                 const areaSqyd = deco.width_m * deco.height_m * SQM_TO_SQYD;
                 const decoPrice = Math.round(areaSqyd * deco.price_sqyd);
                 if (decoPrice > 0) {
-                    let desc = `${deco.type || 'งานตกแต่ง'} <br><small>รหัส: ${deco.deco_code || '-'}, ขนาด ${fmt(deco.width_m,2)} x ${fmt(deco.height_m,2)} ม.</small>`;
+<<<<<<< HEAD
+                    let desc = `${deco.type || 'งานตกแต่ง'} <br><small>รหัส: ${deco.deco_code || '-'}, ขนาด ${fmt(deco.width_m)} x ${fmt(deco.height_m)} ม.</small>`;
+=======
+                    let desc = `${deco.type || 'งานตกแต่ง'} <br><small>รหัส: ${deco.deco_code || '-'}, ขนาด ${deco.width_m.toFixed(2)} x ${deco.height_m.toFixed(2)} ม.</small>`;
+>>>>>>> d7228c3 (PDF แก้หน้าเปล่า)
                     tableRows += `
                          <tr>
-                            <td class="pdf-text-center">${itemNo++}</td>
+                            <td>${itemNo++}</td>
                             <td>${desc}</td>
-                            <td class="pdf-text-center">1</td>
-                            <td class="pdf-text-right">${fmt(decoPrice, 2, true)}</td>
-                            <td class="pdf-text-right">${fmt(decoPrice, 2, true)}</td>
+                            <td>1</td>
+                            <td>${fmt(decoPrice, 0, true)}</td>
+                            <td>${fmt(decoPrice, 0, true)}</td>
                         </tr>`;
                     subTotal += decoPrice;
                 }
@@ -1030,153 +1050,228 @@
             room.wallpapers.forEach(wp => {
                 if (wp.is_suspended) return;
                 const totalWidth = wp.widths.reduce((a, b) => a + b, 0);
+                if (totalWidth <= 0) return;
                 const rolls = CALC.wallpaperRolls(totalWidth, wp.height_m);
                 const materialPrice = Math.round(rolls * wp.price_per_roll);
                 const installPrice = Math.round(rolls * (wp.install_cost_per_roll || 0));
                 const wpPrice = materialPrice + installPrice;
                 if (wpPrice > 0) {
-                     let desc = `วอลเปเปอร์ <br><small>รหัส: ${wp.wallpaper_code || '-'}, สูง ${fmt(wp.height_m,2)} ม. (ใช้ ${rolls} ม้วน)</small>`;
+<<<<<<< HEAD
+                     let desc = `วอลเปเปอร์ <br><small>รหัส: ${wp.wallpaper_code || '-'}, สูง ${fmt(wp.height_m)} ม. (ใช้ ${rolls} ม้วน)</small>`;
+=======
+                     let desc = `วอลเปเปอร์ <br><small>รหัส: ${wp.wallpaper_code || '-'}, สูง ${wp.height_m.toFixed(2)} ม. (ใช้ ${rolls} ม้วน)</small>`;
+>>>>>>> d7228c3 (PDF แก้หน้าเปล่า)
                      tableRows += `
                          <tr>
-                            <td class="pdf-text-center">${itemNo++}</td>
+                            <td>${itemNo++}</td>
                             <td>${desc}</td>
-                            <td class="pdf-text-center">1</td>
-                            <td class="pdf-text-right">${fmt(wpPrice, 2, true)}</td>
-                            <td class="pdf-text-right">${fmt(wpPrice, 2, true)}</td>
+                            <td>1</td>
+                            <td>${fmt(wpPrice, 0, true)}</td>
+                            <td>${fmt(wpPrice, 0, true)}</td>
                         </tr>`;
                     subTotal += wpPrice;
                 }
             });
         });
+        
+        if (subTotal === 0) {
+            showToast('ไม่มีรายการที่มีราคาสำหรับสร้างใบเสนอราคา', 'warning');
+            return;
+        }
 
         const vatAmount = subTotal * SHOP_CONFIG.vatRate;
         const grandTotal = subTotal + vatAmount;
-        const vatDisplay = SHOP_CONFIG.vatRate > 0 ? `
-            <tr>
-                <td colspan="2" class="pdf-label">ภาษีมูลค่าเพิ่ม ${SHOP_CONFIG.vatRate * 100}%</td>
-                <td class="pdf-amount">${fmt(vatAmount, 2, true)}</td>
-            </tr>` : '';
 
+<<<<<<< HEAD
         quotationEl.innerHTML = `
-        <div class="pdf-container">
-            <header class="pdf-header">
-                <div class="pdf-shop-info">
-                    <img src="${SHOP_CONFIG.logoUrl}" alt="Logo" class="pdf-logo">
-                    <div class="pdf-shop-address">
+            <div class="pdf-header">
+                <div class="shop-info">
+                    <img src="${SHOP_CONFIG.logoUrl}" alt="Logo" class="logo">
+                    <div>
                         <strong>${SHOP_CONFIG.name}</strong><br>
                         ${SHOP_CONFIG.address}<br>
-                        โทร: ${SHOP_CONFIG.phone} | เลขประจำตัวผู้เสียภาษี: ${SHOP_CONFIG.taxId}
+                        โทร: ${SHOP_CONFIG.phone}<br>
+                        เลขประจำตัวผู้เสียภาษี: ${SHOP_CONFIG.taxId}
                     </div>
                 </div>
-                <div class="pdf-quote-details">
-                    <div class="pdf-title-box">
-                        <h1>ใบเสนอราคา / Quotation</h1>
-                    </div>
-                    <table class="pdf-quote-meta">
-                        <tr>
-                            <td>เลขที่:</td>
-                            <td>${quoteNumber}</td>
-                        </tr>
-                        <tr>
-                            <td>วันที่:</td>
-                            <td>${dateThai}</td>
-                        </tr>
-                    </table>
+                <div class="quote-info">
+                    <h1>ใบเสนอราคา</h1>
+                    <p><strong>เลขที่:</strong> ${quoteNumber}</p>
+                    <p><strong>วันที่:</strong> ${dateThai}</p>
                 </div>
-            </header>
-
-            <section class="pdf-customer-details">
-                <div class="pdf-customer-info">
-                    <strong>ชื่อลูกค้า:</strong> ${payload.customer_name || '..............................................'}<br>
-                    <strong>ที่อยู่:</strong> ${payload.customer_address || '..............................................'}<br>
-                    <strong>โทร:</strong> ${payload.customer_phone || '..............................................'}
-                </div>
-                <div class="pdf-customer-meta">
-                     <strong>เงื่อนไขการชำระเงิน:</strong> ชำระมัดจำ 50%<br>
-                     <strong>ยืนราคา:</strong> 30 วัน
-                </div>
-            </section>
-
-            <table class="pdf-items-table">
+            </div>
+            <div class="customer-info">
+                <strong>เรียน (ลูกค้า):</strong><br>
+                ${payload.customer_name || 'ไม่ได้ระบุชื่อ'}<br>
+                ${payload.customer_address || 'ไม่ได้ระบุที่อยู่'}<br>
+                โทร: ${payload.customer_phone || '-'}
+            </div>
+            <table class="items-table">
                 <thead>
                     <tr>
-                        <th style="width:5%;">ลำดับ</th>
-                        <th style="width:50%;">รายการ</th>
-                        <th style="width:10%;">จำนวน</th>
-                        <th style="width:17.5%;">ราคา/หน่วย</th>
-                        <th style="width:17.5%;">จำนวนเงิน (บาท)</th>
+                        <th>#</th>
+                        <th>รายการ</th>
+                        <th>จำนวน</th>
+                        <th>ราคา/หน่วย</th>
+                        <th>ราคารวม</th>
                     </tr>
                 </thead>
-                <tbody>
-                    ${tableRows}
-                </tbody>
+                <tbody>${tableRows}</tbody>
             </table>
-
-            <section class="pdf-summary-section">
-                <div class="pdf-amount-in-words">
-                    <strong>หมายเหตุ:</strong>
+            <div class="pdf-summary">
+                <div class="notes">
+                     <strong>หมายเหตุ:</strong>
                     <ul>
+                        <li>ใบเสนอราคานี้มีอายุ 30 วัน</li>
                         <li>ราคานี้รวมค่าติดตั้งแล้ว</li>
-                        <li>ชำระมัดจำ 50% เพื่อยืนยันการสั่งผลิตสินค้า</li>
-                        <li>ใบเสนอราคานี้มีอายุ 30 วัน นับจากวันที่เสนอราคา</li>
+                        <li>ชำระมัดจำ 50% เพื่อยืนยันการสั่งผลิต</li>
                     </ul>
-                    <div class="pdf-amount-text">
-                        ( ${bahttext(grandTotal)} )
-                    </div>
                 </div>
-                <div class="pdf-totals-block">
-                    <table>
-                        <tr>
-                            <td colspan="2" class="pdf-label">รวมเป็นเงิน</td>
-                            <td class="pdf-amount">${fmt(subTotal, 2, true)}</td>
-                        </tr>
-                        ${vatDisplay}
-                        <tr class="pdf-grand-total">
-                            <td colspan="2" class="pdf-label">ยอดรวมสุทธิ</td>
-                            <td class="pdf-amount">${fmt(grandTotal, 2, true)}</td>
-                        </tr>
-                    </table>
+                <div class="totals">
+                    <p><span>รวมเป็นเงิน:</span> <span>${fmt(subTotal, 2, true)}</span></p>
+                    <p><span>ภาษีมูลค่าเพิ่ม ${SHOP_CONFIG.vatRate * 100}%:</span> <span>${fmt(vatAmount, 2, true)}</span></p>
+                    <p class="grand-total-pdf"><span>ยอดรวมสุทธิ:</span> <span>${fmt(grandTotal, 2, true)}</span></p>
                 </div>
-            </section>
-
-            <footer class="pdf-footer-section">
-                <div class="pdf-signature-box">
-                    <p>.................................................</p>
+            </div>
+             <div class="grand-total-thai">
+                <strong>( ${bahttext(grandTotal)} )</strong>
+            </div>
+            <div class="pdf-footer">
+                <div class="signature">
+                    <p>_________________________</p>
+                    <p>(.................................................)</p>
                     <p>ผู้เสนอราคา</p>
-                    <p>วันที่: ${dateThai}</p>
                 </div>
-                <div class="pdf-signature-box pdf-company-stamp">
-                    <p><strong>${SHOP_CONFIG.name}</strong></p>
-                    <p>ขอขอบคุณที่ให้ความไว้วางใจในบริการของเรา</p>
+                <div class="thank-you">
+                    ขอขอบคุณที่ให้ความไว้วางใจในบริการของเรา
                 </div>
-                <div class="pdf-signature-box">
-                     <p>.................................................</p>
-                    <p>ลูกค้า / ผู้มีอำนาจลงนาม</p>
-                    <p>วันที่: ......./......./............</p>
-                </div>
-            </footer>
+            </div>
+=======
+        // Populate the temporary element
+        printableElement.innerHTML = `
+        <div id="quotation-template">
+            <div class="pdf-container">
+                <header class="pdf-header">
+                    <div class="pdf-shop-info">
+                        <img src="${SHOP_CONFIG.logoUrl}" alt="Logo" class="pdf-logo">
+                        <div class="pdf-shop-address">
+                            <strong>${SHOP_CONFIG.name}</strong><br>
+                            ${SHOP_CONFIG.address}<br>
+                            โทร: ${SHOP_CONFIG.phone} | เลขประจำตัวผู้เสียภาษี: ${SHOP_CONFIG.taxId}
+                        </div>
+                    </div>
+                    <div class="pdf-quote-details">
+                        <div class="pdf-title-box">
+                            <h1>ใบเสนอราคา / Quotation</h1>
+                        </div>
+                        <table class="pdf-quote-meta">
+                            <tr>
+                                <td>เลขที่:</td>
+                                <td>${quoteNumber}</td>
+                            </tr>
+                            <tr>
+                                <td>วันที่:</td>
+                                <td>${dateThai}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </header>
+                <section class="pdf-customer-details">
+                    <div class="pdf-customer-info">
+                        <strong>ชื่อลูกค้า:</strong> ${payload.customer_name || '..............................................'}<br>
+                        <strong>ที่อยู่:</strong> ${payload.customer_address.replace(/\n/g, '<br>') || '..............................................'}<br>
+                        <strong>โทร:</strong> ${payload.customer_phone || '..............................................'}
+                    </div>
+                    <div class="pdf-customer-meta">
+                         <strong>เงื่อนไขการชำระเงิน:</strong> ชำระมัดจำ 50%<br>
+                         <strong>ยืนราคา:</strong> 30 วัน
+                    </div>
+                </section>
+                <table class="pdf-items-table">
+                    <thead>
+                        <tr>
+                            <th style="width:5%;">ลำดับ</th>
+                            <th style="width:50%;">รายการ</th>
+                            <th style="width:10%;">จำนวน</th>
+                            <th style="width:17.5%;">ราคา/หน่วย</th>
+                            <th style="width:17.5%;">จำนวนเงิน (บาท)</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+                <section class="pdf-summary-section">
+                    <div class="pdf-amount-in-words">
+                        <strong>หมายเหตุ:</strong>
+                        <ul>
+                            <li>ราคานี้รวมค่าติดตั้งแล้ว</li>
+                            <li>ชำระมัดจำ 50% เพื่อยืนยันการสั่งผลิตสินค้า</li>
+                            <li>ใบเสนอราคานี้มีอายุ 30 วัน นับจากวันที่เสนอราคา</li>
+                        </ul>
+                        <div class="pdf-amount-text">( ${bahttext(grandTotal)} )</div>
+                    </div>
+                    <div class="pdf-totals-block">
+                        <table>
+                            <tr>
+                                <td colspan="2" class="pdf-label">รวมเป็นเงิน</td>
+                                <td class="pdf-amount">${fmt(subTotal, 2, true)}</td>
+                            </tr>
+                            ${vatDisplay}
+                            <tr class="pdf-grand-total">
+                                <td colspan="2" class="pdf-label">ยอดรวมสุทธิ</td>
+                                <td class="pdf-amount">${fmt(grandTotal, 2, true)}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </section>
+                <footer class="pdf-footer-section">
+                    <div class="pdf-signature-box">
+                        <p>.................................................</p>
+                        <p>ผู้เสนอราคา</p>
+                        <p>วันที่: ${dateThai}</p>
+                    </div>
+                    <div class="pdf-signature-box pdf-company-stamp">
+                        <p><strong>${SHOP_CONFIG.name}</strong></p>
+                        <p>ขอขอบคุณที่ให้ความไว้วางใจในบริการของเรา</p>
+                    </div>
+                    <div class="pdf-signature-box">
+                         <p>.................................................</p>
+                        <p>ลูกค้า / ผู้มีอำนาจลงนาม</p>
+                        <p>วันที่: ......./......./............</p>
+                    </div>
+                </footer>
+            </div>
         </div>
+>>>>>>> d7228c3 (PDF แก้หน้าเปล่า)
         `;
+        
+        // Style and append the temporary element off-screen
+        printableElement.style.position = 'absolute';
+        printableElement.style.left = '-9999px';
+        printableElement.style.top = '0';
+        printableElement.style.width = '210mm'; // A4 width
+        document.body.appendChild(printableElement);
 
         const customerName = payload.customer_name.trim().replace(/\s+/g, '-') || 'quote';
         const fileName = `${quoteNumber}_${customerName}.pdf`;
 
         const opt = {
-            margin:       [5, 5, 5, 5],
+            margin:       [10, 10, 10, 10],
             filename:     fileName,
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+            html2canvas:  { scale: 2, useCORS: true },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
         try {
-            await html2pdf().from(quotationEl).set(opt).save();
+            // Generate PDF from the off-screen element
+            await html2pdf().from(printableElement.firstElementChild).set(opt).save();
             showToast('สร้าง PDF สำเร็จ!', 'success');
         } catch (error) {
             console.error("PDF Generation Error:", error);
             showToast('เกิดข้อผิดพลาดในการสร้าง PDF', 'error');
         } finally {
-            quotationEl.innerHTML = ''; // Clear template after use
+            // Clean up by removing the temporary element
+            document.body.removeChild(printableElement);
         }
     }
 
@@ -1189,9 +1284,14 @@
         const debouncedRecalcAndSave = debounce(() => { recalcAll(); saveData(); }, 150);
 
         orderForm.addEventListener("input", e => {
-            if(e.target.name === 'deco_price_sqyd' || e.target.name === 'wallpaper_price_roll' || e.target.name === 'wallpaper_install_cost') {
-                 const value = toNum(e.target.value);
-                 e.target.value = value > 0 ? value.toLocaleString('en-US') : '';
+            const el = e.target;
+            if(el.name === 'deco_price_sqyd' || el.name === 'wallpaper_price_roll' || el.name === 'wallpaper_install_cost') {
+                 const value = toNum(el.value);
+                 const cursorPosition = el.selectionStart;
+                 const oldLength = el.value.length;
+                 el.value = value > 0 ? value.toLocaleString('en-US') : '';
+                 const newLength = el.value.length;
+                 el.setSelectionRange(cursorPosition + (newLength - oldLength), cursorPosition + (newLength - oldLength));
             }
             debouncedRecalcAndSave();
         });

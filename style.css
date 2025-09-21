@@ -720,6 +720,9 @@ input[inputmode="numeric"] { text-align: left; }
 /* Specific margins for different card types during removal */
 .item-removing.card { margin-bottom: 1.5rem; }
 .item-removing.item-card { margin-bottom: 1rem; }
+<<<<<<< HEAD
+.item-removing.wall-input-row { margin-bottom: 0.5rem; }
+=======
 .item-removing.wall-input-row { margin-bottom: 0.5rem; }
 
 
@@ -733,7 +736,6 @@ input[inputmode="numeric"] { text-align: left; }
 }
 .pdf-container {
     width: 100%;
-    height: 100%;
     display: flex;
     flex-direction: column;
 }
@@ -745,7 +747,7 @@ input[inputmode="numeric"] { text-align: left; }
     padding-bottom: 5mm;
 }
 .pdf-shop-info { display: flex; align-items: flex-start; gap: 4mm; }
-.pdf-logo { max-width: 60px; max-height: 60px; }
+.pdf-logo { max-width: 60px; max-height: 60px; object-fit: contain; }
 .pdf-shop-address { font-size: 9pt; }
 .pdf-quote-details { text-align: right; }
 .pdf-title-box { background-color: var(--primary); color: var(--on-primary); padding: 2mm 5mm; margin-bottom: 2mm; }
@@ -797,6 +799,7 @@ input[inputmode="numeric"] { text-align: left; }
     margin-top: auto; /* Push to bottom */
     padding-top: 5mm;
     border-top: 1px solid #ccc;
+    page-break-inside: avoid;
 }
 .pdf-amount-in-words { flex-basis: 55%; font-size: 9pt; }
 .pdf-amount-in-words ul { padding-left: 5mm; margin: 2mm 0; }
@@ -837,6 +840,7 @@ input[inputmode="numeric"] { text-align: left; }
     margin-top: 10mm;
     border-top: 3px solid var(--primary);
     padding-top: 5mm;
+    page-break-inside: avoid;
 }
 .pdf-signature-box { flex-basis: 32%; }
 .pdf-signature-box p { margin: 1mm 0; }
@@ -849,3 +853,4 @@ input[inputmode="numeric"] { text-align: left; }
     align-items: center;
     padding: 5mm;
 }
+>>>>>>> d7228c3 (PDF แก้หน้าเปล่า)
