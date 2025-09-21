@@ -68,6 +68,22 @@
         clearItemsBtn: '#clearItemsBtn',
         generatePdfBtn: '#generatePdfBtn'
     };
+	
+	// toggle dropdown
+		document.querySelector(SELECTORS.menuBtn)?.addEventListener('click', (e) => {
+			e.preventDefault();
+			const menu = document.querySelector(SELECTORS.menuDropdown);
+		menu?.classList.toggle('show');
+});
+
+	// ปิด dropdown เมื่อคลิกนอก
+		document.addEventListener('click', (e) => {
+			const menu = document.querySelector(SELECTORS.menuDropdown);
+			const btn = document.querySelector(SELECTORS.menuBtn);
+			if (menu && !menu.contains(e.target) && !btn.contains(e.target)) {
+		menu.classList.remove('show');
+  }
+});
 
     // --- STATE ---
     let roomCount = 0;
