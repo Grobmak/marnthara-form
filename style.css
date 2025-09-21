@@ -731,14 +731,11 @@ input[inputmode="numeric"] { text-align: left; }
     background-color: #fff;
     padding: 1cm;
 }
-
 .pdf-container {
     width: 100%;
     display: flex;
     flex-direction: column;
-    min-height: 260mm; /* <-- FIX: ADD THIS LINE */
 }
-
 .pdf-header {
     display: flex;
     justify-content: space-between;
@@ -852,5 +849,4 @@ input[inputmode="numeric"] { text-align: left; }
     justify-content: center;
     align-items: center;
     padding: 5mm;
-}
 }
