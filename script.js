@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.4.0-pdf-export";
+    const APP_VERSION = "input-ui/4.4.1-pdf-hotfix";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4";
     const SQM_TO_SQYD = 1.19599;
@@ -10,9 +10,9 @@
     // +++ PDF QUOTATION CONFIGURATION +++
     const QUOTATION_CONFIG = {
         // *** ใส่ข้อมูลร้านค้าของคุณที่นี่ ***
-        company_name: "ม่านธารา เดคคอร์",
-        company_address: "123 หมู่ 4 ต.ในเมือง อ.เมือง จ.ขอนแก่น 40000",
-        company_phone: "08X-XXX-XXXX, 09X-XXX-XXXX",
+        company_name: "ม่านธารา",
+        company_address: " 65/8 หมู่ 2 ถ.พหลโยธิน ต.ท่าศาลา อ.เมือง จ.ลพบุรี 15000",
+        company_phone: "082-552-5595, 092-985-9359",
         company_logo_base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABTSURBVHhe7cEBDQAAAMKg909tDwcFAAAAAAAAAAAAAAAAAMDfA2nZAAE5QQk8AAAAAElFTkSuQmCC", // Placeholder 64x64 transparent PNG. Replace with your actual logo in base64 format.
         // คุณสามารถแปลงไฟล์รูปภาพโลโก้เป็น Base64 ได้ที่เว็บ: https://www.base64-image.de/
     };
@@ -952,7 +952,9 @@
         
         const vat = subtotal * VAT_RATE;
         const grandTotal = subtotal + vat;
-        const bahtText = `(${ThaiBaht. bahtText(grandTotal)})`;
+        
+        // CHANGE: Correctly call the ThaiBaht library using THB.ThaiBaht
+        const bahtText = `(${THB.ThaiBaht.bahtText(grandTotal)})`;
 
         const today = new Date();
         const dateString = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear() + 543}`;
