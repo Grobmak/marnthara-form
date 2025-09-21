@@ -1,20 +1,103 @@
 (function() {
     'use strict';
+
+    // --- SELF-CONTAINED THAI BAHT TEXT CONVERTER ---
+    // This function is now part of the script to avoid external library errors.
+    function convertToThaiBahtText(number) {
+        const TxtBaht = 'บาท';
+        const TxtStang = 'สตางค์';
+        const TxtThousand = 'พัน';
+        const TxtTenThousand = 'หมื่น';
+        const TxtHundredThousand = 'แสน';
+        const TxtMillion = 'ล้าน';
+        const TxtInteger = 'ถ้วน';
+        const TxtNumbers = ['', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
+        const TxtTens = ['', 'สิบ', 'ยี่สิบ', 'สามสิบ', 'สี่สิบ', 'ห้าสิบ', 'หกสิบ', 'เจ็ดสิบ', 'แปดสิบ', 'เก้าสิบ'];
+
+        number = Number(number);
+        if (isNaN(number)) return 'ข้อมูลตัวเลขไม่ถูกต้อง';
+
+        const numStr = number.toFixed(2).replace('.', ',');
+        const [bahtStr, stangStr] = numStr.split(',');
+
+        let result = '';
+        const baht = BigInt(bahtStr);
+
+        if (baht === 0n) {
+            // No action needed for zero baht
+        } else {
+            const bahtArr = Array.from(String(baht));
+            const len = bahtArr.length;
+            for (let i = 0; i < len; i++) {
+                const tmp = BigInt(bahtArr[i]);
+                if (tmp !== 0n) {
+                    if (i === (len - 1) && tmp === 1n && len > 1) {
+                        result += 'เอ็ด';
+                    } else if (i === (len - 2) && tmp === 2n) {
+                        result += TxtTens[Number(tmp)];
+                    } else if (i === (len - 2) && tmp === 1n) {
+                        result += TxtTens[Number(tmp)];
+                    } else {
+                        result += TxtNumbers[Number(tmp)];
+                    }
+
+                    const pos = len - i;
+                    if (pos === 2 || pos === 8) {
+                        // Position for 'สิบ' is handled by TxtTens
+                    } else if (pos === 3 || pos === 9) {
+                        result += 'ร้อย';
+                    } else if (pos === 4 || pos === 10) {
+                        result += TxtThousand;
+                    } else if (pos === 5 || pos === 11) {
+                        result += TxtTenThousand;
+                    } else if (pos === 6 || pos === 12) {
+                        result += TxtHundredThousand;
+                    } else if (pos === 7) {
+                        result += TxtMillion;
+                    }
+                }
+            }
+        }
+
+        result += TxtBaht;
+
+        const stang = BigInt(stangStr);
+        if (stang === 0n) {
+            result += TxtInteger;
+        } else {
+            const stangArr = Array.from(String(stang).padStart(2, '0'));
+            const len = stangArr.length;
+            for (let i = 0; i < len; i++) {
+                 const tmp = BigInt(stangArr[i]);
+                if (tmp !== 0n) {
+                    if (i === (len - 1) && tmp === 1n && stang > 10n) {
+                        result += 'เอ็ด';
+                    } else if (i === (len - 2) && tmp === 2n) {
+                        result += TxtTens[Number(tmp)];
+                    } else if (i === (len - 2) && tmp === 1n) {
+                        result += TxtTens[Number(tmp)];
+                    } else {
+                        result += TxtNumbers[Number(tmp)];
+                    }
+                }
+            }
+            result += TxtStang;
+        }
+        return result;
+    }
+
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.4.1-pdf-hotfix";
+    const APP_VERSION = "input-ui/4.4.2-pdf-stable";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4";
     const SQM_TO_SQYD = 1.19599;
     const VAT_RATE = 0.07; // 7% VAT
 
-    // +++ PDF QUOTATION CONFIGURATION +++
     const QUOTATION_CONFIG = {
-        // *** ใส่ข้อมูลร้านค้าของคุณที่นี่ ***
         company_name: "ม่านธารา เดคคอร์",
         company_address: "65/8 หมู่ 2 ถ.พหลโยธิน ต.ท่าศาลา อ.เมือง จ.ลพบุรี 15000",
         company_phone: "082-552-5595, 092-985-9359",
-        company_logo_base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABTSURBVHhe7cEBDQAAAMKg909tDwcFAAAAAAAAAAAAAAAAAMDfA2nZAAE5QQk8AAAAAElFTSuQmCC", // Placeholder 64x64 transparent PNG. Replace with your actual logo in base64 format.
-        // คุณสามารถแปลงไฟล์รูปภาพโลโก้เป็น Base64 ได้ที่เว็บ: https://www.base64-image.de/
+        company_logo_base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABTSURBVHhe7cEBDQAAAMKg909tDwcFAAAAAAAAAAAAAAAAAMDfA2nZAAE5QQk8AAAAAElFTSuQmCC", // Placeholder
     };
 
     const PRICING = {
@@ -62,14 +145,12 @@
         menuBtn: '#menuBtn', menuDropdown: '#menuDropdown', importBtn: '#importBtn', exportBtn: '#exportBtn', fileImporter: '#fileImporter',
         submitBtn: '#submitBtn',
         clearItemsBtn: '#clearItemsBtn',
-        generatePdfBtn: '#generatePdfBtn' // ++ ADDED PDF BUTTON SELECTOR
+        generatePdfBtn: '#generatePdfBtn'
     };
 
-    // --- STATE ---
     let roomCount = 0;
     let isLocked = false;
 
-    // --- UTILITY FUNCTIONS ---
     const toNum = v => {
         if (typeof v === 'string') v = v.replace(/,/g, '');
         const num = parseFloat(v);
@@ -114,7 +195,6 @@
         }, { once: true });
     }
 
-    // --- UI FUNCTIONS (Toasts, Modals) ---
     function showToast(message, type = 'default') {
         const container = document.querySelector(SELECTORS.toastContainer);
         if (!container) return;
@@ -165,7 +245,6 @@
         return selected ? selected.value : false;
     }
 
-    // --- CORE DOM MANIPULATION ---
     function addRoom(prefill) {
         if (isLocked) return;
         roomCount++;
@@ -346,7 +425,6 @@
         }
     }
 
-    // --- DATA & CALCULATIONS ---
     function recalcAll() {
         let grand = 0, grandOpaqueYards = 0, grandSheerYards = 0, grandOpaqueTrack = 0, grandSheerTrack = 0;
         let totalWallpaperRolls = 0;
@@ -358,7 +436,6 @@
             let roomSum = 0;
             const isRoomSuspended = room.dataset.suspended === 'true';
 
-            // CURTAIN SETS
             room.querySelectorAll(SELECTORS.set).forEach(set => {
                 let opaquePrice = 0, sheerPrice = 0, opaqueYards = 0, sheerYards = 0, opaqueTrack = 0, sheerTrack = 0;
                 if (set.dataset.suspended !== 'true' && !isRoomSuspended) {
@@ -411,7 +488,6 @@
                 grandSheerTrack += sheerTrack;
             });
 
-            // DECORATIONS
             room.querySelectorAll(SELECTORS.decoItem).forEach(deco => {
                 let decoPrice = 0, areaSqyd = 0;
                 if (deco.dataset.suspended !== 'true' && !isRoomSuspended) {
@@ -432,7 +508,6 @@
                 roomSum += decoPrice;
             });
 
-            // WALLPAPERS
             room.querySelectorAll(SELECTORS.wallpaperItem).forEach(wallpaper => {
                 let totalItemPrice = 0, materialPrice = 0, installPrice = 0, areaSqm = 0, rollsNeeded = 0;
                 if (wallpaper.dataset.suspended !== 'true' && !isRoomSuspended) {
@@ -557,7 +632,6 @@
         return payload;
     }
 
-    // --- PERSISTENCE ---
     function saveData() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPayload()));
     }
@@ -573,7 +647,6 @@
         showToast("โหลดข้อมูลสำเร็จ", "success");
     }
 
-    // --- UI HELPERS & STATE MANAGEMENT ---
     function renumber() {
         document.querySelectorAll(SELECTORS.room).forEach((room, rIdx) => {
             room.querySelector(SELECTORS.roomNameInput).placeholder = `ห้อง ${String(rIdx + 1).padStart(2, "0")}`;
@@ -613,7 +686,6 @@
         showToast(isLocked ? 'ฟอร์มถูกล็อคแล้ว' : 'ฟอร์มถูกปลดล็อคแล้ว', 'warning');
     }
 
-    // --- TEXT SUMMARY BUILDERS (LINE-Optimized) ---
     function buildCustomerSummary(payload) {
         let summary = "";
         let grandTotal = 0;
@@ -864,7 +936,6 @@
         return summary;
     }
 
-    // --- PDF GENERATION ---
     async function generatePdf() {
         showToast('กำลังสร้าง PDF...', 'default');
 
@@ -882,7 +953,6 @@
             if (room.is_suspended) return;
             const roomName = room.room_name || `ห้อง ${payload.rooms.indexOf(room) + 1}`;
             
-            // Add a room header row to the table
             tableBody.push([{ text: roomName, colSpan: 5, style: 'roomHeader', fillColor: '#eeeeee' }, {}, {}, {}, {}]);
 
             room.sets.forEach(set => {
@@ -953,15 +1023,14 @@
         const vat = subtotal * VAT_RATE;
         const grandTotal = subtotal + vat;
         
-        // --- FIX: Correctly call the ThaiBaht function, which is now globally available from the specific library version ---
-        const bahtText = `(${ThaiBaht(grandTotal)})`;
+        // --- FIX: Using the self-contained converter function ---
+        const bahtText = `(${convertToThaiBahtText(grandTotal)})`;
 
         const today = new Date();
         const dateString = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear() + 543}`;
         const docNumber = `QT-${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}-${String(Math.floor(Math.random() * 900) + 100)}`;
         const fileName = `ใบเสนอราคา-${customerName.replace(/\s+/g, '-')}-${dateString.replace(/\//g, '-')}.pdf`;
 
-        // Define Thai Font for pdfmake
         pdfMake.fonts = {
             Sarabun: {
                 normal: 'https://cdn.jsdelivr.net/gh/lazywasant/js-thai-fonts@gh-pages/Sarabun/Sarabun-Regular.ttf',
@@ -975,10 +1044,9 @@
             pageSize: 'A4',
             defaultStyle: { font: 'Sarabun', fontSize: 10 },
             content: [
-                // Header
                 {
                     columns: [
-                        { image: QUOTATION_CONFIG.company_logo__base64, width: 60, height: 60 },
+                        { image: QUOTATION_CONFIG.company_logo_base64, width: 60, height: 60 },
                         [
                             { text: QUOTATION_CONFIG.company_name, style: 'header' },
                             { text: QUOTATION_CONFIG.company_address },
@@ -993,7 +1061,6 @@
                 },
                 { canvas: [{ type: 'line', x1: 0, y1: 5, x2: 515, y2: 5, lineWidth: 1 }], margin: [0, 10, 0, 10] },
                 
-                // Customer Info
                 {
                     columns: [
                         {
@@ -1009,7 +1076,6 @@
                     margin: [0, 0, 0, 20]
                 },
                 
-                // Items Table
                 {
                     table: {
                         headerRows: 1,
@@ -1019,7 +1085,6 @@
                     layout: 'lightHorizontalLines'
                 },
 
-                // Totals Section
                 {
                     columns: [
                         { text: '', width: '*' },
@@ -1039,13 +1104,11 @@
                     margin: [0, 10, 0, 5]
                 },
 
-                // Baht Text
                 {
                     text: bahtText,
                     style: 'bahtText'
                 },
 
-                // Footer
                 {
                     absolutePosition: { x: 40, y: 750 },
                     columns: [
@@ -1085,7 +1148,6 @@
         // orderForm.submit();
     }
 
-    // --- EVENT LISTENERS & INITIALIZATION ---
     function init() {
         const orderForm = document.querySelector(SELECTORS.orderForm);
         const fileImporter = document.querySelector(SELECTORS.fileImporter);
@@ -1176,7 +1238,6 @@
         document.querySelector(SELECTORS.addRoomFooterBtn).addEventListener('click', () => addRoom());
         document.querySelector(SELECTORS.lockBtn).addEventListener('click', toggleLock);
 
-        // --- Menu Actions ---
         const menuDropdown = document.querySelector(SELECTORS.menuDropdown);
         document.querySelector(SELECTORS.copyTextBtn).addEventListener('click', async (e) => {
             e.preventDefault();
@@ -1194,7 +1255,6 @@
             menuDropdown.classList.remove('show');
         });
 
-        // ++ ADDED PDF BUTTON EVENT LISTENER
         document.querySelector(SELECTORS.generatePdfBtn).addEventListener('click', (e) => {
             e.preventDefault();
             generatePdf();
@@ -1265,7 +1325,6 @@
             e.target.value = null;
         });
 
-        // Menu & Popup Toggles
         window.addEventListener('click', (e) => {
             if (!e.target.closest('.menu-container')) {
                 document.querySelector(SELECTORS.menuDropdown).classList.remove('show');
@@ -1281,7 +1340,6 @@
             menuDropdown.classList.toggle('show');
         });
 
-        // Initial Load from localStorage
         try {
             const storedData = localStorage.getItem(STORAGE_KEY);
             if (storedData) {
