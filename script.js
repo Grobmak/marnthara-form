@@ -2,7 +2,6 @@
     'use strict';
 
     // --- SELF-CONTAINED THAI BAHT TEXT CONVERTER ---
-    // This function is now part of the script to avoid external library errors.
     function convertToThaiBahtText(number) {
         const TxtBaht = 'บาท';
         const TxtStang = 'สตางค์';
@@ -87,7 +86,7 @@
     }
 
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/4.4.2-pdf-stable";
+    const APP_VERSION = "input-ui/4.4.3-pdf-font-fix";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4";
     const SQM_TO_SQYD = 1.19599;
@@ -1023,7 +1022,6 @@
         const vat = subtotal * VAT_RATE;
         const grandTotal = subtotal + vat;
         
-        // --- FIX: Using the self-contained converter function ---
         const bahtText = `(${convertToThaiBahtText(grandTotal)})`;
 
         const today = new Date();
@@ -1031,12 +1029,13 @@
         const docNumber = `QT-${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}-${String(Math.floor(Math.random() * 900) + 100)}`;
         const fileName = `ใบเสนอราคา-${customerName.replace(/\s+/g, '-')}-${dateString.replace(/\//g, '-')}.pdf`;
 
+        // --- FIX: Replaced broken font URLs with new, reliable ones ---
         pdfMake.fonts = {
             Sarabun: {
-                normal: 'https://cdn.jsdelivr.net/gh/lazywasant/js-thai-fonts@gh-pages/Sarabun/Sarabun-Regular.ttf',
-                bold: 'https://cdn.jsdelivr.net/gh/lazywasant/js-thai-fonts@gh-pages/Sarabun/Sarabun-Bold.ttf',
-                italics: 'https://cdn.jsdelivr.net/gh/lazywasant/js-thai-fonts@gh-pages/Sarabun/Sarabun-Italic.ttf',
-                bolditalics: 'https://cdn.jsdelivr.net/gh/lazywasant/js-thai-fonts@gh-pages/Sarabun/Sarabun-BoldItalic.ttf'
+                normal: 'https://cdn.jsdelivr.net/npm/@fontsource/sarabun/files/sarabun-thai-400-normal.woff',
+                bold: 'https://cdn.jsdelivr.net/npm/@fontsource/sarabun/files/sarabun-thai-700-normal.woff',
+                italics: 'https://cdn.jsdelivr.net/npm/@fontsource/sarabun/files/sarabun-thai-400-italic.woff',
+                bolditalics: 'https://cdn.jsdelivr.net/npm/@fontsource/sarabun/files/sarabun-thai-700-italic.woff'
             }
         };
 
