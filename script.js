@@ -468,8 +468,6 @@
 
         document.querySelector(SELECTORS.grandTotal).textContent = fmt(grand, 0, true);
         document.querySelector(SELECTORS.setCount).textContent = pricedItemCount;
-		const grandTotal = grand;
-		const bahtText = `(${ThaiBaht.bahtText(grandTotal)})`;
 
         const summaryContainer = document.querySelector(SELECTORS.detailedSummaryContainer);
         if(summaryContainer) {
