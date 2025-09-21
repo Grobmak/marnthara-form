@@ -720,6 +720,7 @@ input[inputmode="numeric"] { text-align: left; }
 /* Specific margins for different card types during removal */
 .item-removing.card { margin-bottom: 1.5rem; }
 .item-removing.item-card { margin-bottom: 1rem; }
+<<<<<<< HEAD
 .item-removing.wall-input-row { margin-bottom: 0.5rem; }
 
 
@@ -850,3 +851,6 @@ input[inputmode="numeric"] { text-align: left; }
     align-items: center;
     padding: 5mm;
 }
+=======
+.item-removing.wall-input-row { margin-bottom: 0.5rem; }
+>>>>>>> parent of fe37472 (Update style.css)
