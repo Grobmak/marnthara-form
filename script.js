@@ -842,9 +842,9 @@
         }
 
         // ---  สำคัญ! นี่คือ URL ของ Serverless Function ที่คุณจะต้องสร้างในขั้นตอนถัดไป ---
-        const PDF_GENERATOR_URL = "YOUR_SERVERLESS_FUNCTION_URL_HERE"; // <--- ใส่ URL ของคุณที่นี่
+        const PDF_GENERATOR_URL = "https://fabulous-arithmetic-492081.netlify.app/"; // <--- ใส่ URL ของคุณที่นี่
 
-        if (PDF_GENERATOR_URL === "YOUR_SERVERLESS_FUNCTION_URL_HERE") {
+        if (PDF_GENERATOR_URL === "https://fabulous-arithmetic-492081.netlify.app/") {
              showToast('ยังไม่ได้ตั้งค่า URL สำหรับสร้าง PDF', 'error');
              console.error("Please set your PDF_GENERATOR_URL in script.js");
              return;
