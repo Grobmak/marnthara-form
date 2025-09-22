@@ -849,3 +849,4 @@ input[inputmode="numeric"] { text-align: left; }
 .pdf-signature-box { flex-basis: 48%; }
 .pdf-signature-box p { margin: 1mm 0; }
 .pdf-signature-box p:first-child { margin-top: 15mm; }
+}

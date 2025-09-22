@@ -949,7 +949,8 @@
         showToast('กำลังสร้างใบเสนอราคา...', 'default');
         const payload = buildPayload();
 
-        // [FIX #1] Preload the logo image to prevent a race condition that can cause blank PDFs.
+        // **[FIX]** Preload the logo image to prevent a race condition that can cause blank PDFs.
+        // It now handles loading failures gracefully by skipping the logo.
         const preloadImage = (src) => new Promise((resolve, reject) => {
             if (!src) {
                 resolve(); // Resolve immediately if no logo is provided.
@@ -965,8 +966,8 @@
             await preloadImage(SHOP_CONFIG.logoUrl);
         } catch (error) {
             console.error(error.message);
-            showToast('ผิดพลาด: ไม่สามารถโหลดโลโก้ได้', 'error');
-            // Decide whether to continue without a logo or stop. For now, we'll continue.
+            showToast('ผิดพลาด: ไม่สามารถโหลดโลโก้ได้ (จะสร้าง PDF โดยไม่มีโลโก้)', 'warning');
+            // Execution continues even if the logo fails to load.
         }
 
         const printableElement = document.createElement('div');
@@ -1059,7 +1060,6 @@
         const vatAmount = subTotal * SHOP_CONFIG.vatRate;
         const grandTotal = subTotal + vatAmount;
 
-        // [FIX #3] Correctly format the VAT percentage to avoid floating point display errors.
         const vatRateFormatted = `${(SHOP_CONFIG.vatRate * 100).toFixed(0)}%`;
         const vatDisplay = SHOP_CONFIG.vatRate > 0 ? `
             <tr>
@@ -1166,7 +1166,6 @@
 
         try {
             const element = printableElement.firstElementChild;
-            // [FIX #2] Implement professional multi-page handling with page numbers.
             await html2pdf().from(element).set(opt).toPdf().get('pdf').then(pdf => {
                 const totalPages = pdf.internal.getNumberOfPages();
                 for (let i = 1; i <= totalPages; i++) {
