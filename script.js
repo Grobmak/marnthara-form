@@ -374,7 +374,6 @@
             frag.querySelector('input[name="wall_width_m"]').value = prefillWidth > 0 ? prefillWidth.toFixed(2) : "";
         }
         wallsContainer.appendChild(frag);
-
         const newWallInputRow = wallsContainer.querySelector('.wall-input-row:last-of-type');
         if (newWallInputRow) {
             animateAndScroll(newWallInputRow);
@@ -395,16 +394,13 @@
     function suspendRoom(roomEl, isSuspended, notify = true) {
         roomEl.dataset.suspended = isSuspended;
         roomEl.classList.toggle('is-suspended', isSuspended);
-
         const suspendText = roomEl.querySelector('[data-act="toggle-suspend-room"] span');
         if (suspendText) {
             suspendText.textContent = isSuspended ? 'ใช้งานห้อง' : 'ระงับห้อง';
         }
-
         roomEl.querySelectorAll('.set-item, .deco-item, .wallpaper-item').forEach(item => {
             suspendItem(item, isSuspended, false);
         });
-
         if (notify) showToast(`ห้องถูก${isSuspended ? 'ระงับ' : 'ใช้งาน'}แล้ว`, 'warning');
         recalcAll();
         saveData();
@@ -448,7 +444,9 @@
                     const variant = set.querySelector('select[name="fabric_variant"]')?.value;
                     const sPlus = stylePlus(style);
                     const hPlus = heightPlus(h);
+
                     if(variant === "ทึบ&โปร่ง") hasDoubleBracket = true;
+
                     if (w > 0 && h > 0) {
                         if (variant.includes("ทึบ")) {
                             const baseRaw = clamp01(set.querySelector('select[name="set_price_per_m"]')?.value);
@@ -474,13 +472,10 @@
                 const details = [];
                 if (opaquePrice > 0) details.push(`ทึบ: ${fmtTH(opaquePrice)}`);
                 if (sheerPrice > 0) details.push(`โปร่ง: ${fmtTH(sheerPrice)}`);
-                if (details.length > 0 && totalSetPrice > 0) summaryHtml += ` <small>(${details.join(', ')})</small>`;
+                if (details.length > 0) summaryHtml += ` (${details.join(', ')})`;
                 set.querySelector('[data-set-summary]').innerHTML = summaryHtml;
-                set.querySelector('[data-set-yardage-opaque]').textContent = fmtTH(opaqueYards, 2);
-                set.querySelector('[data-set-opaque-track]').textContent = fmtTH(opaqueTrack, 2);
-                set.querySelector('[data-set-yardage-sheer]').textContent = fmtTH(sheerYards, 2);
-                set.querySelector('[data-set-sheer-track]').textContent = fmtTH(sheerTrack, 2);
-                roomSum += opaquePrice + sheerPrice;
+                roomSum += totalSetPrice;
+                grand += totalSetPrice;
                 grandOpaqueYards += opaqueYards;
                 grandSheerYards += sheerYards;
                 grandOpaqueTrack += opaqueTrack;
@@ -489,880 +484,665 @@
 
             // DECORATIONS
             room.querySelectorAll(SELECTORS.decoItem).forEach(deco => {
-                let decoPrice = 0, areaSqyd = 0;
+                let decoPrice = 0;
                 if (deco.dataset.suspended !== 'true' && !isRoomSuspended) {
-                    const w = clamp01(deco.querySelector('[name="deco_width_m"]')?.value);
-                    const h = clamp01(deco.querySelector('[name="deco_height_m"]')?.value);
-                    const price = clamp01(deco.querySelector('[name="deco_price_sqyd"]')?.value);
-                    areaSqyd = w * h * SQM_TO_SQYD;
-                    decoPrice = Math.round(areaSqyd * price);
-                    if (decoPrice > 0) {
+                    const type = deco.querySelector('input[name="deco_type"]')?.value;
+                    const w = clamp01(deco.querySelector('input[name="deco_width_m"]')?.value);
+                    const h = clamp01(deco.querySelector('input[name="deco_height_m"]')?.value);
+                    const p = clamp01(deco.querySelector('input[name="deco_price_sqyd"]')?.value);
+                    const sqyd = (w * h) * SQM_TO_SQYD;
+                    if (w > 0 && h > 0 && p > 0) {
+                        decoPrice = Math.round(sqyd * p);
+                        if (type) {
+                            if (!decoCounts[type]) decoCounts[type] = { count: 0, total: 0 };
+                            decoCounts[type].count++;
+                            decoCounts[type].total += decoPrice;
+                        }
                         pricedItemCount++;
-                        const type = deco.querySelector('[name="deco_type"]').value.trim();
-                        if(type) decoCounts[type] = (decoCounts[type] || 0) + 1;
                     }
                 }
-                deco.querySelector('[data-deco-summary]').innerHTML = `ราคา: <b>${fmtTH(decoPrice)}</b> บ. • พื้นที่: <b>${fmtTH(areaSqyd, 2)}</b> ตร.หลา`;
+                deco.querySelector('[data-deco-summary]').innerHTML = `ราคา: <b>${fmtTH(decoPrice)}</b> บ.`;
                 roomSum += decoPrice;
+                grand += decoPrice;
             });
 
             // WALLPAPERS
             room.querySelectorAll(SELECTORS.wallpaperItem).forEach(wallpaper => {
-                let totalItemPrice = 0, materialPrice = 0, installPrice = 0, areaSqm = 0, rollsNeeded = 0;
+                let wallpaperPrice = 0, totalRolls = 0, installCost = 0;
                 if (wallpaper.dataset.suspended !== 'true' && !isRoomSuspended) {
-                    const h = clamp01(wallpaper.querySelector('[name="wallpaper_height_m"]')?.value);
-                    const pricePerRoll = clamp01(wallpaper.querySelector('[name="wallpaper_price_roll"]')?.value);
-                    const installCostPerRoll = clamp01(wallpaper.querySelector('[name="wallpaper_install_cost"]')?.value);
+                    const h = clamp01(wallpaper.querySelector('input[name="wallpaper_height_m"]')?.value);
+                    const p = clamp01(wallpaper.querySelector('input[name="wallpaper_price_roll"]')?.value);
+                    const i = clamp01(wallpaper.querySelector('input[name="wallpaper_install_cost"]')?.value);
                     const totalWidth = Array.from(wallpaper.querySelectorAll('input[name="wall_width_m"]')).reduce((sum, el) => sum + clamp01(el.value), 0);
-                    areaSqm = totalWidth * h;
-                    rollsNeeded = CALC.wallpaperRolls(totalWidth, h);
-                    materialPrice = Math.round(rollsNeeded * pricePerRoll);
-                    installPrice = Math.round(rollsNeeded * installCostPerRoll);
-                    totalItemPrice = materialPrice + installPrice;
-                    if (totalItemPrice > 0) {
-                       pricedItemCount++;
-                        if (Number.isFinite(rollsNeeded)) totalWallpaperRolls += rollsNeeded;
+                    if (totalWidth > 0 && h > 0) {
+                        const rolls = CALC.wallpaperRolls(totalWidth, h);
+                        totalRolls = rolls;
+                        wallpaperPrice = Math.round(rolls * p);
+                        installCost = Math.round(rolls * i);
+                        pricedItemCount++;
                     }
                 }
-                let summaryHtml = `รวม: <b>${fmtTH(totalItemPrice)}</b> บ.`;
-                if (totalItemPrice > 0) summaryHtml += ` <small>(วอลล์: ${fmtTH(materialPrice)}, ค่าช่าง: ${fmtTH(installPrice)})</small>`;
-                summaryHtml += ` • พื้นที่: <b>${fmtTH(areaSqm, 2)}</b> ตร.ม. • ใช้: <b>${Number.isFinite(rollsNeeded) ? rollsNeeded : 'N/A'}</b> ม้วน`;
+                const totalWallpaperPrice = wallpaperPrice + installCost;
+                let summaryHtml = `รวม: <b>${fmtTH(totalWallpaperPrice)}</b> บ.`;
+                const details = [];
+                if (wallpaperPrice > 0) details.push(`ค่าของ: ${fmtTH(wallpaperPrice)}`);
+                if (installCost > 0) details.push(`ค่าติดตั้ง: ${fmtTH(installCost)}`);
+                if (details.length > 0) summaryHtml += ` (${details.join(', ')})`;
                 wallpaper.querySelector('[data-wallpaper-summary]').innerHTML = summaryHtml;
-                roomSum += totalItemPrice;
+                roomSum += totalWallpaperPrice;
+                grand += totalWallpaperPrice;
+                totalWallpaperRolls += totalRolls;
             });
 
-            const itemCount = room.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`).length;
-            room.querySelector('[data-room-brief]').innerHTML = `<span>${itemCount} รายการ • ${fmtTH(roomSum)} บาท</span>`;
-            grand += roomSum;
+            // Update room brief
+            const roomSummaryText = room.querySelector('[data-room-summary]');
+            roomSummaryText.textContent = `${fmtTH(roomSum)} บ.`;
         });
 
-        document.querySelector(SELECTORS.grandTotal).textContent = fmtTH(grand);
+        const grandTotal = grand;
+        const totalVat = grandTotal * SHOP_CONFIG.vatRate;
+        const grandTotalWithVat = grandTotal + totalVat;
+
+        // Update overall summary
+        document.querySelector(SELECTORS.grandTotal).textContent = `${fmtTH(grandTotal, 2)} บ.`;
         document.querySelector(SELECTORS.setCount).textContent = pricedItemCount;
 
-        // UPDATE DETAILED MATERIAL SUMMARY
-        const summaryContainer = document.querySelector(SELECTORS.detailedSummaryContainer);
-        if(summaryContainer) {
-            let html = '';
-            if (grandOpaqueYards > 0 || grandSheerYards > 0) {
-                html += `<h4><i class="ph-bold ph-blinds"></i> ผ้าม่าน</h4><ul>`;
-                if (grandOpaqueYards > 0) html += `<li>ผ้าทึบ: <b>${fmtTH(grandOpaqueYards, 2)}</b> หลา</li>`;
-                if (grandSheerYards > 0) html += `<li>ผ้าโปร่ง: <b>${fmtTH(grandSheerYards, 2)}</b> หลา</li>`;
-                if (grandOpaqueTrack > 0) html += `<li>รางทึบ: <b>${fmtTH(grandOpaqueTrack, 2)}</b> ม.</li>`;
-                if (grandSheerTrack > 0) html += `<li>รางโปร่ง: <b>${fmtTH(grandSheerTrack, 2)}</b> ม.</li>`;
-                if (hasDoubleBracket) html += `<li class="summary-note">** มีรายการที่ต้องใช้ขาสองชั้น</li>`;
-                html += `</ul>`;
+        // Update detailed summary
+        const detailedSummary = document.querySelector(SELECTORS.detailedSummaryContainer);
+        let summaryHtml = '';
+
+        if (pricedItemCount > 0) {
+            summaryHtml += `<h4>ผ้าม่าน</h4><ul>`;
+            if (grandOpaqueYards > 0) {
+                summaryHtml += `<li>ผ้าทึบ: ${fmtTH(grandOpaqueYards, 2)} หลา</li>`;
             }
-            if (Object.keys(decoCounts).length > 0) {
-                 html += `<h4><i class="ph-bold ph-file-image"></i> งานตกแต่ง</h4><ul>`;
-                 for (const type in decoCounts) html += `<li>${type}: <b>${decoCounts[type]}</b> ชุด</li>`;
-                 html += `</ul>`;
+            if (grandSheerYards > 0) {
+                summaryHtml += `<li>ผ้าโปร่ง: ${fmtTH(grandSheerYards, 2)} หลา</li>`;
             }
+            if (grandOpaqueTrack > 0) {
+                summaryHtml += `<li>รางผ้าม่าน: ${fmtTH(grandOpaqueTrack + (hasDoubleBracket ? grandSheerTrack : 0), 2)} ม.</li>`;
+            }
+            summaryHtml += `</ul>`;
+
+            const decoKeys = Object.keys(decoCounts);
+            if (decoKeys.length > 0) {
+                summaryHtml += `<h4>ของตกแต่ง</h4><ul>`;
+                decoKeys.forEach(type => {
+                    summaryHtml += `<li>${type} (${decoCounts[type].count} ชิ้น): ${fmtTH(decoCounts[type].total)} บ.</li>`;
+                });
+                summaryHtml += `</ul>`;
+            }
+
             if (totalWallpaperRolls > 0) {
-                 html += `<h4><i class="ph-bold ph-paint-roller"></i> วอลเปเปอร์</h4><ul>`;
-                 html += `<li>จำนวนที่ต้องใช้: <b>${totalWallpaperRolls}</b> ม้วน</li>`;
-                 html += `</ul>`;
+                summaryHtml += `<h4>วอลล์เปเปอร์</h4><ul><li>${fmtTH(totalWallpaperRolls)} ม้วน</li></ul>`;
             }
-            if (html === '') html = '<p class="empty-summary">ยังไม่มีรายการวัสดุ</p>';
-            summaryContainer.innerHTML = html;
+        } else {
+            summaryHtml = `<p>ยังไม่มีรายการที่คิดราคา</p>`;
         }
+        detailedSummary.innerHTML = summaryHtml;
+
+        saveData({ grandTotal, totalVat, grandTotalWithVat });
     }
 
-    function buildPayload() {
-        const payload = {
-            app_version: APP_VERSION,
-            customer_name: document.querySelector('[name="customer_name"]')?.value || '',
-            customer_phone: document.querySelector('[name="customer_phone"]')?.value || '',
-            customer_address: document.querySelector('[name="customer_address"]')?.value || '',
-            rooms: []
+    function renumber() {
+        let setIndex = 1;
+        let decoIndex = 1;
+        let wallpaperIndex = 1;
+
+        document.querySelectorAll(SELECTORS.room).forEach((room, roomIndex) => {
+            const roomNumber = roomIndex + 1;
+            room.querySelector(SELECTORS.roomNameInput).placeholder = `ชื่อห้อง #${roomNumber}`;
+            room.dataset.index = roomNumber;
+            const menu = room.querySelector('.room-options-menu');
+            if (menu) {
+                 menu.querySelectorAll('a').forEach(link => {
+                    const text = link.textContent.replace(/ห้อง #\d+/, `ห้อง #${roomNumber}`);
+                    link.innerHTML = text.replace(/ลบห้อง/, 'ลบห้อง');
+                });
+            }
+
+            room.querySelectorAll(SELECTORS.set).forEach(set => {
+                set.querySelector('[data-set-number]').textContent = `${setIndex++}`;
+            });
+            room.querySelectorAll(SELECTORS.decoItem).forEach(deco => {
+                deco.querySelector('[data-deco-number]').textContent = `${decoIndex++}`;
+            });
+            room.querySelectorAll(SELECTORS.wallpaperItem).forEach(wallpaper => {
+                wallpaper.querySelector('[data-wallpaper-number]').textContent = `${wallpaperIndex++}`;
+            });
+        });
+    }
+
+    // --- PDF EXPORT FUNCTIONALITY (NEW) ---
+    function createPdfContent(payload) {
+        const shop = SHOP_CONFIG;
+        const customer = payload.customer_info;
+        const totals = payload.totals;
+
+        const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+        const currentDate = new Date().toLocaleDateString('th-TH', dateOptions);
+
+        let html = `
+            <div id="pdf-container">
+                <header class="pdf-header">
+                    <div class="pdf-shop-details">
+                        <img src="${shop.logoUrl}" alt="${shop.name}" class="pdf-logo">
+                        <h1>${shop.name}</h1>
+                        <p>ที่อยู่: ${shop.address}</p>
+                        <p>โทร: ${shop.phone}</p>
+                        <p>เลขประจำตัวผู้เสียภาษี: ${shop.taxId}</p>
+                    </div>
+                    <div class="pdf-quotation-info">
+                        <h2>ใบเสนอราคา</h2>
+                        <p>วันที่: ${currentDate}</p>
+                        <p>เลขที่: ______________</p>
+                    </div>
+                </header>
+                <div class="pdf-customer-info">
+                    <h3>ข้อมูลลูกค้า</h3>
+                    <p><strong>ชื่อ:</strong> ${customer.customer_name || 'ไม่ระบุ'}</p>
+                    <p><strong>ที่อยู่:</strong> ${customer.customer_address || 'ไม่ระบุ'}</p>
+                    <p><strong>เบอร์โทร:</strong> ${customer.customer_phone || 'ไม่ระบุ'}</p>
+                </div>
+        `;
+
+        // Room and Item Details
+        if (payload.rooms && payload.rooms.length > 0) {
+            html += `<div class="pdf-item-details">`;
+            let itemCounter = 1;
+            payload.rooms.forEach(room => {
+                if (room.is_suspended) return;
+
+                html += `<h4 class="pdf-room-heading">${room.room_name || 'ไม่ระบุชื่อห้อง'}</h4>`;
+                html += `<table class="pdf-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">#</th>
+                                    <th style="width: 55%;">รายละเอียด</th>
+                                    <th style="width: 15%; text-align: right;">จำนวน</th>
+                                    <th style="width: 25%; text-align: right;">รวม (บาท)</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                
+                // Sets
+                room.sets.forEach(set => {
+                    if (set.is_suspended) return;
+                    const style = set.style || 'ไม่ระบุ';
+                    const variant = set.fabric_variant || 'ไม่ระบุ';
+                    const width = set.width_m > 0 ? `${fmtTH(set.width_m, 2)} ม.` : 'ไม่ระบุ';
+                    const height = set.height_m > 0 ? `${fmtTH(set.height_m, 2)} ม.` : 'ไม่ระบุ';
+                    const price = set.total_price;
+                    const details = [];
+                    if (variant.includes('ทึบ')) details.push(`รหัสผ้า: ${set.fabric_code || '-'} (ราคา: ${fmtTH(set.price_per_m_raw)}/ม.)`);
+                    if (variant.includes('โปร่ง')) details.push(`รหัสผ้าโปร่ง: ${set.sheer_fabric_code || '-'} (ราคา: ${fmtTH(set.sheer_price_per_m)}/ม.)`);
+                    
+                    html += `<tr>
+                                <td class="pdf-item-number">${itemCounter++}</td>
+                                <td class="pdf-item-desc">
+                                    <strong>ผ้าม่าน ${variant} สไตล์ ${style}</strong>
+                                    <br>ขนาด: กว้าง ${width} x สูง ${height}
+                                    ${details.length > 0 ? `<br>${details.join('<br>')}` : ''}
+                                    ${set.notes ? `<br><em>หมายเหตุ: ${set.notes}</em>` : ''}
+                                </td>
+                                <td class="pdf-item-qty">1 ชุด</td>
+                                <td class="pdf-item-total">${fmtTH(price)}</td>
+                            </tr>`;
+                });
+
+                // Decorations
+                room.decorations.forEach(deco => {
+                    if (deco.is_suspended) return;
+                    const type = deco.type || 'ของตกแต่ง';
+                    const width = deco.width_m > 0 ? `${fmtTH(deco.width_m, 2)} ม.` : 'ไม่ระบุ';
+                    const height = deco.height_m > 0 ? `${fmtTH(deco.height_m, 2)} ม.` : 'ไม่ระบุ';
+                    const price = deco.total_price;
+                    html += `<tr>
+                                <td class="pdf-item-number">${itemCounter++}</td>
+                                <td class="pdf-item-desc">
+                                    <strong>${type}</strong>
+                                    <br>ขนาด: กว้าง ${width} x สูง ${height}
+                                    <br>รหัส: ${deco.deco_code || '-'}
+                                    ${deco.deco_notes ? `<br><em>หมายเหตุ: ${deco.deco_notes}</em>` : ''}
+                                </td>
+                                <td class="pdf-item-qty">1 ชุด</td>
+                                <td class="pdf-item-total">${fmtTH(price)}</td>
+                            </tr>`;
+                });
+
+                // Wallpapers
+                room.wallpapers.forEach(wallpaper => {
+                    if (wallpaper.is_suspended) return;
+                    const rolls = wallpaper.total_rolls;
+                    const height = wallpaper.height_m > 0 ? `${fmtTH(wallpaper.height_m, 2)} ม.` : 'ไม่ระบุ';
+                    const walls = wallpaper.widths.map(w => `${fmtTH(w, 2)} ม.`).join(', ');
+                    const price = wallpaper.total_price;
+                    html += `<tr>
+                                <td class="pdf-item-number">${itemCounter++}</td>
+                                <td class="pdf-item-desc">
+                                    <strong>วอลล์เปเปอร์</strong>
+                                    <br>ความสูง: ${height} / ผนังกว้าง: ${walls}
+                                    <br>รหัส: ${wallpaper.wallpaper_code || '-'}
+                                    ${wallpaper.wallpaper_notes ? `<br><em>หมายเหตุ: ${wallpaper.wallpaper_notes}</em>` : ''}
+                                </td>
+                                <td class="pdf-item-qty">${fmtTH(rolls)} ม้วน</td>
+                                <td class="pdf-item-total">${fmtTH(price)}</td>
+                            </tr>`;
+                });
+
+                html += `</tbody></table>`;
+            });
+            html += `</div>`; // Close pdf-item-details
+        }
+        
+        // Total Summary
+        html += `
+            <div class="pdf-footer-summary">
+                <div class="pdf-amount-in-words">
+                    <p>ตัวอักษร: ${bahttext(totals.grandTotalWithVat)}</p>
+                    <p><strong>เงื่อนไขการชำระเงิน</strong></p>
+                    <ul>
+                        <li><small>การจองมัดจำงาน 50% ของราคารวมทั้งหมด</small></li>
+                        <li><small>ชำระส่วนที่เหลือ 50% เมื่อติดตั้งงานแล้วเสร็จ</small></li>
+                        <li><small>ใบเสนอราคามีอายุ 30 วันนับจากวันที่ออก</small></li>
+                    </ul>
+                </div>
+                <div class="pdf-totals-block">
+                    <table>
+                        <tr><td class="pdf-label">รวม (ก่อนภาษี)</td><td class="pdf-amount">${fmtTH(totals.grandTotal, 2)} บ.</td></tr>
+                        <tr><td class="pdf-label">ภาษีมูลค่าเพิ่ม ${SHOP_CONFIG.vatRate * 100}%</td><td class="pdf-amount">${fmtTH(totals.totalVat, 2)} บ.</td></tr>
+                        <tr class="pdf-grand-total"><td class="pdf-label">รวมทั้งหมด</td><td class="pdf-amount">${fmtTH(totals.grandTotalWithVat, 2)} บ.</td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="pdf-signature-block">
+                <div class="pdf-signature-column">
+                    <p>ผู้เสนอราคา: .......................................</p>
+                    <p>(${SHOP_CONFIG.name})</p>
+                </div>
+                <div class="pdf-signature-column">
+                    <p>ผู้อนุมัติ: ...........................................</p>
+                    <p>(ลูกค้า)</p>
+                </div>
+            </div>
+            <p class="pdf-note">**ราคารวมนี้อาจมีการปรับเปลี่ยนตามข้อตกลงเพิ่มเติม</p>
+        </div>`;
+
+        return html;
+    }
+
+    function exportToPdf() {
+        if (isLocked) {
+            showToast('ปลดล็อคฟอร์มเพื่อสร้าง PDF', 'warning');
+            return;
+        }
+        showToast('กำลังสร้าง PDF...', 'info');
+
+        const payload = getPayloadData();
+        const content = createPdfContent(payload);
+        const container = document.getElementById('pdf-content-container');
+        container.innerHTML = content;
+
+        const opt = {
+            margin:       10,
+            filename:     'ใบเสนอราคา-ม่านธารา.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, logging: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
         };
+
+        html2pdf().set(opt).from(container).save().then(() => {
+            showToast('สร้าง PDF สำเร็จ!', 'success');
+            container.innerHTML = '';
+        }).catch(err => {
+            console.error(err);
+            showToast('เกิดข้อผิดพลาดในการสร้าง PDF', 'error');
+            container.innerHTML = '';
+        });
+    }
+
+
+    // --- DATA HANDLING ---
+    function getPayloadData() {
+        const payload = {
+            customer_info: {},
+            rooms: [],
+            totals: {}
+        };
+        const customerInfo = document.querySelector('#customerInfo');
+        payload.customer_info.customer_name = customerInfo.querySelector('#customer_name').value;
+        payload.customer_info.customer_phone = customerInfo.querySelector('#customer_phone').value;
+        payload.customer_info.customer_address = customerInfo.querySelector('#customer_address').value;
 
         document.querySelectorAll(SELECTORS.room).forEach(roomEl => {
             const roomData = {
-                room_name: roomEl.querySelector(SELECTORS.roomNameInput)?.value || '',
+                room_name: roomEl.querySelector(SELECTORS.roomNameInput).value,
                 is_suspended: roomEl.dataset.suspended === 'true',
-                sets: [], decorations: [], wallpapers: []
+                sets: [],
+                decorations: [],
+                wallpapers: []
             };
+
+            // Sets
             roomEl.querySelectorAll(SELECTORS.set).forEach(setEl => {
+                const w = clamp01(setEl.querySelector('[name="width_m"]')?.value);
+                const h = clamp01(setEl.querySelector('[name="height_m"]')?.value);
+                const style = setEl.querySelector('[name="set_style"]')?.value;
+                const variant = setEl.querySelector('[name="fabric_variant"]')?.value;
+                const price_per_m_raw = clamp01(setEl.querySelector('[name="set_price_per_m"]')?.value);
+                const sheer_price_per_m = clamp01(setEl.querySelector('[name="sheer_price_per_m"]')?.value);
+
+                const opaquePrice = variant.includes('ทึบ') ? Math.round((price_per_m_raw + stylePlus(style) + heightPlus(h)) * w) : 0;
+                const sheerPrice = variant.includes('โปร่ง') ? Math.round((sheer_price_per_m + stylePlus(style) + heightPlus(h)) * w) : 0;
+                
                 roomData.sets.push({
-                    width_m: toNum(setEl.querySelector('input[name="width_m"]')?.value), height_m: toNum(setEl.querySelector('input[name="height_m"]')?.value), style: setEl.querySelector('select[name="set_style"]')?.value || '', fabric_variant: setEl.querySelector('select[name="fabric_variant"]')?.value || '', price_per_m_raw: toNum(setEl.querySelector('select[name="set_price_per_m"]')?.value), sheer_price_per_m: toNum(setEl.querySelector('select[name="sheer_price_per_m"]')?.value), fabric_code: setEl.querySelector('input[name="fabric_code"]')?.value || '', sheer_fabric_code: setEl.querySelector('input[name="sheer_fabric_code"]')?.value || '', opening_style: setEl.querySelector('select[name="opening_style"]')?.value || '', track_color: setEl.querySelector('select[name="track_color"]')?.value || '', notes: setEl.querySelector('input[name="notes"]')?.value || '', is_suspended: setEl.dataset.suspended === 'true',
+                    width_m: w, height_m: h, style: style, fabric_variant: variant,
+                    price_per_m_raw: price_per_m_raw, sheer_price_per_m: sheer_price_per_m,
+                    fabric_code: setEl.querySelector('[name="fabric_code"]')?.value,
+                    sheer_fabric_code: setEl.querySelector('[name="sheer_fabric_code"]')?.value,
+                    opening_style: setEl.querySelector('[name="opening_style"]')?.value,
+                    track_color: setEl.querySelector('[name="track_color"]')?.value,
+                    notes: setEl.querySelector('[name="notes"]')?.value,
+                    total_price: opaquePrice + sheerPrice,
+                    is_suspended: setEl.dataset.suspended === 'true'
                 });
             });
+
+            // Decorations
             roomEl.querySelectorAll(SELECTORS.decoItem).forEach(decoEl => {
+                const w = clamp01(decoEl.querySelector('[name="deco_width_m"]')?.value);
+                const h = clamp01(decoEl.querySelector('[name="deco_height_m"]')?.value);
+                const p = clamp01(decoEl.querySelector('[name="deco_price_sqyd"]')?.value);
+                const sqyd = (w * h) * SQM_TO_SQYD;
+                const price = Math.round(sqyd * p);
+                
                 roomData.decorations.push({
-                    type: decoEl.querySelector('[name="deco_type"]')?.value || '', width_m: toNum(decoEl.querySelector('[name="deco_width_m"]')?.value), height_m: toNum(decoEl.querySelector('[name="deco_height_m"]')?.value), price_sqyd: toNum(decoEl.querySelector('[name="deco_price_sqyd"]')?.value), deco_code: decoEl.querySelector('[name="deco_code"]')?.value || '', deco_notes: decoEl.querySelector('[name="deco_notes"]')?.value || '', is_suspended: decoEl.dataset.suspended === 'true',
+                    type: decoEl.querySelector('[name="deco_type"]')?.value,
+                    width_m: w, height_m: h, price_sqyd: p,
+                    total_price: price,
+                    deco_code: decoEl.querySelector('[name="deco_code"]')?.value,
+                    deco_notes: decoEl.querySelector('[name="deco_notes"]')?.value,
+                    is_suspended: decoEl.dataset.suspended === 'true'
                 });
             });
+
+            // Wallpapers
             roomEl.querySelectorAll(SELECTORS.wallpaperItem).forEach(wallpaperEl => {
+                const h = clamp01(wallpaperEl.querySelector('[name="wallpaper_height_m"]')?.value);
+                const p = clamp01(wallpaperEl.querySelector('[name="wallpaper_price_roll"]')?.value);
+                const i = clamp01(wallpaperEl.querySelector('[name="wallpaper_install_cost"]')?.value);
+                const widths = Array.from(wallpaperEl.querySelectorAll('[name="wall_width_m"]')).map(el => clamp01(el.value));
+                const totalWidth = widths.reduce((sum, val) => sum + val, 0);
+                const rolls = CALC.wallpaperRolls(totalWidth, h);
+                const total_price = Math.round((rolls * p) + (rolls * i));
+                
                 roomData.wallpapers.push({
-                    height_m: toNum(wallpaperEl.querySelector('[name="wallpaper_height_m"]')?.value), wallpaper_code: wallpaperEl.querySelector('[name="wallpaper_code"]')?.value || '', price_per_roll: toNum(wallpaperEl.querySelector('[name="wallpaper_price_roll"]')?.value), install_cost_per_roll: toNum(wallpaperEl.querySelector('[name="wallpaper_install_cost"]')?.value), wallpaper_notes: wallpaperEl.querySelector('[name="wallpaper_notes"]')?.value || '', widths: Array.from(wallpaperEl.querySelectorAll('[name="wall_width_m"]')).map(el => toNum(el.value)), is_suspended: wallpaperEl.dataset.suspended === 'true',
+                    height_m: h,
+                    price_per_roll: p,
+                    install_cost_per_roll: i,
+                    widths: widths,
+                    total_rolls: rolls,
+                    total_price: total_price,
+                    wallpaper_code: wallpaperEl.querySelector('[name="wallpaper_code"]')?.value,
+                    wallpaper_notes: wallpaperEl.querySelector('[name="wallpaper_notes"]')?.value,
+                    is_suspended: wallpaperEl.dataset.suspended === 'true'
                 });
             });
+
             payload.rooms.push(roomData);
         });
+
+        // Totals
+        const currentGrandTotal = toNum(document.querySelector(SELECTORS.grandTotal).textContent.replace(/บ\./, '').trim());
+        const vatRate = SHOP_CONFIG.vatRate;
+        payload.totals.grandTotal = currentGrandTotal;
+        payload.totals.totalVat = currentGrandTotal * vatRate;
+        payload.totals.grandTotalWithVat = currentGrandTotal * (1 + vatRate);
+
         return payload;
     }
 
-    // --- PERSISTENCE ---
-    function saveData() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPayload()));
+    function saveData(extraData = {}) {
+        const payload = getPayloadData();
+        payload.appVersion = APP_VERSION;
+        Object.assign(payload.totals, extraData); // Merge totals
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     }
 
     function loadPayload(payload) {
-        if (!payload || !payload.rooms) { showToast("ข้อมูลไม่ถูกต้อง", "error"); return; }
-        document.querySelector('[name="customer_name"]').value = payload.customer_name || '';
-        document.querySelector('[name="customer_address"]').value = payload.customer_address || '';
-        document.querySelector('[name="customer_phone"]').value = payload.customer_phone || '';
-        document.querySelector(SELECTORS.roomsContainer).innerHTML = "";
-        roomCount = 0;
-        if (payload.rooms.length > 0) payload.rooms.forEach(addRoom);
-        else addRoom();
-        showToast("โหลดข้อมูลสำเร็จ", "success");
-    }
-
-    // --- UI HELPERS & STATE MANAGEMENT ---
-    function renumber() {
-        document.querySelectorAll(SELECTORS.room).forEach((room, rIdx) => {
-            room.querySelector(SELECTORS.roomNameInput).placeholder = `ห้อง ${String(rIdx + 1).padStart(2, "0")}`;
-            const items = room.querySelectorAll(`${SELECTORS.set}, ${SELECTORS.decoItem}, ${SELECTORS.wallpaperItem}`);
-            const totalItemsInRoom = items.length;
-            items.forEach((item, iIdx) => {
-                const titleEl = item.querySelector("[data-item-title]");
-                if (titleEl) titleEl.textContent = `${iIdx + 1}/${totalItemsInRoom}`;
-            });
-        });
-    }
-
-    function toggleSetFabricUI(setEl) {
-        if (!setEl) return;
-        const variant = setEl.querySelector('select[name="fabric_variant"]').value;
-        const hasSheer = variant === "โปร่ง" || variant === "ทึบ&โปร่ง";
-        setEl.querySelector(SELECTORS.sheerWrap)?.classList.toggle("hidden", !hasSheer);
-        setEl.querySelector(SELECTORS.sheerCodeWrap)?.classList.toggle("hidden", !hasSheer);
-    }
-
-    function updateLockState() {
-        const lockBtn = document.querySelector(SELECTORS.lockBtn);
-        if (!lockBtn) return;
-        lockBtn.classList.toggle('is-locked', isLocked);
-        lockBtn.title = isLocked ? 'ปลดล็อคฟอร์ม' : 'ล็อคฟอร์ม';
-        lockBtn.querySelector('.lock-icon').className = isLocked ? 'ph-bold ph-lock-key lock-icon' : 'ph-bold ph-lock-key-open lock-icon';
-        const lockTextEl = document.querySelector(SELECTORS.lockText);
-        if (lockTextEl) lockTextEl.textContent = isLocked ? 'ปลดล็อค' : 'ล็อก';
-        document.querySelectorAll('input, select, textarea, button').forEach(el => {
-            const isExempt = el.closest('.summary-footer') || el.closest('.main-header') || el.closest('.modal-wrapper') || el.closest('.room-options-menu');
-            if (!isExempt) el.disabled = isLocked;
-        });
-    }
-
-    function toggleLock() {
-        isLocked = !isLocked;
-        updateLockState();
-        showToast(isLocked ? 'ฟอร์มถูกล็อคแล้ว' : 'ฟอร์มถูกปลดล็อคแล้ว', 'warning');
-    }
-
-    // --- TEXT SUMMARY BUILDERS (LINE-Optimized) ---
-    function buildCustomerSummary(payload) {
-        let summary = "";
-        let grandTotal = 0;
-
-        summary += `สรุปใบเสนอราคา\n`;
-        summary += `ลูกค้า: ${payload.customer_name || '-'}\n`;
-        summary += `โทร: ${payload.customer_phone || '-'}\n\n`;
-
-        payload.rooms.forEach((room, rIdx) => {
-            if (room.is_suspended) return;
-
-            let roomTotal = 0;
-            let roomDetailsText = "";
-            let hasContent = false;
-
-            room.sets.forEach((set, sIdx) => {
-                if (set.is_suspended) return;
-                let setPrice = 0;
-                const hPlus = heightPlus(set.height_m);
-                const sPlus = stylePlus(set.style);
-                if (set.fabric_variant.includes("ทึบ") && set.price_per_m_raw > 0) {
-                    setPrice += Math.round((set.price_per_m_raw + sPlus + hPlus) * set.width_m);
-                }
-                if (set.fabric_variant.includes("โปร่ง") && set.sheer_price_per_m > 0) {
-                    setPrice += Math.round((set.sheer_price_per_m + sPlus + hPlus) * set.width_m);
-                }
-                if (setPrice > 0) {
-                    roomTotal += setPrice;
-                    hasContent = true;
-                    roomDetailsText += `  - ผ้าม่าน #${sIdx + 1}: ${fmtTH(setPrice)} บ.\n`;
-                }
-            });
-             room.decorations.forEach((deco, dIdx) => {
-                if (deco.is_suspended) return;
-                const decoPrice = Math.round(deco.width_m * deco.height_m * SQM_TO_SQYD * deco.price_sqyd);
-                if(decoPrice > 0) {
-                    roomTotal += decoPrice;
-                    hasContent = true;
-                    roomDetailsText += `  - ${deco.type || 'ตกแต่ง'} #${dIdx + 1}: ${fmtTH(decoPrice)} บ.\n`;
-                }
-            });
-            room.wallpapers.forEach((wp, wIdx) => {
-                if (wp.is_suspended) return;
-                const totalWidth = wp.widths.reduce((a,b) => a + b, 0);
-                const rolls = CALC.wallpaperRolls(totalWidth, wp.height_m);
-                const materialPrice = Math.round(rolls * wp.price_per_roll);
-                const installPrice = Math.round(rolls * (wp.install_cost_per_roll || 0));
-                const wpPrice = materialPrice + installPrice;
-
-                if (wpPrice > 0) {
-                    roomTotal += wpPrice;
-                    hasContent = true;
-                    roomDetailsText += `  - วอลเปเปอร์ #${wIdx + 1}: ${fmtTH(wpPrice)} บ.\n`;
-                }
-            });
-
-            if (hasContent) {
-                summary += `*ห้อง ${room.room_name || `ห้อง ${rIdx + 1}`}*\n`;
-                summary += `(รวม ${fmtTH(roomTotal)} บ.)\n${roomDetailsText}\n`;
-            }
-            grandTotal += roomTotal;
-        });
-
-        summary += `====================\n`;
-        summary += `*รวมราคาสุทธิ: ${fmtTH(grandTotal)} บาท*\n`;
-        return summary;
-    }
-
-    function buildSeamstressSummary(payload) {
-        let summary = `*สรุปงานเย็บผ้า*\nลูกค้า: ${payload.customer_name || '-'}\n`;
-        summary += `====================\n`;
-        let hasCurtains = false;
-
-        payload.rooms.forEach((room, rIdx) => {
-             if (room.is_suspended) return;
-
-             const sets = room.sets.filter(s => !s.is_suspended && s.width_m > 0 && s.height_m > 0);
-             if (sets.length === 0) return;
-
-             hasCurtains = true;
-             summary += `\n*ห้อง: ${room.room_name || `ห้อง ${rIdx + 1}`}*\n`;
-
-             sets.forEach((set, sIdx) => {
-                 summary += `\n*ชุดที่ ${sIdx + 1} (${set.fabric_variant})*\n`;
-                 summary += `ขนาด:\n`;
-                 summary += `  กว้าง ${fmtTH(set.width_m, 2)} x สูง ${fmtTH(set.height_m, 2)} ม.\n`;
-                 summary += `รูปแบบ: ${set.style}\n`;
-                 summary += `การเปิด: ${set.opening_style}\n`;
-                 if (set.fabric_variant === "ทึบ&โปร่ง") {
-                    summary += `รหัสผ้าทึบ: ${set.fabric_code || '-'}\n`;
-                    summary += `รหัสผ้าโปร่ง: ${set.sheer_fabric_code || '-'}\n`;
-                 } else {
-                    summary += `รหัสผ้า: ${set.fabric_code || '-'}\n`;
-                 }
-                 summary += `หมายเหตุ: ${set.notes || '-'}\n`;
-             });
-             summary += `--------------------\n`;
-        });
-
-        if (!hasCurtains) {
-            return "ไม่มีรายการผ้าม่านที่ต้องผลิตในใบเสนอนี้";
-        }
-        return summary;
-    }
-
-    function buildOwnerSummary(payload) {
-        let summary = `*สรุปทั้งหมด (ร้านค้า)*\n`;
-        let grandTotal = 0;
-
-        summary += `ลูกค้า: ${payload.customer_name || '-'}\n`;
-        summary += `โทร: ${payload.customer_phone || '-'}\n`;
-        summary += `====================\n\n`;
-
-        payload.rooms.forEach((room, rIdx) => {
-            if (room.is_suspended) {
-                summary += `*ห้อง ${room.room_name || rIdx + 1}*: -- ระงับ --\n\n`;
-                return;
-            }
-
-            let roomTotal = 0;
-            summary += `*ห้อง: ${room.room_name || `ห้อง ${rIdx + 1}`}*\n`;
-
-            room.sets.forEach((set, sIdx) => {
-                if (set.is_suspended) {
-                    summary += ` - ผ้าม่าน #${sIdx + 1}: -- ระงับ --\n`; return;
-                }
-                const hPlus = heightPlus(set.height_m);
-                const sPlus = stylePlus(set.style);
-                let opaquePrice = 0, sheerPrice = 0, opaqueYards = 0, sheerYards = 0;
-
-                if (set.fabric_variant.includes("ทึบ") && set.price_per_m_raw > 0) {
-                    opaquePrice = Math.round((set.price_per_m_raw + sPlus + hPlus) * set.width_m);
-                    opaqueYards = CALC.fabricYardage(set.style, set.width_m);
-                }
-                if (set.fabric_variant.includes("โปร่ง") && set.sheer_price_per_m > 0) {
-                    sheerPrice = Math.round((set.sheer_price_per_m + sPlus + hPlus) * set.width_m);
-                    sheerYards = CALC.fabricYardage(set.style, set.width_m);
-                }
-                const setTotal = opaquePrice + sheerPrice;
-                roomTotal += setTotal;
-
-                summary += `\n*ผ้าม่าน #${sIdx+1} (${set.style}, ${set.fabric_variant})*\n`;
-                summary += `  - ราคา: ${fmtTH(setTotal)} บ.\n`;
-                summary += `  - ขนาด: ${fmtTH(set.width_m, 2)}x${fmtTH(set.height_m, 2)} ม.\n`;
-                if(opaquePrice > 0) {
-                    summary += `  - ทึบ: ${fmtTH(set.price_per_m_raw)}/ม. (ใช้ ${fmtTH(opaqueYards, 2)} หลา, รหัส: ${set.fabric_code || '-'}) \n`;
-                }
-                 if(sheerPrice > 0) {
-                    const sheerCode = (set.fabric_variant === "ทึบ&โปร่ง") ? set.sheer_fabric_code : set.fabric_code;
-                    summary += `  - โปร่ง: ${fmtTH(set.sheer_price_per_m)}/ม. (ใช้ ${fmtTH(sheerYards, 2)} หลา, รหัส: ${sheerCode || '-'}) \n`;
-                }
-                if (set.width_m > 0) {
-                    summary += `  - ราง: สี${set.track_color}, ${fmtTH(set.width_m, 2)} ม.\n`;
-                }
-                if (set.fabric_variant === "ทึบ&โปร่ง") {
-                    summary += `  - **ต้องใช้ขาสองชั้น**\n`;
-                }
-            });
-
-            room.decorations.forEach((deco, dIdx) => {
-                 if (deco.is_suspended) {
-                    summary += `\n- ${deco.type || 'ตกแต่ง'} #${dIdx + 1}: -- ระงับ --\n`; return;
-                }
-                const areaSqyd = deco.width_m * deco.height_m * SQM_TO_SQYD;
-                const decoPrice = Math.round(areaSqyd * deco.price_sqyd);
-                roomTotal += decoPrice;
-
-                summary += `\n*${deco.type || 'ตกแต่ง'} #${dIdx+1}*\n`;
-                summary += `  - ราคา: ${fmtTH(decoPrice)} บ.\n`;
-                summary += `  - รหัส: ${deco.deco_code || '-'}\n`;
-                summary += `  - ขนาด: ${fmtTH(deco.width_m, 2)}x${fmtTH(deco.height_m, 2)} ม.\n`;
-                summary += `  - พื้นที่: ${fmtTH(areaSqyd,2)} ตร.หลา\n`;
-                summary += `  - ราคา: ${fmtTH(deco.price_sqyd)}/ตร.หลา\n`;
-            });
-
-            room.wallpapers.forEach((wp, wIdx) => {
-                 if (wp.is_suspended) {
-                    summary += `\n- วอลเปเปอร์ #${wIdx + 1}: -- ระงับ --\n`; return;
-                }
-                const totalWidth = wp.widths.reduce((a, b) => a + b, 0);
-                const areaSqm = totalWidth * wp.height_m;
-                const rolls = CALC.wallpaperRolls(totalWidth, wp.height_m);
-
-                const materialPrice = Math.round(rolls * wp.price_per_roll);
-                const installPrice = Math.round(rolls * (wp.install_cost_per_roll || 0));
-                const wpPrice = materialPrice + installPrice;
-                roomTotal += wpPrice;
-
-                summary += `\n*วอลเปเปอร์ #${wIdx+1}*\n`;
-                summary += `  - ราคา: ${fmtTH(wpPrice)} บ.\n`;
-                summary += `  - รหัส: ${wp.wallpaper_code || '-'}\n`;
-                summary += `  - สูง: ${fmtTH(wp.height_m, 2)} ม., กว้าง: ${fmtTH(totalWidth,2)} ม.\n`;
-                summary += `  - พื้นที่: ${fmtTH(areaSqm,2)} ตร.ม.\n`;
-                summary += `  - คำนวณ: ใช้ ${rolls} ม้วน\n`;
-            });
-            summary += `   *ยอดรวมห้องนี้: ${fmtTH(roomTotal)} บาท*\n`;
-            summary += `--------------------\n`;
-            grandTotal += roomTotal;
-        });
-
-        summary += `\n*สรุปวัสดุรวม*\n`;
-        const summaryNode = document.querySelector(SELECTORS.detailedSummaryContainer);
-        if(summaryNode) {
-             summaryNode.querySelectorAll('ul').forEach(ul => {
-                 ul.querySelectorAll('li').forEach(li => {
-                    summary += `- ${li.textContent.replace(/\s+/g, ' ').trim()}\n`;
-                 });
-             });
-        }
-        summary += `\n*รวมราคาสุทธิทั้งหมด: ${fmtTH(grandTotal)} บาท*\n`;
-        return summary;
-    }
-
-    function buildPurchaseOrderSummary(payload) {
-        let summary = `*รายการสั่งของ*\nลูกค้า: ${payload.customer_name || '-'}\n`;
-        summary += `====================\n`;
-        let itemCounter = 1;
-        const sections = { curtains: '', decorations: '', wallpapers: '' };
-
-        payload.rooms.forEach(room => {
-            if (room.is_suspended) return;
-
-            room.sets.forEach(set => {
-                if (set.is_suspended || set.width_m <= 0) return;
-                const fabricYards = CALC.fabricYardage(set.style, set.width_m);
-                if (set.fabric_variant.includes("ทึบ")) {
-                    sections.curtains += `\n*ผ้าทึบ #${itemCounter}*\n`;
-                    sections.curtains += ` • รหัส: ${set.fabric_code || '-'}\n`;
-                    sections.curtains += ` • จำนวน: ${fmtTH(fabricYards, 2)} หลา\n`;
-                }
-                if (set.fabric_variant.includes("โปร่ง")) {
-                     const sheerCode = (set.fabric_variant === "ทึบ&โปร่ง") ? set.sheer_fabric_code : set.fabric_code;
-                     sections.curtains += `\n*ผ้าโปร่ง #${itemCounter}*\n`;
-                     sections.curtains += ` • รหัส: ${sheerCode || '-'}\n`;
-                     sections.curtains += ` • จำนวน: ${fmtTH(fabricYards, 2)} หลา\n`;
-                }
-                sections.curtains += `\n*ราง #${itemCounter}*\n`;
-                sections.curtains += ` • รูปแบบ: ราง${set.style}\n`;
-                sections.curtains += ` • สี: ${set.track_color || '-'}\n`;
-                sections.curtains += ` • ขนาด: ${fmtTH(set.width_m, 2)} ม. (1 เส้น)\n`;
-                if (set.fabric_variant === "ทึบ&โปร่ง") sections.curtains += `**[!] เตือน: ต้องใช้ขาสองชั้น**\n`;
-                itemCounter++;
-            });
-
-            room.decorations.forEach(deco => {
-                 if (deco.is_suspended || deco.width_m <= 0) return;
-                 sections.decorations += `\n*${deco.type || 'ตกแต่ง'} #${itemCounter}*\n`;
-                 sections.decorations += ` • รหัส: ${deco.deco_code || '-'}\n`;
-                 sections.decorations += ` • ขนาด: ${fmtTH(deco.width_m, 2)} x ${fmtTH(deco.height_m, 2)} ม.\n`;
-                 if(deco.deco_notes) sections.decorations += ` • โน้ต: ${deco.deco_notes}\n`;
-                 sections.decorations += ` • [ ] แนบรูป\n`;
-                 itemCounter++;
-            });
-
-            room.wallpapers.forEach(wp => {
-                if (wp.is_suspended || wp.height_m <= 0) return;
-                const totalWidth = wp.widths.reduce((a, b) => a + b, 0);
-                if (totalWidth <= 0) return;
-                const rolls = CALC.wallpaperRolls(totalWidth, wp.height_m);
-                sections.wallpapers += `\n*วอลเปเปอร์ #${itemCounter}*\n`;
-                sections.wallpapers += ` • รหัส: ${wp.wallpaper_code || '-'}\n`;
-                sections.wallpapers += ` • จำนวน: ${rolls} ม้วน\n`;
-                if(wp.wallpaper_notes) sections.wallpapers += ` • โน้ต: ${wp.wallpaper_notes}\n`;
-                sections.wallpapers += ` • [ ] แนบรูป\n`;
-                itemCounter++;
-            });
-        });
-
-        if (sections.curtains) { summary += `\n*-- ผ้าม่านและอุปกรณ์ --*${sections.curtains}`; }
-        if (sections.decorations) { summary += `\n*-- รายการตกแต่ง --*${sections.decorations}`; }
-        if (sections.wallpapers) { summary += `\n*-- วอลเปเปอร์ --*${sections.wallpapers}`; }
-        if (!sections.curtains && !sections.decorations && !sections.wallpapers) return "ไม่มีรายการสินค้าที่ต้องสั่งซื้อ";
-        return summary;
-    }
-
-    function handleFormSubmit() {
-        const orderForm = document.querySelector(SELECTORS.orderForm);
-        orderForm.action = WEBHOOK_URL;
-        document.querySelector(SELECTORS.payloadInput).value = JSON.stringify(buildPayload());
-        showToast("ส่งข้อมูลแล้ว...", "success");
-        // orderForm.submit(); // This is commented out by default
-    }
-
-    // --- REVISED & IMPROVED PDF Generation ---
-    async function generatePdfQuotation() {
-        showToast('กำลังสร้างใบเสนอราคา...', 'default');
-        const payload = buildPayload();
-
-        // [FIX #1] Preload the logo image to prevent a race condition that can cause blank PDFs.
-        const preloadImage = (src) => new Promise((resolve, reject) => {
-            if (!src) {
-                resolve(); // Resolve immediately if no logo is provided.
-                return;
-            }
-            const img = new Image();
-            img.onload = () => resolve();
-            img.onerror = () => reject(new Error(`Failed to load image at ${src}`));
-            img.src = src;
-        });
-
-        try {
-            await preloadImage(SHOP_CONFIG.logoUrl);
-        } catch (error) {
-            console.error(error.message);
-            showToast('ผิดพลาด: ไม่สามารถโหลดโลโก้ได้', 'error');
-            // Decide whether to continue without a logo or stop. For now, we'll continue.
-        }
-
-        const printableElement = document.createElement('div');
-        const today = new Date();
-        const dateThai = today.toLocaleDateString('th-TH', { year: 'numeric', month: '2-digit', day: '2-digit' });
-        const quoteNumber = `QT-${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
-
-        let tableRows = '';
-        let itemNo = 1;
-        let subTotal = 0;
-
-        payload.rooms.forEach(room => {
-            if (room.is_suspended) return;
-            const roomName = room.room_name || 'ไม่ระบุชื่อห้อง';
-            let hasItemsInRoom = room.sets.some(s => !s.is_suspended) ||
-                                 room.decorations.some(d => !d.is_suspended) ||
-                                 room.wallpapers.some(w => !w.is_suspended);
-
-            if (!hasItemsInRoom) return;
-
-            let roomContent = '';
-            let roomHasPricedItems = false;
-
-            room.sets.forEach(set => {
-                if (set.is_suspended) return;
-                const w = set.width_m;
-                const h = set.height_m;
-                let totalSetPrice = 0;
-                if (w > 0 && h > 0) {
-                    const sPlus = stylePlus(set.style);
-                    const hPlus = heightPlus(h);
-                    const opaquePrice = set.fabric_variant.includes("ทึบ") && set.price_per_m_raw > 0
-                        ? Math.round((set.price_per_m_raw + sPlus + hPlus) * w)
-                        : 0;
-                    const sheerPrice = set.fabric_variant.includes("โปร่ง") && set.sheer_price_per_m > 0
-                        ? Math.round((set.sheer_price_per_m + sPlus + hPlus) * w)
-                        : 0;
-                    totalSetPrice = opaquePrice + sheerPrice;
-                }
-
-                if (totalSetPrice > 0) {
-                    let desc = `ผ้าม่าน ${set.style} (${set.fabric_variant}) <br><small>ขนาด ${w.toFixed(2)} x ${h.toFixed(2)} ม.`;
-                    if (set.notes) desc += ` - ${set.notes}`;
-                    desc += '</small>';
-                    roomContent += `<tr><td class="pdf-text-center">${itemNo++}</td><td>${desc}</td><td class="pdf-text-center">1</td><td class="pdf-text-right">${fmt(totalSetPrice, 2, true)}</td><td class="pdf-text-right">${fmt(totalSetPrice, 2, true)}</td></tr>`;
-                    subTotal += totalSetPrice;
-                    roomHasPricedItems = true;
-                }
-            });
-
-            room.decorations.forEach(deco => {
-                if (deco.is_suspended) return;
-                const areaSqyd = deco.width_m * deco.height_m * SQM_TO_SQYD;
-                const decoPrice = Math.round(areaSqyd * deco.price_sqyd);
-                if (decoPrice > 0) {
-                    let desc = `${deco.type || 'งานตกแต่ง'} <br><small>รหัส: ${deco.deco_code || '-'}, ขนาด ${deco.width_m.toFixed(2)} x ${deco.height_m.toFixed(2)} ม.</small>`;
-                    roomContent += `<tr><td class="pdf-text-center">${itemNo++}</td><td>${desc}</td><td class="pdf-text-center">1</td><td class="pdf-text-right">${fmt(decoPrice, 2, true)}</td><td class="pdf-text-right">${fmt(decoPrice, 2, true)}</td></tr>`;
-                    subTotal += decoPrice;
-                    roomHasPricedItems = true;
-                }
-            });
-
-            room.wallpapers.forEach(wp => {
-                if (wp.is_suspended) return;
-                const totalWidth = wp.widths.reduce((a, b) => a + b, 0);
-                if (totalWidth <= 0) return;
-                const rolls = CALC.wallpaperRolls(totalWidth, wp.height_m);
-                const materialPrice = Math.round(rolls * wp.price_per_roll);
-                const installPrice = Math.round(rolls * (wp.install_cost_per_roll || 0));
-                const wpPrice = materialPrice + installPrice;
-                if (wpPrice > 0) {
-                    let desc = `วอลเปเปอร์ <br><small>รหัส: ${wp.wallpaper_code || '-'}, สูง ${wp.height_m.toFixed(2)} ม. (ใช้ ${rolls} ม้วน)</small>`;
-                    roomContent += `<tr><td class="pdf-text-center">${itemNo++}</td><td>${desc}</td><td class="pdf-text-center">1</td><td class="pdf-text-right">${fmt(wpPrice, 2, true)}</td><td class="pdf-text-right">${fmt(wpPrice, 2, true)}</td></tr>`;
-                    subTotal += wpPrice;
-                    roomHasPricedItems = true;
-                }
-            });
-
-            if (roomHasPricedItems) {
-                tableRows += `<tr class="pdf-room-header"><td colspan="5">ห้อง: ${roomName}</td></tr>`;
-                tableRows += roomContent;
-            }
-        });
-
-        if (subTotal === 0) {
-            showToast('ไม่มีรายการที่มีราคาสำหรับสร้างใบเสนอราคา', 'warning');
+        if (!payload || !payload.rooms) {
+            showToast('ไฟล์ข้อมูลไม่ถูกต้องหรือไม่สมบูรณ์', 'error');
             return;
         }
-
-        const vatAmount = subTotal * SHOP_CONFIG.vatRate;
-        const grandTotal = subTotal + vatAmount;
-
-        // [FIX #3] Correctly format the VAT percentage to avoid floating point display errors.
-        const vatRateFormatted = `${(SHOP_CONFIG.vatRate * 100).toFixed(0)}%`;
-        const vatDisplay = SHOP_CONFIG.vatRate > 0 ? `
-            <tr>
-                <td colspan="2" class="pdf-label">ภาษีมูลค่าเพิ่ม ${vatRateFormatted}</td>
-                <td class="pdf-amount">${fmt(vatAmount, 2, true)}</td>
-            </tr>` : '';
-
-        printableElement.innerHTML = `
-        <div id="quotation-template">
-            <div class="pdf-container">
-                <header class="pdf-header">
-                    <div class="pdf-shop-info">
-                        ${SHOP_CONFIG.logoUrl ? `<img src="${SHOP_CONFIG.logoUrl}" alt="Logo" class="pdf-logo">` : ''}
-                        <div class="pdf-shop-address">
-                            <strong>${SHOP_CONFIG.name}</strong><br>
-                            ${SHOP_CONFIG.address}<br>
-                            โทร: ${SHOP_CONFIG.phone} | เลขประจำตัวผู้เสียภาษี: ${SHOP_CONFIG.taxId}
-                        </div>
-                    </div>
-                    <div class="pdf-quote-details">
-                        <div class="pdf-title-box">
-                            <h1>ใบเสนอราคา / Quotation</h1>
-                        </div>
-                        <table class="pdf-quote-meta">
-                            <tr><td>เลขที่:</td><td>${quoteNumber}</td></tr>
-                            <tr><td>วันที่:</td><td>${dateThai}</td></tr>
-                        </table>
-                    </div>
-                </header>
-                <section class="pdf-customer-details">
-                    <div class="pdf-customer-info">
-                        <strong>ชื่อลูกค้า:</strong> ${payload.customer_name || '..............................................'}<br>
-                        <strong>ที่อยู่:</strong> ${payload.customer_address.replace(/\n/g, '<br>') || '..............................................'}<br>
-                        <strong>โทร:</strong> ${payload.customer_phone || '..............................................'}
-                    </div>
-                    <div class="pdf-customer-meta">
-                         <strong>เงื่อนไขการชำระเงิน:</strong> ชำระมัดจำ 50%<br>
-                         <strong>ยืนราคา:</strong> 30 วัน
-                    </div>
-                </section>
-                <table class="pdf-items-table">
-                    <thead>
-                        <tr>
-                            <th style="width:5%;">ลำดับ</th>
-                            <th style="width:50%;">รายการ</th>
-                            <th style="width:10%;">จำนวน</th>
-                            <th style="width:17.5%;">ราคา/หน่วย</th>
-                            <th style="width:17.5%;">จำนวนเงิน (บาท)</th>
-                        </tr>
-                    </thead>
-                    <tbody>${tableRows}</tbody>
-                </table>
-                <section class="pdf-summary-section">
-                    <div class="pdf-amount-in-words">
-                        <strong>หมายเหตุ:</strong>
-                        <ul>
-                            <li>ราคานี้รวมค่าติดตั้งแล้ว</li>
-                            <li>ชำระมัดจำ 50% เพื่อยืนยันการสั่งผลิตสินค้า</li>
-                            <li>ใบเสนอราคานี้มีอายุ 30 วัน นับจากวันที่เสนอราคา</li>
-                        </ul>
-                        <div class="pdf-amount-text">( ${bahttext(grandTotal)} )</div>
-                    </div>
-                    <div class="pdf-totals-block">
-                        <table>
-                            <tr><td colspan="2" class="pdf-label">รวมเป็นเงิน</td><td class="pdf-amount">${fmt(subTotal, 2, true)}</td></tr>
-                            ${vatDisplay}
-                            <tr class="pdf-grand-total"><td colspan="2" class="pdf-label">ยอดรวมสุทธิ</td><td class="pdf-amount">${fmt(grandTotal, 2, true)}</td></tr>
-                        </table>
-                    </div>
-                </section>
-                <footer class="pdf-footer-section">
-                    <div class="pdf-signature-box">
-                        <p>.................................................</p>
-                        <p>ผู้เสนอราคา</p>
-                        <p>(${SHOP_CONFIG.name})</p>
-                        <p>วันที่: ${dateThai}</p>
-                    </div>
-                    <div class="pdf-signature-box">
-                         <p>.................................................</p>
-                        <p>ลูกค้า / ผู้มีอำนาจลงนาม</p>
-                        <p>&nbsp;</p>
-                        <p>วันที่: ......./......./............</p>
-                    </div>
-                </footer>
-            </div>
-        </div>`;
-
-        printableElement.style.position = 'absolute';
-        printableElement.style.left = '-9999px';
-        printableElement.style.top = '0';
-        printableElement.style.width = '210mm';
-        document.body.appendChild(printableElement);
-
-        const customerName = payload.customer_name.trim().replace(/\s+/g, '-') || 'quote';
-        const fileName = `${quoteNumber}_${customerName}.pdf`;
-
-        const opt = {
-            margin: [10, 5, 15, 5], // Top, Right, Bottom, Left. Increased bottom margin for page number.
-            filename: fileName,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        try {
-            const element = printableElement.firstElementChild;
-            // [FIX #2] Implement professional multi-page handling with page numbers.
-            await html2pdf().from(element).set(opt).toPdf().get('pdf').then(pdf => {
-                const totalPages = pdf.internal.getNumberOfPages();
-                for (let i = 1; i <= totalPages; i++) {
-                    pdf.setPage(i);
-                    pdf.setFontSize(8);
-                    pdf.setTextColor('#6c757d');
-                    const footerText = `${SHOP_CONFIG.name} | โทร: ${SHOP_CONFIG.phone}`;
-                    pdf.text(footerText, opt.margin[3], 297 - 8, { align: 'left' });
-                    const pageNumText = `หน้า ${i} / ${totalPages}`;
-                    pdf.text(pageNumText, 210 - opt.margin[1], 297 - 8, { align: 'right' });
-                }
-            }).save();
-
-            showToast('สร้าง PDF สำเร็จ!', 'success');
-        } catch (error) {
-            console.error("PDF Generation Error:", error);
-            showToast('เกิดข้อผิดพลาดในการสร้าง PDF', 'error');
-        } finally {
-            document.body.removeChild(printableElement);
+        if (payload.appVersion !== APP_VERSION) {
+            showToast('ข้อมูลถูกบันทึกด้วยเวอร์ชันเก่า, อาจมีการแสดงผลที่ไม่ถูกต้อง', 'warning');
         }
+
+        const roomsContainer = document.querySelector(SELECTORS.roomsContainer);
+        roomsContainer.innerHTML = '';
+        roomCount = 0;
+
+        const customerInfo = document.querySelector('#customerInfo');
+        customerInfo.querySelector('#customer_name').value = payload.customer_info?.customer_name || '';
+        customerInfo.querySelector('#customer_phone').value = payload.customer_info?.customer_phone || '';
+        customerInfo.querySelector('#customer_address').value = payload.customer_info?.customer_address || '';
+
+        payload.rooms.forEach(room => addRoom(room));
+        recalcAll();
+        renumber();
+        showToast('โหลดข้อมูลสำเร็จ', 'success');
     }
 
-
-    // --- EVENT LISTENERS & INITIALIZATION ---
-    function init() {
+    // --- EVENT LISTENERS ---
+    function initListeners() {
+        const roomsContainer = document.querySelector(SELECTORS.roomsContainer);
         const orderForm = document.querySelector(SELECTORS.orderForm);
-        const fileImporter = document.querySelector(SELECTORS.fileImporter);
+        const lockBtn = document.querySelector(SELECTORS.lockBtn);
+        const exportPdfBtn = document.querySelector(SELECTORS.exportPdfBtn);
 
-        const debouncedRecalcAndSave = debounce(() => { recalcAll(); saveData(); }, 150);
-
-        orderForm.addEventListener("input", e => {
-            const el = e.target;
-            if(el.name === 'deco_price_sqyd' || el.name === 'wallpaper_price_roll' || el.name === 'wallpaper_install_cost') {
-                 const value = toNum(el.value);
-                 const cursorPosition = el.selectionStart;
-                 const oldLength = el.value.length;
-                 el.value = value > 0 ? value.toLocaleString('en-US') : '';
-                 const newLength = el.value.length;
-                 el.setSelectionRange(cursorPosition + (newLength - oldLength), cursorPosition + (newLength - oldLength));
+        orderForm.addEventListener('input', debounce(e => {
+            if (isLocked) return;
+            const target = e.target;
+            const item = target.closest(SELECTORS.set) || target.closest(SELECTORS.decoItem) || target.closest(SELECTORS.wallpaperItem);
+            const parentRoom = target.closest(SELECTORS.room);
+            if (item || parentRoom) {
+                recalcAll();
+                saveData();
             }
-            debouncedRecalcAndSave();
-        });
+        }));
 
-        const handleDecoTypeChange = (target) => {
-            const itemCard = target.closest(SELECTORS.decoItem);
-            if (itemCard) {
-                const displayEl = itemCard.querySelector('.deco-type-display');
-                if (displayEl) {
-                    const selectedText = target.options[target.selectedIndex]?.text || target.value;
-                    displayEl.textContent = selectedText ? `(${selectedText})` : '';
-                }
-            }
-        };
-
-        orderForm.addEventListener("change", e => {
-            if (e.target.name === 'deco_type') handleDecoTypeChange(e.target);
-            if (e.target.matches('select[name="fabric_variant"]')) toggleSetFabricUI(e.target.closest(SELECTORS.set));
-            debouncedRecalcAndSave();
-        });
-
-        orderForm.addEventListener("click", e => {
+        roomsContainer.addEventListener('click', (e) => {
+            if (isLocked) return;
             const btn = e.target.closest('[data-act]');
             if (!btn) return;
-
-            const action = btn.dataset.act;
-            const roomEl = btn.closest(SELECTORS.room);
-
-            const roomMenu = btn.closest('.room-options-menu');
-            if (roomMenu) {
-                roomMenu.classList.remove('show');
-                roomEl?.classList.remove('overflow-visible');
-            }
+            e.preventDefault();
+            
+            const roomEl = e.target.closest(SELECTORS.room);
 
             const actions = {
-                'add-set': () => addSet(roomEl), 'add-deco': () => addDeco(roomEl), 'add-wallpaper': () => addWallpaper(roomEl), 'add-wall': () => addWall(btn),
-                'toggle-room-menu': () => {
-                     e.preventDefault();
-                     const menu = btn.nextElementSibling;
-                     const card = btn.closest('.room-card');
-                     const isOpening = !menu.classList.contains('show');
-                     document.querySelectorAll('.room-options-menu.show').forEach(m => {
-                         m.classList.remove('show');
-                         m.closest('.room-card')?.classList.remove('overflow-visible');
-                     });
-                     if (isOpening) {
-                        menu.classList.add('show');
-                        card?.classList.add('overflow-visible');
-                     }
+                'add-set': () => addSet(roomEl),
+                'add-deco': () => addDeco(roomEl),
+                'add-wallpaper': () => addWallpaper(roomEl),
+                'delete-set': (item) => performActionWithConfirmation(btn, { action: animateAndRemove, selector: SELECTORS.set, isRemoval: true, confirm: true, title: 'ยืนยันการลบ', body: 'คุณแน่ใจที่จะลบรายการนี้ใช่ไหม?', toast: 'ลบรายการแล้ว' }),
+                'delete-deco': (item) => performActionWithConfirmation(btn, { action: animateAndRemove, selector: SELECTORS.decoItem, isRemoval: true, confirm: true, title: 'ยืนยันการลบ', body: 'คุณแน่ใจที่จะลบรายการนี้ใช่ไหม?', toast: 'ลบรายการแล้ว' }),
+                'delete-wallpaper': (item) => performActionWithConfirmation(btn, { action: animateAndRemove, selector: SELECTORS.wallpaperItem, isRemoval: true, confirm: true, title: 'ยืนยันการลบ', body: 'คุณแน่ใจที่จะลบรายการนี้ใช่ไหม?', toast: 'ลบรายการแล้ว' }),
+                'delete-room': (item) => performActionWithConfirmation(btn, { action: animateAndRemove, selector: SELECTORS.room, isRemoval: true, confirm: true, title: 'ยืนยันการลบ', body: 'การลบห้องจะลบข้อมูลทั้งหมดในห้องนี้ คุณแน่ใจหรือไม่?', toast: 'ลบห้องแล้ว' }),
+                'add-room': () => addRoom(),
+                'delete-wall': (item) => {
+                    const row = item.closest('.wall-input-row');
+                    if (row) {
+                        row.remove();
+                        recalcAll();
+                        saveData();
+                    }
                 },
-                'toggle-suspend-room': () => {
-                    e.preventDefault();
-                    if(!roomEl) return;
-                    const isSuspended = !(roomEl.dataset.suspended === 'true');
-                    suspendRoom(roomEl, isSuspended);
+                'toggle-suspend': (item) => {
+                    const isSuspended = item.dataset.suspended === 'true';
+                    suspendItem(item, !isSuspended);
+                    recalcAll();
+                    saveData();
                 },
-                'clear-room': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูลในห้อง', body: 'ยืนยันการลบทุกรายการในห้องนี้?', selector: SELECTORS.room, action: (item) => { item.querySelector(SELECTORS.setsContainer).innerHTML = ""; item.querySelector(SELECTORS.decorationsContainer).innerHTML = ""; item.querySelector(SELECTORS.wallpapersContainer).innerHTML = ""; }, toast: 'ล้างข้อมูลในห้องแล้ว' }),
-                'del-room': () => performActionWithConfirmation(btn, { confirm: true, isRemoval: true, title: 'ลบห้อง', body: 'ยืนยันการลบห้องนี้?', selector: SELECTORS.room, action: animateAndRemove, toast: 'ลบห้องแล้ว' }),
-                'del-set': () => performActionWithConfirmation(btn, { confirm: true, isRemoval: true, title: 'ลบจุด', body: 'ยืนยันการลบจุดติดตั้งนี้?', selector: SELECTORS.set, action: animateAndRemove, toast: 'ลบจุดผ้าม่านแล้ว' }),
-                'del-deco': () => performActionWithConfirmation(btn, { confirm: true, isRemoval: true, title: 'ลบรายการ', body: 'ยืนยันการลบรายการตกแต่งนี้?', selector: SELECTORS.decoItem, action: animateAndRemove, toast: 'ลบรายการตกแต่งแล้ว' }),
-                'del-wallpaper': () => performActionWithConfirmation(btn, { confirm: true, isRemoval: true, title: 'ลบรายการ', body: 'ยืนยันการลบรายการวอลเปเปอร์?', selector: SELECTORS.wallpaperItem, action: animateAndRemove, toast: 'ลบรายการวอลเปเปอร์แล้ว' }),
-                'del-wall': () => performActionWithConfirmation(btn, { confirm: true, isRemoval: true, title: 'ลบผนัง', body: 'ยืนยันการลบผนังนี้?', selector: '.wall-input-row', action: animateAndRemove, toast: 'ลบผนังแล้ว' }),
-                'clear-set': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในจุดนี้?', selector: SELECTORS.set, action: (item) => { item.querySelectorAll('input, select').forEach(el => { el.value = el.name === 'fabric_variant' ? 'ทึบ' : el.name === 'set_style' ? 'ลอน' : el.name === 'opening_style' ? 'แยกกลาง' : el.name === 'track_color' ? 'ขาว' : ''; }); toggleSetFabricUI(item); }, toast: 'ล้างข้อมูลผ้าม่านแล้ว' }),
-                'clear-deco': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในรายการนี้?', selector: SELECTORS.decoItem, action: (item) => { item.querySelectorAll('input, select').forEach(el => el.value = ''); item.querySelector('.deco-type-display').textContent = ''; }, toast: 'ล้างข้อมูลตกแต่งแล้ว' }),
-                'clear-wallpaper': () => performActionWithConfirmation(btn, { confirm: true, title: 'ล้างข้อมูล', body: 'ยืนยันการล้างข้อมูลในรายการนี้?', selector: SELECTORS.wallpaperItem, action: (item) => { item.querySelectorAll('input').forEach(el => { el.value = (el.name === 'wallpaper_install_cost') ? '300' : ''; }); item.querySelector(SELECTORS.wallsContainer).innerHTML = ''; addWall(item.querySelector('[data-act="add-wall"]')); }, toast: 'ล้างข้อมูลวอลเปเปอร์แล้ว' }),
-                'toggle-suspend': () => {
-                    const item = btn.closest('.set-item, .deco-item, .wallpaper-item');
-                    const isSuspended = !(item.dataset.suspended === 'true');
-                    suspendItem(item, isSuspended);
-                    recalcAll(); saveData();
+                'toggle-suspend-room': (item) => {
+                     const isSuspended = item.dataset.suspended === 'true';
+                    suspendRoom(item, !isSuspended);
+                },
+                'toggle-set-menu': (item) => {
+                    const menu = item.closest('.item-menu-container').querySelector('.item-options-menu');
+                    const card = item.closest('.item-card');
+                    card.classList.toggle('overflow-visible');
+                    menu.classList.toggle('show');
+                },
+                'toggle-room-menu': (item) => {
+                    document.querySelectorAll('.room-options-menu.show').forEach(m => {
+                        if (m !== item.closest('.room-options-container').querySelector('.room-options-menu')) {
+                            m.classList.remove('show');
+                            m.closest('.room-card')?.classList.remove('overflow-visible');
+                        }
+                    });
+                    const menu = item.closest('.room-options-container').querySelector('.room-options-menu');
+                    const card = item.closest('.room-card');
+                    card.classList.toggle('overflow-visible');
+                    menu.classList.toggle('show');
                 }
             };
-            if (actions[action]) {
-                if (action !== 'toggle-room-menu') e.preventDefault();
-                actions[action]();
+            if (btn.dataset.act in actions) actions[btn.dataset.act](btn.closest('[data-room],[data-set],[data-deco-item],[data-wallpaper-item]') || btn);
+        });
+
+        // Add Room button at the bottom
+        document.querySelector(SELECTORS.addRoomFooterBtn).addEventListener('click', () => {
+            if (isLocked) return;
+            addRoom();
+        });
+
+        // General listeners for lock, clear, etc.
+        lockBtn.addEventListener('click', toggleLockState);
+        document.querySelector(SELECTORS.clearAllBtn).addEventListener('click', () => {
+             performActionWithConfirmation(document.querySelector(SELECTORS.clearAllBtn), {
+                action: () => {
+                    localStorage.removeItem(STORAGE_KEY);
+                    window.location.reload();
+                },
+                selector: 'body', isRemoval: true, confirm: true, title: 'ยืนยันการลบข้อมูล', body: 'การลบข้อมูลทั้งหมดจะทำให้คุณต้องเริ่มใหม่ คุณแน่ใจหรือไม่?', toast: 'ลบข้อมูลทั้งหมดแล้ว'
+            });
+        });
+        document.querySelector(SELECTORS.clearItemsBtn).addEventListener('click', () => {
+             performActionWithConfirmation(document.querySelector(SELECTORS.clearItemsBtn), {
+                action: () => {
+                    document.querySelector(SELECTORS.roomsContainer).innerHTML = '';
+                    roomCount = 0;
+                    addRoom();
+                },
+                selector: 'body', isRemoval: true, confirm: true, title: 'ยืนยันการลบรายการ', body: 'การลบรายการทั้งหมดจะลบแค่ข้อมูลรายการ (ผ้าม่าน, ของตกแต่ง, วอลล์เปเปอร์) แต่ยังคงข้อมูลลูกค้าไว้', toast: 'ลบรายการทั้งหมดแล้ว'
+            });
+        });
+
+        exportPdfBtn.addEventListener('click', exportToPdf);
+
+        const toggleSetFabricUI = (setEl) => {
+            const variantSelect = setEl.querySelector('select[name="fabric_variant"]');
+            const sheerWrap = setEl.querySelector(SELECTORS.sheerWrap);
+            const sheerCodeWrap = setEl.querySelector(SELECTORS.sheerCodeWrap);
+            const updateVisibility = () => {
+                const isSheer = variantSelect.value.includes('โปร่ง');
+                sheerWrap.style.display = isSheer ? 'block' : 'none';
+                sheerCodeWrap.style.display = isSheer ? 'block' : 'none';
+            };
+            variantSelect.addEventListener('change', updateVisibility);
+            updateVisibility();
+        };
+
+        // Copy summary to clipboard
+        document.querySelector(SELECTORS.copyTextBtn).addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (isLocked) {
+                showToast('ปลดล็อคฟอร์มเพื่อคัดลอก', 'warning');
+                return;
+            }
+            const option = await showCopyOptionsModal();
+            if (!option) return;
+
+            const payload = getPayloadData();
+            let text = '';
+            if (option === 'customer') {
+                const customerName = payload.customer_info?.customer_name || 'ลูกค้า';
+                const grandTotalWithVat = payload.totals.grandTotalWithVat;
+                const formattedPrice = fmtTH(grandTotalWithVat, 2);
+                const phone = SHOP_CONFIG.phone;
+
+                text = `💡 ใบเสนอราคาสำหรับคุณ ${customerName}\n\n`;
+                
+                payload.rooms.forEach(room => {
+                    if (room.is_suspended) return;
+                    text += `🏠 *ห้อง: ${room.room_name || 'ไม่ระบุ'}:*\n`;
+                    room.sets.forEach(set => {
+                        if (set.is_suspended) return;
+                        text += `  - ${set.style || 'ผ้าม่าน'} ${set.fabric_variant || ''}: กว้าง ${fmtTH(set.width_m, 2)} ม. x สูง ${fmtTH(set.height_m, 2)} ม.\n`;
+                    });
+                    room.decorations.forEach(deco => {
+                         if (deco.is_suspended) return;
+                        text += `  - ${deco.type || 'ของตกแต่ง'}: กว้าง ${fmtTH(deco.width_m, 2)} ม. x สูง ${fmtTH(deco.height_m, 2)} ม.\n`;
+                    });
+                    room.wallpapers.forEach(wallpaper => {
+                        if (wallpaper.is_suspended) return;
+                        text += `  - วอลล์เปเปอร์: ความสูง ${fmtTH(wallpaper.height_m, 2)} ม.\n`;
+                    });
+                });
+                text += `\n💰 *ราคารวม: ${formattedPrice} บาท*\n`;
+                text += `\nขอบคุณที่ใช้บริการครับ\n☎️ ติดต่อสอบถามเพิ่มเติม: ${phone}`;
+
+            } else if (option === 'internal') {
+                const customerName = payload.customer_info?.customer_name || 'ลูกค้า';
+                const totals = payload.totals;
+                text = `-- ข้อมูลภายในสำหรับ ${customerName} --\n\n`;
+                text += `รวม (ก่อนภาษี): ${fmtTH(totals.grandTotal, 2)} บ.\n`;
+                text += `ภาษีมูลค่าเพิ่ม: ${fmtTH(totals.totalVat, 2)} บ.\n`;
+                text += `รวมทั้งหมด: ${fmtTH(totals.grandTotalWithVat, 2)} บ.\n\n`;
+
+                payload.rooms.forEach(room => {
+                    text += `--- ห้อง: ${room.room_name || 'ไม่ระบุ'}${room.is_suspended ? ' (ระงับ)' : ''} ---\n`;
+                    room.sets.forEach((set, i) => {
+                        text += `  - ผ้าม่าน: ${set.style} ${set.fabric_variant}, กว้าง ${fmtTH(set.width_m, 2)} ม. x สูง ${fmtTH(set.height_m, 2)} ม. (${fmtTH(set.total_price)} บ.)${set.is_suspended ? ' (ระงับ)' : ''}\n`;
+                    });
+                    room.decorations.forEach(deco => {
+                        text += `  - ของตกแต่ง: ${deco.type}, กว้าง ${fmtTH(deco.width_m, 2)} ม. x สูง ${fmtTH(deco.height_m, 2)} ม. (${fmtTH(deco.total_price)} บ.)${deco.is_suspended ? ' (ระงับ)' : ''}\n`;
+                    });
+                    room.wallpapers.forEach(wallpaper => {
+                        text += `  - วอลล์เปเปอร์: ${fmtTH(wallpaper.total_rolls)} ม้วน (${fmtTH(wallpaper.total_price)} บ.)${wallpaper.is_suspended ? ' (ระงับ)' : ''}\n`;
+                    });
+                    text += '\n';
+                });
+            }
+
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast('คัดลอกข้อมูลสำเร็จ!', 'success');
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                showToast('คัดลอกข้อมูลไม่สำเร็จ', 'error');
             }
         });
 
-        document.querySelector(SELECTORS.addRoomFooterBtn).addEventListener('click', () => addRoom());
-        document.querySelector(SELECTORS.lockBtn).addEventListener('click', toggleLock);
-
-        // --- Menu Actions ---
-        const menuDropdown = document.querySelector(SELECTORS.menuDropdown);
-
-        document.querySelector(SELECTORS.copyTextBtn).addEventListener('click', async (e) => {
-            e.preventDefault();
-            const option = await showCopyOptionsModal();
-            if (!option) return;
-            const payload = buildPayload();
-            let textToCopy = '';
-            if (option === 'customer') textToCopy = buildCustomerSummary(payload);
-            else if (option === 'seamstress') textToCopy = buildSeamstressSummary(payload);
-            else if (option === 'owner') textToCopy = buildOwnerSummary(payload);
-            else if (option === 'purchase_order') textToCopy = buildPurchaseOrderSummary(payload);
-            navigator.clipboard.writeText(textToCopy)
-                .then(() => showToast('คัดลอกข้อความสำเร็จ', 'success'))
-                .catch(() => showToast('คัดลอกล้มเหลว', 'error'));
-            menuDropdown.classList.remove('show');
+        // Import/Export JSON
+        document.querySelector(SELECTORS.exportBtn).addEventListener('click', () => {
+            const data = getPayloadData();
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const date = new Date().toISOString().slice(0, 10);
+            a.download = `marnthara-data-${date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Export ข้อมูลสำเร็จ', 'success');
         });
-
-        document.querySelector(SELECTORS.exportPdfBtn).addEventListener('click', (e) => {
-            e.preventDefault();
-            generatePdfQuotation();
-            menuDropdown.classList.remove('show');
-        });
-
-        document.querySelector(SELECTORS.submitBtn).addEventListener('click', (e) => {
-            e.preventDefault();
-            handleFormSubmit();
-            menuDropdown.classList.remove('show');
-        });
-
-        document.querySelector(SELECTORS.clearItemsBtn).addEventListener('click', async (e) => {
-            e.preventDefault();
-            if (isLocked || !await showConfirmation('ล้างรายการทั้งหมด', 'ยืนยันการล้างรายการสินค้าทั้งหมด (ข้อมูลลูกค้าจะยังคงอยู่)')) return;
-            document.querySelector(SELECTORS.roomsContainer).innerHTML = ""; roomCount = 0; addRoom(); saveData();
-            showToast('ล้างทุกรายการแล้ว', 'warning');
-            menuDropdown.classList.remove('show');
-        });
-
-        document.querySelector(SELECTORS.clearAllBtn).addEventListener('click', async (e) => {
-            e.preventDefault();
-            if (isLocked || !await showConfirmation('ล้างข้อมูลทั้งหมด', 'คำเตือน! การกระทำนี้จะลบข้อมูลทั้งหมดและข้อมูลลูกค้า ไม่สามารถกู้คืนได้')) return;
-            document.querySelector(SELECTORS.roomsContainer).innerHTML = ""; roomCount = 0;
-            document.querySelectorAll('#customerInfo input, #customerInfo textarea').forEach(i => i.value = "");
-            addRoom(); saveData();
-            showToast('ล้างข้อมูลทั้งหมดแล้ว', 'warning');
-            menuDropdown.classList.remove('show');
-        });
-
-        document.querySelector(SELECTORS.exportBtn).addEventListener('click', (e) => {
-            e.preventDefault();
-            const payload = buildPayload();
-            const customerName = payload.customer_name.trim();
-            const cleanName = customerName.replace(/[^a-zA-Z0-9ก-๙_.\s-]/g, '').replace(/\s+/g, '-').substring(0, 30);
-            const dateStamp = new Date().toISOString().split('T')[0];
-            const fileName = cleanName ? `mtr-${cleanName}-${dateStamp}.json` : `mtr-${dateStamp}.json`;
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", fileName);
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-            showToast('ส่งออกข้อมูลสำเร็จ', 'success');
-            menuDropdown.classList.remove('show');
-        });
-
-        document.querySelector(SELECTORS.importBtn).addEventListener('click', (e) => {
-            e.preventDefault();
-            menuDropdown.classList.remove('show');
-            fileImporter.click();
-        });
-        
-        fileImporter.addEventListener('change', (e) => {
-            if (!e.target.files || !e.target.files[0]) return;
+        document.querySelector(SELECTORS.importBtn).addEventListener('click', () => document.querySelector(SELECTORS.fileImporter).click());
+        document.querySelector(SELECTORS.fileImporter).addEventListener('change', (e) => {
             const file = e.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
             reader.onload = (event) => {
                 try {
@@ -1385,10 +1165,43 @@
                     menu.closest('.room-card')?.classList.remove('overflow-visible');
                 });
             }
+            if (!e.target.closest('.item-menu-container')) {
+                 document.querySelectorAll('.item-options-menu.show').forEach(menu => {
+                    menu.classList.remove('show');
+                    menu.closest('.item-card')?.classList.remove('overflow-visible');
+                });
+            }
         });
         document.querySelector(SELECTORS.menuBtn).addEventListener('click', () => menuDropdown.classList.toggle('show'));
+    }
 
-        // Initial Load from localStorage
+    function toggleLockState() {
+        isLocked = !isLocked;
+        const lockIcon = document.querySelector('.lock-icon');
+        const lockText = document.querySelector(SELECTORS.lockText);
+        const orderForm = document.querySelector(SELECTORS.orderForm);
+
+        lockIcon.className = isLocked ? 'ph-bold ph-lock-key-open lock-icon' : 'ph-bold ph-unlock lock-icon';
+        lockText.textContent = isLocked ? 'ปลดล็อก' : 'ล็อก';
+        orderForm.classList.toggle('is-locked', isLocked);
+        orderForm.querySelectorAll('input, select, textarea, button:not(#lockBtn, #menuBtn, .btn-icon, .btn-secondary)').forEach(el => {
+            el.disabled = isLocked;
+        });
+
+        showToast(isLocked ? 'ฟอร์มถูกล็อกแล้ว' : 'ฟอร์มถูกปลดล็อกแล้ว', 'info');
+        updateLockState();
+    }
+
+    function updateLockState() {
+        const orderForm = document.querySelector(SELECTORS.orderForm);
+        orderForm.querySelectorAll('input, select, textarea, button:not(#lockBtn, #menuBtn, .btn-icon, .btn-secondary)').forEach(el => {
+            el.disabled = isLocked;
+        });
+    }
+
+    // Initial Load from localStorage
+    function init() {
+        initListeners();
         try {
             const storedData = localStorage.getItem(STORAGE_KEY);
             if (storedData) loadPayload(JSON.parse(storedData));
