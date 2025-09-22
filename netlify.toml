@@ -11,8 +11,10 @@ functions = "api"
 [functions]
 # Increase the timeout for potentially long PDF generation.
 # The maximum for the free tier is 26 seconds.
-timeout = 25
-node_bundler = "esbuild"
+[functions]
+  node_bundler = "esbuild"
+[functions.api]
+  timeout = 25
 
 [[redirects]]
 from = "/api/*"
