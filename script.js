@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/5.0.1-pdf-robust";
+    const APP_VERSION = "input-ui/5.0.2-pdf-robust";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path"; // NOTE: Secure this endpoint if used.
     const STORAGE_KEY = "marnthara.input.v4"; // Keep v4 for data compatibility
 
@@ -11,7 +11,10 @@
         address: "65/8 หมู่ 2 ต.ท่าศาลา อ.เมือง จ.ลพบุรี 15000",
         phone: "092-985-9395, 082-552-5595",
         taxId: "1234567890123",
-        logoUrl: "https://i.imgur.com/l7y85nI.png", // Recommended: Use a square logo (e.g., 200x200px) hosted online
+        // IMPORTANT: Add your publicly accessible logo URL here.
+        // A square logo (e.g., 200x200px) hosted on a service like Imgur works best.
+        // If left empty (''), the PDF will be generated without a logo.
+        logoUrl: "", // EXAMPLE: "https://i.imgur.com/l7y85nI.png"
         vatRate: 0.07 // 7% VAT. Set to 0 to disable.
     };
 
@@ -952,7 +955,7 @@
 
         const preloadImage = (src) => new Promise((resolve, reject) => {
             if (!src) {
-                resolve();
+                resolve(); // Resolve immediately if no src is provided
                 return;
             }
             const img = new Image();
@@ -981,25 +984,29 @@
         payload.rooms.forEach(room => {
             if (room.is_suspended) return;
             const roomName = room.room_name || 'ไม่ระบุชื่อห้อง';
-            let hasItemsInRoom = room.sets.some(s => !s.is_suspended) ||
-                                 room.decorations.some(d => !d.is_suspended) ||
-                                 room.wallpapers.some(w => !w.is_suspended);
+            
+            const activeItems = [
+                ...room.sets.filter(s => !s.is_suspended && s.width_m > 0 && s.height_m > 0),
+                ...room.decorations.filter(d => !d.is_suspended && d.width_m > 0 && d.height_m > 0),
+                ...room.wallpapers.filter(w => !w.is_suspended && w.widths.reduce((a, b) => a + b, 0) > 0)
+            ];
 
-            if (!hasItemsInRoom) return;
+            if (activeItems.length === 0) return;
+            
             let roomContent = '';
             let roomHasPricedItems = false;
+            
             room.sets.forEach(set => {
-                if (set.is_suspended) return;
+                if (set.is_suspended || !(set.width_m > 0 && set.height_m > 0)) return;
                 const w = set.width_m;
                 const h = set.height_m;
                 let totalSetPrice = 0;
-                if (w > 0 && h > 0) {
-                    const sPlus = stylePlus(set.style);
-                    const hPlus = heightPlus(h);
-                    const opaquePrice = set.fabric_variant.includes("ทึบ") && set.price_per_m_raw > 0 ? Math.round((set.price_per_m_raw + sPlus + hPlus) * w) : 0;
-                    const sheerPrice = set.fabric_variant.includes("โปร่ง") && set.sheer_price_per_m > 0 ? Math.round((set.sheer_price_per_m + sPlus + hPlus) * w) : 0;
-                    totalSetPrice = opaquePrice + sheerPrice;
-                }
+                const sPlus = stylePlus(set.style);
+                const hPlus = heightPlus(h);
+                const opaquePrice = set.fabric_variant.includes("ทึบ") && set.price_per_m_raw > 0 ? Math.round((set.price_per_m_raw + sPlus + hPlus) * w) : 0;
+                const sheerPrice = set.fabric_variant.includes("โปร่ง") && set.sheer_price_per_m > 0 ? Math.round((set.sheer_price_per_m + sPlus + hPlus) * w) : 0;
+                totalSetPrice = opaquePrice + sheerPrice;
+                
                 if (totalSetPrice > 0) {
                     let desc = `ผ้าม่าน ${set.style} (${set.fabric_variant}) <br><small>ขนาด ${w.toFixed(2)} x ${h.toFixed(2)} ม.`;
                     if (set.notes) desc += ` - ${set.notes}`;
@@ -1010,7 +1017,7 @@
                 }
             });
             room.decorations.forEach(deco => {
-                if (deco.is_suspended) return;
+                if (deco.is_suspended || !(deco.width_m > 0 && deco.height_m > 0)) return;
                 const areaSqyd = deco.width_m * deco.height_m * SQM_TO_SQYD;
                 const decoPrice = Math.round(areaSqyd * deco.price_sqyd);
                 if (decoPrice > 0) {
@@ -1051,7 +1058,7 @@
         const vatRateFormatted = `${(SHOP_CONFIG.vatRate * 100).toFixed(0)}%`;
         const vatDisplay = SHOP_CONFIG.vatRate > 0 ? `<tr><td colspan="2" class="pdf-label">ภาษีมูลค่าเพิ่ม ${vatRateFormatted}</td><td class="pdf-amount">${fmt(vatAmount, 2, true)}</td></tr>` : '';
 
-        // **[FIX 1]** Conditionally create the logo HTML. If loading failed, this will be an empty string.
+        // **[FIX #1]** Conditionally create the logo HTML. If loading failed, this will be an empty string.
         const logoHtml = logoLoaded && SHOP_CONFIG.logoUrl ? `<img src="${SHOP_CONFIG.logoUrl}" alt="Logo" class="pdf-logo">` : '';
 
         printableElement.innerHTML = `
@@ -1062,7 +1069,7 @@
                         ${logoHtml}
                         <div class="pdf-shop-address">
                             <strong>${SHOP_CONFIG.name}</strong><br>
-                            ${SHOP_CONFIG.address}<br>
+                            ${SHOP_CONFIG.address.replace(/\n/g, '<br>')}<br>
                             โทร: ${SHOP_CONFIG.phone} | เลขประจำตัวผู้เสียภาษี: ${SHOP_CONFIG.taxId}
                         </div>
                     </div>
@@ -1138,12 +1145,12 @@
             margin: [10, 5, 15, 5],
             filename: fileName,
             image: { type: 'jpeg', quality: 0.98 },
-            // **[FIX 2]** Reduced scale for better performance on mobile devices.
+            // **[FIX #2]** Reduced scale for better performance on mobile devices.
             html2canvas: { scale: 1.5, useCORS: true, letterRendering: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // **[FIX 3]** Added a small delay to ensure the browser has rendered the element before capturing.
+        // **[FIX #3]** Added a small delay to ensure the browser has rendered the element before capturing.
         setTimeout(() => {
             try {
                 const element = printableElement.firstElementChild;
