@@ -8,8 +8,8 @@
     // NEW: Shop & PDF Configuration - EDIT YOUR DETAILS HERE
     const SHOP_CONFIG = {
         name: "ม่านธารา ผ้าม่านและของตกแต่ง",
-        address: "123 หมู่ 4 ต.วังเพลิง อ.โคกสำโรง จ.ลพบุรี 15120",
-        phone: "081-234-5678",
+        address: "65/8 หมู่ 2 ต.ท่าศาลา อ.เมือง จ.ลพบุรี 15000",
+        phone: "092-985-9395", "082-552-5595"
         taxId: "1234567890123",
         logoUrl: "https://i.imgur.com/l7y85nI.png", // Recommended: Use a square logo (e.g., 200x200px) hosted online
         vatRate: 0.07 // 7% VAT. Set to 0 to disable.
@@ -18,13 +18,13 @@
     const SQM_TO_SQYD = 1.19599;
 
     const PRICING = {
-        fabric: [1000, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500],
+        fabric: [1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200],
         sheer: [1000, 1100, 1200, 1300, 1400, 1500],
         style_surcharge: { "ลอน": 200, "ตาไก่": 0, "จีบ": 0 },
         height: [
             { threshold: 3.2, add_per_m: 300 },
             { threshold: 2.8, add_per_m: 200 },
-            { threshold: 2.5, add_per_m: 150 }
+            { threshold: 2.5, add_per_m: 100 }
         ],
     };
 
