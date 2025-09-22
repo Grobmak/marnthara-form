@@ -947,111 +947,80 @@
         // orderForm.submit(); // This is commented out by default
     }
 
-    // --- PDF Generation (REVISED FOR STABILITY) ---
+    // --- PDF Generation (OVERHAULED FOR SERVER-SIDE RELIABILITY) ---
     async function generatePdfQuotation() {
         showToast('กำลังสร้างใบเสนอราคา...', 'default');
         const payload = buildPayload();
-        let logoLoaded = true;
 
-        const preloadImage = (src) => new Promise((resolve, reject) => {
-            if (!src) {
-                resolve(); // Resolve immediately if no src is provided
-                return;
-            }
-            const img = new Image();
-            img.onload = () => resolve();
-            img.onerror = () => reject(new Error(`Failed to load image at ${src}`));
-            img.src = src;
+        // ตรวจสอบว่ามีรายการที่สามารถคำนวณราคาได้หรือไม่
+        const hasPricedItems = payload.rooms.some(room => {
+            if (room.is_suspended) return false;
+            const hasSet = room.sets.some(s => !s.is_suspended && s.width_m > 0 && s.price_per_m_raw > 0);
+            const hasDeco = room.decorations.some(d => !d.is_suspended && d.width_m > 0 && d.price_sqyd > 0);
+            const hasWallpaper = room.wallpapers.some(w => !w.is_suspended && w.widths.reduce((a, b) => a + b, 0) > 0 && w.price_per_roll > 0);
+            return hasSet || hasDeco || hasWallpaper;
         });
 
-        try {
-            await preloadImage(SHOP_CONFIG.logoUrl);
-        } catch (error) {
-            logoLoaded = false;
-            console.error(error.message);
-            showToast('คำเตือน: โลโก้ผิดพลาด จะสร้าง PDF โดยไม่มีโลโก้', 'warning');
-        }
-
-        const printableElement = document.createElement('div');
-        const today = new Date();
-        const dateThai = today.toLocaleDateString('th-TH', { year: 'numeric', month: '2-digit', day: '2-digit' });
-        const quoteNumber = `QT-${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
-
-        let tableRows = '';
-        let itemNo = 1;
-        let subTotal = 0;
-
-        payload.rooms.forEach(room => {
-            if (room.is_suspended) return;
-            const roomName = room.room_name || 'ไม่ระบุชื่อห้อง';
-            
-            const activeItems = [
-                ...room.sets.filter(s => !s.is_suspended && s.width_m > 0 && s.height_m > 0),
-                ...room.decorations.filter(d => !d.is_suspended && d.width_m > 0 && d.height_m > 0),
-                ...room.wallpapers.filter(w => !w.is_suspended && w.widths.reduce((a, b) => a + b, 0) > 0)
-            ];
-
-            if (activeItems.length === 0) return;
-            
-            let roomContent = '';
-            let roomHasPricedItems = false;
-            
-            room.sets.forEach(set => {
-                if (set.is_suspended || !(set.width_m > 0 && set.height_m > 0)) return;
-                const w = set.width_m;
-                const h = set.height_m;
-                let totalSetPrice = 0;
-                const sPlus = stylePlus(set.style);
-                const hPlus = heightPlus(h);
-                const opaquePrice = set.fabric_variant.includes("ทึบ") && set.price_per_m_raw > 0 ? Math.round((set.price_per_m_raw + sPlus + hPlus) * w) : 0;
-                const sheerPrice = set.fabric_variant.includes("โปร่ง") && set.sheer_price_per_m > 0 ? Math.round((set.sheer_price_per_m + sPlus + hPlus) * w) : 0;
-                totalSetPrice = opaquePrice + sheerPrice;
-                
-                if (totalSetPrice > 0) {
-                    let desc = `ผ้าม่าน ${set.style} (${set.fabric_variant}) <br><small>ขนาด ${w.toFixed(2)} x ${h.toFixed(2)} ม.`;
-                    if (set.notes) desc += ` - ${set.notes}`;
-                    desc += '</small>';
-                    roomContent += `<tr><td class="pdf-text-center">${itemNo++}</td><td>${desc}</td><td class="pdf-text-center">1</td><td class="pdf-text-right">${fmt(totalSetPrice, 2, true)}</td><td class="pdf-text-right">${fmt(totalSetPrice, 2, true)}</td></tr>`;
-                    subTotal += totalSetPrice;
-                    roomHasPricedItems = true;
-                }
-            });
-            room.decorations.forEach(deco => {
-                if (deco.is_suspended || !(deco.width_m > 0 && deco.height_m > 0)) return;
-                const areaSqyd = deco.width_m * deco.height_m * SQM_TO_SQYD;
-                const decoPrice = Math.round(areaSqyd * deco.price_sqyd);
-                if (decoPrice > 0) {
-                    let desc = `${deco.type || 'งานตกแต่ง'} <br><small>รหัส: ${deco.deco_code || '-'}, ขนาด ${deco.width_m.toFixed(2)} x ${deco.height_m.toFixed(2)} ม.</small>`;
-                    roomContent += `<tr><td class="pdf-text-center">${itemNo++}</td><td>${desc}</td><td class="pdf-text-center">1</td><td class="pdf-text-right">${fmt(decoPrice, 2, true)}</td><td class="pdf-text-right">${fmt(decoPrice, 2, true)}</td></tr>`;
-                    subTotal += decoPrice;
-                    roomHasPricedItems = true;
-                }
-            });
-            room.wallpapers.forEach(wp => {
-                if (wp.is_suspended) return;
-                const totalWidth = wp.widths.reduce((a, b) => a + b, 0);
-                if (totalWidth <= 0) return;
-                const rolls = CALC.wallpaperRolls(totalWidth, wp.height_m);
-                const materialPrice = Math.round(rolls * wp.price_per_roll);
-                const installPrice = Math.round(rolls * (wp.install_cost_per_roll || 0));
-                const wpPrice = materialPrice + installPrice;
-                if (wpPrice > 0) {
-                    let desc = `วอลเปเปอร์ <br><small>รหัส: ${wp.wallpaper_code || '-'}, สูง ${wp.height_m.toFixed(2)} ม. (ใช้ ${rolls} ม้วน)</small>`;
-                    roomContent += `<tr><td class="pdf-text-center">${itemNo++}</td><td>${desc}</td><td class="pdf-text-center">1</td><td class="pdf-text-right">${fmt(wpPrice, 2, true)}</td><td class="pdf-text-right">${fmt(wpPrice, 2, true)}</td></tr>`;
-                    subTotal += wpPrice;
-                    roomHasPricedItems = true;
-                }
-            });
-            if (roomHasPricedItems) {
-                tableRows += `<tr class="pdf-room-header"><td colspan="5">ห้อง: ${roomName}</td></tr>`;
-                tableRows += roomContent;
-            }
-        });
-
-        if (subTotal === 0) {
+        if (!hasPricedItems) {
             showToast('ไม่มีรายการที่มีราคาสำหรับสร้างใบเสนอราคา', 'warning');
             return;
         }
+
+        // ---  สำคัญ! นี่คือ URL ของ Serverless Function ที่คุณจะต้องสร้างในขั้นตอนถัดไป ---
+        const PDF_GENERATOR_URL = "YOUR_SERVERLESS_FUNCTION_URL_HERE"; // <--- ใส่ URL ของคุณที่นี่
+
+        if (PDF_GENERATOR_URL === "YOUR_SERVERLESS_FUNCTION_URL_HERE") {
+             showToast('ยังไม่ได้ตั้งค่า URL สำหรับสร้าง PDF', 'error');
+             console.error("Please set your PDF_GENERATOR_URL in script.js");
+             return;
+        }
+
+        try {
+            const response = await fetch(PDF_GENERATOR_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                // หากเซิร์ฟเวอร์ตอบกลับมาว่ามีปัญหา
+                const errorData = await response.json();
+                throw new Error(errorData.message || `เกิดข้อผิดพลาดบนเซิร์ฟเวอร์: ${response.statusText}`);
+            }
+
+            // รับไฟล์ PDF กลับมาเป็น Blob (Binary Large Object)
+            const pdfBlob = await response.blob();
+
+            // สร้าง URL ชั่วคราวสำหรับไฟล์ Blob ที่ได้รับ
+            const url = window.URL.createObjectURL(pdfBlob);
+            
+            // สร้าง element 'a' เพื่อทำการดาวน์โหลด
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+
+            // ตั้งชื่อไฟล์
+            const today = new Date();
+            const quoteNumber = `QT-${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
+            const customerName = payload.customer_name.trim().replace(/\s+/g, '-') || 'quote';
+            a.download = `${quoteNumber}_${customerName}.pdf`;
+            
+            document.body.appendChild(a);
+            a.click(); // สั่งให้เบราว์เซอร์ดาวน์โหลดไฟล์
+
+            // เคลียร์ URL ที่สร้างขึ้นชั่วคราว
+            window.URL.revokeObjectURL(url);
+            a.remove();
+            
+            showToast('สร้าง PDF สำเร็จ!', 'success');
+
+        } catch (error) {
+            console.error("PDF Generation Error:", error);
+            showToast(`สร้าง PDF ล้มเหลว: ${error.message}`, 'error');
+        }
+    }
 
         const vatAmount = subTotal * SHOP_CONFIG.vatRate;
         const grandTotal = subTotal + vatAmount;
