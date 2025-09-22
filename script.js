@@ -844,12 +844,6 @@
         // ---  สำคัญ! นี่คือ URL ของ Serverless Function ที่คุณจะต้องสร้างในขั้นตอนถัดไป ---
         const PDF_GENERATOR_URL = "https://marnthara-quotation.netlify.app/.netlify/functions/generate-pdf"; // <--- ใส่ URL ของคุณที่นี่
 
-        if (PDF_GENERATOR_URL === "https://marnthara-quotation.netlify.app/.netlify/functions/generate-pdf") {
-             showToast('ยังไม่ได้ตั้งค่า URL สำหรับสร้าง PDF', 'error');
-             console.error("Please set your PDF_GENERATOR_URL in script.js");
-             return;
-        }
-
         try {
             const response = await fetch(PDF_GENERATOR_URL, {
                 method: 'POST',
