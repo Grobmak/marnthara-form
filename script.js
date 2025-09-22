@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/5.0.0-pdf-export";
+    const APP_VERSION = "input-ui/5.0.1-pdf-robust";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path"; // NOTE: Secure this endpoint if used.
     const STORAGE_KEY = "marnthara.input.v4"; // Keep v4 for data compatibility
 
@@ -944,16 +944,15 @@
         // orderForm.submit(); // This is commented out by default
     }
 
-    // --- REVISED & IMPROVED PDF Generation ---
+    // --- PDF Generation (REVISED FOR STABILITY) ---
     async function generatePdfQuotation() {
         showToast('กำลังสร้างใบเสนอราคา...', 'default');
         const payload = buildPayload();
+        let logoLoaded = true;
 
-        // **[FIX]** Preload the logo image to prevent a race condition that can cause blank PDFs.
-        // It now handles loading failures gracefully by skipping the logo.
         const preloadImage = (src) => new Promise((resolve, reject) => {
             if (!src) {
-                resolve(); // Resolve immediately if no logo is provided.
+                resolve();
                 return;
             }
             const img = new Image();
@@ -965,9 +964,9 @@
         try {
             await preloadImage(SHOP_CONFIG.logoUrl);
         } catch (error) {
+            logoLoaded = false;
             console.error(error.message);
-            showToast('ผิดพลาด: ไม่สามารถโหลดโลโก้ได้ (จะสร้าง PDF โดยไม่มีโลโก้)', 'warning');
-            // Execution continues even if the logo fails to load.
+            showToast('คำเตือน: โลโก้ผิดพลาด จะสร้าง PDF โดยไม่มีโลโก้', 'warning');
         }
 
         const printableElement = document.createElement('div');
@@ -987,10 +986,8 @@
                                  room.wallpapers.some(w => !w.is_suspended);
 
             if (!hasItemsInRoom) return;
-
             let roomContent = '';
             let roomHasPricedItems = false;
-
             room.sets.forEach(set => {
                 if (set.is_suspended) return;
                 const w = set.width_m;
@@ -999,15 +996,10 @@
                 if (w > 0 && h > 0) {
                     const sPlus = stylePlus(set.style);
                     const hPlus = heightPlus(h);
-                    const opaquePrice = set.fabric_variant.includes("ทึบ") && set.price_per_m_raw > 0
-                        ? Math.round((set.price_per_m_raw + sPlus + hPlus) * w)
-                        : 0;
-                    const sheerPrice = set.fabric_variant.includes("โปร่ง") && set.sheer_price_per_m > 0
-                        ? Math.round((set.sheer_price_per_m + sPlus + hPlus) * w)
-                        : 0;
+                    const opaquePrice = set.fabric_variant.includes("ทึบ") && set.price_per_m_raw > 0 ? Math.round((set.price_per_m_raw + sPlus + hPlus) * w) : 0;
+                    const sheerPrice = set.fabric_variant.includes("โปร่ง") && set.sheer_price_per_m > 0 ? Math.round((set.sheer_price_per_m + sPlus + hPlus) * w) : 0;
                     totalSetPrice = opaquePrice + sheerPrice;
                 }
-
                 if (totalSetPrice > 0) {
                     let desc = `ผ้าม่าน ${set.style} (${set.fabric_variant}) <br><small>ขนาด ${w.toFixed(2)} x ${h.toFixed(2)} ม.`;
                     if (set.notes) desc += ` - ${set.notes}`;
@@ -1017,7 +1009,6 @@
                     roomHasPricedItems = true;
                 }
             });
-
             room.decorations.forEach(deco => {
                 if (deco.is_suspended) return;
                 const areaSqyd = deco.width_m * deco.height_m * SQM_TO_SQYD;
@@ -1029,7 +1020,6 @@
                     roomHasPricedItems = true;
                 }
             });
-
             room.wallpapers.forEach(wp => {
                 if (wp.is_suspended) return;
                 const totalWidth = wp.widths.reduce((a, b) => a + b, 0);
@@ -1045,7 +1035,6 @@
                     roomHasPricedItems = true;
                 }
             });
-
             if (roomHasPricedItems) {
                 tableRows += `<tr class="pdf-room-header"><td colspan="5">ห้อง: ${roomName}</td></tr>`;
                 tableRows += roomContent;
@@ -1059,20 +1048,18 @@
 
         const vatAmount = subTotal * SHOP_CONFIG.vatRate;
         const grandTotal = subTotal + vatAmount;
-
         const vatRateFormatted = `${(SHOP_CONFIG.vatRate * 100).toFixed(0)}%`;
-        const vatDisplay = SHOP_CONFIG.vatRate > 0 ? `
-            <tr>
-                <td colspan="2" class="pdf-label">ภาษีมูลค่าเพิ่ม ${vatRateFormatted}</td>
-                <td class="pdf-amount">${fmt(vatAmount, 2, true)}</td>
-            </tr>` : '';
+        const vatDisplay = SHOP_CONFIG.vatRate > 0 ? `<tr><td colspan="2" class="pdf-label">ภาษีมูลค่าเพิ่ม ${vatRateFormatted}</td><td class="pdf-amount">${fmt(vatAmount, 2, true)}</td></tr>` : '';
+
+        // **[FIX 1]** Conditionally create the logo HTML. If loading failed, this will be an empty string.
+        const logoHtml = logoLoaded && SHOP_CONFIG.logoUrl ? `<img src="${SHOP_CONFIG.logoUrl}" alt="Logo" class="pdf-logo">` : '';
 
         printableElement.innerHTML = `
         <div id="quotation-template">
             <div class="pdf-container">
                 <header class="pdf-header">
                     <div class="pdf-shop-info">
-                        ${SHOP_CONFIG.logoUrl ? `<img src="${SHOP_CONFIG.logoUrl}" alt="Logo" class="pdf-logo">` : ''}
+                        ${logoHtml}
                         <div class="pdf-shop-address">
                             <strong>${SHOP_CONFIG.name}</strong><br>
                             ${SHOP_CONFIG.address}<br>
@@ -1080,9 +1067,7 @@
                         </div>
                     </div>
                     <div class="pdf-quote-details">
-                        <div class="pdf-title-box">
-                            <h1>ใบเสนอราคา / Quotation</h1>
-                        </div>
+                        <div class="pdf-title-box"><h1>ใบเสนอราคา / Quotation</h1></div>
                         <table class="pdf-quote-meta">
                             <tr><td>เลขที่:</td><td>${quoteNumber}</td></tr>
                             <tr><td>วันที่:</td><td>${dateThai}</td></tr>
@@ -1103,11 +1088,8 @@
                 <table class="pdf-items-table">
                     <thead>
                         <tr>
-                            <th style="width:5%;">ลำดับ</th>
-                            <th style="width:50%;">รายการ</th>
-                            <th style="width:10%;">จำนวน</th>
-                            <th style="width:17.5%;">ราคา/หน่วย</th>
-                            <th style="width:17.5%;">จำนวนเงิน (บาท)</th>
+                            <th style="width:5%;">ลำดับ</th><th style="width:50%;">รายการ</th><th style="width:10%;">จำนวน</th>
+                            <th style="width:17.5%;">ราคา/หน่วย</th><th style="width:17.5%;">จำนวนเงิน (บาท)</th>
                         </tr>
                     </thead>
                     <tbody>${tableRows}</tbody>
@@ -1132,16 +1114,12 @@
                 </section>
                 <footer class="pdf-footer-section">
                     <div class="pdf-signature-box">
-                        <p>.................................................</p>
-                        <p>ผู้เสนอราคา</p>
-                        <p>(${SHOP_CONFIG.name})</p>
-                        <p>วันที่: ${dateThai}</p>
+                        <p>.................................................</p><p>ผู้เสนอราคา</p>
+                        <p>(${SHOP_CONFIG.name})</p><p>วันที่: ${dateThai}</p>
                     </div>
                     <div class="pdf-signature-box">
-                         <p>.................................................</p>
-                        <p>ลูกค้า / ผู้มีอำนาจลงนาม</p>
-                        <p>&nbsp;</p>
-                        <p>วันที่: ......./......./............</p>
+                         <p>.................................................</p><p>ลูกค้า / ผู้มีอำนาจลงนาม</p>
+                        <p>&nbsp;</p><p>วันที่: ......./......./............</p>
                     </div>
                 </footer>
             </div>
@@ -1157,35 +1135,41 @@
         const fileName = `${quoteNumber}_${customerName}.pdf`;
 
         const opt = {
-            margin: [10, 5, 15, 5], // Top, Right, Bottom, Left. Increased bottom margin for page number.
+            margin: [10, 5, 15, 5],
             filename: fileName,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+            // **[FIX 2]** Reduced scale for better performance on mobile devices.
+            html2canvas: { scale: 1.5, useCORS: true, letterRendering: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        try {
-            const element = printableElement.firstElementChild;
-            await html2pdf().from(element).set(opt).toPdf().get('pdf').then(pdf => {
-                const totalPages = pdf.internal.getNumberOfPages();
-                for (let i = 1; i <= totalPages; i++) {
-                    pdf.setPage(i);
-                    pdf.setFontSize(8);
-                    pdf.setTextColor('#6c757d');
-                    const footerText = `${SHOP_CONFIG.name} | โทร: ${SHOP_CONFIG.phone}`;
-                    pdf.text(footerText, opt.margin[3], 297 - 8, { align: 'left' });
-                    const pageNumText = `หน้า ${i} / ${totalPages}`;
-                    pdf.text(pageNumText, 210 - opt.margin[1], 297 - 8, { align: 'right' });
-                }
-            }).save();
+        // **[FIX 3]** Added a small delay to ensure the browser has rendered the element before capturing.
+        setTimeout(() => {
+            try {
+                const element = printableElement.firstElementChild;
+                html2pdf().from(element).set(opt).toPdf().get('pdf').then(pdf => {
+                    const totalPages = pdf.internal.getNumberOfPages();
+                    for (let i = 1; i <= totalPages; i++) {
+                        pdf.setPage(i);
+                        pdf.setFontSize(8);
+                        pdf.setTextColor('#6c757d');
+                        const footerText = `${SHOP_CONFIG.name} | โทร: ${SHOP_CONFIG.phone}`;
+                        pdf.text(footerText, opt.margin[3], 297 - 8, { align: 'left' });
+                        const pageNumText = `หน้า ${i} / ${totalPages}`;
+                        pdf.text(pageNumText, 210 - opt.margin[1], 297 - 8, { align: 'right' });
+                    }
+                }).save();
 
-            showToast('สร้าง PDF สำเร็จ!', 'success');
-        } catch (error) {
-            console.error("PDF Generation Error:", error);
-            showToast('เกิดข้อผิดพลาดในการสร้าง PDF', 'error');
-        } finally {
-            document.body.removeChild(printableElement);
-        }
+                showToast('สร้าง PDF สำเร็จ!', 'success');
+            } catch (error) {
+                console.error("PDF Generation Error:", error);
+                showToast('เกิดข้อผิดพลาดในการสร้าง PDF', 'error');
+            } finally {
+                if (document.body.contains(printableElement)) {
+                    document.body.removeChild(printableElement);
+                }
+            }
+        }, 100); // 100ms delay
     }
 
 
