@@ -1,0 +1,10 @@
+{
+  "name": "marnthara-pdf-generator",
+  "version": "1.0.0",
+  "description": "Generates PDF quotes for Marnthara.",
+  "main": "api/index.js",
+  "dependencies": {
+    "chrome-aws-lambda": "^10.1.0",
+    "puppeteer-core": "^10.4.0"
+  }
+}
