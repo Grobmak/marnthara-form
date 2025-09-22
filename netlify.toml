@@ -1,0 +1,19 @@
+[build]
+  # คำสั่งให้ Netlify ติดตั้ง dependencies ที่จำเป็นสำหรับ function
+  command = "npm install"
+  
+  # บอกว่าไฟล์หน้าเว็บ (index.html, etc.) อยู่ที่โฟลเดอร์ราก
+  publish = "."
+
+  # บอกว่าไฟล์ serverless function ของเราอยู่ในโฟลเดอร์ "api"
+  functions = "api"
+
+[functions]
+  # เพิ่ม timeout ให้ฟังก์ชันทำงานได้นานขึ้น เผื่อการสร้าง PDF ที่ซับซ้อน
+  node_bundler = "esbuild"
+  included_files = ["template.js"]
+  
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
