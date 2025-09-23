@@ -344,6 +344,13 @@ input[inputmode="numeric"] { text-align: left; }
 }
 
 @media print {
+    @page {
+        margin: 0;
+    }
+    body {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
     body > *:not(#printable-content) { display: none !important; }
     #printable-content { display: block !important; }
     .pdf-page {
@@ -352,13 +359,14 @@ input[inputmode="numeric"] { text-align: left; }
         width: 100%;
         height: auto;
         border: none;
+        box-shadow: none;
     }
     .pdf-page-content { padding: 15mm 12mm 10mm 12mm; }
     .pdf-page-footer {
         position: static; /* Let the browser handle footer placement */
         padding-top: 10mm;
     }
-    .pdf-title-box, .pdf-items-table thead th, .pdf-grand-total .pdf-amount, .pdf-room-header td, .pdf-subtotal-row td {
+    .pdf-title-box, .pdf-items-table thead th, .pdf-grand-total .pdf-amount, .pdf-room-header td, .pdf-subtotal-row td, .pdf-amount-text {
         -webkit-print-color-adjust: exact !important;
         color-adjust: exact !important;
     }
