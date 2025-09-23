@@ -199,7 +199,6 @@
     }
 
     // --- Core DOM Functions ---
-    // (addRoom, addSet, addDeco, etc. are unchanged)
     function addRoom(prefill) {
         if (isLocked) return;
         roomCount++;
@@ -388,7 +387,7 @@
         }
     }
 
-    // --- Data & Calculations (recalcAll, buildPayload, etc. are unchanged) ---
+    // --- Data & Calculations ---
     function recalcAll() {
         let grand = 0, grandOpaqueYards = 0, grandSheerYards = 0, grandOpaqueTrack = 0, grandSheerTrack = 0;
         let totalWallpaperRolls = 0;
@@ -620,8 +619,122 @@
         showToast(isLocked ? 'ฟอร์มถูกล็อคแล้ว' : 'ฟอร์มถูกปลดล็อคแล้ว', 'warning');
     }
 
-    // --- DOCUMENT EXPORT ENGINE ---
+    // --- TEXT SUMMARY ENGINE ---
+    function generateSummaryText(payload, type) {
+        const grandTotal = payload.rooms.reduce((roomSum, room) => {
+            if (room.is_suspended) return roomSum;
+            const setsTotal = room.sets.reduce((sum, set) => {
+                if (set.is_suspended || set.width_m <= 0) return sum;
+                const sPlus = stylePlus(set.style), hPlus = heightPlus(set.height_m);
+                const opaquePrice = set.fabric_variant.includes("ทึบ") && set.price_per_m_raw > 0 ? Math.round((set.price_per_m_raw + sPlus + hPlus) * set.width_m) : 0;
+                const sheerPrice = set.fabric_variant.includes("โปร่ง") && set.sheer_price_per_m > 0 ? Math.round((set.sheer_price_per_m + sPlus + hPlus) * set.width_m) : 0;
+                return sum + opaquePrice + sheerPrice;
+            }, 0);
+            const decosTotal = room.decorations.reduce((sum, deco) => {
+                if (deco.is_suspended || deco.width_m <= 0) return sum;
+                return sum + Math.round(deco.width_m * deco.height_m * SQM_TO_SQYD * deco.price_sqyd);
+            }, 0);
+            const wpsTotal = room.wallpapers.reduce((sum, wp) => {
+                 if (wp.is_suspended) return sum;
+                 const totalWidth = wp.widths.reduce((a, b) => a + b, 0);
+                 if (totalWidth <= 0) return sum;
+                 const rolls = CALC.wallpaperRolls(totalWidth, wp.height_m);
+                 return sum + Math.round(rolls * wp.price_per_roll) + Math.round(rolls * (wp.install_cost_per_roll || 0));
+            }, 0);
+            return roomSum + setsTotal + decosTotal + wpsTotal;
+        }, 0);
+        
+        let text = `สรุปข้อมูล (${new Date().toLocaleDateString('th-TH')})\n`;
+        text += `ลูกค้า: ${payload.customer_name || '-'}\n`;
+        if (type === 'customer' || type === 'owner') {
+            text += `เบอร์โทร: ${payload.customer_phone || '-'}\n`;
+            text += `ที่อยู่: ${payload.customer_address || '-'}\n`;
+        }
+        text += '------------------------------\n';
 
+        if (type === 'customer') {
+            text += `\nสรุปยอดรวม: ${fmtTH(grandTotal)} บาท\n`;
+            text += `\nขอบคุณที่ใช้บริการ\n${SHOP_CONFIG.name}\nโทร: ${SHOP_CONFIG.phone}`;
+            return text;
+        }
+
+        if (type === 'purchase_order' || type === 'owner') {
+            text += '📋 *สรุปวัสดุสำหรับสั่งซื้อ*\n';
+            const materials = { opaqueYards: 0, sheerYards: 0, opaqueTrack: 0, sheerTrack: 0, wallpaperRolls: 0, decoCounts: {} };
+            let hasDoubleBracket = false;
+            payload.rooms.forEach(room => {
+                if (room.is_suspended) return;
+                room.sets.forEach(set => {
+                    if (set.is_suspended || set.width_m <= 0) return;
+                    if (set.fabric_variant.includes('ทึบ')) {
+                        materials.opaqueYards += CALC.fabricYardage(set.style, set.width_m);
+                        materials.opaqueTrack += set.width_m;
+                    }
+                    if (set.fabric_variant.includes('โปร่ง')) {
+                        materials.sheerYards += CALC.fabricYardage(set.style, set.width_m);
+                        materials.sheerTrack += set.width_m;
+                    }
+                    if (set.fabric_variant === 'ทึบ&โปร่ง') hasDoubleBracket = true;
+                });
+                room.decorations.forEach(deco => {
+                     if (deco.is_suspended || !deco.type || deco.width_m <= 0) return;
+                     materials.decoCounts[deco.type] = (materials.decoCounts[deco.type] || 0) + 1;
+                });
+                 room.wallpapers.forEach(wp => {
+                     if (wp.is_suspended) return;
+                     const totalWidth = wp.widths.reduce((a, b) => a + b, 0);
+                     if(totalWidth > 0) materials.wallpaperRolls += CALC.wallpaperRolls(totalWidth, wp.height_m);
+                });
+            });
+            if(materials.opaqueYards > 0) text += ` - ผ้าทึบ: ${materials.opaqueYards.toFixed(2)} หลา\n`;
+            if(materials.sheerYards > 0) text += ` - ผ้าโปร่ง: ${materials.sheerYards.toFixed(2)} หลา\n`;
+            if(materials.opaqueTrack > 0) text += ` - รางทึบ: ${materials.opaqueTrack.toFixed(2)} ม.\n`;
+            if(materials.sheerTrack > 0) text += ` - รางโปร่ง: ${materials.sheerTrack.toFixed(2)} ม.\n`;
+            if(hasDoubleBracket) text += `   (❗️ต้องใช้ขาสองชั้น)\n`;
+            Object.entries(materials.decoCounts).forEach(([type, count]) => text += ` - ${type}: ${count} ชุด\n`);
+            if(materials.wallpaperRolls > 0) text += ` - วอลเปเปอร์: ${materials.wallpaperRolls} ม้วน\n`;
+            text += '------------------------------\n';
+            if (type === 'purchase_order') return text;
+        }
+
+        if (type === 'seamstress' || type === 'owner') {
+             text += '\n🧵 *รายละเอียดสำหรับช่าง*\n';
+             payload.rooms.forEach(room => {
+                if(room.is_suspended) return;
+                const activeItems = [...room.sets, ...room.decorations, ...room.wallpapers].filter(i => !i.is_suspended && i.width_m > 0 || (i.widths && i.widths.reduce((a,b)=>a+b,0)>0));
+                if (activeItems.length === 0) return;
+
+                text += `\n*ห้อง: ${room.room_name || 'ไม่ระบุ'}*\n`;
+                let itemCounter = 1;
+                room.sets.forEach(s => {
+                     if(s.is_suspended || s.width_m <= 0) return;
+                     text += `${itemCounter++}) *ผ้าม่าน ${s.style}*\n`;
+                     text += `  ขนาด: กว้าง ${s.width_m} x สูง ${s.height_m} ม.\n`;
+                     text += `  รูปแบบเปิด: ${s.opening_style}, สีราง: ${s.track_color}\n`;
+                     if (s.fabric_variant.includes('ทึบ')) text += `  ผ้าทึบ: รหัส ${s.fabric_code || '-'}\n`;
+                     if (s.fabric_variant.includes('โปร่ง')) text += `  ผ้าโปร่ง: รหัส ${s.sheer_fabric_code || '-'}\n`;
+                     if (s.notes) text += `  หมายเหตุ: ${s.notes}\n`;
+                });
+                 room.decorations.forEach(d => {
+                     if(d.is_suspended || d.width_m <= 0) return;
+                     text += `${itemCounter++}) *${d.type}*\n`;
+                     text += `  ขนาด: กว้าง ${d.width_m} x สูง ${d.height_m} ม.\n`;
+                     text += `  รหัส: ${d.deco_code || '-'}\n`;
+                     if (d.deco_notes) text += `  หมายเหตุ: ${d.deco_notes}\n`;
+                });
+             });
+            text += '------------------------------\n';
+            if (type === 'seamstress') return text;
+        }
+        
+        if (type === 'owner') {
+             text += `\n💰 *สรุปยอดรวม: ${fmtTH(grandTotal)} บาท*\n`;
+        }
+
+        return text;
+    }
+
+    // --- DOCUMENT EXPORT ENGINE ---
     function generateQuotationHtml(payload, options) {
         const { vatRate } = options;
 
@@ -951,8 +1064,10 @@
             }
         });
 
+        // --- HEADER & MENU ACTIONS ---
         document.querySelector(SELECTORS.addRoomFooterBtn).addEventListener('click', () => addRoom());
         document.querySelector(SELECTORS.lockBtn).addEventListener('click', toggleLock);
+        document.querySelector(SELECTORS.menuBtn).addEventListener('click', () => menuDropdown.classList.toggle('show'));
 
         document.querySelector(SELECTORS.exportPdfBtn).addEventListener('click', async (e) => {
             e.preventDefault();
@@ -1000,6 +1115,115 @@
             e.target.value = null;
         });
 
+        // [ADDED] Export data as JSON
+        document.querySelector(SELECTORS.exportBtn).addEventListener('click', (e) => {
+            e.preventDefault();
+            menuDropdown.classList.remove('show');
+            try {
+                const payload = buildPayload();
+                const dataStr = JSON.stringify(payload, null, 4);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const today = new Date();
+                const dateSuffix = `${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
+                const customerName = (payload.customer_name || 'data').trim().replace(/\s+/g, '-');
+                a.href = url;
+                a.download = `marnthara-backup-${customerName}-${dateSuffix}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('Export ข้อมูลสำเร็จ', 'success');
+            } catch (err) {
+                console.error('Export failed:', err);
+                showToast('Export ข้อมูลล้มเหลว', 'error');
+            }
+        });
+
+        // [ADDED] Submit data to webhook
+        document.querySelector(SELECTORS.submitBtn).addEventListener('click', async (e) => {
+            e.preventDefault();
+            menuDropdown.classList.remove('show');
+            const confirmed = await showConfirmation('ส่งข้อมูล', 'ยืนยันการส่งข้อมูลการประเมินราคา?');
+            if (confirmed) {
+                const payload = buildPayload();
+                if (!payload.customer_name && !payload.customer_phone) {
+                    showToast('กรุณาระบุชื่อหรือเบอร์โทรลูกค้า', 'warning');
+                    return;
+                }
+                showToast('กำลังส่งข้อมูล...', 'default');
+                try {
+                    const response = await fetch(WEBHOOK_URL, {
+                        method: 'POST',
+                        mode: 'cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) {
+                        showToast('ส่งข้อมูลสำเร็จ!', 'success');
+                    } else {
+                        const errorText = await response.text();
+                        console.error('Webhook Error:', response.status, errorText);
+                        showToast(`ส่งข้อมูลล้มเหลว: ${response.status}`, 'error');
+                    }
+                } catch (err) {
+                    console.error('Fetch Error:', err);
+                    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+                }
+            }
+        });
+        
+        // [ADDED] Copy summary text
+        document.querySelector(SELECTORS.copyTextBtn).addEventListener('click', async (e) => {
+            e.preventDefault();
+            menuDropdown.classList.remove('show');
+            
+            const copyModal = document.querySelector(SELECTORS.copyOptionsModal);
+            copyModal.querySelector('input[name="copy_option"][value="customer"]').checked = true;
+            const confirmed = await showModal(SELECTORS.copyOptionsModal);
+            
+            if (confirmed) {
+                const selectedOption = copyModal.querySelector('input[name="copy_option"]:checked').value;
+                const payload = buildPayload();
+                const summary = generateSummaryText(payload, selectedOption);
+                
+                try {
+                    await navigator.clipboard.writeText(summary);
+                    showToast('คัดลอกสรุปสำเร็จ!', 'success');
+                } catch (err) {
+                    console.error('Copy failed', err);
+                    showToast('คัดลอกล้มเหลว', 'error');
+                }
+            }
+        });
+        
+        // [ADDED] Clear All Items button
+        document.querySelector(SELECTORS.clearItemsBtn).addEventListener('click', async (e) => {
+            e.preventDefault();
+            menuDropdown.classList.remove('show');
+            const confirmed = await showConfirmation('ล้างทุกรายการ', 'คุณแน่ใจหรือไม่ว่าต้องการลบห้องและรายการทั้งหมด? ข้อมูลลูกค้าจะยังคงอยู่');
+            if (confirmed) {
+                document.querySelector(SELECTORS.roomsContainer).innerHTML = '';
+                roomCount = 0;
+                addRoom();
+                recalcAll();
+                saveData();
+                showToast('ล้างทุกรายการแล้ว', 'success');
+            }
+        });
+
+        // [ADDED] Clear All Data button
+        document.querySelector(SELECTORS.clearAllBtn).addEventListener('click', async (e) => {
+            e.preventDefault();
+            menuDropdown.classList.remove('show');
+            const confirmed = await showConfirmation('ล้างข้อมูลทั้งหมด', 'คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลทั้งหมดในฟอร์มนี้? การกระทำนี้ไม่สามารถย้อนกลับได้');
+            if (confirmed) {
+                localStorage.removeItem(STORAGE_KEY);
+                window.location.reload();
+            }
+        });
+
         window.addEventListener('click', (e) => {
             if (!e.target.closest('.menu-container')) menuDropdown.classList.remove('show');
             if (!e.target.closest('.room-options-container')) {
@@ -1009,8 +1233,8 @@
                 });
             }
         });
-        document.querySelector(SELECTORS.menuBtn).addEventListener('click', () => menuDropdown.classList.toggle('show'));
-
+        
+        // --- INITIAL LOAD ---
         try {
             const storedData = localStorage.getItem(STORAGE_KEY);
             if (storedData) {
