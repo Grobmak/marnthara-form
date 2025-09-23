@@ -9,61 +9,46 @@
     --border-radius-lg: 16px;
     --border-radius-xl: 28px;
     --transition-speed: 0.3s;
-
-    /* REFINED THEME 2025: Ethereal Blue & Mocha Mousse Palette */
-    --primary: #543D49; /* 2025 Color of the Year: Purple Basil. */
+    --primary: #543D49;
     --on-primary: #FFFFFF;
     --primary-container: #E0E8FF;
-    --on-primary-container: #002D62; /* Dark Sapphire Blue */
-
-    --secondary: #8A7968; /* Muted Mocha */
+    --on-primary-container: #002D62;
+    --secondary: #8A7968;
     --on-secondary: #FFFFFF;
-    
-    --danger: #E57373; /* Softer Red */
+    --danger: #E57373;
     --on-danger: #FFFFFF;
     --danger-container: #FFEBEE;
     --on-danger-container: #C62828;
-
-    --warning: #FFB74D; /* Muted Orange */
+    --warning: #FFB74D;
     --warning-container: #FFF8E1;
     --on-warning-container: #E65100;
-
-    --success: #81C784; /* Muted Green */
+    --success: #81C784;
     --success-container: #E8F5E9;
     --on-success-container: #2E7D32;
-
-    --info: #4FC3F7; /* Light Sky Blue */
+    --info: #4FC3F7;
     --info-container: #E1F5FE;
     --on-info-container: #0277BD;
-
-    --background: #F8F9FC; /* Very light, cool gray */
-    --surface: rgba(255, 255, 255, 0.9); /* More transparent for a lighter feel */
+    --background: #F8F9FC;
+    --surface: rgba(255, 255, 255, 0.9);
     --surface-container: #F1F3F8;
     --surface-container-high: #EAEFF9;
-    --on-surface: #202124; /* Google's standard dark text */
+    --on-surface: #202124;
     --on-surface-variant: #5F6368;
-    
     --outline: #DDE2E7;
     --outline-variant: #BCC2CB;
-
-    /* Enhanced Glow Effect for Liquid Glass */
     --shadow-color: rgba(100, 149, 237, 0.1);
-    --glow-color: rgba(100, 149, 237, 0.2); /* Glow color based on --primary */
+    --glow-color: rgba(100, 149, 237, 0.2);
     --shadow-sm: 0 2px 4px var(--shadow-color);
     --shadow-md: 0 4px 15px var(--shadow-color), 0 2px 20px var(--glow-color);
     --shadow-lg: 0 10px 25px var(--shadow-color), 0 5px 30px var(--glow-color);
-
-    /* Liquid Glass Effect */
     --glass-bg: rgba(248, 249, 252, 0.75);
     --glass-border: rgba(255, 255, 255, 0.5);
-
-    /* REFINED Item Type Colors */
     --curtain-color: var(--primary);
     --curtain-container-color: hsl(220, 100%, 98%);
-    --deco-color: #4DB6AC; /* Muted Teal */
+    --deco-color: #4DB6AC;
     --deco-container-color: hsl(174, 80%, 98%);
-    --wallpaper-color: #B35B47; /* Warm Terracotta/Burnt Umber */
-    --wallpaper-container-color: hsl(15, 50%, 98%); /* Adjusted to match new hue */
+    --wallpaper-color: #B35B47;
+    --wallpaper-container-color: hsl(15, 50%, 98%);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -77,8 +62,6 @@ body {
 }
 h1, h2, h3, h4 { color: var(--on-surface); font-weight: 700; }
 i.ph { font-size: 1.25em; vertical-align: middle; }
-
-/* --- LAYOUT & CONTAINERS --- */
 #app-container { max-width: 800px; margin: 0 auto; padding: 1rem; }
 .main-header {
     background: var(--glass-bg);
@@ -92,8 +75,6 @@ i.ph { font-size: 1.25em; vertical-align: middle; }
 }
 .main-header h1 { font-size: 1.25rem; color: var(--primary); }
 .header-actions { display: flex; align-items: center; gap: 0.5rem; }
-
-/* --- CARD STYLING (with <details>) --- */
 .card {
     background-color: var(--surface);
     border-radius: var(--border-radius-lg);
@@ -128,8 +109,6 @@ i.ph { font-size: 1.25em; vertical-align: middle; }
 .room-name-input { font-size: 1.2rem; font-weight: 700; border: none; background: none; outline: none; color: var(--on-surface); padding: 0.25rem; width: 100%; border-radius: var(--border-radius-sm); transition: all var(--transition-speed); }
 .room-name-input:focus { background-color: var(--primary-container); }
 .room-brief { font-size: 0.875rem; color: var(--on-surface-variant); text-align: right; white-space: nowrap; padding: 0 0.5rem; }
-
-/* --- ROOM OPTIONS MENU --- */
 .room-options-container { position: relative; }
 .room-options-menu {
     position: absolute; top: calc(100% + 4px); right: 0;
@@ -143,8 +122,6 @@ i.ph { font-size: 1.25em; vertical-align: middle; }
 .room-options-menu a:hover { background-color: var(--surface-container); }
 .room-options-menu a.danger { color: var(--danger); }
 .room-options-menu a.danger:hover { background-color: var(--danger-container); }
-
-/* --- ITEM CARD STYLING --- */
 .items-container { display: flex; flex-direction: column; gap: 1rem; }
 .item-card {
     border: 1px solid transparent; background-color: var(--surface); border-radius: var(--border-radius-md);
@@ -175,8 +152,6 @@ i.ph { font-size: 1.25em; vertical-align: middle; }
 .walls-section > label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
 .walls-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem; margin-bottom: 0.75rem; }
 .wall-input-row { display: flex; align-items: center; gap: 0.25rem; }
-
-/* --- FORM ELEMENTS --- */
 .form-grid-2 { display: grid; grid-template-columns: 1fr; gap: 1rem; }
 @media (min-width: 300px) { .form-grid-2 { grid-template-columns: 1fr 1fr; gap: 0.75rem; } }
 .form-group { display: flex; flex-direction: column; }
@@ -192,8 +167,6 @@ input:disabled, select:disabled, textarea:disabled { background-color: var(--sur
 select:disabled { -webkit-appearance: none; -moz-appearance: none; appearance: none; padding-right: 0.75rem; }
 textarea { resize: vertical; }
 input[inputmode="numeric"] { text-align: left; }
-
-/* --- BUTTONS --- */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: var(--border-radius-xl); border: none; font-family: var(--font-family); font-size: 1rem; font-weight: 700; cursor: pointer; transition: all var(--transition-speed); -webkit-tap-highlight-color: transparent; }
 .btn:active { transform: scale(0.97); }
 .btn.btn-primary { background-color: var(--primary); color: var(--on-primary); }
@@ -223,8 +196,6 @@ input[inputmode="numeric"] { text-align: left; }
 #lockBtn .ph { font-size: 1.1rem; }
 #menuBtn .ph { font-size: 1.6rem; }
 .add-room-container { text-align: center; margin-top: 1rem; }
-
-/* --- DETAILED MATERIAL SUMMARY --- */
 #detailed-material-summary { display: flex; flex-direction: column; gap: 1.25rem; padding-top: 0.5rem; }
 #detailed-material-summary h4 { font-size: 1rem; font-weight: 700; color: var(--on-surface); display: flex; align-items: center; gap: 0.5rem; margin: 0; padding-bottom: 0.35rem; border-bottom: 2px solid var(--surface-container-high); }
 #detailed-material-summary ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -232,16 +203,12 @@ input[inputmode="numeric"] { text-align: left; }
 #detailed-material-summary li b { color: var(--on-surface); }
 .summary-note { background-color: var(--primary-container) !important; color: var(--on-primary-container) !important; font-weight: 500; width: 100%; text-align: center; }
 .empty-summary { color: var(--on-surface-variant); text-align: center; padding: 1rem; background-color: var(--surface-container); border-radius: var(--border-radius-md); }
-
-/* --- FOOTER & SUMMARY --- */
 .summary-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: 1px solid var(--glass-border); padding: 0.75rem; z-index: 50; box-shadow: 0 -5px 30px var(--shadow-color); }
 .summary-grid { display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 1rem; max-width: 800px; margin: 0 auto; align-items: center; }
 .summary-grid .total-items { color: var(--on-surface-variant); font-size: 0.875rem; }
 .summary-grid .grand-total { text-align: right; font-size: 1.3rem; font-weight: 700; color: var(--on-surface); }
 .grand-total span { color: var(--primary); }
 .grand-total span span::after { content: ' บาท'; font-size: 0.9rem; font-weight: normal; }
-
-/* --- MODALS & TOASTS --- */
 .modal-wrapper { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; visibility: hidden; transition: opacity var(--transition-speed), visibility var(--transition-speed); }
 .modal-wrapper.visible { opacity: 1; visibility: visible; }
 .modal-content { background: var(--surface); border-radius: var(--border-radius-lg); padding: 1.5rem; width: 90%; max-width: 300px; box-shadow: var(--shadow-lg); border: 1px solid var(--glass-border); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.85); }
@@ -269,8 +236,6 @@ input[inputmode="numeric"] { text-align: left; }
 .toast-warning i { color: var(--warning); }
 .toast-error { background-color: var(--danger-container); color: var(--on-danger-container); }
 .toast-error i { color: var(--danger); }
-
-/* --- MENU DROPDOWN --- */
 .menu-container { position: relative; }
 .menu-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-radius: var(--border-radius-md); box-shadow: var(--shadow-lg); border: 1px solid var(--glass-border); overflow: hidden; display: flex; flex-direction: column; width: max-content; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all var(--transition-speed) ease; z-index: 110; }
 .menu-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
@@ -279,11 +244,7 @@ input[inputmode="numeric"] { text-align: left; }
 .menu-dropdown a.danger { color: var(--danger); }
 .menu-dropdown a.danger:hover { background-color: var(--danger-container); }
 .menu-dropdown hr { border: none; border-top: 1px solid var(--outline); margin: 0.25rem 0; }
-
-/* --- UTILITIES --- */
 .hidden { display: none !important; }
-
-/* --- ANIMATIONS & UX FEEDBACK --- */
 @keyframes highlight-and-fade-in { 0% { opacity: 0; transform: translateY(15px); background-color: transparent; } 50% { opacity: 1; background-color: var(--primary-container); } 100% { opacity: 1; transform: translateY(0); background-color: transparent; } }
 .item-created { animation: highlight-and-fade-in 1.2s ease-out forwards; }
 @keyframes fade-out-and-shrink { from { opacity: 1; transform: scale(1); max-height: 500px; margin-bottom: 1.5rem; padding-top: 1rem; padding-bottom: 1rem; } to { opacity: 0; transform: scale(0.95); max-height: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; border-width: 0; } }
@@ -299,7 +260,36 @@ input[inputmode="numeric"] { text-align: left; }
     color: #333; 
     font-size: 10pt; 
     background-color: #fff;
-    counter-reset: page;
+}
+.pdf-page {
+    width: 210mm;
+    height: 297mm;
+    padding: 15mm 12mm 10mm 12mm;
+    page-break-after: always;
+    box-sizing: border-box;
+    display: block;
+    position: relative;
+    overflow: hidden;
+}
+.pdf-page:last-child {
+    page-break-after: avoid;
+}
+.pdf-page-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.pdf-page-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.pdf-page-body .pdf-items-table {
+    width: 100%;
+}
+.pdf-page-body .pdf-summary-wrapper {
+    margin-top: auto; /* Push summary to the bottom of the flow */
+    page-break-inside: avoid;
 }
 .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8mm; border-bottom: 3px solid var(--primary); padding-bottom: 5mm; }
 .pdf-shop-info { display: flex; align-items: flex-start; gap: 4mm; }
@@ -316,12 +306,13 @@ input[inputmode="numeric"] { text-align: left; }
 .pdf-customer-meta { flex-basis: 35%; text-align: right; }
 .pdf-items-table { width: 100%; border-collapse: collapse; }
 .pdf-items-table th, .pdf-items-table td { border: 1px solid #ccc; padding: 2.5mm 2mm; vertical-align: top; line-height: 1.4; }
+.pdf-items-table thead { display: table-header-group; }
 .pdf-items-table thead th { background-color: var(--primary); color: var(--on-primary); font-weight: bold; text-align: center; }
+.pdf-items-table tbody tr, .pdf-items-table tfoot tr { page-break-inside: avoid; }
 .pdf-items-table td small { color: #555; font-size: 8pt; }
 .pdf-room-header td { background-color: #f2f2f2; font-weight: bold; color: var(--primary); }
 .pdf-text-center { text-align: center; }
 .pdf-text-right { text-align: right; }
-.pdf-summary-wrapper { page-break-before: auto; page-break-inside: avoid; }
 .pdf-summary-section { display: flex; justify-content: space-between; align-items: flex-start; padding-top: 5mm; border-top: 1px solid #ccc; }
 .pdf-amount-in-words { flex-basis: 55%; font-size: 9pt; }
 .pdf-amount-in-words ul { padding-left: 5mm; margin: 2mm 0; }
@@ -337,71 +328,37 @@ input[inputmode="numeric"] { text-align: left; }
 .pdf-signature-box { flex-basis: 48%; }
 .pdf-signature-box p { margin: 1mm 0; }
 .pdf-signature-box p:first-child { margin-top: 15mm; }
-
-/* Subtotal Rows: Initially hidden */
-.pdf-subtotal-header, .pdf-subtotal-footer { display: none; }
-.pdf-subtotal-header td, .pdf-subtotal-footer td {
+.pdf-page-footer {
+    position: absolute;
+    bottom: 10mm;
+    left: 12mm;
+    right: 12mm;
+    font-size: 8pt;
+    color: #666;
+}
+.pdf-footer-info { display: flex; justify-content: space-between; }
+.pdf-subtotal-row td {
     font-weight: bold;
     background-color: #f2f2f2;
     font-size: 9pt;
-    border: 1px solid #ccc;
-    padding: 2mm;
 }
 
 @media print {
     body > *:not(#printable-content) { display: none !important; }
     #printable-content { display: block !important; }
-
-    #quotation-template {
-        padding: 15mm 10mm; /* Standard margins */
+    .pdf-page {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: auto;
+        border: none;
     }
-
-    /* Header & Footer stick to each page */
-    .pdf-page-header { position: fixed; top: 0; left: 10mm; right: 10mm; }
-    .pdf-page-footer { position: fixed; bottom: 0; left: 10mm; right: 10mm; }
-    .pdf-page-footer .pdf-page-number::after {
-        counter-increment: page;
-        content: "หน้า " counter(page);
+    .pdf-page-content { padding: 15mm 12mm 10mm 12mm; }
+    .pdf-page-footer {
+        position: static; /* Let the browser handle footer placement */
+        padding-top: 10mm;
     }
-    .pdf-footer-info {
-        font-size: 8pt;
-        color: #666;
-        display: flex;
-        justify-content: space-between;
-        padding-bottom: 5mm;
-    }
-
-    /* Table layout for printing */
-    .pdf-items-table { page-break-inside: auto; }
-    .pdf-items-table thead { display: table-header-group; }
-    .pdf-items-table tbody { display: table-row-group; }
-    
-    /* Avoid breaking rows, especially room headers */
-    .pdf-item-row, .pdf-room-header.no-page-break { page-break-inside: avoid; }
-    
-    .pdf-items-table {
-        margin-top: 95mm; /* Space for fixed header */
-        margin-bottom: 20mm; /* Space for fixed footer */
-    }
-    .pdf-summary-wrapper {
-        page-break-before: auto !important; /* Allow summary to be on the same page if it fits */
-    }
-
-    /* Magic for showing subtotals only on page breaks */
-    .pdf-item-row + .pdf-subtotal-footer {
-        page-break-after: always; /* Force break after the carried-forward row */
-        display: table-row; /* Show the carried-forward row */
-    }
-    thead + .pdf-subtotal-header {
-        display: table-row; /* Show the brought-forward row at the top of the new page */
-    }
-    .pdf-subtotal-header:last-of-type,
-    .pdf-subtotal-footer:last-of-type {
-        display: none !important; /* Hide the final, unnecessary subtotal rows */
-    }
-    
-    /* Force colors to print */
-    .pdf-title-box, .pdf-items-table thead th, .pdf-grand-total .pdf-amount, .pdf-room-header td, .pdf-subtotal-header td, .pdf-subtotal-footer td {
+    .pdf-title-box, .pdf-items-table thead th, .pdf-grand-total .pdf-amount, .pdf-room-header td, .pdf-subtotal-row td {
         -webkit-print-color-adjust: exact !important;
         color-adjust: exact !important;
     }
