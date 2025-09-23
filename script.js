@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/5.2.1-hotfix";
+    const APP_VERSION = "input-ui/5.3.0-multipage-pdf";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4";
 
@@ -629,20 +629,18 @@
         updateLockState();
         showToast(isLocked ? 'ฟอร์มถูกล็อคแล้ว' : 'ฟอร์มถูกปลดล็อคแล้ว', 'warning');
     }
-    
-    // [Text summary builders like buildCustomerSummary, buildSeamstressSummary, etc. remain unchanged and should be here]
 
     // --- DOCUMENT EXPORT ENGINE ---
 
     function generateQuotationHtml(payload, options) {
         const { vatRate } = options;
-        
-        let subTotal = 0;
-        let lineItems = [];
 
+        // 1. Flatten all valid items into a single list
+        const lineItems = [];
         payload.rooms.forEach(room => {
             if (room.is_suspended) return;
-            const roomItems = [];
+
+            const roomPricedItems = [];
             
             room.sets.forEach(set => {
                 if (set.is_suspended || set.width_m <= 0) return;
@@ -652,7 +650,7 @@
                 const totalSetPrice = opaquePrice + sheerPrice;
                 if (totalSetPrice > 0) {
                     let desc = `ผ้าม่าน ${set.style} (${set.fabric_variant}) <br><small>ขนาด ${set.width_m.toFixed(2)} x ${set.height_m.toFixed(2)} ม.${set.notes ? ` - ${set.notes}`: ''}</small>`;
-                    roomItems.push({ description: desc, total: totalSetPrice });
+                    roomPricedItems.push({ description: desc, total: totalSetPrice });
                 }
             });
 
@@ -661,7 +659,7 @@
                 const decoPrice = Math.round(deco.width_m * deco.height_m * SQM_TO_SQYD * deco.price_sqyd);
                 if (decoPrice > 0) {
                     let desc = `${deco.type || 'งานตกแต่ง'} <br><small>รหัส: ${deco.deco_code || '-'}, ขนาด ${deco.width_m.toFixed(2)} x ${deco.height_m.toFixed(2)} ม.</small>`;
-                    roomItems.push({ description: desc, total: decoPrice });
+                    roomPricedItems.push({ description: desc, total: decoPrice });
                 }
             });
             
@@ -673,96 +671,151 @@
                 const wpPrice = Math.round(rolls * wp.price_per_roll) + Math.round(rolls * (wp.install_cost_per_roll || 0));
                 if (wpPrice > 0) {
                     let desc = `วอลเปเปอร์ <br><small>รหัส: ${wp.wallpaper_code || '-'}, สูง ${wp.height_m.toFixed(2)} ม. (ใช้ ${rolls} ม้วน)</small>`;
-                    roomItems.push({ description: desc, total: wpPrice });
+                    roomPricedItems.push({ description: desc, total: wpPrice });
                 }
             });
 
-            if (roomItems.length > 0) {
+            if (roomPricedItems.length > 0) {
                 lineItems.push({ isRoomHeader: true, roomName: room.room_name || 'ไม่ระบุชื่อห้อง' });
-                roomItems.forEach(item => {
-                    lineItems.push(item);
-                    subTotal += item.total;
-                });
+                lineItems.push(...roomPricedItems);
             }
         });
 
+        const subTotal = lineItems.reduce((sum, item) => sum + (item.total || 0), 0);
         if (subTotal === 0) return null;
 
         const vatAmount = subTotal * vatRate;
         const grandTotal = subTotal + vatAmount;
-        
+
+        // 2. Paginate the items
+        const ROWS_PER_FIRST_PAGE = 15;
+        const ROWS_PER_SUBSEQUENT_PAGE = 22;
+        const pages = [];
+        let currentPageItems = [];
+
+        lineItems.forEach(item => {
+            const rowCount = item.isRoomHeader ? 1 : 1; // Simple row count
+            const limit = pages.length === 0 ? ROWS_PER_FIRST_PAGE : ROWS_PER_SUBSEQUENT_PAGE;
+            if ((currentPageItems.reduce((acc, i) => acc + (i.isRoomHeader ? 1 : 1), 0) + rowCount) > limit && currentPageItems.length > 0) {
+                pages.push(currentPageItems);
+                currentPageItems = [];
+            }
+            currentPageItems.push(item);
+        });
+        if (currentPageItems.length > 0) pages.push(currentPageItems);
+
+        // 3. Build HTML for each page
         const today = new Date();
-        const dateThai = today.toLocaleDateString('th-TH', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const dateThai = today.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
         const quoteNumber = `QT-${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
         
-        let tableRows = '';
+        let allPagesHtml = '';
+        let cumulativeTotal = 0;
         let itemNo = 1;
-        lineItems.forEach(item => {
-            if (item.isRoomHeader) {
-                tableRows += `<tr class="pdf-room-header"><td colspan="5">ห้อง: ${item.roomName}</td></tr>`;
-            } else {
-                tableRows += `<tr><td class="pdf-text-center">${itemNo++}</td><td>${item.description}</td><td class="pdf-text-center">1</td><td class="pdf-text-right">${fmt(item.total, 2, true)}</td><td class="pdf-text-right">${fmt(item.total, 2, true)}</td></tr>`;
+
+        pages.forEach((pageItems, pageIndex) => {
+            const isFirstPage = pageIndex === 0;
+            const isLastPage = pageIndex === pages.length - 1;
+
+            // Page Header
+            const docHeader = `
+                <header class="pdf-header">
+                    <div class="pdf-shop-info">
+                        ${SHOP_CONFIG.logoUrl ? `<img src="${SHOP_CONFIG.logoUrl}" alt="Logo" class="pdf-logo">` : ''}
+                        <div class="pdf-shop-address">
+                            <strong>${SHOP_CONFIG.name}</strong><br>
+                            ${SHOP_CONFIG.address.replace(/\n/g, '<br>')}<br>
+                            โทร: ${SHOP_CONFIG.phone} | เลขประจำตัวผู้เสียภาษี: ${SHOP_CONFIG.taxId}
+                        </div>
+                    </div>
+                    <div class="pdf-quote-details">
+                        <div class="pdf-title-box"><h1>${isFirstPage ? 'ใบเสนอราคา' : 'ใบเสนอราคา (ต่อ)'}</h1></div>
+                        <table class="pdf-quote-meta">
+                            <tr><td>เลขที่:</td><td>${quoteNumber}</td></tr>
+                            <tr><td>วันที่:</td><td>${dateThai}</td></tr>
+                            <tr><td>หน้า:</td><td>${pageIndex + 1} / ${pages.length}</td></tr>
+                        </table>
+                    </div>
+                </header>
+            `;
+            const customerDetails = isFirstPage ? `
+                <section class="pdf-customer-details">
+                    <div class="pdf-customer-info">
+                        <strong>ลูกค้า:</strong> ${payload.customer_name || ''}<br>
+                        <strong>ที่อยู่:</strong> ${payload.customer_address.replace(/\n/g, '<br>') || ''}<br>
+                        <strong>โทร:</strong> ${payload.customer_phone || ''}
+                    </div>
+                    <div class="pdf-customer-meta">
+                        <strong>เงื่อนไขชำระเงิน:</strong> ${SHOP_CONFIG.pdf.paymentTerms}<br>
+                        <strong>ยืนราคา:</strong> ${SHOP_CONFIG.pdf.priceValidity}
+                    </div>
+                </section>
+            ` : `<div style="height: 8mm;"></div>`; // Spacer for subsequent pages
+
+            // Table Content
+            let tableRows = '';
+            if (!isFirstPage) {
+                tableRows += `<tr class="pdf-subtotal-row"><td colspan="4">ยอดยกมา</td><td class="pdf-text-right">${fmt(cumulativeTotal, 2, true)}</td></tr>`;
             }
-        });
 
-        const vatDisplay = vatRate > 0 ? `<tr><td colspan="2" class="pdf-label">ภาษีมูลค่าเพิ่ม ${(vatRate * 100).toFixed(0)}%</td><td class="pdf-amount">${fmt(vatAmount, 2, true)}</td></tr>` : '';
+            pageItems.forEach(item => {
+                if (item.isRoomHeader) {
+                    tableRows += `<tr class="pdf-room-header"><td colspan="5">ห้อง: ${item.roomName}</td></tr>`;
+                } else {
+                    tableRows += `<tr><td class="pdf-text-center">${itemNo++}</td><td>${item.description}</td><td class="pdf-text-center">1</td><td class="pdf-text-right">${fmt(item.total, 2, true)}</td><td class="pdf-text-right">${fmt(item.total, 2, true)}</td></tr>`;
+                    cumulativeTotal += item.total;
+                }
+            });
 
-        return {
-            html: `
-                <div id="quotation-template">
+            let tableFooter = '';
+            if (!isLastPage) {
+                tableFooter = `<tfoot><tr class="pdf-subtotal-row"><td colspan="4">ยอดยกไป</td><td class="pdf-text-right">${fmt(cumulativeTotal, 2, true)}</td></tr></tfoot>`;
+            }
+
+            // Page Footer
+            const docFooter = `
+                <footer class="pdf-footer-section">
+                    <div class="pdf-signature-box"><p>.................................................</p><p>ผู้เสนอราคา</p><p>(${SHOP_CONFIG.name})</p><p>วันที่: ${dateThai}</p></div>
+                    <div class="pdf-signature-box"><p>.................................................</p><p>ลูกค้า / ผู้มีอำนาจลงนาม</p><p>&nbsp;</p><p>วันที่: ......./......./............</p></div>
+                </footer>
+            `;
+
+            const summarySection = isLastPage ? `
+                <section class="pdf-summary-section">
+                    <div class="pdf-amount-in-words">
+                        <strong>หมายเหตุ:</strong>
+                        <ul>${SHOP_CONFIG.pdf.notes.map(n => `<li>${n}</li>`).join('')}</ul>
+                        <div class="pdf-amount-text">( ${bahttext(grandTotal)} )</div>
+                    </div>
+                    <div class="pdf-totals-block">
+                        <table>
+                            <tr><td colspan="2" class="pdf-label">รวมเป็นเงิน</td><td class="pdf-amount">${fmt(subTotal, 2, true)}</td></tr>
+                            ${vatRate > 0 ? `<tr><td colspan="2" class="pdf-label">ภาษีมูลค่าเพิ่ม ${(vatRate * 100).toFixed(0)}%</td><td class="pdf-amount">${fmt(vatAmount, 2, true)}</td></tr>` : ''}
+                            <tr class="pdf-grand-total"><td colspan="2" class="pdf-label">ยอดรวมสุทธิ</td><td class="pdf-amount">${fmt(grandTotal, 2, true)}</td></tr>
+                        </table>
+                    </div>
+                </section>
+            ` : '';
+
+            allPagesHtml += `
+                <div class="pdf-page-wrapper">
                     <div class="pdf-container">
-                        <header class="pdf-header">
-                            <div class="pdf-shop-info">
-                                ${SHOP_CONFIG.logoUrl ? `<img src="${SHOP_CONFIG.logoUrl}" alt="Logo" class="pdf-logo">` : ''}
-                                <div class="pdf-shop-address">
-                                    <strong>${SHOP_CONFIG.name}</strong><br>
-                                    ${SHOP_CONFIG.address.replace(/\n/g, '<br>')}<br>
-                                    โทร: ${SHOP_CONFIG.phone} | เลขประจำตัวผู้เสียภาษี: ${SHOP_CONFIG.taxId}
-                                </div>
-                            </div>
-                            <div class="pdf-quote-details">
-                                <div class="pdf-title-box"><h1>ใบเสนอราคา</h1></div>
-                                <table class="pdf-quote-meta">
-                                    <tr><td>เลขที่:</td><td>${quoteNumber}</td></tr>
-                                    <tr><td>วันที่:</td><td>${dateThai}</td></tr>
-                                </table>
-                            </div>
-                        </header>
-                        <section class="pdf-customer-details">
-                            <div class="pdf-customer-info">
-                                <strong>ลูกค้า:</strong> ${payload.customer_name || ''}<br>
-                                <strong>ที่อยู่:</strong> ${payload.customer_address.replace(/\n/g, '<br>') || ''}<br>
-                                <strong>โทร:</strong> ${payload.customer_phone || ''}
-                            </div>
-                            <div class="pdf-customer-meta">
-                                <strong>เงื่อนไขชำระเงิน:</strong> ${SHOP_CONFIG.pdf.paymentTerms}<br>
-                                <strong>ยืนราคา:</strong> ${SHOP_CONFIG.pdf.priceValidity}
-                            </div>
-                        </section>
+                        ${docHeader}
+                        ${customerDetails}
                         <table class="pdf-items-table">
                             <thead><tr><th style="width:5%;">ลำดับ</th><th style="width:50%;">รายการ</th><th style="width:10%;">จำนวน</th><th style="width:17.5%;">ราคา/หน่วย</th><th style="width:17.5%;">รวม (บาท)</th></tr></thead>
                             <tbody>${tableRows}</tbody>
+                            ${tableFooter}
                         </table>
-                        <section class="pdf-summary-section">
-                            <div class="pdf-amount-in-words">
-                                <strong>หมายเหตุ:</strong>
-                                <ul>${SHOP_CONFIG.pdf.notes.map(n => `<li>${n}</li>`).join('')}</ul>
-                                <div class="pdf-amount-text">( ${bahttext(grandTotal)} )</div>
-                            </div>
-                            <div class="pdf-totals-block">
-                                <table>
-                                    <tr><td colspan="2" class="pdf-label">รวมเป็นเงิน</td><td class="pdf-amount">${fmt(subTotal, 2, true)}</td></tr>
-                                    ${vatDisplay}
-                                    <tr class="pdf-grand-total"><td colspan="2" class="pdf-label">ยอดรวมสุทธิ</td><td class="pdf-amount">${fmt(grandTotal, 2, true)}</td></tr>
-                                </table>
-                            </div>
-                        </section>
-                        <footer class="pdf-footer-section">
-                            <div class="pdf-signature-box"><p>.................................................</p><p>ผู้เสนอราคา</p><p>(${SHOP_CONFIG.name})</p><p>วันที่: ${dateThai}</p></div>
-                            <div class="pdf-signature-box"><p>.................................................</p><p>ลูกค้า / ผู้มีอำนาจลงนาม</p><p>&nbsp;</p><p>วันที่: ......./......./............</p></div>
-                        </footer>
+                        ${summarySection}
+                        ${isLastPage ? docFooter : ''}
                     </div>
-                </div>`,
+                </div>
+            `;
+        });
+        
+        return {
+            html: `<div id="quotation-template">${allPagesHtml}</div>`,
             fileName: `${quoteNumber}_${payload.customer_name.trim().replace(/\s+/g, '-') || 'quote'}`
         };
     }
@@ -774,7 +827,7 @@
         element.innerHTML = htmlContent;
         
         const opt = {
-            margin: [10, 5, 15, 5], filename: `${fileName}.pdf`,
+            margin: [10, 5, 10, 5], filename: `${fileName}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -782,16 +835,8 @@
 
         setTimeout(async () => {
             try {
-                await html2pdf().from(element).set(opt).toPdf().get('pdf').then(pdf => {
-                    const totalPages = pdf.internal.getNumberOfPages();
-                    for (let i = 1; i <= totalPages; i++) {
-                        pdf.setPage(i);
-                        pdf.setFontSize(8);
-                        pdf.setTextColor('#6c757d');
-                        pdf.text(`${SHOP_CONFIG.name} | โทร: ${SHOP_CONFIG.phone}`, opt.margin[3], 297 - 8, { align: 'left' });
-                        pdf.text(`หน้า ${i} / ${totalPages}`, 210 - opt.margin[1], 297 - 8, { align: 'right' });
-                    }
-                }).save();
+                // The page numbers are now part of the HTML content, so the post-processing loop is no longer needed here.
+                await html2pdf().from(element).set(opt).save();
                 showToast('สร้าง PDF สำเร็จ!', 'success');
             } catch (error) {
                 console.error("Direct PDF Export Error:", error);
