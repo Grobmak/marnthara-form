@@ -104,6 +104,9 @@
             </div>
         </div>
     </footer>
+    
+    <div id="printable-content" aria-hidden="true"></div>
+
 
     <div id="confirmationModal" class="modal-wrapper">
         <div class="modal-content">
@@ -155,6 +158,46 @@
             </div>
         </div>
     </div>
+
+    <div id="exportOptionsModal" class="modal-wrapper">
+        <div class="modal-content" style="max-width: 450px;">
+            <h3>ตัวเลือกการสร้างใบเสนอราคา</h3>
+            
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label style="padding-left: 0;">รูปแบบภาษีมูลค่าเพิ่ม (VAT)</label>
+                <div class="radio-button-group--horizontal">
+                    <label>
+                        <input type="radio" name="vat_option" value="include" checked>
+                        <div class="radio-button-content">
+                            <strong>รวม VAT 7%</strong>
+                        </div>
+                    </label>
+                    <label>
+                        <input type="radio" name="vat_option" value="exclude">
+                        <div class="radio-button-content">
+                            <strong>ไม่รวม VAT</strong>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label style="padding-left: 0;">วิธีสร้างเอกสาร</label>
+                <select id="exportMethod" class="select-box">
+                    <option value="direct">วิธีที่ 1: ดาวน์โหลด PDF โดยตรง (เร็วที่สุด)</option>
+                    <option value="print">วิธีที่ 2: ใช้ Browser พิมพ์ (เสถียรที่สุด)</option>
+                    <option value="html">วิธีที่ 3: ดาวน์โหลดไฟล์ HTML (สำรอง)</option>
+                </select>
+                <small style="margin-top: 0.5rem; padding-left: 0.25rem; color: var(--on-surface-variant);">หากวิธีที่ 1 เกิดปัญหาหน้าขาว ให้ลองวิธีที่ 2</small>
+            </div>
+
+            <div class="modal-actions">
+                <button id="exportOptionsCancel" class="btn btn-secondary">ยกเลิก</button>
+                <button id="exportOptionsConfirm" class="btn btn-primary">สร้างเอกสาร</button>
+            </div>
+        </div>
+    </div>
+
 
     <template id="roomTpl">
         <details class="card room-card" data-room open>
