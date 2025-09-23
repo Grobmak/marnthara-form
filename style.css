@@ -777,7 +777,9 @@ input[inputmode="numeric"] { text-align: left; }
     line-height: 1.4;
 }
 .pdf-items-table thead {
-    display: table-header-group; /* [FIX #2] CRITICAL for repeating headers on new pages */
+    /* CRITICAL: This CSS rule tells the browser's print engine (and html2pdf) 
+       to repeat the table header on each new page. This is essential for long quotations. */
+    display: table-header-group;
 }
 .pdf-items-table thead th {
     background-color: var(--primary);
@@ -786,7 +788,8 @@ input[inputmode="numeric"] { text-align: left; }
     text-align: center;
 }
 .pdf-items-table tbody tr {
-    page-break-inside: avoid; /* Prevents a single row from splitting across pages */
+    /* This attempts to prevent a single table row (an item) from being split across two pages. */
+    page-break-inside: avoid;
 }
 .pdf-items-table td small { color: #555; font-size: 8pt; }
 .pdf-room-header td {
@@ -803,7 +806,8 @@ input[inputmode="numeric"] { text-align: left; }
     align-items: flex-start;
     padding-top: 5mm;
     border-top: 1px solid #ccc;
-    page-break-inside: avoid; /* [FIX #2] Keep summary block from splitting */
+    /* Keep the entire summary block (notes, totals) together on one page if possible. */
+    page-break-inside: avoid;
 }
 .pdf-amount-in-words { flex-basis: 55%; font-size: 9pt; }
 .pdf-amount-in-words ul { padding-left: 5mm; margin: 2mm 0; }
@@ -844,7 +848,8 @@ input[inputmode="numeric"] { text-align: left; }
     margin-top: 10mm;
     border-top: 3px solid var(--primary);
     padding-top: 5mm;
-    page-break-inside: avoid; /* [FIX #2] Keep signature block from splitting */
+    /* Keep the signature block from being awkwardly split across pages. */
+    page-break-inside: avoid;
 }
 .pdf-signature-box { flex-basis: 48%; }
 .pdf-signature-box p { margin: 1mm 0; }
