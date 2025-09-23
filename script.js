@@ -1,12 +1,11 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/5.3.0-multipage-pdf";
+    const APP_VERSION = "input-ui/5.4.0-standard-pdf";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4";
 
     // CONFIG: Delay in milliseconds before html2pdf starts rendering.
-    // Increase this value (e.g., to 1000) if blank PDFs still occur.
     const PDF_EXPORT_DELAY_MS = 500;
 
     const SHOP_CONFIG = {
@@ -635,13 +634,16 @@
     function generateQuotationHtml(payload, options) {
         const { vatRate } = options;
 
+        let subTotal = 0;
+        let lineItems = [];
+        let runningTotal = 0;
+
         // 1. Flatten all valid items into a single list
-        const lineItems = [];
         payload.rooms.forEach(room => {
             if (room.is_suspended) return;
-
             const roomPricedItems = [];
             
+            // Calculate prices for sets
             room.sets.forEach(set => {
                 if (set.is_suspended || set.width_m <= 0) return;
                 const sPlus = stylePlus(set.style), hPlus = heightPlus(set.height_m);
@@ -654,6 +656,7 @@
                 }
             });
 
+            // Calculate prices for decorations
             room.decorations.forEach(deco => {
                 if (deco.is_suspended || deco.width_m <= 0) return;
                 const decoPrice = Math.round(deco.width_m * deco.height_m * SQM_TO_SQYD * deco.price_sqyd);
@@ -663,6 +666,7 @@
                 }
             });
             
+            // Calculate prices for wallpapers
             room.wallpapers.forEach(wp => {
                 if (wp.is_suspended) return;
                 const totalWidth = wp.widths.reduce((a, b) => a + b, 0);
@@ -675,147 +679,140 @@
                 }
             });
 
+            // Add room header if there are items in it
             if (roomPricedItems.length > 0) {
                 lineItems.push({ isRoomHeader: true, roomName: room.room_name || 'ไม่ระบุชื่อห้อง' });
-                lineItems.push(...roomPricedItems);
+                roomPricedItems.forEach(item => {
+                    runningTotal += item.total;
+                    lineItems.push({ ...item, subtotal: runningTotal });
+                });
             }
         });
 
-        const subTotal = lineItems.reduce((sum, item) => sum + (item.total || 0), 0);
+        // Exit if no priced items
+        subTotal = lineItems.reduce((sum, item) => sum + (item.total || 0), 0);
         if (subTotal === 0) return null;
 
         const vatAmount = subTotal * vatRate;
         const grandTotal = subTotal + vatAmount;
-
-        // 2. Paginate the items
-        const ROWS_PER_FIRST_PAGE = 15;
-        const ROWS_PER_SUBSEQUENT_PAGE = 22;
-        const pages = [];
-        let currentPageItems = [];
-
-        lineItems.forEach(item => {
-            const rowCount = item.isRoomHeader ? 1 : 1; // Simple row count
-            const limit = pages.length === 0 ? ROWS_PER_FIRST_PAGE : ROWS_PER_SUBSEQUENT_PAGE;
-            if ((currentPageItems.reduce((acc, i) => acc + (i.isRoomHeader ? 1 : 1), 0) + rowCount) > limit && currentPageItems.length > 0) {
-                pages.push(currentPageItems);
-                currentPageItems = [];
-            }
-            currentPageItems.push(item);
-        });
-        if (currentPageItems.length > 0) pages.push(currentPageItems);
-
-        // 3. Build HTML for each page
+        
         const today = new Date();
-        const dateThai = today.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+        const dateThai = today.toLocaleDateString('th-TH', { year: 'numeric', month: '2-digit', day: '2-digit' });
         const quoteNumber = `QT-${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
         
-        let allPagesHtml = '';
-        let cumulativeTotal = 0;
+        // 2. Build ONE continuous table body, adding subtotal rows dynamically
+        let tableRows = '';
         let itemNo = 1;
+        lineItems.forEach((item, index) => {
+            if (item.isRoomHeader) {
+                tableRows += `<tr class="pdf-room-header no-page-break"><td colspan="5">ห้อง: ${item.roomName}</td></tr>`;
+            } else {
+                tableRows += `
+                    <tr class="pdf-item-row">
+                        <td class="pdf-text-center">${itemNo++}</td>
+                        <td>${item.description}</td>
+                        <td class="pdf-text-center">1</td>
+                        <td class="pdf-text-right">${fmt(item.total, 2, true)}</td>
+                        <td class="pdf-text-right">${fmt(item.total, 2, true)}</td>
+                    </tr>`;
+            }
+            // Add subtotal rows which will only be visible when a page breaks
+            if(item.subtotal) {
+                tableRows += `
+                    <tr class="pdf-subtotal-footer">
+                        <td colspan="4">ยอดยกไป (Subtotal Carried Forward)</td>
+                        <td class="pdf-text-right">${fmt(item.subtotal, 2, true)}</td>
+                    </tr>
+                `;
+                tableRows += `
+                    <tr class="pdf-subtotal-header">
+                        <td colspan="4">ยอดยกมา (Subtotal Brought Forward)</td>
+                        <td class="pdf-text-right">${fmt(item.subtotal, 2, true)}</td>
+                    </tr>
+                `;
+            }
+        });
 
-        pages.forEach((pageItems, pageIndex) => {
-            const isFirstPage = pageIndex === 0;
-            const isLastPage = pageIndex === pages.length - 1;
-
-            // Page Header
-            const docHeader = `
-                <header class="pdf-header">
-                    <div class="pdf-shop-info">
-                        ${SHOP_CONFIG.logoUrl ? `<img src="${SHOP_CONFIG.logoUrl}" alt="Logo" class="pdf-logo">` : ''}
-                        <div class="pdf-shop-address">
-                            <strong>${SHOP_CONFIG.name}</strong><br>
-                            ${SHOP_CONFIG.address.replace(/\n/g, '<br>')}<br>
-                            โทร: ${SHOP_CONFIG.phone} | เลขประจำตัวผู้เสียภาษี: ${SHOP_CONFIG.taxId}
+        // 3. Assemble the full HTML document
+        const html = `
+            <div id="quotation-template">
+                <header class="pdf-page-header">
+                    <div class="pdf-header">
+                        <div class="pdf-shop-info">
+                            ${SHOP_CONFIG.logoUrl ? `<img src="${SHOP_CONFIG.logoUrl}" alt="Logo" class="pdf-logo">` : ''}
+                            <div class="pdf-shop-address">
+                                <strong>${SHOP_CONFIG.name}</strong><br>
+                                ${SHOP_CONFIG.address.replace(/\n/g, '<br>')}<br>
+                                โทร: ${SHOP_CONFIG.phone} | เลขประจำตัวผู้เสียภาษี: ${SHOP_CONFIG.taxId}
+                            </div>
+                        </div>
+                        <div class="pdf-quote-details">
+                            <div class="pdf-title-box"><h1>ใบเสนอราคา</h1></div>
+                            <table class="pdf-quote-meta">
+                                <tr><td>เลขที่:</td><td>${quoteNumber}</td></tr>
+                                <tr><td>วันที่:</td><td>${dateThai}</td></tr>
+                            </table>
                         </div>
                     </div>
-                    <div class="pdf-quote-details">
-                        <div class="pdf-title-box"><h1>${isFirstPage ? 'ใบเสนอราคา' : 'ใบเสนอราคา (ต่อ)'}</h1></div>
-                        <table class="pdf-quote-meta">
-                            <tr><td>เลขที่:</td><td>${quoteNumber}</td></tr>
-                            <tr><td>วันที่:</td><td>${dateThai}</td></tr>
-                            <tr><td>หน้า:</td><td>${pageIndex + 1} / ${pages.length}</td></tr>
-                        </table>
-                    </div>
+                     <section class="pdf-customer-details">
+                        <div class="pdf-customer-info">
+                            <strong>ลูกค้า:</strong> ${payload.customer_name || ''}<br>
+                            <strong>ที่อยู่:</strong> ${payload.customer_address.replace(/\n/g, '<br>') || ''}<br>
+                            <strong>โทร:</strong> ${payload.customer_phone || ''}
+                        </div>
+                        <div class="pdf-customer-meta">
+                            <strong>เงื่อนไขชำระเงิน:</strong> ${SHOP_CONFIG.pdf.paymentTerms}<br>
+                            <strong>ยืนราคา:</strong> ${SHOP_CONFIG.pdf.priceValidity}
+                        </div>
+                    </section>
                 </header>
-            `;
-            const customerDetails = isFirstPage ? `
-                <section class="pdf-customer-details">
-                    <div class="pdf-customer-info">
-                        <strong>ลูกค้า:</strong> ${payload.customer_name || ''}<br>
-                        <strong>ที่อยู่:</strong> ${payload.customer_address.replace(/\n/g, '<br>') || ''}<br>
-                        <strong>โทร:</strong> ${payload.customer_phone || ''}
+
+                <footer class="pdf-page-footer">
+                     <div class="pdf-footer-info">
+                        ${SHOP_CONFIG.name} | โทร: ${SHOP_CONFIG.phone}
+                        <div class="pdf-page-number"></div>
                     </div>
-                    <div class="pdf-customer-meta">
-                        <strong>เงื่อนไขชำระเงิน:</strong> ${SHOP_CONFIG.pdf.paymentTerms}<br>
-                        <strong>ยืนราคา:</strong> ${SHOP_CONFIG.pdf.priceValidity}
-                    </div>
-                </section>
-            ` : `<div style="height: 8mm;"></div>`; // Spacer for subsequent pages
-
-            // Table Content
-            let tableRows = '';
-            if (!isFirstPage) {
-                tableRows += `<tr class="pdf-subtotal-row"><td colspan="4">ยอดยกมา</td><td class="pdf-text-right">${fmt(cumulativeTotal, 2, true)}</td></tr>`;
-            }
-
-            pageItems.forEach(item => {
-                if (item.isRoomHeader) {
-                    tableRows += `<tr class="pdf-room-header"><td colspan="5">ห้อง: ${item.roomName}</td></tr>`;
-                } else {
-                    tableRows += `<tr><td class="pdf-text-center">${itemNo++}</td><td>${item.description}</td><td class="pdf-text-center">1</td><td class="pdf-text-right">${fmt(item.total, 2, true)}</td><td class="pdf-text-right">${fmt(item.total, 2, true)}</td></tr>`;
-                    cumulativeTotal += item.total;
-                }
-            });
-
-            let tableFooter = '';
-            if (!isLastPage) {
-                tableFooter = `<tfoot><tr class="pdf-subtotal-row"><td colspan="4">ยอดยกไป</td><td class="pdf-text-right">${fmt(cumulativeTotal, 2, true)}</td></tr></tfoot>`;
-            }
-
-            // Page Footer
-            const docFooter = `
-                <footer class="pdf-footer-section">
-                    <div class="pdf-signature-box"><p>.................................................</p><p>ผู้เสนอราคา</p><p>(${SHOP_CONFIG.name})</p><p>วันที่: ${dateThai}</p></div>
-                    <div class="pdf-signature-box"><p>.................................................</p><p>ลูกค้า / ผู้มีอำนาจลงนาม</p><p>&nbsp;</p><p>วันที่: ......./......./............</p></div>
                 </footer>
-            `;
 
-            const summarySection = isLastPage ? `
-                <section class="pdf-summary-section">
-                    <div class="pdf-amount-in-words">
-                        <strong>หมายเหตุ:</strong>
-                        <ul>${SHOP_CONFIG.pdf.notes.map(n => `<li>${n}</li>`).join('')}</ul>
-                        <div class="pdf-amount-text">( ${bahttext(grandTotal)} )</div>
-                    </div>
-                    <div class="pdf-totals-block">
-                        <table>
-                            <tr><td colspan="2" class="pdf-label">รวมเป็นเงิน</td><td class="pdf-amount">${fmt(subTotal, 2, true)}</td></tr>
-                            ${vatRate > 0 ? `<tr><td colspan="2" class="pdf-label">ภาษีมูลค่าเพิ่ม ${(vatRate * 100).toFixed(0)}%</td><td class="pdf-amount">${fmt(vatAmount, 2, true)}</td></tr>` : ''}
-                            <tr class="pdf-grand-total"><td colspan="2" class="pdf-label">ยอดรวมสุทธิ</td><td class="pdf-amount">${fmt(grandTotal, 2, true)}</td></tr>
-                        </table>
-                    </div>
-                </section>
-            ` : '';
+                <table class="pdf-items-table">
+                    <thead>
+                        <tr>
+                            <th style="width:5%;">ลำดับ</th>
+                            <th style="width:50%;">รายการ</th>
+                            <th style="width:10%;">จำนวน</th>
+                            <th style="width:17.5%;">ราคา/หน่วย</th>
+                            <th style="width:17.5%;">รวม (บาท)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
 
-            allPagesHtml += `
-                <div class="pdf-page-wrapper">
-                    <div class="pdf-container">
-                        ${docHeader}
-                        ${customerDetails}
-                        <table class="pdf-items-table">
-                            <thead><tr><th style="width:5%;">ลำดับ</th><th style="width:50%;">รายการ</th><th style="width:10%;">จำนวน</th><th style="width:17.5%;">ราคา/หน่วย</th><th style="width:17.5%;">รวม (บาท)</th></tr></thead>
-                            <tbody>${tableRows}</tbody>
-                            ${tableFooter}
-                        </table>
-                        ${summarySection}
-                        ${isLastPage ? docFooter : ''}
-                    </div>
+                <div class="pdf-summary-wrapper">
+                    <section class="pdf-summary-section">
+                        <div class="pdf-amount-in-words">
+                            <strong>หมายเหตุ:</strong>
+                            <ul>${SHOP_CONFIG.pdf.notes.map(n => `<li>${n}</li>`).join('')}</ul>
+                            <div class="pdf-amount-text">( ${bahttext(grandTotal)} )</div>
+                        </div>
+                        <div class="pdf-totals-block">
+                            <table>
+                                <tr><td colspan="2" class="pdf-label">รวมเป็นเงิน</td><td class="pdf-amount">${fmt(subTotal, 2, true)}</td></tr>
+                                ${vatRate > 0 ? `<tr><td colspan="2" class="pdf-label">ภาษีมูลค่าเพิ่ม ${(vatRate * 100).toFixed(0)}%</td><td class="pdf-amount">${fmt(vatAmount, 2, true)}</td></tr>` : ''}
+                                <tr class="pdf-grand-total"><td colspan="2" class="pdf-label">ยอดรวมสุทธิ</td><td class="pdf-amount">${fmt(grandTotal, 2, true)}</td></tr>
+                            </table>
+                        </div>
+                    </section>
+                    <footer class="pdf-footer-section">
+                        <div class="pdf-signature-box"><p>.................................................</p><p>ผู้เสนอราคา</p><p>(${SHOP_CONFIG.name})</p><p>วันที่: ${dateThai}</p></div>
+                        <div class="pdf-signature-box"><p>.................................................</p><p>ลูกค้า / ผู้มีอำนาจลงนาม</p><p>&nbsp;</p><p>วันที่: ......./......./............</p></div>
+                    </footer>
                 </div>
-            `;
-        });
-        
+            </div>`;
+
         return {
-            html: `<div id="quotation-template">${allPagesHtml}</div>`,
+            html: html,
             fileName: `${quoteNumber}_${payload.customer_name.trim().replace(/\s+/g, '-') || 'quote'}`
         };
     }
@@ -825,18 +822,29 @@
         
         const element = document.createElement('div');
         element.innerHTML = htmlContent;
+        element.style.padding = '10mm 5mm'; // Add padding to the container for margins
         
         const opt = {
-            margin: [10, 5, 10, 5], filename: `${fileName}.pdf`,
+            margin: [0, 0, 0, 0], // Margins are now handled by padding and CSS
+            filename: `${fileName}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['css', 'legacy'] } // Use CSS page-break properties
         };
 
         setTimeout(async () => {
             try {
-                // The page numbers are now part of the HTML content, so the post-processing loop is no longer needed here.
-                await html2pdf().from(element).set(opt).save();
+                const worker = html2pdf().from(element).set(opt);
+                await worker.toPdf().get('pdf').then(pdf => {
+                    const totalPages = pdf.internal.getNumberOfPages();
+                    const pageNumberSpans = worker.getContainer().querySelectorAll('.pdf-page-number');
+                    pageNumberSpans.forEach((span, i) => {
+                       // The library doesn't easily support adding page numbers AFTER rendering with this method
+                       // So we rely on the CSS counter method, which is more robust for printing
+                    });
+                }).save();
+
                 showToast('สร้าง PDF สำเร็จ!', 'success');
             } catch (error) {
                 console.error("Direct PDF Export Error:", error);

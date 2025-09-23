@@ -293,11 +293,14 @@ input[inputmode="numeric"] { text-align: left; }
 .item-removing.wall-input-row { margin-bottom: 0.5rem; }
 
 /* --- PDF & PRINT STYLES --- */
-#printable-content { display: none; } /* Hidden by default */
-#quotation-template { font-family: 'Noto Sans Thai', sans-serif; color: #333; font-size: 10pt; background-color: #fff; }
-.pdf-page-wrapper { page-break-after: always; }
-.pdf-page-wrapper:last-child { page-break-after: avoid; }
-.pdf-container { width: 100%; display: flex; flex-direction: column; height: 297mm; /* A4 height */ }
+#printable-content { display: none; }
+#quotation-template { 
+    font-family: 'Noto Sans Thai', sans-serif; 
+    color: #333; 
+    font-size: 10pt; 
+    background-color: #fff;
+    counter-reset: page;
+}
 .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8mm; border-bottom: 3px solid var(--primary); padding-bottom: 5mm; }
 .pdf-shop-info { display: flex; align-items: flex-start; gap: 4mm; }
 .pdf-logo { max-width: 60px; max-height: 60px; object-fit: contain; }
@@ -311,18 +314,15 @@ input[inputmode="numeric"] { text-align: left; }
 .pdf-customer-details { display: flex; justify-content: space-between; padding: 4mm; border: 1px solid var(--outline-variant); margin-bottom: 8mm; font-size: 9pt; }
 .pdf-customer-info { flex-basis: 60%; }
 .pdf-customer-meta { flex-basis: 35%; text-align: right; }
-.pdf-items-table { width: 100%; border-collapse: collapse; margin-bottom: 8mm; }
+.pdf-items-table { width: 100%; border-collapse: collapse; }
 .pdf-items-table th, .pdf-items-table td { border: 1px solid #ccc; padding: 2.5mm 2mm; vertical-align: top; line-height: 1.4; }
-.pdf-items-table thead { display: table-header-group; }
 .pdf-items-table thead th { background-color: var(--primary); color: var(--on-primary); font-weight: bold; text-align: center; }
-.pdf-items-table tbody tr { page-break-inside: avoid; }
-.pdf-items-table tfoot tr { page-break-inside: avoid; }
-.pdf-items-table .pdf-subtotal-row td { font-weight: bold; background-color: #f2f2f2; }
 .pdf-items-table td small { color: #555; font-size: 8pt; }
 .pdf-room-header td { background-color: #f2f2f2; font-weight: bold; color: var(--primary); }
 .pdf-text-center { text-align: center; }
 .pdf-text-right { text-align: right; }
-.pdf-summary-section { display: flex; justify-content: space-between; align-items: flex-start; padding-top: 5mm; border-top: 1px solid #ccc; page-break-inside: avoid; margin-top: auto; /* Pushes to bottom */ }
+.pdf-summary-wrapper { page-break-before: auto; page-break-inside: avoid; }
+.pdf-summary-section { display: flex; justify-content: space-between; align-items: flex-start; padding-top: 5mm; border-top: 1px solid #ccc; }
 .pdf-amount-in-words { flex-basis: 55%; font-size: 9pt; }
 .pdf-amount-in-words ul { padding-left: 5mm; margin: 2mm 0; }
 .pdf-amount-in-words li { margin-bottom: 1mm; }
@@ -333,44 +333,75 @@ input[inputmode="numeric"] { text-align: left; }
 .pdf-totals-block .pdf-amount { text-align: right; padding: 2.5mm; border: 1px solid #ccc; background-color: #f9f9f9; }
 .pdf-grand-total .pdf-label { font-weight: bold; }
 .pdf-grand-total .pdf-amount { background-color: var(--primary); color: var(--on-primary); font-weight: bold; font-size: 11pt; }
-.pdf-footer-section { display: flex; justify-content: space-between; text-align: center; font-size: 9pt; margin-top: 10mm; border-top: 3px solid var(--primary); padding-top: 5mm; page-break-inside: avoid; }
+.pdf-footer-section { display: flex; justify-content: space-between; text-align: center; font-size: 9pt; margin-top: 10mm; border-top: 3px solid var(--primary); padding-top: 5mm; }
 .pdf-signature-box { flex-basis: 48%; }
 .pdf-signature-box p { margin: 1mm 0; }
 .pdf-signature-box p:first-child { margin-top: 15mm; }
 
-/* PRINT-SPECIFIC STYLES - Activated when window.print() is called */
+/* Subtotal Rows: Initially hidden */
+.pdf-subtotal-header, .pdf-subtotal-footer { display: none; }
+.pdf-subtotal-header td, .pdf-subtotal-footer td {
+    font-weight: bold;
+    background-color: #f2f2f2;
+    font-size: 9pt;
+    border: 1px solid #ccc;
+    padding: 2mm;
+}
+
 @media print {
-    /* Hide the entire web application UI */
-    body > *:not(#printable-content) {
-        display: none !important;
+    body > *:not(#printable-content) { display: none !important; }
+    #printable-content { display: block !important; }
+
+    #quotation-template {
+        padding: 15mm 10mm; /* Standard margins */
     }
-    /* Only show the specially prepared quotation content */
-    #printable-content {
-        display: block !important;
-        margin: 0;
-        padding: 0;
+
+    /* Header & Footer stick to each page */
+    .pdf-page-header { position: fixed; top: 0; left: 10mm; right: 10mm; }
+    .pdf-page-footer { position: fixed; bottom: 0; left: 10mm; right: 10mm; }
+    .pdf-page-footer .pdf-page-number::after {
+        counter-increment: page;
+        content: "หน้า " counter(page);
     }
-    /* Ensure the content uses the full page width */
-    .pdf-container {
-        width: 100%;
-        margin: 0;
-        box-shadow: none;
-        border: none;
-        height: auto; /* Allow content to flow naturally */
+    .pdf-footer-info {
+        font-size: 8pt;
+        color: #666;
+        display: flex;
+        justify-content: space-between;
+        padding-bottom: 5mm;
     }
-    .pdf-page-wrapper {
-        page-break-after: always;
+
+    /* Table layout for printing */
+    .pdf-items-table { page-break-inside: auto; }
+    .pdf-items-table thead { display: table-header-group; }
+    .pdf-items-table tbody { display: table-row-group; }
+    
+    /* Avoid breaking rows, especially room headers */
+    .pdf-item-row, .pdf-room-header.no-page-break { page-break-inside: avoid; }
+    
+    .pdf-items-table {
+        margin-top: 95mm; /* Space for fixed header */
+        margin-bottom: 20mm; /* Space for fixed footer */
     }
-    .pdf-page-wrapper:last-child {
-        page-break-after: avoid;
+    .pdf-summary-wrapper {
+        page-break-before: auto !important; /* Allow summary to be on the same page if it fits */
     }
-    /* Remove web-only shadows and backgrounds for clean printing */
-    .pdf-header, .pdf-summary-section, .pdf-footer-section {
-        box-shadow: none;
-        background-color: transparent !important;
+
+    /* Magic for showing subtotals only on page breaks */
+    .pdf-item-row + .pdf-subtotal-footer {
+        page-break-after: always; /* Force break after the carried-forward row */
+        display: table-row; /* Show the carried-forward row */
     }
-    /* Forcing colors and backgrounds to print, which some browsers disable by default */
-    .pdf-title-box, .pdf-items-table thead th, .pdf-grand-total .pdf-amount, .pdf-room-header td, .pdf-subtotal-row td {
+    thead + .pdf-subtotal-header {
+        display: table-row; /* Show the brought-forward row at the top of the new page */
+    }
+    .pdf-subtotal-header:last-of-type,
+    .pdf-subtotal-footer:last-of-type {
+        display: none !important; /* Hide the final, unnecessary subtotal rows */
+    }
+    
+    /* Force colors to print */
+    .pdf-title-box, .pdf-items-table thead th, .pdf-grand-total .pdf-amount, .pdf-room-header td, .pdf-subtotal-header td, .pdf-subtotal-footer td {
         -webkit-print-color-adjust: exact !important;
         color-adjust: exact !important;
     }
