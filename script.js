@@ -677,8 +677,8 @@
         const grandTotal = subTotal + vatAmount;
 
         // 2. Paginate the items based on estimated height (units)
-        const UNITS_PER_FIRST_PAGE = 18;
-        const UNITS_PER_SUBSEQUENT_PAGE = 25;
+        const UNITS_PER_FIRST_PAGE = 17;
+        const UNITS_PER_SUBSEQUENT_PAGE = 23;
         const pages = [];
         let currentPageItems = [];
         let currentUnits = 0;
