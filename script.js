@@ -653,6 +653,32 @@
         text += '------------------------------\n';
 
         if (type === 'customer') {
+            text += `\nสรุปรายการ\n`;
+            payload.rooms.forEach(room => {
+                if (room.is_suspended) return;
+                const activeItems = [...room.sets, ...room.decorations, ...room.wallpapers].filter(i => !i.is_suspended && (i.width_m > 0 || (i.widths && i.widths.reduce((a, b) => a + b, 0) > 0)));
+                if (activeItems.length === 0) return;
+
+                text += `\n*ห้อง: ${room.room_name || 'ไม่ระบุ'}*\n`;
+                let itemCount = 0;
+                room.sets.forEach(set => {
+                    if (set.is_suspended || set.width_m <= 0) return;
+                    itemCount++;
+                    text += ` ${itemCount}) ผ้าม่าน ${set.style} (${set.fabric_variant})\n`;
+                });
+                room.decorations.forEach(deco => {
+                    if (deco.is_suspended || deco.width_m <= 0) return;
+                    itemCount++;
+                    text += ` ${itemCount}) ${deco.type || 'ของตกแต่ง'}\n`;
+                });
+                room.wallpapers.forEach(wp => {
+                    if (wp.is_suspended || wp.widths.reduce((a, b) => a + b, 0) <= 0) return;
+                    itemCount++;
+                    text += ` ${itemCount}) วอลเปเปอร์\n`;
+                });
+            });
+
+            text += '------------------------------\n';
             text += `\nสรุปยอดรวม: ${fmtTH(grandTotal)} บาท\n`;
             text += `\nขอบคุณที่ใช้บริการ\n${SHOP_CONFIG.name}\nโทร: ${SHOP_CONFIG.phone}`;
             return text;
@@ -660,69 +686,112 @@
 
         if (type === 'purchase_order' || type === 'owner') {
             text += '📋 *สรุปวัสดุสำหรับสั่งซื้อ*\n';
-            const materials = { opaqueYards: 0, sheerYards: 0, opaqueTrack: 0, sheerTrack: 0, wallpaperRolls: 0, decoCounts: {} };
+            const materials = {
+                opaqueFabrics: [],
+                sheerFabrics: [],
+                opaqueTracks: [],
+                sheerTracks: [],
+                decorations: [],
+                wallpapers: [],
+            };
             let hasDoubleBracket = false;
+
             payload.rooms.forEach(room => {
                 if (room.is_suspended) return;
                 room.sets.forEach(set => {
                     if (set.is_suspended || set.width_m <= 0) return;
                     if (set.fabric_variant.includes('ทึบ')) {
-                        materials.opaqueYards += CALC.fabricYardage(set.style, set.width_m);
-                        materials.opaqueTrack += set.width_m;
+                        materials.opaqueFabrics.push({
+                            code: set.fabric_code || '??',
+                            yards: CALC.fabricYardage(set.style, set.width_m)
+                        });
+                        materials.opaqueTracks.push({ width: set.width_m });
                     }
                     if (set.fabric_variant.includes('โปร่ง')) {
-                        materials.sheerYards += CALC.fabricYardage(set.style, set.width_m);
-                        materials.sheerTrack += set.width_m;
+                        materials.sheerFabrics.push({
+                            code: set.sheer_fabric_code || '??',
+                            yards: CALC.fabricYardage(set.style, set.width_m)
+                        });
+                        materials.sheerTracks.push({ width: set.width_m });
                     }
                     if (set.fabric_variant === 'ทึบ&โปร่ง') hasDoubleBracket = true;
                 });
                 room.decorations.forEach(deco => {
-                     if (deco.is_suspended || !deco.type || deco.width_m <= 0) return;
-                     materials.decoCounts[deco.type] = (materials.decoCounts[deco.type] || 0) + 1;
+                    if (deco.is_suspended || !deco.type || deco.width_m <= 0) return;
+                    materials.decorations.push({
+                        type: deco.type,
+                        code: deco.deco_code || 'xxx'
+                    });
                 });
-                 room.wallpapers.forEach(wp => {
-                     if (wp.is_suspended) return;
-                     const totalWidth = wp.widths.reduce((a, b) => a + b, 0);
-                     if(totalWidth > 0) materials.wallpaperRolls += CALC.wallpaperRolls(totalWidth, wp.height_m);
+                room.wallpapers.forEach(wp => {
+                    if (wp.is_suspended) return;
+                    const totalWidth = wp.widths.reduce((a, b) => a + b, 0);
+                    if (totalWidth > 0) {
+                        const rolls = CALC.wallpaperRolls(totalWidth, wp.height_m);
+                        if (rolls > 0) {
+                           materials.wallpapers.push({
+                                code: wp.wallpaper_code || 'xxx',
+                                rolls: rolls
+                           });
+                        }
+                    }
                 });
             });
-            if(materials.opaqueYards > 0) text += ` - ผ้าทึบ: ${materials.opaqueYards.toFixed(2)} หลา\n`;
-            if(materials.sheerYards > 0) text += ` - ผ้าโปร่ง: ${materials.sheerYards.toFixed(2)} หลา\n`;
-            if(materials.opaqueTrack > 0) text += ` - รางทึบ: ${materials.opaqueTrack.toFixed(2)} ม.\n`;
-            if(materials.sheerTrack > 0) text += ` - รางโปร่ง: ${materials.sheerTrack.toFixed(2)} ม.\n`;
-            if(hasDoubleBracket) text += `   (❗️ต้องใช้ขาสองชั้น)\n`;
-            Object.entries(materials.decoCounts).forEach(([type, count]) => text += ` - ${type}: ${count} ชุด\n`);
-            if(materials.wallpaperRolls > 0) text += ` - วอลเปเปอร์: ${materials.wallpaperRolls} ม้วน\n`;
+
+            if (materials.opaqueFabrics.length > 0) {
+                materials.opaqueFabrics.forEach(f => {
+                    text += `- ผ้าทึบ: รหัส ${f.code} ใช้ ${f.yards.toFixed(2)} หลา\n`;
+                });
+            }
+            if (materials.sheerFabrics.length > 0) {
+                materials.sheerFabrics.forEach(f => {
+                    text += `- ผ้าโปร่ง: รหัส ${f.code} ใช้ ${f.yards.toFixed(2)} หลา\n`;
+                });
+            }
+            if (materials.opaqueTracks.length > 0) {
+                materials.opaqueTracks.forEach(t => {
+                    text += `- รางทึบ: ${t.width.toFixed(2)} ม. จำนวน 1 เส้น\n`;
+                });
+            }
+            if (materials.sheerTracks.length > 0) {
+                materials.sheerTracks.forEach(t => {
+                    text += `- รางโปร่ง: ${t.width.toFixed(2)} ม. จำนวน 1 เส้น\n`;
+                });
+            }
+            if (hasDoubleBracket) text += `   (❗️ต้องใช้ขาสองชั้น)\n`;
+            if (materials.decorations.length > 0) {
+                materials.decorations.forEach(d => {
+                    text += `- ${d.type}: รหัส ${d.code} จำนวน 1 ชุด\n`;
+                });
+            }
+            if (materials.wallpapers.length > 0) {
+                materials.wallpapers.forEach(w => {
+                    text += `- วอลเปเปอร์: รหัส ${w.code} จำนวน ${w.rolls} ม้วน\n`;
+                });
+            }
+
             text += '------------------------------\n';
             if (type === 'purchase_order') return text;
         }
 
         if (type === 'seamstress' || type === 'owner') {
-             text += '\n🧵 *รายละเอียดสำหรับช่าง*\n';
-             payload.rooms.forEach(room => {
-                if(room.is_suspended) return;
-                const activeItems = [...room.sets, ...room.decorations, ...room.wallpapers].filter(i => !i.is_suspended && i.width_m > 0 || (i.widths && i.widths.reduce((a,b)=>a+b,0)>0));
-                if (activeItems.length === 0) return;
+            text += '\n🧵 *รายละเอียดสำหรับช่าง*\n';
+            payload.rooms.forEach(room => {
+                if (room.is_suspended) return;
+                const activeSets = room.sets.filter(s => !s.is_suspended && s.width_m > 0);
+                if (activeSets.length === 0) return;
 
                 text += `\n*ห้อง: ${room.room_name || 'ไม่ระบุ'}*\n`;
                 let itemCounter = 1;
                 room.sets.forEach(s => {
-                     if(s.is_suspended || s.width_m <= 0) return;
-                     text += `${itemCounter++}) *ผ้าม่าน ${s.style}*\n`;
-                     text += `  ขนาด: กว้าง ${s.width_m} x สูง ${s.height_m} ม.\n`;
-                     text += `  รูปแบบเปิด: ${s.opening_style}, สีราง: ${s.track_color}\n`;
-                     if (s.fabric_variant.includes('ทึบ')) text += `  ผ้าทึบ: รหัส ${s.fabric_code || '-'}\n`;
-                     if (s.fabric_variant.includes('โปร่ง')) text += `  ผ้าโปร่ง: รหัส ${s.sheer_fabric_code || '-'}\n`;
-                     if (s.notes) text += `  หมายเหตุ: ${s.notes}\n`;
+                    if (s.is_suspended || s.width_m <= 0) return;
+                    text += `${itemCounter++}) *ผ้าม่าน ${s.style} ${s.fabric_variant}*\n`;
+                    text += `  กว้าง ${s.width_m} x สูง ${s.height_m} ม.\n`;
+                    text += `  รูปแบบเปิด: ${s.opening_style}\n`;
+                    if (s.fabric_variant.includes('ทึบ')) text += `  ผ้าทึบ: รหัส ${s.fabric_code || '-'}\n`;
+                    if (s.fabric_variant.includes('โปร่ง')) text += `  ผ้าโปร่ง: รหัส ${s.sheer_fabric_code || '-'}\n`;
                 });
-                 room.decorations.forEach(d => {
-                     if(d.is_suspended || d.width_m <= 0) return;
-                     text += `${itemCounter++}) *${d.type}*\n`;
-                     text += `  ขนาด: กว้าง ${d.width_m} x สูง ${d.height_m} ม.\n`;
-                     text += `  รหัส: ${d.deco_code || '-'}\n`;
-                     if (d.deco_notes) text += `  หมายเหตุ: ${d.deco_notes}\n`;
-                });
-             });
+            });
             text += '------------------------------\n';
             if (type === 'seamstress') return text;
         }
