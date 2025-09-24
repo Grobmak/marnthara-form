@@ -629,6 +629,15 @@ setTimeout(doRemove, 700);
     
     // ======================= [FIX] JUMP MENU FUNCTION UPDATED =======================
     
+function jumpToRoom(roomId) {
+    const target = document.getElementById(roomId);
+    if (target) {
+        target.scrollIntoView({ behavior: 'auto', block: 'start' });
+        target.classList.add('scrolling-jump');
+        setTimeout(() => target.classList.remove('scrolling-jump'), 600);
+    }
+}
+
 function updateQuickNavMenu() {
         const roomListContainer = document.querySelector(SELECTORS.quickNavRoomList);
         const quickNavBtn = document.querySelector(SELECTORS.quickNavBtn);
