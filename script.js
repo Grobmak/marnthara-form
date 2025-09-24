@@ -568,7 +568,7 @@
     }
 
     function loadPayload(payload) {
-        if (!payload || !payload.rooms) { showToast("ข้อมูลไม่ถูกต้อง", "error"); return; }
+        if (!payload || !payload.rooms) { showToast("ข้อมูลตัวเลขไม่ถูกต้อง", "error"); return; }
         document.querySelector('[name="customer_name"]').value = payload.customer_name || '';
         document.querySelector('[name="customer_address"]').value = payload.customer_address || '';
         document.querySelector('[name="customer_phone"]').value = payload.customer_phone || '';
@@ -685,29 +685,23 @@
         }
 
         if (type === 'purchase_order' || type === 'owner') {
-            text += '📋 *สรุปวัสดุสำหรับสั่งซื้อ*\n';
             const materials = {
                 opaqueFabrics: [],
                 sheerFabrics: [],
-                opaqueTracks: [],
-                sheerTracks: [],
                 decorations: [],
                 wallpapers: [],
+                allSets: []
             };
-            let hasDoubleBracket = false;
 
             payload.rooms.forEach(room => {
                 if (room.is_suspended) return;
                 room.sets.forEach(set => {
                     if (set.is_suspended || set.width_m <= 0) return;
+                     materials.allSets.push(set);
                     if (set.fabric_variant.includes('ทึบ')) {
                         materials.opaqueFabrics.push({
                             code: set.fabric_code || '??',
                             yards: CALC.fabricYardage(set.style, set.width_m)
-                        });
-                        materials.opaqueTracks.push({
-                            width: set.width_m,
-                            color: set.track_color || 'ขาว'
                         });
                     }
                     if (set.fabric_variant.includes('โปร่ง')) {
@@ -715,12 +709,7 @@
                             code: set.sheer_fabric_code || '??',
                             yards: CALC.fabricYardage(set.style, set.width_m)
                         });
-                        materials.sheerTracks.push({
-                            width: set.width_m,
-                            color: set.track_color || 'ขาว'
-                        });
                     }
-                    if (set.fabric_variant === 'ทึบ&โปร่ง') hasDoubleBracket = true;
                 });
                 room.decorations.forEach(deco => {
                     if (deco.is_suspended || !deco.type || deco.width_m <= 0) return;
@@ -745,55 +734,65 @@
                     }
                 });
             });
-
-            // --- Formatting Output ---
+            
+            // --- Section: Fabric ---
+            text += '📋 *สรุปวัสดุสำหรับสั่งซื้อ*\n';
             if (materials.opaqueFabrics.length > 0) {
                 materials.opaqueFabrics.forEach(f => {
-                    text += `- ผ้าทึบ: รหัส ${f.code} ใช้ ${f.yards.toFixed(2)} หลา\n`;
+                    text += `- ผ้าทึบ: รหัส ${f.code} = ${f.yards.toFixed(2)} หลา\n`;
                 });
+                text += '\n';
             }
             if (materials.sheerFabrics.length > 0) {
                  materials.sheerFabrics.forEach(f => {
-                    text += `- ผ้าโปร่ง: รหัส ${f.code} ใช้ ${f.yards.toFixed(2)} หลา\n`;
+                    text += `- ผ้าโปร่ง: รหัส ${f.code} = ${f.yards.toFixed(2)} หลา\n`;
                 });
+                text += '\n';
             }
-            text += '\n';
-
-            const allTracks = { 'รางทึบ': materials.opaqueTracks, 'รางโปร่ง': materials.sheerTracks };
-            for (const [trackType, tracks] of Object.entries(allTracks)) {
-                if (tracks.length > 0) {
-                    const tracksByColor = tracks.reduce((acc, track) => {
-                        acc[track.color] = acc[track.color] || [];
-                        acc[track.color].push(track.width);
-                        return acc;
-                    }, {});
-                    for (const [color, widths] of Object.entries(tracksByColor)) {
-                        text += `- ${trackType}: สี${color}\n`;
-                        widths.forEach(width => {
-                            text += `   ${width.toFixed(2)} ม. จำนวน 1 เส้น\n`;
-                        });
-                    }
+            
+            // --- Section: Tracks ---
+            text += '------------------------------\n';
+            text += '📋 *สำหรับสั่งซื้อ ราง*\n';
+            text += '------------------------------\n\n';
+            let trackSetCounter = 1;
+            materials.allSets.forEach(set => {
+                text += `( ${trackSetCounter++}. )  รางม่าน ${set.style}\n`;
+                if (set.fabric_variant.includes('ทึบ')) {
+                    text += `- รางทึบ: ${set.width_m.toFixed(2)} ม. จำนวน 1 เส้น\n`;
                 }
-            }
-
-            if (hasDoubleBracket) text += `   (❗️ต้องใช้ขาสองชั้น)\n`;
-            text += '\n';
-
+                if (set.fabric_variant.includes('โปร่ง')) {
+                    text += `- รางโปร่ง: ${set.width_m.toFixed(2)} ม. จำนวน 1 เส้น\n`;
+                }
+                if (set.fabric_variant === 'ทึบ&โปร่ง') {
+                    text += `(❗️ขาสองชั้น)\n`;
+                }
+                text += `\n`;
+            });
+            
+            // --- Section: Blinds ---
+            text += '------------------------------\n';
+            text += '📋 *สำหรับสั่งซื้อ Blind*\n';
+            text += '------------------------------\n\n';
             if (materials.decorations.length > 0) {
                 materials.decorations.forEach(d => {
-                    text += `- ${d.type}:\n`;
-                    text += `รหัส ${d.code}\n`;
-                    text += `ขนาด กว้าง ${d.width.toFixed(2)} x สูง ${d.height.toFixed(2)} ม.\n`;
-                    text += `จำนวน 1 ชุด\n\n`;
+                    text += `- ${d.type} -\n`;
+                    text += `รหัส: ${d.code}\n`;
+                    text += `ขนาด: ${d.width.toFixed(2)} x ${d.height.toFixed(2)} m.\n`;
+                    text += `จำนวน: 1 ชุด\n\n`;
                 });
             }
+            
+            // --- Section: Wallpaper ---
+            text += '------------------------------\n';
+            text += '📋 *สำหรับสั่งซื้อ Wallpaper*\n';
+            text += '------------------------------\n\n';
             if (materials.wallpapers.length > 0) {
                 materials.wallpapers.forEach(w => {
                     text += `- วอลเปเปอร์: รหัส ${w.code} จำนวน ${w.rolls} ม้วน\n`;
                 });
                 text += '\n';
             }
-
+            
             text += '------------------------------\n';
             if (type === 'purchase_order') return text;
         }
