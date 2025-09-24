@@ -589,33 +589,45 @@
     }
     
     // ======================= [FIX] JUMP MENU FUNCTION UPDATED =======================
-    function updateQuickNavMenu() {
-        const roomListContainer = document.querySelector(SELECTORS.quickNavRoomList);
-        const quickNavBtn = document.querySelector(SELECTORS.quickNavBtn);
-        if (!roomListContainer || !quickNavBtn) return;
+function updateQuickNavMenu() {
+    const roomListContainer = document.querySelector(SELECTORS.quickNavRoomList);
+    const quickNavBtn = document.querySelector(SELECTORS.quickNavBtn);
+    if (!roomListContainer || !quickNavBtn) return;
 
-        roomListContainer.innerHTML = ''; // Clear previous links
-        const rooms = document.querySelectorAll(SELECTORS.room);
+    roomListContainer.innerHTML = '';
+    const rooms = document.querySelectorAll(SELECTORS.room);
 
-        if (rooms.length < 2) {
-            quickNavBtn.style.display = 'none'; // Hide if not useful
-            return;
-        } else {
-            quickNavBtn.style.display = 'inline-flex';
-        }
-
-        rooms.forEach((room, index) => {
-            const roomNameInput = room.querySelector(SELECTORS.roomNameInput);
-            const roomName = roomNameInput.value.trim() || roomNameInput.placeholder || `ห้อง ${index + 1}`;
-            const roomId = room.id;
-
-            const link = document.createElement('a');
-            link.href = `#${roomId}`;
-            link.dataset.jumpTo = roomId;
-            link.innerHTML = `<i class="ph ph-arrow-bend-right-down"></i> ${roomName}`;
-            roomListContainer.appendChild(link);
-        });
+    if (rooms.length < 2) {
+        quickNavBtn.style.display = 'none';
+        return;
+    } else {
+        quickNavBtn.style.display = 'inline-flex';
     }
+
+    rooms.forEach((room, index) => {
+        const roomNameInput = room.querySelector(SELECTORS.roomNameInput);
+        const roomName = roomNameInput.value.trim() || roomNameInput.placeholder || `ห้อง ${index + 1}`;
+        const roomId = room.id;
+
+        const link = document.createElement('a');
+        link.href = `#${roomId}`;
+        link.dataset.jumpTo = roomId;
+        link.innerHTML = `<i class="ph ph-arrow-bend-right-down"></i> ${roomName}`;
+
+        // --- FIX: smooth animation bug on jump ---
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = document.getElementById(roomId);
+            if (target) {
+                target.classList.add('scrolling-jump');
+                target.scrollIntoView({ behavior: 'auto', block: 'start' });
+                setTimeout(() => target.classList.remove('scrolling-jump'), 600);
+            }
+        });
+
+        roomListContainer.appendChild(link);
+    });
+}
     // ======================= END [FIX] =======================
 
     function renumber() {
