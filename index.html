@@ -122,34 +122,34 @@
     <div id="copyOptionsModal" class="modal-wrapper">
         <div class="modal-content">
             <h3>เลือกสรุปที่จะคัดลอก</h3>
-            <div class="radio-button-group">
+            <div class="radio-card-group">
                 <label>
                     <input type="radio" name="copy_option" value="customer">
-                    <div class="radio-button-content">
+                    <span class="radio-card-content">
                         <strong>ส่งให้ลูกค้า</strong>
                         <small>สรุปราคาแบบย่อ พร้อมข้อมูลติดต่อ</small>
-                    </div>
+                    </span>
                 </label>
                 <label>
                     <input type="radio" name="copy_option" value="seamstress">
-                    <div class="radio-button-content">
+                     <span class="radio-card-content">
                         <strong>ส่งช่างเย็บผ้า</strong>
                         <small>รายละเอียดขนาด, รูปแบบ, รหัสผ้า</small>
-                    </div>
+                    </span>
                 </label>
                  <label>
                     <input type="radio" name="copy_option" value="purchase_order">
-                    <div class="radio-button-content">
+                     <span class="radio-card-content">
                         <strong>รายการสั่งของ</strong>
                         <small>สรุปวัสดุสำหรับสั่งซื้อ</small>
-                    </div>
+                    </span>
                 </label>
                 <label>
                     <input type="radio" name="copy_option" value="owner">
-                    <div class="radio-button-content">
+                     <span class="radio-card-content">
                         <strong>รายละเอียดทั้งหมด</strong>
                         <small>ข้อมูลทั้งหมดสำหรับทำบัญชีและสรุปวัสดุ</small>
-                    </div>
+                    </span>
                 </label>
             </div>
             <div class="modal-actions">
@@ -165,18 +165,14 @@
             
             <div class="form-group" style="margin-top: 1.5rem;">
                 <label style="padding-left: 0;">รูปแบบภาษีมูลค่าเพิ่ม (VAT)</label>
-                <div class="radio-button-group--horizontal">
+                <div class="radio-group">
                     <label>
                         <input type="radio" name="vat_option" value="include" checked>
-                        <div class="radio-button-content">
-                            <strong>รวม VAT 7%</strong>
-                        </div>
+                        <span>รวม VAT 7%</span>
                     </label>
                     <label>
                         <input type="radio" name="vat_option" value="exclude">
-                        <div class="radio-button-content">
-                            <strong>ไม่รวม VAT</strong>
-                        </div>
+                        <span>ไม่รวม VAT</span>
                     </label>
                 </div>
             </div>
