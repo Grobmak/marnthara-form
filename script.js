@@ -750,24 +750,26 @@
                 text += '\n';
             }
             
-            // --- Section: Tracks ---
+            // --- Section: Tracks (MODIFIED) ---
             text += '------------------------------\n';
             text += '📋 *สำหรับสั่งซื้อ ราง*\n';
             text += '------------------------------\n\n';
-            let trackSetCounter = 1;
-            materials.allSets.forEach(set => {
-                text += `( ${trackSetCounter++}. )  รางม่าน ${set.style}\n`;
-                if (set.fabric_variant.includes('ทึบ')) {
-                    text += `- รางทึบ: ${set.width_m.toFixed(2)} ม. จำนวน 1 เส้น\n`;
-                }
-                if (set.fabric_variant.includes('โปร่ง')) {
-                    text += `- รางโปร่ง: ${set.width_m.toFixed(2)} ม. จำนวน 1 เส้น\n`;
-                }
-                if (set.fabric_variant === 'ทึบ&โปร่ง') {
-                    text += `(❗️ขาสองชั้น)\n`;
-                }
-                text += `\n`;
-            });
+            if (materials.allSets.length > 0) {
+                let trackSetCounter = 1;
+                materials.allSets.forEach(set => {
+                    text += `(${trackSetCounter++}) รางม่าน: ${set.style}, สี: ${set.track_color}\n`;
+                    if (set.fabric_variant.includes('ทึบ')) {
+                        text += `  - รางทึบ: ${set.width_m.toFixed(2)} ม. (1 เส้น)\n`;
+                    }
+                    if (set.fabric_variant.includes('โปร่ง')) {
+                        text += `  - รางโปร่ง: ${set.width_m.toFixed(2)} ม. (1 เส้น)\n`;
+                    }
+                    if (set.fabric_variant === 'ทึบ&โปร่ง') {
+                        text += `  (❗️ต้องใช้ขาสองชั้น)\n`;
+                    }
+                    text += `\n`;
+                });
+            }
             
             // --- Section: Blinds ---
             text += '------------------------------\n';
