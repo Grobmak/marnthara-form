@@ -365,10 +365,10 @@ input[inputmode="numeric"] { text-align: left; }
 
 /* --- PDF & PRINT STYLES --- */
 #printable-content { display: none; }
-#quotation-template {
-    font-family: 'Noto Sans Thai', sans-serif;
-    color: #333;
-    font-size: 10pt;
+#quotation-template { 
+    font-family: 'Noto Sans Thai', sans-serif; 
+    color: #333; 
+    font-size: 10pt; 
     background-color: #fff;
 }
 .pdf-page {
