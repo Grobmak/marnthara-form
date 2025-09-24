@@ -83,8 +83,15 @@ i.ph { font-size: 1.25em; vertical-align: middle; }
     box-shadow: var(--shadow-md);
     overflow: hidden;
     transition: all var(--transition-speed) ease-in-out;
+    position: relative; /* Ensure card can be a reference for z-index */
 }
-.card.overflow-visible { overflow: visible; }
+
+/* === FIX: Added z-index to lift the active card and its menu above other cards === */
+.card.overflow-visible {
+    overflow: visible;
+    z-index: 10;
+}
+
 @media (hover: hover) {
     .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--primary-container); }
 }
