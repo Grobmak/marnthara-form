@@ -705,14 +705,20 @@
                             code: set.fabric_code || '??',
                             yards: CALC.fabricYardage(set.style, set.width_m)
                         });
-                        materials.opaqueTracks.push({ width: set.width_m });
+                        materials.opaqueTracks.push({
+                            width: set.width_m,
+                            color: set.track_color || 'ขาว'
+                        });
                     }
                     if (set.fabric_variant.includes('โปร่ง')) {
                         materials.sheerFabrics.push({
                             code: set.sheer_fabric_code || '??',
                             yards: CALC.fabricYardage(set.style, set.width_m)
                         });
-                        materials.sheerTracks.push({ width: set.width_m });
+                        materials.sheerTracks.push({
+                            width: set.width_m,
+                            color: set.track_color || 'ขาว'
+                        });
                     }
                     if (set.fabric_variant === 'ทึบ&โปร่ง') hasDoubleBracket = true;
                 });
@@ -720,7 +726,9 @@
                     if (deco.is_suspended || !deco.type || deco.width_m <= 0) return;
                     materials.decorations.push({
                         type: deco.type,
-                        code: deco.deco_code || 'xxx'
+                        code: deco.deco_code || 'xxx',
+                        width: deco.width_m,
+                        height: deco.height_m
                     });
                 });
                 room.wallpapers.forEach(wp => {
@@ -738,36 +746,52 @@
                 });
             });
 
+            // --- Formatting Output ---
             if (materials.opaqueFabrics.length > 0) {
                 materials.opaqueFabrics.forEach(f => {
                     text += `- ผ้าทึบ: รหัส ${f.code} ใช้ ${f.yards.toFixed(2)} หลา\n`;
                 });
             }
             if (materials.sheerFabrics.length > 0) {
-                materials.sheerFabrics.forEach(f => {
+                 materials.sheerFabrics.forEach(f => {
                     text += `- ผ้าโปร่ง: รหัส ${f.code} ใช้ ${f.yards.toFixed(2)} หลา\n`;
                 });
             }
-            if (materials.opaqueTracks.length > 0) {
-                materials.opaqueTracks.forEach(t => {
-                    text += `- รางทึบ: ${t.width.toFixed(2)} ม. จำนวน 1 เส้น\n`;
-                });
+            text += '\n';
+
+            const allTracks = { 'รางทึบ': materials.opaqueTracks, 'รางโปร่ง': materials.sheerTracks };
+            for (const [trackType, tracks] of Object.entries(allTracks)) {
+                if (tracks.length > 0) {
+                    const tracksByColor = tracks.reduce((acc, track) => {
+                        acc[track.color] = acc[track.color] || [];
+                        acc[track.color].push(track.width);
+                        return acc;
+                    }, {});
+                    for (const [color, widths] of Object.entries(tracksByColor)) {
+                        text += `- ${trackType}: สี${color}\n`;
+                        widths.forEach(width => {
+                            text += `   ${width.toFixed(2)} ม. จำนวน 1 เส้น\n`;
+                        });
+                    }
+                }
             }
-            if (materials.sheerTracks.length > 0) {
-                materials.sheerTracks.forEach(t => {
-                    text += `- รางโปร่ง: ${t.width.toFixed(2)} ม. จำนวน 1 เส้น\n`;
-                });
-            }
+
             if (hasDoubleBracket) text += `   (❗️ต้องใช้ขาสองชั้น)\n`;
+            text += '\n';
+
             if (materials.decorations.length > 0) {
                 materials.decorations.forEach(d => {
-                    text += `- ${d.type}: รหัส ${d.code} จำนวน 1 ชุด\n`;
+                    text += `- ${d.type}:\n`;
+                    text += `รหัส ${d.code}\n`;
+                    text += `ขนาด กว้าง ${d.width.toFixed(2)} x สูง ${d.height.toFixed(2)} ม.\n`;
+                    text += `จำนวน 1 ชุด\n\n`;
                 });
             }
             if (materials.wallpapers.length > 0) {
                 materials.wallpapers.forEach(w => {
                     text += `- วอลเปเปอร์: รหัส ${w.code} จำนวน ${w.rolls} ม้วน\n`;
                 });
+                text += '\n';
             }
 
             text += '------------------------------\n';
