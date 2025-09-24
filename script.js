@@ -644,7 +644,7 @@
             return roomSum + setsTotal + decosTotal + wpsTotal;
         }, 0);
         
-        let text = `สรุปข้อมูล (${new Date().toLocaleDateString('th-TH')})\n`;
+        let text = `สรุปข้อมูล (${new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'numeric', year: 'numeric' })})\n`;
         text += `ลูกค้า: ${payload.customer_name || '-'}\n`;
         if (type === 'customer' || type === 'owner') {
             text += `เบอร์โทร: ${payload.customer_phone || '-'}\n`;
@@ -735,22 +735,25 @@
                 });
             });
             
-            // --- Section: Fabric ---
-            text += '📋 *สรุปวัสดุสำหรับสั่งซื้อ*\n';
+            // --- Section: Fabric (MODIFIED) ---
+            text += '📋 *สรุปวัสดุสำหรับสั่งซื้อผ้า*\n';
+            text += '------------------------------\n';
             if (materials.opaqueFabrics.length > 0) {
                 materials.opaqueFabrics.forEach(f => {
-                    text += `- ผ้าทึบ: รหัส ${f.code} = ${f.yards.toFixed(2)} หลา\n`;
+                    text += `- ผ้าทึบ (Curtain Fabric)\n`;
+                    text += `รหัส: #${f.code || '??'}\n`;
+                    text += `จำนวน: ${f.yards.toFixed(2)} หลา\n\n`;
                 });
-                text += '\n';
             }
             if (materials.sheerFabrics.length > 0) {
                  materials.sheerFabrics.forEach(f => {
-                    text += `- ผ้าโปร่ง: รหัส ${f.code} = ${f.yards.toFixed(2)} หลา\n`;
+                    text += `- ผ้าโปร่ง (Sheer Fabric)\n`;
+                    text += `รหัส: #${f.code || '??'}\n`;
+                    text += `จำนวน: ${f.yards.toFixed(2)} หลา\n\n`;
                 });
-                text += '\n';
             }
             
-            // --- Section: Tracks (MODIFIED) ---
+            // --- Section: Tracks ---
             text += '------------------------------\n';
             text += '📋 *สำหรับสั่งซื้อ ราง*\n';
             text += '------------------------------\n\n';
@@ -771,28 +774,38 @@
                 });
             }
             
-            // --- Section: Blinds ---
+            // --- Section: Blinds (MODIFIED) ---
             text += '------------------------------\n';
             text += '📋 *สำหรับสั่งซื้อ Blind*\n';
             text += '------------------------------\n\n';
             if (materials.decorations.length > 0) {
+                const decoTypeMap = {
+                    "มู่ลี่ไม้": "Wooden Blind",
+                    "ม่านม้วน": "Roller Blind",
+                    "ปรับแสง": "Vertical Blind",
+                    "ฉากกั้นห้อง": "Partition",
+                    "มุ้งจีบ": "Pleated Insect Screen",
+                    "มู่ลี่มิเนียม": "Aluminium Blind"
+                };
                 materials.decorations.forEach(d => {
-                    text += `- ${d.type} -\n`;
-                    text += `รหัส: ${d.code}\n`;
+                    const englishType = decoTypeMap[d.type] ? ` (${decoTypeMap[d.type]})` : '';
+                    text += `- ${d.type}${englishType}\n`;
+                    text += `รหัส: #${d.code || 'xxx'}\n`;
                     text += `ขนาด: ${d.width.toFixed(2)} x ${d.height.toFixed(2)} m.\n`;
                     text += `จำนวน: 1 ชุด\n\n`;
                 });
             }
             
-            // --- Section: Wallpaper ---
+            // --- Section: Wallpaper (MODIFIED) ---
             text += '------------------------------\n';
             text += '📋 *สำหรับสั่งซื้อ Wallpaper*\n';
             text += '------------------------------\n\n';
             if (materials.wallpapers.length > 0) {
                 materials.wallpapers.forEach(w => {
-                    text += `- วอลเปเปอร์: รหัส ${w.code} จำนวน ${w.rolls} ม้วน\n`;
+                    text += `- วอลเปเปอร์ -\n`;
+                    text += `รหัส: #${w.code || 'xxx'}\n`;
+                    text += `จำนวน: ${w.rolls} ม้วน\n\n`;
                 });
-                text += '\n';
             }
             
             text += '------------------------------\n';
