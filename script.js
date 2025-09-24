@@ -638,56 +638,58 @@ function jumpToRoom(roomId) {
     }
 }
 
-function updateQuickNavMenu() {
-        const roomListContainer = document.querySelector(SELECTORS.quickNavRoomList);
-        const quickNavBtn = document.querySelector(SELECTORS.quickNavBtn);
-        if (!roomListContainer || !quickNavBtn) return;
 
-        roomListContainer.innerHTML = ''; // Clear previous links
-        const rooms = document.querySelectorAll(SELECTORS.room);
-
-        if (rooms.length < 2) {
-            quickNavBtn.style.display = 'none'; // Hide if not useful
-            return;
-        } else {
-            quickNavBtn.style.display = 'inline-flex';
+function jumpToRoom(roomId) {
+    const target = document.getElementById(roomId);
+    if (target) {
+        // Use non-smooth scroll to avoid conflicts with other element animations
+        try {
+            target.scrollIntoView({ behavior: 'auto', block: 'start' });
+        } catch (e) {
+            // fallback
+            target.scrollIntoView();
         }
+        // visual feedback without affecting layout
+        target.classList.add('scrolling-jump');
+        setTimeout(() => target.classList.remove('scrolling-jump'), 600);
+    }
+}
 
-        rooms.forEach((room, index) => {
-            const roomNameInput = room.querySelector(SELECTORS.roomNameInput);
-            const roomName = (roomNameInput && roomNameInput.value.trim()) || (roomNameInput && roomNameInput.placeholder) || `ห้อง ${index + 1}`;
-            const roomId = room.id || `room-${index+1}`;
+function updateQuickNavMenu() {
+    const roomListContainer = document.querySelector(SELECTORS.quickNavRoomList);
+    const quickNavBtn = document.querySelector(SELECTORS.quickNavBtn);
+    if (!roomListContainer || !quickNavBtn) return;
 
-            const link = document.createElement('a');
-            link.href = `#${roomId}`;
-            link.dataset.jumpTo = roomId;
-            link.className = 'quick-nav-link';
-            link.innerHTML = `<i class="ph ph-arrow-bend-right-down"></i> ${roomName}`;
+    roomListContainer.innerHTML = ''; // Clear previous links
+    const rooms = document.querySelectorAll(SELECTORS.room);
 
-            // FIX: Use click handler that disables animations and performs a safe scroll.
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                disableAnimationsTemporarily(700);
-                const target = document.getElementById(roomId);
-                if (!target) return;
-                // Ensure the target <details> is open.
-                try { target.open = true; } catch (err) {}
-                // Use instant scroll to avoid smooth/animation conflict.
-                try {
-                    target.scrollIntoView({ behavior: 'auto', block: 'start' });
-                } catch (err) {
-                    target.scrollIntoView();
-                }
-                // Add a short highlight class then remove it.
-                target.classList.add('scrolling-jump');
-                setTimeout(() => target.classList.remove('scrolling-jump'), 700);
-            });
-
-            roomListContainer.appendChild(link);
-        });
+    if (rooms.length < 2) {
+        quickNavBtn.style.display = 'none'; // Hide if not useful
+        return;
+    } else {
+        quickNavBtn.style.display = 'inline-flex';
     }
 
-    // ======================= END [FIX] =======================
+    rooms.forEach((room, index) => {
+        const roomNameInput = room.querySelector(SELECTORS.roomNameInput);
+        const roomName = (roomNameInput && roomNameInput.value.trim()) ? roomNameInput.value.trim() : (roomNameInput && roomNameInput.placeholder) ? roomNameInput.placeholder : `ห้อง ${index + 1}`;
+        const roomId = room.id || `room-${index+1}`;
+
+        const link = document.createElement('a');
+        link.href = `#${roomId}`;
+        link.dataset.jumpTo = roomId;
+        link.innerHTML = `<i class="ph ph-arrow-bend-right-down"></i> ${roomName}`;
+
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            jumpToRoom(roomId);
+        });
+
+        roomListContainer.appendChild(link);
+    });
+}
+// ======================= END [FIX] =======================
+
 
     function renumber() {
         document.querySelectorAll(SELECTORS.room).forEach((room, rIdx) => {
@@ -1505,3 +1507,4 @@ function updateQuickNavMenu() {
 
     document.addEventListener('DOMContentLoaded', init);
 })();
+}
