@@ -242,8 +242,31 @@ input[inputmode="numeric"] { text-align: left; }
 .menu-dropdown hr { border: none; border-top: 1px solid var(--outline); margin: 0.25rem 0; }
 .hidden { display: none !important; }
 
+/* ======================= [FIX] ADDED STYLES FOR QUICK NAV ACTIONS ======================= */
+.quick-nav-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+}
+.quick-nav-actions .btn-chip {
+    flex-grow: 1; /* Make buttons fill the space */
+    text-align: center;
+}
+/* This will now apply to the room list links inside both menus */
+.menu-dropdown #quickNavRoomList a {
+    padding: 0.75rem 1.25rem;
+    text-decoration: none;
+    color: var(--on-surface);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.menu-dropdown #quickNavRoomList a:hover {
+    background-color: var(--surface-container);
+}
+/* ======================= END [FIX] ======================= */
+
 /* --- [NEW] Radio Chip & Card Styles --- */
-/* Style for horizontal chips (e.g., VAT options) */
 .radio-group {
     display: flex;
     flex-wrap: wrap;
@@ -279,7 +302,6 @@ input[inputmode="numeric"] { text-align: left; }
     font-weight: 700;
 }
 
-/* Style for vertical cards (e.g., Copy options) */
 .radio-card-group {
     display: flex;
     flex-direction: column;

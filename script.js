@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     // --- CONFIGURATION & CONSTANTS ---
-    const APP_VERSION = "input-ui/5.5.0-stable-pagination";
+    const APP_VERSION = "input-ui/5.5.1-stable-hotfix";
     const WEBHOOK_URL = "https://your-make-webhook-url.com/your-unique-path";
     const STORAGE_KEY = "marnthara.input.v4";
 
@@ -54,6 +54,7 @@
         }
     };
 
+    // ======================= [FIX] UPDATED SELECTORS TO MATCH NEW HTML =======================
     const SELECTORS = {
         orderForm: '#orderForm', roomsContainer: '#rooms', roomTpl: '#roomTpl', setTpl: '#setTpl', decoTpl: '#decoTpl', wallpaperTpl: '#wallpaperTpl', wallTpl: '#wallTpl',
         payloadInput: '#payload', clearAllBtn: '#clearAllBtn',
@@ -75,12 +76,14 @@
         exportPdfBtn: '#exportPdfBtn',
         exportOptionsModal: '#exportOptionsModal', exportOptionsConfirm: '#exportOptionsConfirm', exportOptionsCancel: '#exportOptionsCancel',
         printableContent: '#printable-content',
-        // ======================= [NEW] SELECTORS =======================
-        toggleAllBtn: '#toggleAllBtn',
-        jumpBtn: '#jumpBtn',
-        jumpDropdown: '#jumpDropdown',
-        // ======================= END [NEW] =======================
+        // --- Updated Quick Navigation Selectors ---
+        quickNavBtn: '#quickNavBtn',
+        quickNavDropdown: '#quickNavDropdown',
+        quickNavRoomList: '#quickNavRoomList',
+        expandAllRoomsBtn: '#expandAllRoomsBtn',
+        collapseAllRoomsBtn: '#collapseAllRoomsBtn',
     };
+    // ======================= END [FIX] =======================
 
     let roomCount = 0;
     let isLocked = false;
@@ -211,9 +214,7 @@
         if (!frag) return;
         const room = frag.querySelector(SELECTORS.room);
         room.dataset.index = roomCount;
-        // ======================= [NEW] ADD UNIQUE ID FOR JUMP MENU =======================
         room.id = `room-${Date.now()}`;
-        // ======================= END [NEW] =======================
         document.querySelector(SELECTORS.roomsContainer).appendChild(frag);
         const created = document.querySelector(`${SELECTORS.room}:last-of-type`);
 
@@ -587,20 +588,20 @@
         showToast("โหลดข้อมูลสำเร็จ", "success");
     }
     
-    // ======================= [NEW] JUMP MENU FUNCTION =======================
-    function updateJumpMenu() {
-        const jumpDropdown = document.querySelector(SELECTORS.jumpDropdown);
-        const jumpBtn = document.querySelector(SELECTORS.jumpBtn);
-        if (!jumpDropdown || !jumpBtn) return;
+    // ======================= [FIX] JUMP MENU FUNCTION UPDATED =======================
+    function updateQuickNavMenu() {
+        const roomListContainer = document.querySelector(SELECTORS.quickNavRoomList);
+        const quickNavBtn = document.querySelector(SELECTORS.quickNavBtn);
+        if (!roomListContainer || !quickNavBtn) return;
 
-        jumpDropdown.innerHTML = '';
+        roomListContainer.innerHTML = ''; // Clear previous links
         const rooms = document.querySelectorAll(SELECTORS.room);
 
         if (rooms.length < 2) {
-            jumpBtn.style.display = 'none';
+            quickNavBtn.style.display = 'none'; // Hide if not useful
             return;
         } else {
-            jumpBtn.style.display = 'inline-flex';
+            quickNavBtn.style.display = 'inline-flex';
         }
 
         rooms.forEach((room, index) => {
@@ -612,10 +613,10 @@
             link.href = `#${roomId}`;
             link.dataset.jumpTo = roomId;
             link.innerHTML = `<i class="ph ph-arrow-bend-right-down"></i> ${roomName}`;
-            jumpDropdown.appendChild(link);
+            roomListContainer.appendChild(link);
         });
     }
-    // ======================= END [NEW] =======================
+    // ======================= END [FIX] =======================
 
     function renumber() {
         document.querySelectorAll(SELECTORS.room).forEach((room, rIdx) => {
@@ -627,9 +628,9 @@
                 if (titleEl) titleEl.textContent = `${iIdx + 1}/${totalItemsInRoom}`;
             });
         });
-        // ======================= [NEW] UPDATE JUMP MENU ON RENUMBER =======================
-        updateJumpMenu();
-        // ======================= END [NEW] =======================
+        // ======================= [FIX] CALL UPDATED QUICK NAV FUNCTION =======================
+        updateQuickNavMenu();
+        // ======================= END [FIX] =======================
     }
 
     function toggleSetFabricUI(setEl) {
@@ -776,7 +777,6 @@
                 });
             });
             
-            // --- Section: Fabric (MODIFIED) ---
             text += '📋 *สรุปวัสดุสำหรับสั่งซื้อผ้า*\n';
             text += '------------------------------\n';
             if (materials.opaqueFabrics.length > 0) {
@@ -794,7 +794,6 @@
                 });
             }
             
-            // --- Section: Tracks ---
             text += '------------------------------\n';
             text += '📋 *สำหรับสั่งซื้อ ราง*\n';
             text += '------------------------------\n\n';
@@ -815,7 +814,6 @@
                 });
             }
             
-            // --- Section: Blinds (MODIFIED) ---
             text += '------------------------------\n';
             text += '📋 *สำหรับสั่งซื้อ Blind*\n';
             text += '------------------------------\n\n';
@@ -837,7 +835,6 @@
                 });
             }
             
-            // --- Section: Wallpaper (MODIFIED) ---
             text += '------------------------------\n';
             text += '📋 *สำหรับสั่งซื้อ Wallpaper*\n';
             text += '------------------------------\n\n';
@@ -937,7 +934,6 @@
         const vatAmount = subTotal * vatRate;
         const grandTotal = subTotal + vatAmount;
 
-        // 2. Paginate the items based on estimated height (units)
         const UNITS_PER_FIRST_PAGE = 17;
         const UNITS_PER_SUBSEQUENT_PAGE = 23;
         const pages = [];
@@ -956,7 +952,6 @@
         });
         if (currentPageItems.length > 0) pages.push(currentPageItems);
 
-        // 3. Build HTML for each page
         const today = new Date();
         const dateThai = today.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
         const quoteNumber = `QT-${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
@@ -1128,9 +1123,9 @@
         const orderForm = document.querySelector(SELECTORS.orderForm);
         const fileImporter = document.querySelector(SELECTORS.fileImporter);
         const menuDropdown = document.querySelector(SELECTORS.menuDropdown);
-        // ======================= [NEW] GET JUMP MENU ELEMENTS =======================
-        const jumpDropdown = document.querySelector(SELECTORS.jumpDropdown);
-        // ======================= END [NEW] =======================
+        // ======================= [FIX] GET QUICK NAV MENU ELEMENTS =======================
+        const quickNavDropdown = document.querySelector(SELECTORS.quickNavDropdown);
+        // ======================= END [FIX] =======================
 
         const debouncedRecalcAndSave = debounce(() => { recalcAll(); saveData(); }, 150);
 
@@ -1144,11 +1139,9 @@
                  const newLength = el.value.length;
                  el.setSelectionRange(cursorPosition + (newLength - oldLength), cursorPosition + (newLength - oldLength));
             }
-             // ======================= [NEW] UPDATE JUMP MENU ON ROOM NAME CHANGE =======================
             if (el.matches(SELECTORS.roomNameInput)) {
-                debounce(updateJumpMenu, 300)();
+                debounce(updateQuickNavMenu, 300)();
             }
-            // ======================= END [NEW] =======================
             debouncedRecalcAndSave();
         });
 
@@ -1224,36 +1217,22 @@
         document.querySelector(SELECTORS.addRoomFooterBtn).addEventListener('click', () => addRoom());
         document.querySelector(SELECTORS.lockBtn).addEventListener('click', toggleLock);
 
-        // ======================= [NEW] EVENT LISTENERS FOR NEW BUTTONS =======================
-        const toggleAllBtn = document.querySelector(SELECTORS.toggleAllBtn);
-        toggleAllBtn.addEventListener('click', () => {
-            const allRooms = document.querySelectorAll(`${SELECTORS.room}`);
-            if (allRooms.length === 0) return;
-
-            // Determine the target state based on the first room's state
-            const shouldOpen = !allRooms[0].open;
-            
-            allRooms.forEach(room => {
+        // ======================= [FIX] UPDATED EVENT LISTENERS FOR NEW BUTTONS =======================
+        const toggleRooms = (shouldOpen) => {
+            document.querySelectorAll(`${SELECTORS.room}`).forEach(room => {
                 room.open = shouldOpen;
             });
+        };
+        
+        document.querySelector(SELECTORS.expandAllRoomsBtn).addEventListener('click', () => toggleRooms(true));
+        document.querySelector(SELECTORS.collapseAllRoomsBtn).addEventListener('click', () => toggleRooms(false));
 
-            // Update button icon and title for next action
-            const icon = toggleAllBtn.querySelector('i');
-            if (shouldOpen) {
-                toggleAllBtn.title = "ย่อทั้งหมด";
-                icon.className = 'ph-bold ph-arrows-in-line-vertical';
-            } else {
-                toggleAllBtn.title = "ขยายทั้งหมด";
-                icon.className = 'ph-bold ph-rows';
-            }
-        });
-
-        document.querySelector(SELECTORS.jumpBtn).addEventListener('click', () => {
+        document.querySelector(SELECTORS.quickNavBtn).addEventListener('click', () => {
             menuDropdown.classList.remove('show');
-            jumpDropdown.classList.toggle('show');
+            quickNavDropdown.classList.toggle('show');
         });
 
-        jumpDropdown.addEventListener('click', (e) => {
+        document.querySelector(SELECTORS.quickNavRoomList).addEventListener('click', (e) => {
             const link = e.target.closest('a[data-jump-to]');
             if (link) {
                 e.preventDefault();
@@ -1261,15 +1240,15 @@
                 const targetRoom = document.getElementById(targetId);
                 if (targetRoom) {
                     targetRoom.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    targetRoom.open = true; // Ensure the jumped-to room is open
+                    targetRoom.open = true;
                 }
-                jumpDropdown.classList.remove('show');
+                quickNavDropdown.classList.remove('show');
             }
         });
-        // ======================= END [NEW] =======================
+        // ======================= END [FIX] =======================
 
         document.querySelector(SELECTORS.menuBtn).addEventListener('click', () => {
-            jumpDropdown.classList.remove('show'); // Close jump menu if open
+            quickNavDropdown.classList.remove('show');
             menuDropdown.classList.toggle('show');
         });
 
@@ -1319,7 +1298,6 @@
             e.target.value = null;
         });
 
-        // [ADDED] Export data as JSON
         document.querySelector(SELECTORS.exportBtn).addEventListener('click', (e) => {
             e.preventDefault();
             menuDropdown.classList.remove('show');
@@ -1345,7 +1323,6 @@
             }
         });
 
-        // [ADDED] Submit data to webhook
         document.querySelector(SELECTORS.submitBtn).addEventListener('click', async (e) => {
             e.preventDefault();
             menuDropdown.classList.remove('show');
@@ -1378,7 +1355,6 @@
             }
         });
         
-        // [ADDED] Copy summary text
         document.querySelector(SELECTORS.copyTextBtn).addEventListener('click', async (e) => {
             e.preventDefault();
             menuDropdown.classList.remove('show');
@@ -1402,7 +1378,6 @@
             }
         });
         
-        // [ADDED] Clear All Items button
         document.querySelector(SELECTORS.clearItemsBtn).addEventListener('click', async (e) => {
             e.preventDefault();
             menuDropdown.classList.remove('show');
@@ -1417,7 +1392,6 @@
             }
         });
 
-        // [ADDED] Clear All Data button
         document.querySelector(SELECTORS.clearAllBtn).addEventListener('click', async (e) => {
             e.preventDefault();
             menuDropdown.classList.remove('show');
@@ -1429,12 +1403,10 @@
         });
 
         window.addEventListener('click', (e) => {
-            // ======================= [NEW] CLOSE ALL HEADER MENUS ON OUTSIDE CLICK =======================
             if (!e.target.closest('.main-header')) {
                 menuDropdown.classList.remove('show');
-                jumpDropdown.classList.remove('show');
+                quickNavDropdown.classList.remove('show');
             }
-             // ======================= END [NEW] =======================
             if (!e.target.closest('.room-options-container')) {
                 document.querySelectorAll('.room-options-menu.show').forEach(menu => {
                     menu.classList.remove('show');
