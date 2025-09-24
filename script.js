@@ -103,6 +103,12 @@
         return n.toLocaleString('th-TH', { minimumFractionDigits: fixed, maximumFractionDigits: fixed });
     };
     const debounce = (fn, ms = 150) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+
+const disableAnimationsTemporarily = (ms = 600) => {
+    document.body.classList.add('disable-animations');
+    setTimeout(() => document.body.classList.remove('disable-animations'), ms);
+};
+
     const stylePlus = s => PRICING.style_surcharge[s] ?? 0;
     const heightPlus = h => {
         const sorted = [...PRICING.height].sort((a, b) => b.threshold - a.threshold);
@@ -140,23 +146,56 @@
         }
         return bahtTxt;
     }
-    const animateAndScroll = (element) => {
-        if (!element) return;
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        element.classList.add('item-created');
-        element.addEventListener('animationend', () => element.classList.remove('item-created'), { once: true });
-    };
-    function animateAndRemove(item) {
-        if (!item) return;
-        item.parentElement.closest('.card, .items-container')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        item.classList.add('item-removing');
-        item.addEventListener('animationend', () => {
-            item.remove();
-            renumber();
-            recalcAll();
-            saveData();
-        }, { once: true });
+    const animateAndScroll = (element) =>
+
+const animateAndScroll = (element) => {
+    if (!element) return;
+    // If global animations are disabled, do a direct jump.
+    if (document.body.classList.contains('disable-animations')) {
+        element.scrollIntoView({ behavior: 'auto', block: 'center' });
+        return;
     }
+    // Smooth scroll + highlight animation with safe cleanup.
+    try {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (e) {
+        element.scrollIntoView({ behavior: 'auto', block: 'center' });
+    }
+    element.classList.add('item-created');
+    let cleaned = false;
+    const cleanup = () => {
+        if (cleaned) return;
+        cleaned = true;
+        element.classList.remove('item-created');
+    };
+    const onEnd = () => cleanup();
+    element.addEventListener('animationend', onEnd, { once: true });
+    // Fallback in case animationend does not fire.
+    setTimeout(cleanup, 900);
+};
+
+;
+    function animateAndRemove(item) {
+
+if (!item) return;
+const parentScrollTarget = item.parentElement?.closest('.card, .items-container') || document.body;
+try {
+    parentScrollTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+} catch (e) {}
+item.classList.add('item-removing');
+let removed = false;
+const doRemove = () => {
+    if (removed) return;
+    removed = true;
+    try { item.remove(); } catch (e) {}
+    try { renumber(); recalcAll(); saveData(); } catch (e) {}
+};
+const onEnd = () => doRemove();
+item.addEventListener('animationend', onEnd, { once: true });
+// Fallback timeout if animationend never fires.
+setTimeout(doRemove, 700);
+
+
 
     function showToast(message, type = 'default') {
         const container = document.querySelector(SELECTORS.toastContainer);
@@ -589,45 +628,56 @@
     }
     
     // ======================= [FIX] JUMP MENU FUNCTION UPDATED =======================
+    
 function updateQuickNavMenu() {
-    const roomListContainer = document.querySelector(SELECTORS.quickNavRoomList);
-    const quickNavBtn = document.querySelector(SELECTORS.quickNavBtn);
-    if (!roomListContainer || !quickNavBtn) return;
+        const roomListContainer = document.querySelector(SELECTORS.quickNavRoomList);
+        const quickNavBtn = document.querySelector(SELECTORS.quickNavBtn);
+        if (!roomListContainer || !quickNavBtn) return;
 
-    roomListContainer.innerHTML = '';
-    const rooms = document.querySelectorAll(SELECTORS.room);
+        roomListContainer.innerHTML = ''; // Clear previous links
+        const rooms = document.querySelectorAll(SELECTORS.room);
 
-    if (rooms.length < 2) {
-        quickNavBtn.style.display = 'none';
-        return;
-    } else {
-        quickNavBtn.style.display = 'inline-flex';
+        if (rooms.length < 2) {
+            quickNavBtn.style.display = 'none'; // Hide if not useful
+            return;
+        } else {
+            quickNavBtn.style.display = 'inline-flex';
+        }
+
+        rooms.forEach((room, index) => {
+            const roomNameInput = room.querySelector(SELECTORS.roomNameInput);
+            const roomName = (roomNameInput && roomNameInput.value.trim()) || (roomNameInput && roomNameInput.placeholder) || `ห้อง ${index + 1}`;
+            const roomId = room.id || `room-${index+1}`;
+
+            const link = document.createElement('a');
+            link.href = `#${roomId}`;
+            link.dataset.jumpTo = roomId;
+            link.className = 'quick-nav-link';
+            link.innerHTML = `<i class="ph ph-arrow-bend-right-down"></i> ${roomName}`;
+
+            // FIX: Use click handler that disables animations and performs a safe scroll.
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                disableAnimationsTemporarily(700);
+                const target = document.getElementById(roomId);
+                if (!target) return;
+                // Ensure the target <details> is open.
+                try { target.open = true; } catch (err) {}
+                // Use instant scroll to avoid smooth/animation conflict.
+                try {
+                    target.scrollIntoView({ behavior: 'auto', block: 'start' });
+                } catch (err) {
+                    target.scrollIntoView();
+                }
+                // Add a short highlight class then remove it.
+                target.classList.add('scrolling-jump');
+                setTimeout(() => target.classList.remove('scrolling-jump'), 700);
+            });
+
+            roomListContainer.appendChild(link);
+        });
     }
 
-    rooms.forEach((room, index) => {
-        const roomNameInput = room.querySelector(SELECTORS.roomNameInput);
-        const roomName = roomNameInput.value.trim() || roomNameInput.placeholder || `ห้อง ${index + 1}`;
-        const roomId = room.id;
-
-        const link = document.createElement('a');
-        link.href = `#${roomId}`;
-        link.dataset.jumpTo = roomId;
-        link.innerHTML = `<i class="ph ph-arrow-bend-right-down"></i> ${roomName}`;
-
-        // --- FIX: smooth animation bug on jump ---
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const target = document.getElementById(roomId);
-            if (target) {
-                target.classList.add('scrolling-jump');
-                target.scrollIntoView({ behavior: 'auto', block: 'start' });
-                setTimeout(() => target.classList.remove('scrolling-jump'), 600);
-            }
-        });
-
-        roomListContainer.appendChild(link);
-    });
-}
     // ======================= END [FIX] =======================
 
     function renumber() {
