@@ -629,54 +629,45 @@ setTimeout(doRemove, 700);
     
     // ======================= [FIX] JUMP MENU FUNCTION UPDATED =======================
     
-function updateQuickNavMenu() {
-        const roomListContainer = document.querySelector(SELECTORS.quickNavRoomList);
-        const quickNavBtn = document.querySelector(SELECTORS.quickNavBtn);
-        if (!roomListContainer || !quickNavBtn) return;
+	function updateQuickNavMenu() {
+		const roomListContainer = document.querySelector(SELECTORS.quickNavRoomList);
+		const quickNavBtn = document.querySelector(SELECTORS.quickNavBtn);
+		if (!roomListContainer || !quickNavBtn) return;
 
-        roomListContainer.innerHTML = ''; // Clear previous links
-        const rooms = document.querySelectorAll(SELECTORS.room);
+		roomListContainer.innerHTML = '';
+		const rooms = document.querySelectorAll(SELECTORS.room);
 
-        if (rooms.length < 2) {
-            quickNavBtn.style.display = 'none'; // Hide if not useful
-            return;
-        } else {
-            quickNavBtn.style.display = 'inline-flex';
-        }
+		if (rooms.length < 2) {
+			quickNavBtn.style.display = 'none';
+			return;
+		} else {
+			quickNavBtn.style.display = 'inline-flex';
+		}
 
-        rooms.forEach((room, index) => {
-            const roomNameInput = room.querySelector(SELECTORS.roomNameInput);
-            const roomName = (roomNameInput && roomNameInput.value.trim()) || (roomNameInput && roomNameInput.placeholder) || `ห้อง ${index + 1}`;
-            const roomId = room.id || `room-${index+1}`;
+		rooms.forEach((room, index) => {
+			const roomNameInput = room.querySelector(SELECTORS.roomNameInput);
+			const roomName = roomNameInput.value.trim() || roomNameInput.placeholder || `ห้อง ${index + 1}`;
+			const roomId = room.id;
 
-            const link = document.createElement('a');
-            link.href = `#${roomId}`;
-            link.dataset.jumpTo = roomId;
-            link.className = 'quick-nav-link';
-            link.innerHTML = `<i class="ph ph-arrow-bend-right-down"></i> ${roomName}`;
+			const link = document.createElement('a');   // <--- ประกาศครั้งเดียว
+			link.href = `#${roomId}`;
+			link.dataset.jumpTo = roomId;
+			link.innerHTML = `<i class="ph ph-arrow-bend-right-down"></i> ${roomName}`;
 
-            // FIX: Use click handler that disables animations and performs a safe scroll.
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                disableAnimationsTemporarily(700);
-                const target = document.getElementById(roomId);
-                if (!target) return;
-                // Ensure the target <details> is open.
-                try { target.open = true; } catch (err) {}
-                // Use instant scroll to avoid smooth/animation conflict.
-                try {
-                    target.scrollIntoView({ behavior: 'auto', block: 'start' });
-                } catch (err) {
-                    target.scrollIntoView();
-                }
-                // Add a short highlight class then remove it.
-                target.classList.add('scrolling-jump');
-                setTimeout(() => target.classList.remove('scrolling-jump'), 700);
-            });
+			// FIX: jump scroll ไม่ชน animation
+			link.addEventListener('click', (e) => {
+				e.preventDefault();
+				const target = document.getElementById(roomId);
+				if (target) {
+					target.classList.add('scrolling-jump');
+					target.scrollIntoView({ behavior: 'auto', block: 'start' });
+					setTimeout(() => target.classList.remove('scrolling-jump'), 600);
+				}
+			});
 
-            roomListContainer.appendChild(link);
-        });
-    }
+			roomListContainer.appendChild(link);
+		});
+	}
 
     // ======================= END [FIX] =======================
 
