@@ -86,7 +86,6 @@ i.ph { font-size: 1.25em; vertical-align: middle; }
     position: relative; /* Ensure card can be a reference for z-index */
 }
 
-/* === FIX: Added z-index to lift the active card and its menu above other cards === */
 .card.overflow-visible {
     overflow: visible;
     z-index: 10;
@@ -201,7 +200,7 @@ input[inputmode="numeric"] { text-align: left; }
 #lockBtn.is-locked { color: var(--on-danger); background-color: var(--danger); border-color: var(--danger); }
 #lockBtn:not(.is-locked) { color: var(--on-surface-variant); background-color: var(--surface); }
 #lockBtn .ph { font-size: 1.1rem; }
-#menuBtn .ph, #quickNavBtn .ph { font-size: 1.6rem; }
+#menuBtn .ph { font-size: 1.6rem; }
 .add-room-container { text-align: center; margin-top: 1rem; }
 #detailed-material-summary { display: flex; flex-direction: column; gap: 1.25rem; padding-top: 0.5rem; }
 #detailed-material-summary h4 { font-size: 1rem; font-weight: 700; color: var(--on-surface); display: flex; align-items: center; gap: 0.5rem; margin: 0; padding-bottom: 0.35rem; border-bottom: 2px solid var(--surface-container-high); }
@@ -211,8 +210,8 @@ input[inputmode="numeric"] { text-align: left; }
 .summary-note { background-color: var(--primary-container) !important; color: var(--on-primary-container) !important; font-weight: 500; width: 100%; text-align: center; }
 .empty-summary { color: var(--on-surface-variant); text-align: center; padding: 1rem; background-color: var(--surface-container); border-radius: var(--border-radius-md); }
 .summary-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: 1px solid var(--glass-border); padding: 0.75rem; z-index: 50; box-shadow: 0 -5px 30px var(--shadow-color); }
-.summary-grid { display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 1rem; max-width: 800px; margin: 0 auto; align-items: center; }
-.summary-grid .total-items { color: var(--on-surface-variant); font-size: 0.875rem; }
+.summary-grid { display: grid; grid-template-columns: auto 1fr auto; gap: 0.75rem; max-width: 800px; margin: 0 auto; align-items: center; }
+.summary-grid .total-items { color: var(--on-surface-variant); font-size: 0.875rem; text-align: center; }
 .summary-grid .grand-total { text-align: right; font-size: 1.3rem; font-weight: 700; color: var(--on-surface); }
 .grand-total span { color: var(--primary); }
 .grand-total span span::after { content: ' บาท'; font-size: 0.9rem; font-weight: normal; }
@@ -242,21 +241,45 @@ input[inputmode="numeric"] { text-align: left; }
 .menu-dropdown hr { border: none; border-top: 1px solid var(--outline); margin: 0.25rem 0; }
 .hidden { display: none !important; }
 
-/* ======================= [FIX] ADDED STYLES FOR QUICK NAV ACTIONS ======================= */
+/* === NEW STYLES FOR FOOTER QUICKNAV === */
+.footer-actions { position: relative; } /* Positioning context for the pop-up menu */
+.footer-actions #quickNavBtn {
+    background-color: var(--primary-container);
+    color: var(--on-primary-container);
+    border-radius: var(--border-radius-xl);
+    width: auto;
+    height: 44px;
+    padding: 0 1rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+.footer-actions #quickNavBtn:hover {
+    filter: brightness(0.97);
+}
+.summary-footer .menu-dropdown {
+    bottom: calc(100% + 8px); /* Position above the footer */
+    top: auto; /* Unset original top property */
+    left: 0;
+    right: auto;
+    transform: translateY(10px); /* Animate from bottom */
+}
+.summary-footer .menu-dropdown.show {
+    transform: translateY(0);
+}
+
 .quick-nav-actions {
     display: flex;
     gap: 0.5rem;
     padding: 0.75rem 1.25rem;
 }
 .quick-nav-actions .btn-chip {
-    flex-grow: 1; /* Make buttons fill the space */
+    flex-grow: 1;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
 }
-/* This will now apply to the room list links inside the quick nav menu */
 #quickNavDropdown #quickNavRoomList a {
     padding: 0.75rem 1.25rem;
     text-decoration: none;
@@ -268,9 +291,8 @@ input[inputmode="numeric"] { text-align: left; }
 #quickNavDropdown #quickNavRoomList a:hover {
     background-color: var(--surface-container);
 }
-/* ======================= END [FIX] ======================= */
 
-/* --- [NEW] Radio Chip & Card Styles --- */
+/* --- Radio Chip & Card Styles --- */
 .radio-group {
     display: flex;
     flex-wrap: wrap;
@@ -316,7 +338,7 @@ input[inputmode="numeric"] { text-align: left; }
     display: none;
 }
 .radio-card-group label {
-    display: block; /* The label is the full clickable area */
+    display: block;
 }
 .radio-card-group .radio-card-content {
     display: block;
@@ -344,8 +366,6 @@ input[inputmode="numeric"] { text-align: left; }
     color: var(--on-surface-variant);
     font-size: 0.875rem;
 }
-/* --- End of New Radio Styles --- */
-
 
 @keyframes highlight-and-fade-in { 0% { opacity: 0; transform: translateY(15px); background-color: transparent; } 50% { opacity: 1; background-color: var(--primary-container); } 100% { opacity: 1; transform: translateY(0); background-color: transparent; } }
 .item-created { animation: highlight-and-fade-in 1.2s ease-out forwards; }
