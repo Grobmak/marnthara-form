@@ -455,4 +455,7 @@ input[inputmode="numeric"] { text-align: left; }
         -webkit-print-color-adjust: exact !important;
         color-adjust: exact !important;
     }
+}.scrolling-jump {
+    outline: 2px dashed var(--primary);
+    transition: outline 0.6s ease;
 }
