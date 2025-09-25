@@ -43,11 +43,11 @@
     --shadow-lg: 0 10px 25px var(--shadow-color), 0 5px 30px var(--glow-color);
     --glass-bg: rgba(248, 249, 252, 0.95);
     --glass-border: rgba(255, 255, 255, 0.5);
-    --curtain-color: #eabed1;
+    --curtain-color: #EABED1;
     --curtain-container-color: hsl(220, 100%, 98%);
-    --deco-color: #7BAA7F;
+    --deco-color: #E1BEA0;
     --deco-container-color: hsl(174, 80%, 98%);
-    --wallpaper-color: #F26B5C;
+    --wallpaper-color: #9DCEBD;
     --wallpaper-container-color: hsl(15, 50%, 98%);
 }
 
