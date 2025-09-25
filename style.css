@@ -188,7 +188,7 @@ input[inputmode="numeric"] { text-align: left; }
 .btn-icon-small .ph { font-size: 1rem; }
 .btn-chip { background-color: var(--surface); color: var(--on-surface-variant); padding: 0.5rem 1rem; border-radius: var(--border-radius-sm); border: 1px solid var(--outline); font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all var(--transition-speed); }
 .btn-chip:hover { background-color: var(--surface-container-high); border-color: var(--outline-variant); }
-.btn-chip.btn-curtain { color: var(--on-primary-container); }
+.btn-chip.btn-curtain { color: var(--curtain-color); }
 .btn-chip.btn-curtain:hover { background-color: var(--primary-container); border-color: var(--primary); }
 .btn-chip.btn-deco { color: var(--deco-color); }
 .btn-chip.btn-deco:hover { background-color: var(--deco-container-color); border-color: var(--deco-color); }
