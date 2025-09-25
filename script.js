@@ -54,11 +54,11 @@
         }
     };
 
-    // ======================= [FIX] UPDATED SELECTORS TO MATCH NEW HTML =======================
+    // ======================= [MODIFIED] SELECTORS UPDATED FOR NEW LAYOUT =======================
     const SELECTORS = {
         orderForm: '#orderForm', roomsContainer: '#rooms', roomTpl: '#roomTpl', setTpl: '#setTpl', decoTpl: '#decoTpl', wallpaperTpl: '#wallpaperTpl', wallTpl: '#wallTpl',
         payloadInput: '#payload', clearAllBtn: '#clearAllBtn',
-        lockBtn: '#lockBtn', addRoomFooterBtn: '#addRoomFooterBtn', lockText: '#lockText',
+        lockBtn: '#lockBtn', addRoomFooterBtn: '#addRoomFooterBtn',
         grandTotal: '#grandTotal', setCount: '#setCount',
         detailedSummaryContainer: '#detailed-material-summary',
         modal: '#confirmationModal', modalTitle: '#modalTitle', modalBody: '#modalBody', modalConfirm: '#modalConfirm', modalCancel: '#modalCancel',
@@ -76,14 +76,14 @@
         exportPdfBtn: '#exportPdfBtn',
         exportOptionsModal: '#exportOptionsModal', exportOptionsConfirm: '#exportOptionsConfirm', exportOptionsCancel: '#exportOptionsCancel',
         printableContent: '#printable-content',
-        // --- Updated Quick Navigation Selectors ---
+        // --- Updated Navigation Selectors ---
         quickNavBtn: '#quickNavBtn',
         quickNavDropdown: '#quickNavDropdown',
         quickNavRoomList: '#quickNavRoomList',
-        expandAllRoomsBtn: '#expandAllRoomsBtn',
-        collapseAllRoomsBtn: '#collapseAllRoomsBtn',
+        toggleAllRoomsBtn: '#toggleAllRoomsBtn', // New smart toggle button
+        allDetailsCards: '.card[id="customerDetailsCard"], .room-card' // Selector for all collapsible cards
     };
-    // ======================= END [FIX] =======================
+    // ======================= END [MODIFIED] =======================
 
     let roomCount = 0;
     let isLocked = false;
@@ -103,6 +103,12 @@
         return n.toLocaleString('th-TH', { minimumFractionDigits: fixed, maximumFractionDigits: fixed });
     };
     const debounce = (fn, ms = 150) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+
+    const disableAnimationsTemporarily = (ms = 600) => {
+        document.body.classList.add('disable-animations');
+        setTimeout(() => document.body.classList.remove('disable-animations'), ms);
+    };
+
     const stylePlus = s => PRICING.style_surcharge[s] ?? 0;
     const heightPlus = h => {
         const sorted = [...PRICING.height].sort((a, b) => b.threshold - a.threshold);
@@ -142,22 +148,49 @@
     }
     const animateAndScroll = (element) => {
         if (!element) return;
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // If global animations are disabled, do a direct jump.
+        if (document.body.classList.contains('disable-animations')) {
+            element.scrollIntoView({ behavior: 'auto', block: 'center' });
+            return;
+        }
+        // Smooth scroll + highlight animation with safe cleanup.
+        try {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch (e) {
+            element.scrollIntoView({ behavior: 'auto', block: 'center' });
+        }
         element.classList.add('item-created');
-        element.addEventListener('animationend', () => element.classList.remove('item-created'), { once: true });
+        let cleaned = false;
+        const cleanup = () => {
+            if (cleaned) return;
+            cleaned = true;
+            element.classList.remove('item-created');
+        };
+        const onEnd = () => cleanup();
+        element.addEventListener('animationend', onEnd, { once: true });
+        // Fallback in case animationend does not fire.
+        setTimeout(cleanup, 900);
     };
+
     function animateAndRemove(item) {
         if (!item) return;
-        item.parentElement.closest('.card, .items-container')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        const parentScrollTarget = item.parentElement?.closest('.card, .items-container') || document.body;
+        try {
+            parentScrollTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } catch (e) {}
         item.classList.add('item-removing');
-        item.addEventListener('animationend', () => {
-            item.remove();
-            renumber();
-            recalcAll();
-            saveData();
-        }, { once: true });
+        let removed = false;
+        const doRemove = () => {
+            if (removed) return;
+            removed = true;
+            try { item.remove(); } catch (e) {}
+            try { renumber(); recalcAll(); saveData(); } catch (e) {}
+        };
+        const onEnd = () => doRemove();
+        item.addEventListener('animationend', onEnd, { once: true });
+        // Fallback timeout if animationend never fires.
+        setTimeout(doRemove, 700);
     }
-
     function showToast(message, type = 'default') {
         const container = document.querySelector(SELECTORS.toastContainer);
         if (!container) return;
@@ -235,6 +268,7 @@
             showToast('เพิ่มห้องใหม่แล้ว', 'success');
             animateAndScroll(created);
         }
+        updateToggleAllButtonState(); // Update button state after adding a room
     }
 
     function populatePriceOptions(selectEl, prices) {
@@ -585,10 +619,33 @@
         roomCount = 0;
         if (payload.rooms.length > 0) payload.rooms.forEach(addRoom);
         else addRoom();
+        
+        // New: Collapse all cards after loading
+        setTimeout(() => {
+            document.querySelectorAll(SELECTORS.allDetailsCards).forEach(card => card.open = false);
+            updateToggleAllButtonState();
+        }, 100);
+
         showToast("โหลดข้อมูลสำเร็จ", "success");
     }
     
-    // ======================= [FIX] JUMP MENU FUNCTION UPDATED =======================
+    // ======================= [MODIFIED] INTELLIGENT UI/UX FUNCTIONS =======================
+    
+    function jumpToRoom(roomId) {
+        const target = document.getElementById(roomId);
+        if (target) {
+            // Use non-smooth scroll to avoid conflicts with other element animations
+            try {
+                target.scrollIntoView({ behavior: 'auto', block: 'start' });
+            } catch (e) {
+                target.scrollIntoView(); // fallback
+            }
+            // Visual feedback without affecting layout
+            target.classList.add('scrolling-jump');
+            setTimeout(() => target.classList.remove('scrolling-jump'), 600);
+        }
+    }
+
     function updateQuickNavMenu() {
         const roomListContainer = document.querySelector(SELECTORS.quickNavRoomList);
         const quickNavBtn = document.querySelector(SELECTORS.quickNavBtn);
@@ -597,8 +654,8 @@
         roomListContainer.innerHTML = ''; // Clear previous links
         const rooms = document.querySelectorAll(SELECTORS.room);
 
-        if (rooms.length < 2) {
-            quickNavBtn.style.display = 'none'; // Hide if not useful
+        if (rooms.length === 0) { // Hide if no rooms
+            quickNavBtn.style.display = 'none';
             return;
         } else {
             quickNavBtn.style.display = 'inline-flex';
@@ -606,17 +663,51 @@
 
         rooms.forEach((room, index) => {
             const roomNameInput = room.querySelector(SELECTORS.roomNameInput);
-            const roomName = roomNameInput.value.trim() || roomNameInput.placeholder || `ห้อง ${index + 1}`;
-            const roomId = room.id;
+            const roomName = (roomNameInput && roomNameInput.value.trim()) ? roomNameInput.value.trim() : (roomNameInput && roomNameInput.placeholder) ? roomNameInput.placeholder : `ห้อง ${index + 1}`;
+            const roomId = room.id || `room-${index+1}`;
 
             const link = document.createElement('a');
             link.href = `#${roomId}`;
             link.dataset.jumpTo = roomId;
             link.innerHTML = `<i class="ph ph-arrow-bend-right-down"></i> ${roomName}`;
+
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                jumpToRoom(roomId);
+            });
+
             roomListContainer.appendChild(link);
         });
+        updateToggleAllButtonState();
     }
-    // ======================= END [FIX] =======================
+
+    function updateToggleAllButtonState() {
+        const btn = document.querySelector(SELECTORS.toggleAllRoomsBtn);
+        if (!btn) return;
+
+        const allDetails = document.querySelectorAll(SELECTORS.allDetailsCards);
+        const anyOpen = Array.from(allDetails).some(d => d.open);
+
+        if (anyOpen) {
+            btn.innerHTML = `<i class="ph ph-columns"></i> <span>ย่อทั้งหมด</span>`;
+        } else {
+            btn.innerHTML = `<i class="ph ph-rows"></i> <span>ขยายทั้งหมด</span>`;
+        }
+    }
+
+    function handleToggleAllRooms() {
+        const allDetails = document.querySelectorAll(SELECTORS.allDetailsCards);
+        // If even one is open, the action is to close all. Otherwise, open all.
+        const shouldOpen = !Array.from(allDetails).some(d => d.open);
+        
+        allDetails.forEach(detail => {
+            detail.open = shouldOpen;
+        });
+        
+        updateToggleAllButtonState();
+    }
+    // ======================= END [MODIFIED] =======================
+
 
     function renumber() {
         document.querySelectorAll(SELECTORS.room).forEach((room, rIdx) => {
@@ -628,9 +719,7 @@
                 if (titleEl) titleEl.textContent = `${iIdx + 1}/${totalItemsInRoom}`;
             });
         });
-        // ======================= [FIX] CALL UPDATED QUICK NAV FUNCTION =======================
         updateQuickNavMenu();
-        // ======================= END [FIX] =======================
     }
 
     function toggleSetFabricUI(setEl) {
@@ -647,8 +736,6 @@
         lockBtn.classList.toggle('is-locked', isLocked);
         lockBtn.title = isLocked ? 'ปลดล็อคฟอร์ม' : 'ล็อคฟอร์ม';
         lockBtn.querySelector('.lock-icon').className = isLocked ? 'ph-bold ph-lock-key lock-icon' : 'ph-bold ph-lock-key-open lock-icon';
-        const lockTextEl = document.querySelector(SELECTORS.lockText);
-        if (lockTextEl) lockTextEl.textContent = isLocked ? 'ปลดล็อค' : 'ล็อก';
         document.querySelectorAll('input, select, textarea, button').forEach(el => {
             const isExempt = el.closest('.summary-footer') || el.closest('.main-header') || el.closest('.modal-wrapper') || el.closest('.room-options-menu');
             if (!isExempt) el.disabled = isLocked;
@@ -1123,9 +1210,7 @@
         const orderForm = document.querySelector(SELECTORS.orderForm);
         const fileImporter = document.querySelector(SELECTORS.fileImporter);
         const menuDropdown = document.querySelector(SELECTORS.menuDropdown);
-        // ======================= [FIX] GET QUICK NAV MENU ELEMENTS =======================
         const quickNavDropdown = document.querySelector(SELECTORS.quickNavDropdown);
-        // ======================= END [FIX] =======================
 
         const debouncedRecalcAndSave = debounce(() => { recalcAll(); saveData(); }, 150);
 
@@ -1213,20 +1298,21 @@
             }
         });
 
-        // --- HEADER & MENU ACTIONS ---
+        // Listen for summary clicks to update toggle button state
+        document.body.addEventListener('click', (e) => {
+            if (e.target.closest('summary')) {
+                // Use a short timeout to allow the 'open' attribute to update
+                setTimeout(updateToggleAllButtonState, 50);
+            }
+        });
+
+        // --- HEADER & FOOTER ACTIONS (MODIFIED) ---
         document.querySelector(SELECTORS.addRoomFooterBtn).addEventListener('click', () => addRoom());
         document.querySelector(SELECTORS.lockBtn).addEventListener('click', toggleLock);
 
-        // ======================= [FIX] UPDATED EVENT LISTENERS FOR NEW BUTTONS =======================
-        const toggleRooms = (shouldOpen) => {
-            document.querySelectorAll(`${SELECTORS.room}`).forEach(room => {
-                room.open = shouldOpen;
-            });
-        };
+        // New smart toggle button listener
+        document.querySelector(SELECTORS.toggleAllRoomsBtn).addEventListener('click', handleToggleAllRooms);
         
-        document.querySelector(SELECTORS.expandAllRoomsBtn).addEventListener('click', () => toggleRooms(true));
-        document.querySelector(SELECTORS.collapseAllRoomsBtn).addEventListener('click', () => toggleRooms(false));
-
         document.querySelector(SELECTORS.quickNavBtn).addEventListener('click', () => {
             menuDropdown.classList.remove('show');
             quickNavDropdown.classList.toggle('show');
@@ -1239,13 +1325,13 @@
                 const targetId = link.dataset.jumpTo;
                 const targetRoom = document.getElementById(targetId);
                 if (targetRoom) {
+                    targetRoom.open = true; // Ensure room is open when jumping to it
                     targetRoom.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    targetRoom.open = true;
+                    updateToggleAllButtonState();
                 }
                 quickNavDropdown.classList.remove('show');
             }
         });
-        // ======================= END [FIX] =======================
 
         document.querySelector(SELECTORS.menuBtn).addEventListener('click', () => {
             quickNavDropdown.classList.remove('show');
@@ -1405,6 +1491,8 @@
         window.addEventListener('click', (e) => {
             if (!e.target.closest('.main-header')) {
                 menuDropdown.classList.remove('show');
+            }
+             if (!e.target.closest('.footer-actions')) { // Close footer dropdown too
                 quickNavDropdown.classList.remove('show');
             }
             if (!e.target.closest('.room-options-container')) {
@@ -1422,6 +1510,8 @@
                 loadPayload(JSON.parse(storedData));
             } else {
                 addRoom();
+                // New: Collapse all cards on fresh start
+                document.querySelectorAll(SELECTORS.allDetailsCards).forEach(card => card.open = false);
             }
         } catch(err) {
             console.error("Failed to load from localStorage:", err);
@@ -1430,6 +1520,7 @@
         }
         recalcAll();
         updateLockState();
+        updateToggleAllButtonState(); // Set initial button state
     }
 
     document.addEventListener('DOMContentLoaded', init);

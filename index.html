@@ -17,25 +17,6 @@
     <header class="main-header">
         <h1>Marnthara</h1>
         <div class="header-actions">
-            <button id="lockBtn" class="btn" title="ล็อค/ปลดล็อคฟอร์ม">
-                <i class="ph-bold ph-lock-key-open lock-icon"></i>
-                <span id="lockText">ล็อก</span>
-            </button>
-            
-            <div class="menu-container">
-                <button id="quickNavBtn" class="header-btn" title="ข้ามไปยังห้อง 🚀">
-                    <i class="ph-bold ph-list-dashes"></i>
-                </button>
-                <div id="quickNavDropdown" class="menu-dropdown">
-                    <div class="quick-nav-actions">
-                        <button id="expandAllRoomsBtn" type="button" class="btn-chip"><i class="ph ph-rows"></i> ขยายทั้งหมด</button>
-                        <button id="collapseAllRoomsBtn" type="button" class="btn-chip"><i class="ph ph-columns"></i> ย่อทั้งหมด</button>
-                    </div>
-                    <hr>
-                    <div id="quickNavRoomList">
-                        </div>
-                </div>
-            </div>
             <div class="menu-container">
                 <button id="menuBtn" class="header-btn" title="Menu">
                     <i class="ph-bold ph-dots-three-outline"></i>
@@ -59,7 +40,7 @@
         <form id="orderForm" novalidate>
             <input type="hidden" id="payload" name="payload">
 
-            <details class="card" open>
+            <details class="card" id="customerDetailsCard">
                 <summary>
                     <h2>
                         <i class="ph-bold ph-user-circle"></i>
@@ -111,17 +92,42 @@
 
     <footer class="summary-footer">
         <div class="summary-grid">
-            <div class="total-items">
-                <medium>รวม <span id="setCount">0</span> รายการ</medium>
+            <div class="footer-actions">
+                <button id="lockBtn" class="btn-icon" title="ล็อค/ปลดล็อคฟอร์ม">
+                    <i class="ph-bold ph-lock-key-open lock-icon"></i>
+                </button>
+                
+                <div class="menu-container">
+                    <button id="quickNavBtn" class="header-btn" title="ข้ามไปยังห้อง 🚀">
+                        <i class="ph-bold ph-list-dashes"></i>
+                        <span>ไปยังห้อง</span>
+                    </button>
+                    <div id="quickNavDropdown" class="menu-dropdown">
+                        <div class="quick-nav-actions">
+                            <button id="toggleAllRoomsBtn" type="button" class="btn-chip">
+                                <i class="ph ph-rows"></i>
+                                <span>ขยายทั้งหมด</span>
+                            </button>
+                        </div>
+                        <hr>
+                        <div id="quickNavRoomList">
+                            </div>
+                    </div>
+                </div>
             </div>
-            <div class="grand-total">
-                <span><span id="grandTotal">0</span></span>
+            
+            <div class="footer-totals">
+                <div class="total-items">
+                    รวม <span id="setCount">0</span> รายการ
+                </div>
+                <div class="grand-total">
+                    <span><span id="grandTotal">0</span></span>
+                </div>
             </div>
         </div>
     </footer>
     
     <div id="printable-content" aria-hidden="true"></div>
-
 
     <div id="confirmationModal" class="modal-wrapper">
         <div class="modal-content">
@@ -211,7 +217,7 @@
 
 
     <template id="roomTpl">
-        <details class="card room-card" data-room open>
+        <details class="card room-card" data-room>
             <summary>
                 <div class="form-group">
                     <input type="text" name="room_name" class="room-name-input" placeholder="ห้อง 01">
@@ -242,7 +248,7 @@
             </footer>
         </details>
     </template>
-
+    
     <template id="setTpl">
         <div class="item-card set-item" data-set>
             <div class="item-header">
