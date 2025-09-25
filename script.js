@@ -669,7 +669,7 @@
             const link = document.createElement('a');
             link.href = `#${roomId}`;
             link.dataset.jumpTo = roomId;
-            link.innerHTML = `<i class="ph ph-arrow-bend-right-down"></i> ${roomName}`;
+            link.innerHTML = `<i class="ph ph-arrow-bend-right-up"></i> ${roomName}`;
 
             link.addEventListener('click', (e) => {
                 e.preventDefault();
