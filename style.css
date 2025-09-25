@@ -41,7 +41,7 @@
     --shadow-sm: 0 2px 4px var(--shadow-color);
     --shadow-md: 0 4px 15px var(--shadow-color), 0 2px 20px var(--glow-color);
     --shadow-lg: 0 10px 25px var(--shadow-color), 0 5px 30px var(--glow-color);
-    --glass-bg: rgba(248, 249, 252, 0.75);
+    --glass-bg: rgba(248, 249, 252, 0.95);
     --glass-border: rgba(255, 255, 255, 0.5);
     --curtain-color: var(--primary);
     --curtain-container-color: hsl(220, 100%, 98%);
