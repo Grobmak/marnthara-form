@@ -140,7 +140,7 @@ i.ph { font-size: 1.25em; vertical-align: middle; }
 .item-title > span { font-weight: 700; }
 .deco-type-display { font-weight: normal; }
 .set-item { border-left-color: var(--curtain-color); border-top-color: var(--curtain-color); }
-.set-item .item-title { color: var(--on-primary-container); }
+.set-item .item-title { color: var(--curtain-color); }
 .set-item .item-header { background-color: var(--curtain-container-color); border-bottom: 1px solid hsl(220, 100%, 95%); }
 .deco-item { border-left-color: var(--deco-color); border-top-color: var(--deco-color); }
 .deco-item .item-title, .deco-type-display { color: var(--deco-color); }
