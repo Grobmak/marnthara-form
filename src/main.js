@@ -1,4 +1,5 @@
 // --- MAIN APPLICATION ENTRY POINT ---
+import './style.css'; // <-- ADD THIS LINE TO FIX THE BUILD ISSUE
 import { SELECTORS, STORAGE_KEY, WEBHOOK_URL, SHOP_CONFIG, PRICING } from './lib/config.js';
 import { saveData, buildPayload } from './lib/storage.js';
 import { generateSummaryText, generateQuotationHtml, generateOverviewHtml } from './lib/documentGenerator.js';
@@ -22,12 +23,7 @@ import {
     handleFormClick,
     handleFormBlur
 } from './lib/ui.js';
-import './style.css';                 // << เพิ่มบรรทัดนี้
-import { init } from './lib/ui.js';   // ไม่เปลี่ยน
-import { throttle } from './lib/utils.js'; // ไม่เปลี่ยน
-
-init();
-
+import { throttle } from './lib/utils.js';
 
 /**
  * Populates the price selection dropdowns within the set template.
