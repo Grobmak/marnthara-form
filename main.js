@@ -105,6 +105,7 @@ function init() {
     });
 
     document.querySelector('#addRoomQuickNavBtn').addEventListener('click', () => {
+		addRoom();
         quickNavDropdown.classList.remove('show');
     });
 
