@@ -22,7 +22,12 @@ import {
     handleFormClick,
     handleFormBlur
 } from './lib/ui.js';
-import { throttle } from './lib/utils.js';
+import './style.css';                 // << เพิ่มบรรทัดนี้
+import { init } from './lib/ui.js';   // ไม่เปลี่ยน
+import { throttle } from './lib/utils.js'; // ไม่เปลี่ยน
+
+init();
+
 
 /**
  * Populates the price selection dropdowns within the set template.
