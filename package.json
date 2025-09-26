@@ -1,0 +1,16 @@
+{
+  "name": "marnthara",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 5173",
+    "test:e2e": "node e2e/run_smoke.js"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "puppeteer": "^21.0.0",
+    "serve-handler": "^6.1.3"
+  }
+}

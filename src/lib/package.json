@@ -1,0 +1,14 @@
+{
+  "name": "marnthara-e2e-smoke",
+  "version": "1.0.0",
+  "description": "E2E smoke tests for Marnthara project",
+  "main": "e2e/run_smoke.js",
+  "scripts": {
+    "start": "node dev-server.js",
+    "test:e2e": "node e2e/run_smoke.js"
+  },
+  "devDependencies": {
+    "puppeteer": "^21.0.0",
+    "serve-handler": "^6.1.3"
+  }
+}
