@@ -6,8 +6,8 @@
     <title>Marnthara - Tool</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script type="module" crossorigin src="./assets/index-DJzFNzUB.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-C6tmDfGs.css">
+  <script type="module" crossorigin src="./assets/index-C0Z6YuHF.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-033m3Tvg.css">
 </head>
 <body>
 
@@ -195,10 +195,14 @@
             </div>
 
             <div class="form-group" style="margin-top: 1.5rem;">
-                <label for="pageBreakBuffer" style="padding-left: 0;">พื้นที่สำรองท้ายหน้า: <span id="pageBreakBufferValue" class="range-value-display">3</span> บรรทัด</label>
-                <input type="range" id="pageBreakBuffer" name="page_break_buffer" min="0" max="10" step="1" value="3">
+                <label for="pageBreakBuffer" style="padding-left: 0;">พื้นที่สำรองท้ายหน้า (บรรทัด)</label>
+                 <div class="range-slider-group">
+                    <input type="range" id="pageBreakBuffer" name="page_break_buffer" min="0" max="10" step="1" value="3">
+                    <span id="pageBreakBufferValue" class="range-slider-value">3</span>
+                </div>
                 <small style="text-align: center; margin-top: 4px;">ป้องกันการเหลือรายการเดียวในหน้าสุดท้าย (แนะนำ 2-4)</small>
             </div>
+
             <div class="form-group" style="margin-top: 1.5rem;">
                 <label style="padding-left: 0;">วิธีสร้างเอกสาร</label>
                 <select id="exportMethod" class="select-box">
@@ -311,13 +315,25 @@
                         <option value="น้ำตาล">น้ำตาล</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>รหัสผ้าทึบ</label>
-                    <input type="text" name="fabric_code" placeholder="-">
+                <div class="form-group-with-favorites">
+                    <div class="form-group">
+                        <label>รหัสผ้าทึบ</label>
+                        <input type="text" name="fabric_code" placeholder="-" data-favorite-type="fabric">
+                         <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="fabric" title="เพิ่ม/ลบ รหัสโปรด">
+                            <i class="ph ph-star"></i>
+                        </button>
+                    </div>
+                    <div class="favorite-chips-container"></div>
                 </div>
-                <div class="form-group hidden" data-sheer-code-wrap>
-                    <label>รหัสผ้าโปร่ง</label>
-                    <input type="text" name="sheer_fabric_code" placeholder="-">
+                <div class="form-group-with-favorites hidden" data-sheer-code-wrap>
+                     <div class="form-group">
+                        <label>รหัสผ้าโปร่ง</label>
+                        <input type="text" name="sheer_fabric_code" placeholder="-" data-favorite-type="sheer">
+                         <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="sheer" title="เพิ่ม/ลบ รหัสโปรด">
+                            <i class="ph ph-star"></i>
+                        </button>
+                    </div>
+                    <div class="favorite-chips-container"></div>
                 </div>
                 <div class="form-group full-width-item">
                     <label>หมายเหตุ</label>
@@ -366,9 +382,15 @@
                     <label>ราคา/ตร.หลา</label>
                     <input type="text" inputmode="numeric" name="deco_price_sqyd" placeholder="0">
                 </div>
-                <div class="form-group full-width-item">
-                    <label>รหัสสินค้า</label>
-                    <input type="text" name="deco_code" placeholder="-">
+                <div class="form-group-with-favorites full-width-item">
+                    <div class="form-group">
+                        <label>รหัสสินค้า</label>
+                        <input type="text" name="deco_code" placeholder="-" data-favorite-type="deco">
+                        <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="deco" title="เพิ่ม/ลบ รหัสโปรด">
+                            <i class="ph ph-star"></i>
+                        </button>
+                    </div>
+                    <div class="favorite-chips-container"></div>
                 </div>
                 <div class="form-group full-width-item">
                     <label>หมายเหตุ</label>
@@ -403,9 +425,15 @@
                     <label>ค่าช่าง/ม้วน</label>
                     <input type="text" inputmode="numeric" name="wallpaper_install_cost" placeholder="300" value="300">
                 </div>
-                <div class="form-group">
-                    <label>รหัสวอลล์เปเปอร์</label>
-                    <input type="text" name="wallpaper_code" placeholder="-">
+                 <div class="form-group-with-favorites">
+                     <div class="form-group">
+                        <label>รหัสวอลล์เปเปอร์</label>
+                        <input type="text" name="wallpaper_code" placeholder="-" data-favorite-type="wallpaper">
+                         <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="wallpaper" title="เพิ่ม/ลบ รหัสโปรด">
+                            <i class="ph ph-star"></i>
+                        </button>
+                    </div>
+                    <div class="favorite-chips-container"></div>
                 </div>
                 <div class="form-group full-width-item">
                     <label>หมายเหตุ</label>
