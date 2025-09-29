@@ -6,8 +6,8 @@
     <title>Marnthara - Tool</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script type="module" crossorigin src="./assets/index-BNmyndM4.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-btz7h3Eo.css">
+  <script type="module" crossorigin src="./assets/index-DMEE9r2c.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CSPRK5oN.css">
 </head>
 <body>
 
@@ -26,14 +26,15 @@
                 </button>
                 <div id="menuDropdown" class="menu-dropdown">
                     <a href="#" id="overviewBtn"><i class="ph ph-presentation-chart"></i> สรุปภาพรวม</a>
+                    <hr>
                     <a href="#" id="copyTextBtn"><i class="ph ph-copy-simple"></i> คัดลอกสรุป (LINE)</a>
                     <a href="#" id="exportPdfBtn"><i class="ph ph-file-pdf"></i> ใบเสนอราคา (PDF)</a>
                     <a href="#" id="submitBtn"><i class="ph ph-paper-plane-tilt"></i> ส่งข้อมูล</a>
                     <hr>
+                    <a href="#" id="themeToggleBtn"><i class="ph ph-moon"></i> <span>สลับธีม</span></a>
+                    <hr>
                     <a href="#" id="importBtn"><i class="ph ph-download-simple"></i> Import (.json)</a>
                     <a href="#" id="exportBtn"><i class="ph ph-upload-simple"></i> Export (.json)</a>
-                    <hr>
-                    <a href="#" id="themeToggleBtn"><i class="ph ph-moon"></i> <span>สลับธีม</span></a>
                     <hr>
                     <a href="#" id="clearItemsBtn" class="danger"><i class="ph ph-wind"></i> ล้างทุกรายการ</a>
                     <a href="#" id="clearAllBtn" class="danger"><i class="ph ph-trash"></i> ลบข้อมูลทั้งหมด</a>
@@ -223,16 +224,6 @@
         </div>
     </div>
 
-    <div id="favoritesManagerModal" class="modal-wrapper">
-        <div class="modal-content" style="max-width: 500px;">
-            <h3 id="favManagerTitle">แก้ไขรายการโปรด</h3>
-            <div id="favManagerBody"></div>
-            <div class="modal-actions">
-                <button id="favManagerCancel" class="btn btn-secondary">เสร็จสิ้น</button>
-            </div>
-        </div>
-    </div>
-
 
     <template id="roomTpl">
         <details class="card room-card" data-room>
@@ -335,9 +326,6 @@
                          <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="fabric" title="เพิ่ม/ลบ รหัสโปรด">
                             <i class="ph ph-star"></i>
                         </button>
-                        <button type="button" class="btn-icon btn-manage-favs" data-act="manage-favorites" data-type="fabric" title="แก้ไขรายการโปรด">
-                            <i class="ph ph-list-bullets"></i>
-                        </button>
                     </div>
                     <div class="favorite-chips-container"></div>
                 </div>
@@ -347,9 +335,6 @@
                         <input type="text" name="sheer_fabric_code" placeholder="-" data-favorite-type="sheer">
                          <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="sheer" title="เพิ่ม/ลบ รหัสโปรด">
                             <i class="ph ph-star"></i>
-                        </button>
-                        <button type="button" class="btn-icon btn-manage-favs" data-act="manage-favorites" data-type="sheer" title="แก้ไขรายการโปรด">
-                            <i class="ph ph-list-bullets"></i>
                         </button>
                     </div>
                     <div class="favorite-chips-container"></div>
@@ -408,9 +393,6 @@
                         <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="deco" title="เพิ่ม/ลบ รหัสโปรด">
                             <i class="ph ph-star"></i>
                         </button>
-                        <button type="button" class="btn-icon btn-manage-favs" data-act="manage-favorites" data-type="deco" title="แก้ไขรายการโปรด">
-                            <i class="ph ph-list-bullets"></i>
-                        </button>
                     </div>
                     <div class="favorite-chips-container"></div>
                 </div>
@@ -453,9 +435,6 @@
                         <input type="text" name="wallpaper_code" placeholder="-" data-favorite-type="wallpaper">
                          <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="wallpaper" title="เพิ่ม/ลบ รหัสโปรด">
                             <i class="ph ph-star"></i>
-                        </button>
-                        <button type="button" class="btn-icon btn-manage-favs" data-act="manage-favorites" data-type="wallpaper" title="แก้ไขรายการโปรด">
-                            <i class="ph ph-list-bullets"></i>
                         </button>
                     </div>
                     <div class="favorite-chips-container"></div>
