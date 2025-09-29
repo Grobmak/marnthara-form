@@ -6,8 +6,8 @@
     <title>Marnthara - Tool</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script type="module" crossorigin src="./assets/index-C0Z6YuHF.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-033m3Tvg.css">
+  <script type="module" crossorigin src="./assets/index-Ch3ii8t2.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CSPRK5oN.css">
 </head>
 <body>
 
@@ -15,7 +15,9 @@
     <input type="file" id="fileImporter" accept=".json" class="hidden">
 
     <header class="main-header">
-        <h1>Marnthara</h1>
+        <div class="header-title-group">
+            <h1>Marnthara</h1>
+        </div>
         <div class="header-actions">
             <div class="menu-container">
                 <button id="menuBtn" class="btn btn-secondary unlockable" title="Menu">
@@ -28,6 +30,8 @@
                     <a href="#" id="copyTextBtn"><i class="ph ph-copy-simple"></i> คัดลอกสรุป (LINE)</a>
                     <a href="#" id="exportPdfBtn"><i class="ph ph-file-pdf"></i> ใบเสนอราคา (PDF)</a>
                     <a href="#" id="submitBtn"><i class="ph ph-paper-plane-tilt"></i> ส่งข้อมูล</a>
+                    <hr>
+                    <a href="#" id="themeToggleBtn"><i class="ph ph-moon"></i> <span>สลับธีม</span></a>
                     <hr>
                     <a href="#" id="importBtn"><i class="ph ph-download-simple"></i> Import (.json)</a>
                     <a href="#" id="exportBtn"><i class="ph ph-upload-simple"></i> Export (.json)</a>
@@ -80,9 +84,9 @@
                 </button>
                 
                 <div class="menu-container">
-                    <button id="quickNavBtn" class="header-btn unlockable" title="ข้ามไปยังห้อง">
+                    <button id="quickNavBtn" class="header-btn unlockable" title="ไปยังห้อง">
                         <i class="ph-bold ph-list-dashes"></i>
-                        <span>ไปยังห้อง</span>
+                        <span id="quickNavBtnText">ไปยังห้อง</span>
                     </button>
                     <div id="quickNavDropdown" class="menu-dropdown">
                         <div class="quick-nav-actions">
@@ -92,7 +96,7 @@
                             </button>
                             <button id="toggleAllRoomsBtn" type="button" class="btn-chip">
                                 <i class="ph ph-rows"></i>
-                                <span>ขยายทั้งหมด</span>
+                                <span>ย่อทั้งหมด</span>
                             </button>
                         </div>
                         <hr>
