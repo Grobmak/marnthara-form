@@ -6,8 +6,8 @@
     <title>Marnthara - Tool</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script type="module" crossorigin src="./assets/index-BA9D_9J9.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-C5e_6e4j.css">
+  <script type="module" crossorigin src="./assets/index-BcQK_bvh.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CM-TOf0a.css">
 </head>
 <body>
 
@@ -139,6 +139,7 @@
         </div>
     </div>
 
+
     <div id="copyOptionsModal" class="modal-wrapper">
         <div class="modal-content">
             <h3>เลือกสรุปที่จะคัดลอก</h3>
@@ -222,14 +223,15 @@
             </div>
         </div>
     </div>
-    
-    <div id="manageFavoritesModal" class="modal-wrapper">
-        <div class="modal-content">
-            <h3 id="manageFavoritesModalTitle">จัดการรหัสโปรด</h3>
-            <div id="manageFavoritesModalBody"></div>
-            <div class="modal-actions">
-                <button id="manageFavoritesModalCancel" class="btn btn-secondary">ปิด</button>
+
+    <div id="favManagerModal" class="modal-wrapper">
+        <div class="modal-content fav-manager-modal-content">
+            <div class="fav-manager-header">
+                <h3 id="favManagerTitle">จัดการรายการโปรด</h3>
+                <button id="favManagerCancel" class="btn-icon" data-act="close-modal"><i class="ph-bold ph-x"></i></button>
             </div>
+            <div id="favManagerBody" class="fav-manager-body">
+                </div>
         </div>
     </div>
 
