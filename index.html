@@ -6,8 +6,8 @@
     <title>Marnthara - Tool</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script type="module" crossorigin src="./assets/index-B4I-zWzl.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-CM-TOf0a.css">
+  <script type="module" crossorigin src="./assets/index-DboM-p6w.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-D9Xg2JFC.css">
 </head>
 <body>
 
@@ -139,7 +139,6 @@
         </div>
     </div>
 
-
     <div id="copyOptionsModal" class="modal-wrapper">
         <div class="modal-content">
             <h3>เลือกสรุปที่จะคัดลอก</h3>
@@ -230,12 +229,58 @@
                 <h3 id="favManagerTitle">จัดการรายการโปรด</h3>
                 <button id="favManagerCancel" class="btn-icon" data-act="close-modal"><i class="ph-bold ph-x"></i></button>
             </div>
-            <div id="favManagerBody" class="fav-manager-body">
+            <div id="favManagerBody" class="fav-manager-body"></div>
+            <div id="favManagerFooter" class="fav-manager-footer">
+                 <button type="button" class="btn btn-secondary" data-act="add-new-fav-form">
+                    <i class="ph ph-plus-circle"></i> เพิ่มรายการใหม่
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="favEditModal" class="modal-wrapper">
+        <div class="modal-content" style="max-width: 400px;">
+            <h3 id="favEditTitle">แก้ไขรายการโปรด</h3>
+            <div id="favEditBody" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                <div class="form-group">
+                    <label for="fav_code_edit">รหัส</label>
+                    <input type="text" name="fav_code_edit" id="fav_code_edit">
                 </div>
+                <div class="form-group">
+                    <label for="fav_price_edit">ราคา</label>
+                    <input type="text" inputmode="numeric" name="fav_price_edit" id="fav_price_edit">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="favEditCancel" class="btn btn-secondary">ยกเลิก</button>
+                <button id="favEditConfirm" class="btn btn-primary">บันทึก</button>
+            </div>
         </div>
     </div>
 
 
+    <template id="favManagerItemTpl">
+        <div class="fav-manager-item" data-code="{CODE}" data-price="{RAW_PRICE}">
+            <span class="fav-manager-code">{CODE}</span>
+            <span class="fav-manager-price">{PRICE}</span>
+            <div class="fav-item-actions">
+                <button type="button" class="btn-icon btn-icon-small" data-act="edit-fav" title="แก้ไข"><i class="ph-bold ph-pencil-simple"></i></button>
+                <button type="button" class="btn-icon btn-icon-small danger" data-act="del-fav" title="ลบ"><i class="ph-bold ph-trash"></i></button>
+            </div>
+        </div>
+    </template>
+
+    <template id="favManagerNewFormTpl">
+        <div class="fav-manager-item is-new" id="newFavForm">
+            <input type="text" name="fav_code_new" placeholder="รหัสใหม่">
+            <input type="text" inputmode="numeric" name="fav_price_new" placeholder="ราคา">
+            <div class="fav-item-actions">
+                <button type="button" class="btn-icon btn-icon-small" data-act="cancel-new-fav" title="ยกเลิก"><i class="ph-bold ph-x-circle"></i></button>
+                <button type="button" class="btn-icon btn-icon-small success" data-act="save-new-fav" title="บันทึก"><i class="ph-bold ph-check-circle"></i></button>
+            </div>
+        </div>
+    </template>
+    
     <template id="roomTpl">
         <details class="card room-card" data-room>
             <summary>
