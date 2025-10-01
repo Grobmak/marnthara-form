@@ -1,3 +1,5 @@
+/* assets/index-2L4eMj8X.css */
+/* Full CSS (as provided earlier) */
 @import "https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;500;700&display=swap";
 
 /* ========== Root Variables ========== */
@@ -252,3 +254,11 @@ input:disabled, select:disabled, textarea:disabled {
   transition: background .2s, color .2s;
 }
 .btn-icon:hover { background: var(--surface-container-high); color: var(--primary); }
+
+/* Misc */
+.item-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; }
+.item-summary { background-color:var(--surface-container); padding:.75rem; font-size:.9rem; color:var(--on-surface-variant); border-top:1px solid var(--outline); margin:.5rem 0 0; }
+.card-footer { padding:.75rem 1.25rem; display:flex; gap:.5rem; flex-wrap:wrap; border-top:1px solid var(--outline); background-color:var(--surface-container); }
+
+/* Small helper */
+.hidden { display:none !important; }

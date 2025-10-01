@@ -1,0 +1,186 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="th" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Marnthara Tool - โปรแกรมคิดราคาผ้าม่านและของตกแต่ง" />
+  <title>Marnthara - Tool</title>
+
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+    integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <link rel="stylesheet" href="./assets/index-2L4eMj8X.css" crossorigin />
+  <script type="module" src="./assets/index-CzpaVp9R.js" crossorigin></script>
+</head>
+<body>
+
+  <div id="toast-container" aria-live="polite"></div>
+  <input type="file" id="fileImporter" accept=".json" class="hidden" />
+
+  <header class="main-header">
+    <div class="header-title-group">
+      <h1>Marnthara</h1>
+    </div>
+    <div class="header-actions">
+      <div class="menu-container">
+        <button id="menuBtn" class="btn btn-secondary" aria-haspopup="true" aria-controls="menuDropdown" aria-expanded="false">
+          <i class="ph-bold ph-list"></i><span>เมนู</span>
+        </button>
+        <div id="menuDropdown" class="menu-dropdown" role="menu" aria-hidden="true">
+          <a href="#" id="overviewBtn"><i class="ph ph-presentation-chart"></i> สรุปภาพรวม</a>
+          <hr />
+          <a href="#" id="copyTextBtn"><i class="ph ph-copy-simple"></i> คัดลอกสรุป (LINE)</a>
+          <a href="#" id="exportPdfBtn"><i class="ph ph-file-pdf"></i> ใบเสนอราคา (PDF)</a>
+          <a href="#" id="submitBtn"><i class="ph ph-paper-plane-tilt"></i> ส่งข้อมูล</a>
+          <hr />
+          <a href="#" id="themeToggleBtn"><i class="ph ph-moon"></i> <span>สลับธีม</span></a>
+          <hr />
+          <a href="#" id="importBtn"><i class="ph ph-download-simple"></i> Import (.json)</a>
+          <a href="#" id="exportBtn"><i class="ph ph-upload-simple"></i> Export (.json)</a>
+          <hr />
+          <a href="#" id="clearItemsBtn" class="danger"><i class="ph ph-wind"></i> ล้างทุกรายการ</a>
+          <a href="#" id="clearAllBtn" class="danger"><i class="ph ph-trash"></i> ลบข้อมูลทั้งหมด</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="app-container">
+    <form id="orderForm" novalidate autocomplete="off">
+      <details class="card" id="customerDetailsCard" open>
+        <summary>
+          <h2><i class="ph-bold ph-user-circle"></i> ข้อมูลลูกค้า</h2>
+          <i class="ph-bold ph-caret-down expand-icon"></i>
+        </summary>
+        <div class="card-content" id="customerInfo">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="customer_name">ชื่อลูกค้า</label>
+              <input type="text" id="customer_name" name="customer_name" placeholder="ระบุชื่อ" />
+            </div>
+            <div class="form-group">
+              <label for="customer_phone">เบอร์โทรศัพท์</label>
+              <input type="tel" id="customer_phone" name="customer_phone" placeholder="ระบุเบอร์โทร" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="customer_address">ที่อยู่</label>
+            <textarea id="customer_address" name="customer_address" rows="2" placeholder="ระบุที่อยู่"></textarea>
+          </div>
+        </div>
+      </details>
+
+      <div id="rooms"></div>
+
+    </form>
+  </main>
+
+  <footer class="summary-footer" role="contentinfo">
+    <div class="summary-grid">
+      <div class="footer-actions">
+        <button id="lockBtn" class="btn-icon" title="ล็อค/ปลดล็อคฟอร์ม"><i class="ph-bold ph-lock-key-open"></i></button>
+
+        <div class="menu-container">
+          <button id="quickNavBtn" class="header-btn" aria-haspopup="true" aria-controls="quickNavDropdown" aria-expanded="false">
+            <i class="ph-bold ph-list-dashes"></i><span id="quickNavBtnText">ไปยังห้อง</span>
+          </button>
+          <div id="quickNavDropdown" class="menu-dropdown" role="menu" aria-hidden="true">
+            <div class="quick-nav-actions">
+              <button id="addRoomQuickNavBtn" type="button" class="btn-chip"><i class="ph ph-plus-circle"></i><span>เพิ่มห้อง</span></button>
+              <button id="toggleAllRoomsBtn" type="button" class="btn-chip"><i class="ph ph-rows"></i><span>ย่อทั้งหมด</span></button>
+            </div>
+            <hr />
+            <div id="quickNavRoomList"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-totals">
+        <div class="total-items"><span id="setCount">0</span> รายการ</div>
+        <div class="grand-total"><span id="grandTotal">0</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <div id="printable-content" aria-hidden="true" style="display:none;"></div>
+
+  <!-- Templates -->
+  <template id="roomTpl">
+    <details class="card room-card" data-room>
+      <summary>
+        <div class="form-group">
+          <input type="text" name="room_name" class="room-name-input" placeholder="ห้อง..." />
+        </div>
+        <div class="room-summary-controls">
+          <div class="room-brief" data-room-brief></div>
+          <div class="room-options-container">
+            <button type="button" class="btn-icon" data-act="toggle-room-menu" title="ตัวเลือกห้อง">
+              <i class="ph-bold ph-dots-three-vertical"></i>
+            </button>
+            <div class="room-options-menu" role="menu" aria-hidden="true">
+              <a href="#" data-act="toggle-suspend-room"><i class="ph ph-pause-circle"></i> <span>ระงับ/ใช้งานห้องนี้</span></a>
+              <a href="#" data-act="clear-room"><i class="ph ph-eraser"></i> ล้างทุกรายการในห้อง</a>
+              <a href="#" data-act="del-room" class="danger"><i class="ph ph-trash"></i> ลบห้องนี้</a>
+            </div>
+          </div>
+        </div>
+      </summary>
+
+      <div class="card-content">
+        <div class="items-container" data-sets></div>
+      </div>
+
+      <footer class="card-footer">
+        <button type="button" class="btn-chip btn-curtain" data-act="add-set"><i class="ph ph-plus"></i>ผ้าม่าน</button>
+      </footer>
+    </details>
+  </template>
+
+  <template id="setTpl">
+    <div class="item-card set-item" data-set>
+      <div class="item-header">
+        <h4 class="item-title"><span>ผ้าม่าน</span></h4>
+        <div class="item-actions">
+          <button type="button" class="btn-icon" data-act="toggle-set"><i class="ph ph-caret-down"></i></button>
+          <button type="button" class="btn-icon" data-act="del-set"><i class="ph ph-trash"></i></button>
+        </div>
+      </div>
+
+      <div class="item-grid">
+        <div class="form-group">
+          <label>กว้าง (m)</label>
+          <input type="number" step="0.01" name="width_m" value="0" />
+        </div>
+        <div class="form-group">
+          <label>สูง (m)</label>
+          <input type="number" step="0.01" name="height_m" value="0" />
+        </div>
+        <div class="form-group">
+          <label>ผ้า</label>
+          <select name="fabric_variant">
+            <option value="ทึบ">ผ้าทึบ</option>
+            <option value="โปร่ง">ผ้าโปร่ง</option>
+            <option value="ทึบ&โปร่ง">ทึบ&โปร่ง</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ราคา/ม. (ทึบ)</label>
+          <input type="number" step="1" name="price_per_m_raw" value="0" />
+        </div>
+        <div class="form-group">
+          <label>ราคา/ม. (โปร่ง)</label>
+          <input type="number" step="1" name="sheer_price_per_m" value="0" />
+        </div>
+      </div>
+
+      <div class="item-summary">
+        <div>รวม: <span class="set-total">0</span> บาท</div>
+      </div>
+    </div>
+  </template>
+
+</body>
+</html>
