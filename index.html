@@ -1,186 +1,327 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="th" dir="ltr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="description" content="Marnthara Tool - โปรแกรมคิดราคาผ้าม่านและของตกแต่ง" />
-  <title>Marnthara - Tool</title>
+  <title>Marnthara - Fixed UI</title>
 
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
     integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-  <link rel="stylesheet" href="./assets/index-2L4eMj8X.css" crossorigin />
-  <script type="module" src="./assets/index-CzpaVp9R.js" crossorigin></script>
+  <style>
+/* ----- Reset + Variables ----- */
+@import "https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;500;700&display=swap";
+:root{
+  --font-family: "Noto Sans Thai", sans-serif;
+  --bg:#F8F9FC; --surface:rgba(255,255,255,.95); --glass-border:rgba(255,255,255,.5);
+  --primary:#ADBBD2; --on-surface:#202124; --outline:#DDE2E7;
+  --shadow:0 6px 18px rgba(0,0,0,.08);
+  --radius-lg:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-family);background:var(--bg);color:var(--on-surface);padding-bottom:96px}
+a{color:inherit;text-decoration:none}
+.hidden{display:none!important}
+
+/* ----- Layout ----- */
+.container{max-width:900px;margin:12px auto;padding:12px}
+.main-header{position:sticky;top:0;z-index:40;background:var(--surface);backdrop-filter:blur(8px);border-bottom:1px solid var(--glass-border);display:flex;align-items:center;gap:12px;padding:12px;border-radius:0 0 var(--radius-lg) var(--radius-lg);box-shadow:var(--shadow)}
+.header-title{font-weight:700;color:var(--primary);font-size:1.4rem;flex:1}
+.header-actions{display:flex;gap:8px;align-items:center}
+
+/* menu */
+.menu-container{position:relative}
+.menu-btn{background:var(--primary);color:#fff;padding:.5rem .9rem;border-radius:12px;border:0;cursor:pointer}
+.menu-dropdown{position:absolute;right:0;top:calc(100% + 8px);width:260px;background:var(--surface);border:1px solid var(--outline);border-radius:12px;padding:.4rem 0;box-shadow:0 10px 30px rgba(0,0,0,.12);max-height:60vh;overflow:auto;display:none;z-index:60}
+.menu-dropdown a{display:block;padding:.6rem 12px;font-weight:600;color:var(--on-surface)}
+.menu-dropdown a:hover{background:#f1f3f8;color:var(--primary)}
+
+/* main content */
+.card{background:var(--surface);border:1px solid var(--outline);border-radius:12px;box-shadow:var(--shadow);margin:12px 0;padding:12px}
+.card h2{display:flex;align-items:center;gap:.6rem;font-size:1.1rem}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-size:.9rem;color:#555}
+input,textarea,select{padding:.6rem;border-radius:10px;border:1px solid var(--outline);background:#fff}
+
+/* footer fixed */
+.summary-footer{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--glass-border);padding:10px;box-shadow:0 -8px 20px rgba(0,0,0,.06);z-index:80}
+.summary-grid{max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 12px}
+.btn{padding:.5rem .9rem;border-radius:12px;border:0;cursor:pointer;background:var(--primary);color:#fff;font-weight:700}
+
+/* templates area tweaks */
+.items-container{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.item-card{border-left:4px solid #f7a; padding:10px;border-radius:8px;background:#fff;border:1px solid var(--outline)}
+
+/* responsive */
+@media (max-width:720px){
+  .form-grid-2{grid-template-columns:1fr}
+  .menu-dropdown{left:12px;right:12px;top:64px;width:auto;max-height:calc(100vh - 140px)}
+  .header-title{font-size:1.1rem}
+  body{padding-bottom:120px}
+}
+  </style>
 </head>
 <body>
-
-  <div id="toast-container" aria-live="polite"></div>
-  <input type="file" id="fileImporter" accept=".json" class="hidden" />
-
-  <header class="main-header">
-    <div class="header-title-group">
-      <h1>Marnthara</h1>
-    </div>
-    <div class="header-actions">
-      <div class="menu-container">
-        <button id="menuBtn" class="btn btn-secondary" aria-haspopup="true" aria-controls="menuDropdown" aria-expanded="false">
-          <i class="ph-bold ph-list"></i><span>เมนู</span>
-        </button>
-        <div id="menuDropdown" class="menu-dropdown" role="menu" aria-hidden="true">
-          <a href="#" id="overviewBtn"><i class="ph ph-presentation-chart"></i> สรุปภาพรวม</a>
-          <hr />
-          <a href="#" id="copyTextBtn"><i class="ph ph-copy-simple"></i> คัดลอกสรุป (LINE)</a>
-          <a href="#" id="exportPdfBtn"><i class="ph ph-file-pdf"></i> ใบเสนอราคา (PDF)</a>
-          <a href="#" id="submitBtn"><i class="ph ph-paper-plane-tilt"></i> ส่งข้อมูล</a>
-          <hr />
-          <a href="#" id="themeToggleBtn"><i class="ph ph-moon"></i> <span>สลับธีม</span></a>
-          <hr />
-          <a href="#" id="importBtn"><i class="ph ph-download-simple"></i> Import (.json)</a>
-          <a href="#" id="exportBtn"><i class="ph ph-upload-simple"></i> Export (.json)</a>
-          <hr />
-          <a href="#" id="clearItemsBtn" class="danger"><i class="ph ph-wind"></i> ล้างทุกรายการ</a>
-          <a href="#" id="clearAllBtn" class="danger"><i class="ph ph-trash"></i> ลบข้อมูลทั้งหมด</a>
+  <div class="container">
+    <header class="main-header">
+      <div class="header-title">Marnthara</div>
+      <div class="header-actions">
+        <div class="menu-container">
+          <button id="menuBtn" class="menu-btn" aria-haspopup="true" aria-controls="menuDropdown" aria-expanded="false">≡ เมนู</button>
+          <nav id="menuDropdown" class="menu-dropdown" aria-hidden="true">
+            <a href="#" id="overviewBtn">📋 สรุปภาพรวม</a>
+            <a href="#" id="copyTextBtn">📝 คัดลอกสรุป (LINE)</a>
+            <a href="#" id="exportPdfBtn">📄 ใบเสนอราคา (PDF)</a>
+            <hr />
+            <a href="#" id="themeToggleBtn">🌓 สลับธีม</a>
+          </nav>
         </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main id="app-container">
-    <form id="orderForm" novalidate autocomplete="off">
-      <details class="card" id="customerDetailsCard" open>
-        <summary>
-          <h2><i class="ph-bold ph-user-circle"></i> ข้อมูลลูกค้า</h2>
-          <i class="ph-bold ph-caret-down expand-icon"></i>
-        </summary>
-        <div class="card-content" id="customerInfo">
+    <main id="app" role="main">
+      <form id="orderForm" novalidate autocomplete="off">
+        <section class="card" id="customerCard">
+          <h2> <i class="ph ph-user-circle"></i> ข้อมูลลูกค้า</h2>
           <div class="form-grid-2">
             <div class="form-group">
               <label for="customer_name">ชื่อลูกค้า</label>
-              <input type="text" id="customer_name" name="customer_name" placeholder="ระบุชื่อ" />
+              <input id="customer_name" name="customer_name" placeholder="ระบุชื่อ" />
             </div>
             <div class="form-group">
               <label for="customer_phone">เบอร์โทรศัพท์</label>
-              <input type="tel" id="customer_phone" name="customer_phone" placeholder="ระบุเบอร์โทร" />
+              <input id="customer_phone" name="customer_phone" placeholder="ระบุเบอร์โทร" />
             </div>
           </div>
-          <div class="form-group">
+          <div class="form-group" style="margin-top:10px">
             <label for="customer_address">ที่อยู่</label>
             <textarea id="customer_address" name="customer_address" rows="2" placeholder="ระบุที่อยู่"></textarea>
           </div>
-        </div>
-      </details>
+        </section>
 
-      <div id="rooms"></div>
-
-    </form>
-  </main>
-
-  <footer class="summary-footer" role="contentinfo">
-    <div class="summary-grid">
-      <div class="footer-actions">
-        <button id="lockBtn" class="btn-icon" title="ล็อค/ปลดล็อคฟอร์ม"><i class="ph-bold ph-lock-key-open"></i></button>
-
-        <div class="menu-container">
-          <button id="quickNavBtn" class="header-btn" aria-haspopup="true" aria-controls="quickNavDropdown" aria-expanded="false">
-            <i class="ph-bold ph-list-dashes"></i><span id="quickNavBtnText">ไปยังห้อง</span>
-          </button>
-          <div id="quickNavDropdown" class="menu-dropdown" role="menu" aria-hidden="true">
-            <div class="quick-nav-actions">
-              <button id="addRoomQuickNavBtn" type="button" class="btn-chip"><i class="ph ph-plus-circle"></i><span>เพิ่มห้อง</span></button>
-              <button id="toggleAllRoomsBtn" type="button" class="btn-chip"><i class="ph ph-rows"></i><span>ย่อทั้งหมด</span></button>
-            </div>
-            <hr />
-            <div id="quickNavRoomList"></div>
+        <section class="card" id="roomsCard">
+          <h2> ห้อง/รายการ</h2>
+          <div id="roomsContainer" class="items-container"></div>
+          <div style="margin-top:8px">
+            <button id="addRoomBtn" type="button" class="btn">+ เพิ่มห้อง</button>
           </div>
-        </div>
-      </div>
+        </section>
+      </form>
+    </main>
+  </div>
 
-      <div class="footer-totals">
-        <div class="total-items"><span id="setCount">0</span> รายการ</div>
-        <div class="grand-total"><span id="grandTotal">0</span></div>
+  <div class="summary-footer" role="contentinfo">
+    <div class="summary-grid">
+      <div>
+        <button id="lockBtn" class="btn" style="background:#666">🔒</button>
+      </div>
+      <div style="text-align:right">
+        <div> <span id="setCount">0</span> รายการ</div>
+        <div style="font-weight:700">รวม <span id="grandTotal">0</span> บาท</div>
+      </div>
+      <div>
+        <button id="exportBtn" class="btn">Export JSON</button>
       </div>
     </div>
-  </footer>
+  </div>
 
-  <div id="printable-content" aria-hidden="true" style="display:none;"></div>
+  <div id="printable" style="display:none"></div>
 
   <!-- Templates -->
-  <template id="roomTpl">
-    <details class="card room-card" data-room>
-      <summary>
-        <div class="form-group">
-          <input type="text" name="room_name" class="room-name-input" placeholder="ห้อง..." />
-        </div>
-        <div class="room-summary-controls">
-          <div class="room-brief" data-room-brief></div>
-          <div class="room-options-container">
-            <button type="button" class="btn-icon" data-act="toggle-room-menu" title="ตัวเลือกห้อง">
-              <i class="ph-bold ph-dots-three-vertical"></i>
-            </button>
-            <div class="room-options-menu" role="menu" aria-hidden="true">
-              <a href="#" data-act="toggle-suspend-room"><i class="ph ph-pause-circle"></i> <span>ระงับ/ใช้งานห้องนี้</span></a>
-              <a href="#" data-act="clear-room"><i class="ph ph-eraser"></i> ล้างทุกรายการในห้อง</a>
-              <a href="#" data-act="del-room" class="danger"><i class="ph ph-trash"></i> ลบห้องนี้</a>
-            </div>
-          </div>
-        </div>
-      </summary>
-
-      <div class="card-content">
-        <div class="items-container" data-sets></div>
+  <template id="roomTemplate">
+    <div class="room">
+      <div style="display:flex;align-items:center;gap:8px;justify-content:space-between">
+        <input class="room-name" placeholder="ชื่อห้อง (ตัวอย่าง: ห้อง 1)" style="flex:1;padding:.5rem;border-radius:8px;border:1px solid #ddd" />
+        <button class="del-room" title="ลบห้อง" style="margin-left:8px;padding:.4rem .6rem;border-radius:8px">🗑</button>
       </div>
-
-      <footer class="card-footer">
-        <button type="button" class="btn-chip btn-curtain" data-act="add-set"><i class="ph ph-plus"></i>ผ้าม่าน</button>
-      </footer>
-    </details>
-  </template>
-
-  <template id="setTpl">
-    <div class="item-card set-item" data-set>
-      <div class="item-header">
-        <h4 class="item-title"><span>ผ้าม่าน</span></h4>
-        <div class="item-actions">
-          <button type="button" class="btn-icon" data-act="toggle-set"><i class="ph ph-caret-down"></i></button>
-          <button type="button" class="btn-icon" data-act="del-set"><i class="ph ph-trash"></i></button>
-        </div>
-      </div>
-
-      <div class="item-grid">
-        <div class="form-group">
-          <label>กว้าง (m)</label>
-          <input type="number" step="0.01" name="width_m" value="0" />
-        </div>
-        <div class="form-group">
-          <label>สูง (m)</label>
-          <input type="number" step="0.01" name="height_m" value="0" />
-        </div>
-        <div class="form-group">
-          <label>ผ้า</label>
-          <select name="fabric_variant">
-            <option value="ทึบ">ผ้าทึบ</option>
-            <option value="โปร่ง">ผ้าโปร่ง</option>
-            <option value="ทึบ&โปร่ง">ทึบ&โปร่ง</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>ราคา/ม. (ทึบ)</label>
-          <input type="number" step="1" name="price_per_m_raw" value="0" />
-        </div>
-        <div class="form-group">
-          <label>ราคา/ม. (โปร่ง)</label>
-          <input type="number" step="1" name="sheer_price_per_m" value="0" />
-        </div>
-      </div>
-
-      <div class="item-summary">
-        <div>รวม: <span class="set-total">0</span> บาท</div>
+      <div class="sets" style="margin-top:8px"></div>
+      <div style="margin-top:8px">
+        <button class="add-set btn" type="button" style="background:#4CAF50">+ ผ้าม่าน</button>
       </div>
     </div>
   </template>
 
+  <template id="setTemplate">
+    <div class="item-card">
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="flex:1">
+          <div style="display:flex;gap:8px">
+            <input class="width" placeholder="กว้าง(m)" style="width:90px;padding:.4rem;border-radius:6px;border:1px solid #ddd" />
+            <input class="height" placeholder="สูง(m)" style="width:90px;padding:.4rem;border-radius:6px;border:1px solid #ddd" />
+            <select class="variant" style="padding:.4rem;border-radius:6px;border:1px solid #ddd">
+              <option value="ทึบ">ผ้าทึบ</option>
+              <option value="โปร่ง">ผ้าโปร่ง</option>
+              <option value="ทึบ&โปร่ง">ทึบ&โปร่ง</option>
+            </select>
+            <input class="price" placeholder="ราคา/ม." style="width:120px;padding:.4rem;border-radius:6px;border:1px solid #ddd" />
+          </div>
+        </div>
+        <button class="del-set" title="ลบรายการ" style="padding:.4rem .6rem;border-radius:6px">✖</button>
+      </div>
+      <div style="margin-top:8px">รวม: <span class="set-total">0</span> บาท</div>
+    </div>
+  </template>
+
+  <script>
+/* Minimal interactive script: menu, theme, rooms/sets, calc, export */
+(function(){
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const menuBtn = $('#menuBtn'), menu = $('#menuDropdown');
+  const themeBtn = $('#themeToggleBtn');
+  const roomsContainer = $('#roomsContainer');
+  const addRoomBtn = $('#addRoomBtn');
+  const setCountEl = $('#setCount'), grandTotalEl = $('#grandTotal');
+  const exportBtn = $('#exportBtn');
+
+  function showMenu(show){
+    menu.style.display = show ? 'block' : 'none';
+    menu.setAttribute('aria-hidden', show ? 'false' : 'true');
+    menuBtn.setAttribute('aria-expanded', show ? 'true' : 'false');
+  }
+  menuBtn?.addEventListener('click', e => { e.stopPropagation(); showMenu(menu.style.display !== 'block'); });
+  document.addEventListener('click', ()=> showMenu(false));
+
+  // theme
+  const THEME_KEY = 'marnthara.theme';
+  function applyTheme(){
+    const t = localStorage.getItem(THEME_KEY) || 'light';
+    document.body.classList.toggle('dark-theme', t === 'dark');
+  }
+  themeBtn?.addEventListener('click', e => { e.preventDefault(); const now = document.body.classList.contains('dark-theme') ? 'light' : 'dark'; localStorage.setItem(THEME_KEY, now); applyTheme(); });
+  applyTheme();
+
+  // utils
+  const num = v => { const n = parseFloat(String(v||'').replace(/,/g,'')); return isNaN(n)?0:n; }
+  const fmt = n => (Math.round(n)).toLocaleString('th-TH');
+
+  // state in-memory
+  const STATE_KEY = 'marnthara.tmp';
+  let APP = JSON.parse(localStorage.getItem(STATE_KEY) || '{"rooms":[{"name":"ห้อง 1","sets":[]}]}');
+
+  function save(){ localStorage.setItem(STATE_KEY, JSON.stringify(APP)); }
+  function calcSet(s){
+    const w = num(s.width.value), h = num(s.height.value), price = num(s.price.value);
+    const variant = s.variant.value||'ทึบ';
+    let total = 0;
+    if(variant === 'ทึบ&โปร่ง'){
+      // assume price covers opaque; no separate sheer input here -> double-count if needed
+      total = price * w * 2;
+    } else {
+      total = price * w;
+    }
+    s.totalEl.textContent = fmt(total);
+    return total;
+  }
+
+  function render(){
+    roomsContainer.innerHTML = '';
+    let overall = 0; let count = 0;
+    APP.rooms.forEach((r,ri) => {
+      const rt = document.getElementById('roomTemplate').content.firstElementChild.cloneNode(true);
+      const nameInput = rt.querySelector('.room-name');
+      nameInput.value = r.name || `ห้อง ${ri+1}`;
+      nameInput.addEventListener('input', ()=>{ APP.rooms[ri].name = nameInput.value; save(); });
+
+      const setsWrap = rt.querySelector('.sets');
+      r.sets.forEach((s,si)=>{
+        const st = document.getElementById('setTemplate').content.firstElementChild.cloneNode(true);
+        const width = st.querySelector('.width'); width.value = s.width || '';
+        const height = st.querySelector('.height'); height.value = s.height || '';
+        const variant = st.querySelector('.variant'); variant.value = s.variant || 'ทึบ';
+        const price = st.querySelector('.price'); price.value = s.price || '';
+        const totalEl = st.querySelector('.set-total');
+        const delBtn = st.querySelector('.del-set');
+
+        const bindUpdate = () => {
+          APP.rooms[ri].sets[si] = { width: width.value, height: height.value, variant: variant.value, price: price.value };
+          save();
+          const t = calcSet({ width, height, variant, price, totalEl });
+          overall += t;
+          if(t>0) count++;
+          updateSummary(overall,count);
+        };
+        // attach totalEl for calcSet
+        const setObj = { width, height, variant, price, totalEl };
+        width.addEventListener('input', ()=>{ bindUpdate(); render(); });
+        height.addEventListener('input', ()=>{ bindUpdate(); render(); });
+        variant.addEventListener('change', ()=>{ bindUpdate(); render(); });
+        price.addEventListener('input', ()=>{ bindUpdate(); render(); });
+
+        delBtn.addEventListener('click', ()=>{ APP.rooms[ri].sets.splice(si,1); save(); render(); });
+
+        calcSet(setObj);
+        setsWrap.appendChild(st);
+      });
+
+      // add-set button
+      rt.querySelector('.add-set')?.addEventListener('click', ()=>{ APP.rooms[ri].sets.push({width:'',height:'',variant:'ทึบ',price:''}); save(); render(); });
+
+      rt.querySelector('.del-room')?.addEventListener('click', ()=>{ APP.rooms.splice(ri,1); save(); render(); });
+
+      roomsContainer.appendChild(rt);
+    });
+
+    // if no rooms, ensure one
+    if(APP.rooms.length===0){ APP.rooms.push({name:'ห้อง 1',sets:[]}); save(); render(); return; }
+
+    // compute overall & count fresh
+    overall = 0; count = 0;
+    APP.rooms.forEach(r=>{
+      r.sets.forEach(s=>{
+        const p = (parseFloat(s.price||0) || 0) * (parseFloat(s.width||0) || 0);
+        if(s.variant === 'ทึบ&โปร่ง') overall += p*2;
+        else overall += p;
+        if(p>0) count++;
+      });
+    });
+    updateSummary(overall,count);
+  }
+
+  function updateSummary(total,count){
+    setCountEl.textContent = String(count);
+    grandTotalEl.textContent = String(fmt(total));
+  }
+
+  // add room
+  addRoomBtn.addEventListener('click', ()=>{ APP.rooms.push({name:`ห้อง ${APP.rooms.length+1}`,sets:[]}); save(); render(); });
+
+  // export json
+  exportBtn.addEventListener('click', ()=> {
+    const blob = new Blob([JSON.stringify(APP, null, 2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `marnthara-${new Date().toISOString().slice(0,10)}.json`; a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  // export PDF simple
+  $('#exportPdfBtn')?.addEventListener('click', (e)=>{ e.preventDefault();
+    const printable = document.getElementById('printable');
+    let html = `<div style="font-family:Arial;padding:18px"><h2>ใบเสนอราคา</h2>`;
+    html += `<p>ลูกค้า: ${$('#customer_name').value || '-'}</p>`;
+    APP.rooms.forEach((r,ri)=>{
+      html += `<h4>ห้อง: ${r.name||'ห้อง'+(ri+1)}</h4>`;
+      if(!r.sets.length) html += `<p>ไม่มีรายการ</p>`;
+      else {
+        html += `<ul>`;
+        r.sets.forEach(s=> html += `<li>${s.variant} - ${s.width} x ${s.height} ม. : ${s.price||0} /ม.</li>`);
+        html += `</ul>`;
+      }
+    });
+    html += `</div>`; printable.innerHTML = html; printable.style.display='block';
+    try{
+      html2pdf().from(printable).set({filename:'quote.pdf', margin:10, html2canvas:{scale:2}}).save().finally(()=>printable.style.display='none');
+    }catch(e){ alert('ไม่สามารถสร้าง PDF'); printable.style.display='none'; }
+  });
+
+  // initial render
+  render();
+})();
+  </script>
 </body>
 </html>
