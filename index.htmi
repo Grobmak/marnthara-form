@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="th" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Marnthara Tool - โปรแกรมคิดราคาผ้าม่านและของตกแต่ง ใช้ในองค์กรเล็ก รองรับมือถือ พร้อม export PDF/LINE/JSON">
+    <title>Marnthara - Tool</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="module" crossorigin src="./assets/index-CzpaVp9R.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-2L4eMj8X.css">
+</head>
+<body>
+
+    <div id="toast-container"></div>
+    <input type="file" id="fileImporter" accept=".json" class="hidden">
+
+    <header class="main-header">
+        <div class="header-title-group">
+            <h1>Marnthara</h1>
+        </div>
+        <div class="header-actions">
+            <div class="menu-container">
+                <button id="menuBtn" class="btn btn-secondary unlockable" title="Menu" aria-haspopup="true" aria-controls="menuDropdown" aria-expanded="false">
+                    <i class="ph-bold ph-list"></i>
+                    <span>เมนู</span>
+                </button>
+                <div id="menuDropdown" class="menu-dropdown" role="menu" aria-hidden="true">
+                    <a href="#" id="overviewBtn"><i class="ph ph-presentation-chart"></i> สรุปภาพรวม</a>
+                    <hr>
+                    <a href="#" id="copyTextBtn"><i class="ph ph-copy-simple"></i> คัดลอกสรุป (LINE)</a>
+                    <a href="#" id="exportPdfBtn"><i class="ph ph-file-pdf"></i> ใบเสนอราคา (PDF)</a>
+                    <a href="#" id="submitBtn"><i class="ph ph-paper-plane-tilt"></i> ส่งข้อมูล</a>
+                    <hr>
+                    <a href="#" id="themeToggleBtn"><i class="ph ph-moon"></i> <span>สลับธีม</span></a>
+                    <hr>
+                    <a href="#" id="importBtn"><i class="ph ph-download-simple"></i> Import (.json)</a>
+                    <a href="#" id="exportBtn"><i class="ph ph-upload-simple"></i> Export (.json)</a>
+                    <hr>
+                    <a href="#" id="clearItemsBtn" class="danger"><i class="ph ph-wind"></i> ล้างทุกรายการ</a>
+                    <a href="#" id="clearAllBtn" class="danger"><i class="ph ph-trash"></i> ลบข้อมูลทั้งหมด</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="app-container">
+        <form id="orderForm" novalidate autocomplete="off">
+            <details class="card" id="customerDetailsCard" open>
+                <summary>
+                    <h2>
+                        <i class="ph-bold ph-user-circle"></i>
+                        ข้อมูลลูกค้า
+                    </h2>
+                    <i class="ph-bold ph-caret-down expand-icon"></i>
+                </summary>
+                <div class="card-content" id="customerInfo">
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="customer_name">ชื่อลูกค้า</label>
+                            <input type="text" id="customer_name" name="customer_name" placeholder="ระบุชื่อ">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer_phone">เบอร์โทรศัพท์</label>
+                            <input type="tel" id="customer_phone" name="customer_phone" placeholder="ระบุเบอร์โทร">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer_address">ที่อยู่</label>
+                        <textarea id="customer_address" name="customer_address" placeholder="ระบุที่อยู่" rows="2"></textarea>
+                    </div>
+                </div>
+            </details>
+
+            <div id="rooms"></div>
+        </form>
+    </main>
+
+    <footer class="summary-footer">
+        <div class="summary-grid">
+            <div class="footer-actions">
+                <button id="lockBtn" class="btn-icon unlockable" title="ล็อค/ปลดล็อคฟอร์ม">
+                    <i class="ph-bold ph-lock-key-open"></i>
+                </button>
+                
+                <div class="menu-container">
+                    <button id="quickNavBtn" class="header-btn unlockable" title="ไปยังห้อง" aria-haspopup="true" aria-controls="quickNavDropdown" aria-expanded="false">
+                        <i class="ph-bold ph-list-dashes"></i>
+                        <span id="quickNavBtnText">ไปยังห้อง</span>
+                    </button>
+                    <div id="quickNavDropdown" class="menu-dropdown" role="menu" aria-hidden="true">
+                        <div class="quick-nav-actions">
+                             <button id="addRoomQuickNavBtn" type="button" class="btn-chip" data-act="add-room">
+                                <i class="ph ph-plus-circle"></i>
+                                <span>เพิ่มห้อง</span>
+                            </button>
+                            <button id="toggleAllRoomsBtn" type="button" class="btn-chip">
+                                <i class="ph ph-rows"></i>
+                                <span>ย่อทั้งหมด</span>
+                            </button>
+                        </div>
+                        <hr>
+                        <div id="quickNavRoomList"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-totals">
+                <div class="total-items">
+                    <span id="setCount">0</span> รายการ
+                </div>
+                <div class="grand-total">
+                    <span id="grandTotal">0</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <div id="printable-content" aria-hidden="true"></div>
+
+    <!-- ตัวอย่าง modal: เพิ่ม role และ aria-labelledby -->
+    <div id="confirmationModal" class="modal-wrapper" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-content">
+            <h3 id="modalTitle"></h3>
+            <p id="modalBody"></p>
+            <div class="modal-actions">
+                <button id="modalCancel" class="btn btn-secondary">ยกเลิก</button>
+                <button id="modalConfirm" class="btn btn-danger">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- (อื่นๆ modal ปรับแบบเดียวกัน, omitted for brevity) -->
+
+    <!-- Templates ... -->
+    <template id="roomTpl"> ... </template>
+    <template id="setTpl"> ... </template>
+
+</body>
+</html>
