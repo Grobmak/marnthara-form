@@ -6,8 +6,8 @@
     <title>Marnthara - Tool</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script type="module" crossorigin src="./assets/index-CGy6_tb_.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-DRo8HG_2.css">
+  <script type="module" crossorigin src="./assets/index-Bq9Z-HGn.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CahyD03C.css">
 </head>
 <body>
 
@@ -73,7 +73,9 @@
 
             <div id="rooms"></div>
             
-            </form>
+            <input type="hidden" id="discount_type" name="discount_type" value="amount">
+            <input type="hidden" id="discount_value" name="discount_value" value="0">
+        </form>
     </main>
 
     <footer class="summary-footer">
@@ -105,14 +107,15 @@
                 </div>
             </div>
             
-            <div class="footer-totals">
+            <button type="button" class="footer-totals" data-act="show-discount-modal">
                 <div class="total-items">
                     <span id="setCount">0</span> รายการ
                 </div>
+                <div class="original-total" id="originalTotal">0</div>
                 <div class="grand-total">
                     <span id="grandTotal">0</span>
                 </div>
-            </div>
+            </button>
         </div>
     </footer>
     
@@ -128,6 +131,36 @@
             </div>
         </div>
     </div>
+    
+    <div id="discountModal" class="modal-wrapper">
+        <div class="modal-content" style="max-width: 400px;">
+            <h3><i class="ph-fill ph-tag"></i> ส่วนลด</h3>
+            <div id="discountBody" class="discount-modal-body">
+                <div class="discount-row">
+                    <span class="discount-label">ยอดรวม</span>
+                    <span id="discountSubtotal" class="discount-value">0</span>
+                </div>
+                <div class="discount-row input-row">
+                    <label for="discountPercent" class="discount-label">ส่วนลด (%)</label>
+                    <input type="number" id="discountPercent" inputmode="decimal" class="discount-input">
+                </div>
+                <div class="discount-row input-row">
+                    <label for="discountAmount" class="discount-label">ส่วนลด (บาท)</label>
+                    <input type="text" id="discountAmount" inputmode="decimal" class="discount-input">
+                </div>
+                <hr>
+                 <div class="discount-row final-total-row">
+                    <span class="discount-label">คงเหลือ</span>
+                    <span id="discountFinalTotal" class="discount-value discount-final">0</span>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="discountCancel" class="btn btn-secondary">ยกเลิก</button>
+                <button id="discountConfirm" class="btn btn-primary">ตกลง</button>
+            </div>
+        </div>
+    </div>
+
 
     <div id="overviewModal" class="modal-wrapper">
         <div class="modal-content overview-modal-content">
