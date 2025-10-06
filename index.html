@@ -3,11 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Marnthara Curtain Pricing Tool - แอปพลิเคชันสำหรับประเมินราคาผ้าม่านและของตกแต่ง">
     <title>Marnthara - Tool</title>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script type="module" crossorigin src="./assets/index-DZxVdyrY.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-PX6NpABY.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://unpkg.com">
+    
+    <style>
+        :root {
+            --font-family: 'Noto Sans Thai', sans-serif;
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 16px;
+            --border-radius-xl: 28px;
+            --primary: #4A69E2;
+            --on-primary: #FFFFFF;
+            --primary-container: #DDE2FF;
+            --on-primary-container: #001B3F;
+            --background: #FEFBFF;
+            --surface: #F8F9FC;
+            --surface-container: #F3F4F7;
+            --surface-container-high: #EAEFF9;
+            --on-surface: #1B1B1F;
+            --on-surface-variant: #45464F;
+            --outline: #DDE2E7;
+            --shadow-color: rgba(74, 105, 226, 0.1);
+            --glow-color: rgba(74, 105, 226, 0.15);
+            --shadow-md: 0 4px 15px var(--shadow-color), 0 2px 20px var(--glow-color);
+            --glass-bg: rgba(248, 249, 252, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.6);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background);
+            color: var(--on-surface);
+            margin: 0;
+            padding-bottom: 100px;
+        }
+        h1, h2, h3, h4 { color: var(--on-surface); font-weight: 700; }
+        i.ph { font-size: 1.25em; vertical-align: middle; }
+        #app-container { max-width: 800px; margin: 0 auto; padding: 1rem; }
+        .main-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
+            border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+            margin: 0 auto 1rem; max-width: 824px; width: calc(100% - 8px);
+            box-shadow: var(--shadow-md), inset 0 1px 1px var(--glass-border);
+        }
+        .header-title-group { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+        .main-header h1 { font-size: 1.25rem; color: var(--primary); white-space: nowrap; }
+        .header-actions { display: flex; align-items: center; gap: 0.5rem; }
+        .card {
+            background-color: var(--surface);
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--outline);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            position: relative;
+        }
+        .card summary {
+            list-style: none; display: flex; justify-content: space-between; align-items: center;
+            padding: 0.5rem 0.5rem 0.5rem 1.25rem; cursor: pointer; background-color: transparent; gap: 0.5rem;
+        }
+        .card summary::-webkit-details-marker { display: none; }
+        .card .expand-icon { transition: transform 0.3s ease; font-size: 1.5rem; color: var(--on-surface-variant); }
+        .card[open] > summary .expand-icon { transform: rotate(180deg); }
+        .card summary h2 { font-size: 1.1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 0.75rem; flex-grow: 1; }
+        .card-content { padding: 0.25rem 0.50rem 0.50rem 0.50rem; display: flex; flex-direction: column; gap: 1rem; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: var(--border-radius-xl); border: none; font-family: var(--font-family); font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; -webkit-tap-highlight-color: transparent; }
+        .btn-secondary { background-color: var(--primary-container); color: var(--on-primary-container); }
+        .header-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: none; border: none; border-radius: 50%; width: 44px; height: 44px; color: var(--on-surface-variant); cursor: pointer; transition: all 0.3s; }
+        .summary-footer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid var(--glass-border);
+            padding: 0.75rem; z-index: 50;
+            box-shadow: 0 -5px 30px var(--shadow-color), inset 0 1px 1px var(--glass-border);
+        }
+        .summary-grid {
+            display: flex; 
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            max-width: 800px; margin: 0 auto;
+        }
+        .footer-actions { display: flex; align-items: center; gap: 0.25rem; }
+        .footer-totals { text-align: right; flex-shrink: 0; background: none; border: none; font-family: var(--font-family); padding: 0; cursor: pointer; border-radius: var(--border-radius-sm); }
+        .original-total { display: none; font-size: 0.9rem; color: #BA1A1A; text-decoration: line-through; }
+        .grand-total { font-size: 1.3rem; font-weight: 700; color: var(--on-surface); }
+    </style>
+    
+    <noscript></noscript>
+
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+  <script type="module" crossorigin src="./assets/index-DDqT5O92.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CBLQaO8Q.css">
 </head>
 <body>
 
