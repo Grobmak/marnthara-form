@@ -6,8 +6,8 @@
     <title>Marnthara - Tool</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script type="module" crossorigin src="./assets/index-Bq9Z-HGn.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-CahyD03C.css">
+  <script type="module" crossorigin src="./assets/index-DZxVdyrY.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-PX6NpABY.css">
 </head>
 <body>
 
@@ -19,6 +19,9 @@
             <h1>Marnthara</h1>
         </div>
         <div class="header-actions">
+            <button id="undoBtn" class="header-btn unlockable" title="Undo" aria-label="Undo last action" disabled>
+                <i class="ph-bold ph-arrow-u-up-left"></i>
+            </button>
             <div class="menu-container">
                 <button id="menuBtn" class="btn btn-secondary unlockable" title="Menu" aria-haspopup="true" aria-expanded="false" aria-label="เปิดเมนูหลัก">
                     <i class="ph-bold ph-list"></i>
@@ -108,9 +111,6 @@
             </div>
             
             <button type="button" class="footer-totals" data-act="show-discount-modal">
-                <div class="total-items">
-                    <span id="setCount">0</span> รายการ
-                </div>
                 <div class="original-total" id="originalTotal">0</div>
                 <div class="grand-total">
                     <span id="grandTotal">0</span>
@@ -164,11 +164,12 @@
 
     <div id="overviewModal" class="modal-wrapper">
         <div class="modal-content overview-modal-content">
-            <h3 id="overviewModalTitle">สรุปภาพรวม</h3>
-            <div id="overviewModalBody"></div>
-            <div class="modal-actions">
-                <button id="overviewModalCancel" class="btn btn-secondary">ปิด</button>
+            <div class="overview-modal-header-bar">
+                <h3 id="overviewModalTitle">สรุปภาพรวม</h3>
+                <button id="overviewModalCancel" class="btn-icon" data-act="close-modal" aria-label="ปิดหน้าต่าง"><i class="ph-bold ph-x"></i></button>
             </div>
+            <div id="overviewModalHeader"></div>
+            <div id="overviewModalBody"></div>
         </div>
     </div>
 
@@ -318,28 +319,63 @@
     </div>
 
     <div id="itemTypeModal" class="modal-wrapper">
-        <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-content" style="max-width: 480px;">
             <h3 id="itemTypeModalTitle">เลือกประเภทรายการ</h3>
-            <div class="radio-card-group" style="margin-top: 1rem;">
+            <div class="radio-card-group" style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                 <label>
                     <input type="radio" name="item_type_option" value="set" checked>
                     <span class="radio-card-content">
                         <strong><i class="ph-fill ph-rows"></i> ผ้าม่าน</strong>
-                        <small>สำหรับงานผ้าทึบ, ผ้าโปร่ง</small>
+                        <small>Curtain, Sheer</small>
                     </span>
                 </label>
                 <label>
-                    <input type="radio" name="item_type_option" value="deco">
-                     <span class="radio-card-content">
-                        <strong><i class="ph-fill ph-blinds"></i> ของตกแต่ง</strong>
-                        <small>มู่ลี่, ม่านม้วน, มุ้งลวด, ฉากกั้น</small>
-                    </span>
-                </label>
-                 <label>
                     <input type="radio" name="item_type_option" value="wallpaper">
                      <span class="radio-card-content">
                         <strong><i class="ph-fill ph-paint-roller"></i> วอลเปเปอร์</strong>
-                        <small>สำหรับงานตกแต่งผนัง</small>
+                        <small>Wallpaper</small>
+                    </span>
+                </label>
+                <label>
+                    <input type="radio" name="item_type_option" value="wooden_blind">
+                     <span class="radio-card-content">
+                        <strong><i class="ph-fill ph-blinds"></i> มู่ลี่ไม้</strong>
+                        <small>Wooden Blinds</small>
+                    </span>
+                </label>
+                <label>
+                    <input type="radio" name="item_type_option" value="roller_blind">
+                     <span class="radio-card-content">
+                        <strong><i class="ph-fill ph-blinds"></i> ม่านม้วน</strong>
+                        <small>Roller Blinds</small>
+                    </span>
+                </label>
+                <label>
+                    <input type="radio" name="item_type_option" value="vertical_blind">
+                     <span class="radio-card-content">
+                        <strong><i class="ph-fill ph-blinds"></i> ม่านปรับแสง</strong>
+                        <small>Vertical Blinds</small>
+                    </span>
+                </label>
+                 <label>
+                    <input type="radio" name="item_type_option" value="aluminum_blind">
+                     <span class="radio-card-content">
+                        <strong><i class="ph-fill ph-blinds"></i> มู่ลี่อลูมิเนียม</strong>
+                        <small>Aluminium</small>
+                    </span>
+                </label>
+                 <label>
+                    <input type="radio" name="item_type_option" value="partition">
+                     <span class="radio-card-content">
+                        <strong><i class="ph-fill ph-columns"></i> ฉากกั้นห้อง</strong>
+                        <small>PVC Partition</small>
+                    </span>
+                </label>
+                 <label>
+                    <input type="radio" name="item_type_option" value="pleated_screen">
+                     <span class="radio-card-content">
+                        <strong><i class="ph-fill ph-squares-four"></i> มุ้งจีบ</strong>
+                        <small>Pleated Screen</small>
                     </span>
                 </label>
             </div>
@@ -388,18 +424,18 @@
     </template>
     
     <template id="setTpl">
-        <div class="item-card set-item" data-set>
+        <div class="item-card set-item">
             <div class="item-header">
                 <h4 class="item-title">
                      <span data-item-title></span>:&nbsp;
-                     <button type="button" class="item-type-changer" data-act="change-type" data-current-type="set">
-                        <span>ผ้าม่าน</span>
+                     <button type="button" class="item-type-changer" data-act="change-type">
+                        <span class="item-type-display">ผ้าม่าน</span>
                         <i class="ph-bold ph-caret-down"></i>
                     </button>
                 </h4>
                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน" aria-label="ระงับหรือใช้งานรายการนี้"><i class="ph-bold ph-pause-circle"></i></button>
-                    <button type="button" class="btn-icon danger" data-act="del-set" title="ลบ" aria-label="ลบรายการผ้าม่าน"><i class="ph-bold ph-x"></i></button>
+                    <button type="button" class="btn-icon danger" data-act="del-item" title="ลบ" aria-label="ลบรายการผ้าม่าน"><i class="ph-bold ph-x"></i></button>
                 </div>
             </div>
 
@@ -492,45 +528,33 @@
         </div>
     </template>
 
-    <template id="decoTpl">
-        <div class="item-card deco-item" data-deco-item>
+    <template id="areaBasedTpl">
+        <div class="item-card area-based-item">
              <div class="item-header">
                 <h4 class="item-title">
                      <span data-item-title></span>:&nbsp;
-                     <button type="button" class="item-type-changer" data-act="change-type" data-current-type="deco">
-                        <span class="deco-type-display">ตกแต่ง</span>
+                     <button type="button" class="item-type-changer" data-act="change-type">
+                        <span class="item-type-display">ของตกแต่ง</span>
                         <i class="ph-bold ph-caret-down"></i>
                     </button>
                 </h4>
                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน" aria-label="ระงับหรือใช้งานรายการนี้"><i class="ph-bold ph-pause-circle"></i></button>
-                    <button type="button" class="btn-icon danger" data-act="del-deco" title="ลบ" aria-label="ลบรายการตกแต่ง"><i class="ph-bold ph-x"></i></button>
+                    <button type="button" class="btn-icon danger" data-act="del-item" title="ลบ" aria-label="ลบรายการ"><i class="ph-bold ph-x"></i></button>
                 </div>
             </div>
             <div class="item-grid">
                 <div class="form-group">
                     <label>กว้าง (ม.)</label>
-                    <input type="number" step="0.01" inputmode="decimal" name="deco_width_m" placeholder="0.00">
+                    <input type="number" step="0.01" inputmode="decimal" name="area_width_m" placeholder="0.00">
                 </div>
                  <div class="form-group">
                     <label>สูง (ม.)</label>
-                    <input type="number" step="0.01" inputmode="decimal" name="deco_height_m" placeholder="0.00">
+                    <input type="number" step="0.01" inputmode="decimal" name="area_height_m" placeholder="0.00">
                 </div>
-                <div class="form-group">
-                    <label>ประเภท</label>
-                    <select name="deco_type">
-                        <option value="" hidden>เลือกประเภท</option>
-                        <option value="มู่ลี่ไม้">มู่ลี่ไม้</option>
-                        <option value="ม่านม้วน">ม่านม้วน</option>
-                        <option value="ม่านปรับแสง">ม่านปรับแสง</option>
-                        <option value="ฉากกั้นห้อง">ฉากกั้นห้อง</option>
-                        <option value="มุ้งจีบ">มุ้งจีบ</option>
-                        <option value="มู่ลี่อลูมิเนียม">มู่ลี่อลูมิเนียม</option>
-                    </select>
-                </div>
-                <div class="form-group">
+                <div class="form-group full-width-item">
                     <label>ราคา/ตร.หลา</label>
-                    <input type="text" inputmode="numeric" name="deco_price_sqyd" placeholder="0">
+                    <input type="text" inputmode="numeric" name="area_price_sqyd" placeholder="0">
                 </div>
                 <div class="form-group full-width-item">
                      <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
@@ -544,8 +568,8 @@
                     <div class="form-group-with-favorites full-width-item">
                         <div class="form-group">
                             <label>รหัสสินค้า</label>
-                            <input type="text" name="deco_code" placeholder="-" data-favorite-type="deco">
-                            <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="deco" title="เพิ่ม/ลบ รหัสโปรด" aria-label="เพิ่มหรือลบรหัสของตกแต่งในรายการโปรด">
+                            <input type="text" name="area_code" placeholder="-" data-favorite-type="deco">
+                            <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="deco" title="เพิ่ม/ลบ รหัสโปรด" aria-label="เพิ่มหรือลบรหัสในรายการโปรด">
                                 <i class="ph ph-star"></i>
                             </button>
                         </div>
@@ -553,27 +577,27 @@
                     </div>
                     <div class="form-group full-width-item">
                         <label>หมายเหตุ</label>
-                        <input type="text" name="deco_notes" placeholder="-">
+                        <input type="text" name="area_notes" placeholder="-">
                     </div>
                 </div>
             </div>
-            <div class="item-summary single-line" data-deco-summary>0</div>
+            <div class="item-summary single-line" data-area-summary>0</div>
         </div>
     </template>
     
     <template id="wallpaperTpl">
-        <div class="item-card wallpaper-item" data-wallpaper-item>
+        <div class="item-card wallpaper-item">
              <div class="item-header">
                 <h4 class="item-title">
                      <span data-item-title></span>:&nbsp;
-                     <button type="button" class="item-type-changer" data-act="change-type" data-current-type="wallpaper">
-                        <span>วอลเปเปอร์</span>
+                     <button type="button" class="item-type-changer" data-act="change-type">
+                        <span class="item-type-display">วอลเปเปอร์</span>
                         <i class="ph-bold ph-caret-down"></i>
                     </button>
                 </h4>
                  <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน" aria-label="ระงับหรือใช้งานรายการนี้"><i class="ph-bold ph-pause-circle"></i></button>
-                    <button type="button" class="btn-icon danger" data-act="del-wallpaper" title="ลบ" aria-label="ลบรายการวอลเปเปอร์"><i class="ph-bold ph-x"></i></button>
+                    <button type="button" class="btn-icon danger" data-act="del-item" title="ลบ" aria-label="ลบรายการวอลเปเปอร์"><i class="ph-bold ph-x"></i></button>
                 </div>
             </div>
             
