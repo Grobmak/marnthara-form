@@ -11,6 +11,10 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://unpkg.com">
     
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;500;700&display=swap" as="style">
+    <link rel="preload" href="https://fonts.gstatic.com/s/notosansthai/v29/iJWQBXeUZi_OHPqn4wq6hQ2_hbJ1xyN9wd43SofNWcdfPI2hTWsb-A.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/bold/Phosphor-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    
     <style>
         :root {
             --font-family: 'Noto Sans Thai', sans-serif;
@@ -105,8 +109,8 @@
     <noscript></noscript>
 
     <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
-  <script type="module" crossorigin src="./assets/index-B4H7vtht.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-OZNixX9d.css">
+  <script type="module" crossorigin src="./assets/index-B1W2gqRR.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CBhi7hrE.css">
 </head>
 <body>
 
@@ -188,7 +192,7 @@
                 </button>
                 
                 <div class="menu-container">
-                    <button id="quickNavBtn" class="header-btn unlockable" title="ไปยังห้อง" aria-haspopup="true" aria-expanded="false" aria-label="เปิดเมนูนำทางด่วน">
+                    <button id="quickNavBtn" class="header-btn unlockable" title="ไปยังห้อง" aria-haspopup="true" aria-expanded="false" aria-label="ไปยังห้อง: เปิดเมนูนำทางด่วน">
                         <i class="ph-bold ph-list-dashes"></i>
                         <span id="quickNavBtnText">ไปยังห้อง</span>
                     </button>
@@ -340,7 +344,7 @@
             </div>
 
             <div class="form-group" style="margin-top: 1.5rem;">
-                <label style="padding-left: 0;">วิธีสร้างเอกสาร</label>
+                <label for="exportMethod" style="padding-left: 0;">วิธีสร้างเอกสาร</label>
                 <select id="exportMethod" class="select-box">
                     <option value="direct">วิธีที่ 1: ดาวน์โหลด PDF (คมชัดสุด)</option>
                     <option value="print">วิธีที่ 2: ใช้ Browser พิมพ์ (แนะนำ)</option>
@@ -525,13 +529,13 @@
     <template id="setTpl">
         <div class="item-card set-item">
             <div class="item-header">
-                <h4 class="item-title">
+                <h3 class="item-title">
                      <span data-item-title></span>:&nbsp;
                      <button type="button" class="item-type-changer" data-act="change-type">
                         <span class="item-type-display">ผ้าม่าน</span>
                         <i class="ph-bold ph-caret-down"></i>
                     </button>
-                </h4>
+                </h3>
                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน" aria-label="ระงับหรือใช้งานรายการนี้"><i class="ph-bold ph-pause-circle"></i></button>
                     <button type="button" class="btn-icon danger" data-act="del-item" title="ลบ" aria-label="ลบรายการผ้าม่าน"><i class="ph-bold ph-x"></i></button>
@@ -540,36 +544,36 @@
 
             <div class="item-grid">
                 <div class="form-group">
-                    <label>กว้าง (ม.)</label>
-                    <input type="number" step="0.01" inputmode="decimal" name="width_m" placeholder="0.00">
+                    <label for="width_m">กว้าง (ม.)</label>
+                    <input type="number" id="width_m" step="0.01" inputmode="decimal" name="width_m" placeholder="0.00">
                 </div>
                 <div class="form-group">
-                    <label>สูง (ม.)</label>
-                    <input type="number" step="0.01" inputmode="decimal" name="height_m" placeholder="0.00">
+                    <label for="height_m">สูง (ม.)</label>
+                    <input type="number" id="height_m" step="0.01" inputmode="decimal" name="height_m" placeholder="0.00">
                 </div>
                 <div class="form-group">
-                    <label>รูปแบบ</label>
-                    <select name="set_style">
+                    <label for="set_style">รูปแบบ</label>
+                    <select name="set_style" id="set_style">
                         <option value="ลอน">ลอน</option>
                         <option value="ตาไก่">ตาไก่</option>
                         <option value="จีบ">จีบ</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>ชนิดผ้า</label>
-                    <select name="fabric_variant">
+                    <label for="fabric_variant">ชนิดผ้า</label>
+                    <select name="fabric_variant" id="fabric_variant">
                         <option value="ทึบ">ทึบ</option>
                         <option value="ทึบ&โปร่ง">ทึบ & โปร่ง</option>
                         <option value="โปร่ง">โปร่ง</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>ราคาผ้าทึบ</label>
-                    <select name="set_price_per_m"></select>
+                    <label for="set_price_per_m">ราคาผ้าทึบ</label>
+                    <select name="set_price_per_m" id="set_price_per_m"></select>
                 </div>
                 <div class="form-group hidden" data-sheer-wrap>
-                    <label>ราคาผ้าโปร่ง</label>
-                    <select name="sheer_price_per_m"></select>
+                    <label for="sheer_price_per_m">ราคาผ้าโปร่ง</label>
+                    <select name="sheer_price_per_m" id="sheer_price_per_m"></select>
                 </div>
                 <div class="form-group full-width-item">
                     <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
@@ -583,8 +587,8 @@
                 <div class="item-grid">
                     <div class="form-group-with-favorites">
                         <div class="form-group">
-                            <label>รหัสผ้าทึบ</label>
-                            <input type="text" name="fabric_code" placeholder="-" data-favorite-type="fabric">
+                            <label for="fabric_code">รหัสผ้าทึบ</label>
+                            <input type="text" id="fabric_code" name="fabric_code" placeholder="-" data-favorite-type="fabric">
                              <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="fabric" title="เพิ่ม/ลบ รหัสโปรด" aria-label="เพิ่มหรือลบรหัสผ้าทึบในรายการโปรด">
                                 <i class="ph ph-star"></i>
                             </button>
@@ -593,8 +597,8 @@
                     </div>
                      <div class="form-group-with-favorites hidden" data-sheer-code-wrap>
                          <div class="form-group">
-                            <label>รหัสผ้าโปร่ง</label>
-                            <input type="text" name="sheer_fabric_code" placeholder="-" data-favorite-type="sheer">
+                            <label for="sheer_fabric_code">รหัสผ้าโปร่ง</label>
+                            <input type="text" id="sheer_fabric_code" name="sheer_fabric_code" placeholder="-" data-favorite-type="sheer">
                              <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="sheer" title="เพิ่ม/ลบ รหัสโปรด" aria-label="เพิ่มหรือลบรหัสผ้าโปร่งในรายการโปรด">
                                 <i class="ph ph-star"></i>
                             </button>
@@ -602,24 +606,24 @@
                         <div class="favorite-chips-container"></div>
                     </div>
                     <div class="form-group">
-                        <label>รูปแบบเปิด</label>
-                        <select name="opening_style">
+                        <label for="opening_style">รูปแบบเปิด</label>
+                        <select name="opening_style" id="opening_style">
                             <option value="แยกกลาง">แยกกลาง</option>
                             <option value="รวบซ้าย">รวบซ้าย</option>
                             <option value="รวบขวา">รวบขวา</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>สีราง</label>
-                        <select name="track_color">
+                        <label for="track_color">สีราง</label>
+                        <select name="track_color" id="track_color">
                             <option value="ขาว" selected>ขาว</option>
                             <option value="ดำ">ดำ</option>
                             <option value="น้ำตาล">น้ำตาล</option>
                         </select>
                     </div>
                     <div class="form-group full-width-item">
-                        <label>หมายเหตุ</label>
-                        <input type="text" name="notes" placeholder="- ">
+                        <label for="notes">หมายเหตุ</label>
+                        <input type="text" id="notes" name="notes" placeholder="- ">
                     </div>
                 </div>
             </div>
@@ -630,13 +634,13 @@
     <template id="areaBasedTpl">
         <div class="item-card area-based-item">
              <div class="item-header">
-                <h4 class="item-title">
+                <h3 class="item-title">
                      <span data-item-title></span>:&nbsp;
                      <button type="button" class="item-type-changer" data-act="change-type">
                         <span class="item-type-display">ของตกแต่ง</span>
                         <i class="ph-bold ph-caret-down"></i>
                     </button>
-                </h4>
+                </h3>
                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน" aria-label="ระงับหรือใช้งานรายการนี้"><i class="ph-bold ph-pause-circle"></i></button>
                     <button type="button" class="btn-icon danger" data-act="del-item" title="ลบ" aria-label="ลบรายการ"><i class="ph-bold ph-x"></i></button>
@@ -644,16 +648,16 @@
             </div>
             <div class="item-grid">
                 <div class="form-group">
-                    <label>กว้าง (ม.)</label>
-                    <input type="number" step="0.01" inputmode="decimal" name="area_width_m" placeholder="0.00">
+                    <label for="area_width_m">กว้าง (ม.)</label>
+                    <input type="number" id="area_width_m" step="0.01" inputmode="decimal" name="area_width_m" placeholder="0.00">
                 </div>
                  <div class="form-group">
-                    <label>สูง (ม.)</label>
-                    <input type="number" step="0.01" inputmode="decimal" name="area_height_m" placeholder="0.00">
+                    <label for="area_height_m">สูง (ม.)</label>
+                    <input type="number" id="area_height_m" step="0.01" inputmode="decimal" name="area_height_m" placeholder="0.00">
                 </div>
                 <div class="form-group full-width-item">
-                    <label>ราคา/ตร.หลา</label>
-                    <input type="text" inputmode="numeric" name="area_price_sqyd" placeholder="0">
+                    <label for="area_price_sqyd">ราคา/ตร.หลา</label>
+                    <input type="text" id="area_price_sqyd" inputmode="numeric" name="area_price_sqyd" placeholder="0">
                 </div>
                 <div class="form-group full-width-item">
                      <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
@@ -666,8 +670,8 @@
                 <div class="item-grid">
                     <div class="form-group-with-favorites full-width-item">
                         <div class="form-group">
-                            <label>รหัสสินค้า</label>
-                            <input type="text" name="area_code" placeholder="-" data-favorite-type="deco">
+                            <label for="area_code">รหัสสินค้า</label>
+                            <input type="text" id="area_code" name="area_code" placeholder="-" data-favorite-type="deco">
                             <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="deco" title="เพิ่ม/ลบ รหัสโปรด" aria-label="เพิ่มหรือลบรหัสในรายการโปรด">
                                 <i class="ph ph-star"></i>
                             </button>
@@ -675,8 +679,8 @@
                         <div class="favorite-chips-container"></div>
                     </div>
                     <div class="form-group full-width-item">
-                        <label>หมายเหตุ</label>
-                        <input type="text" name="area_notes" placeholder="-">
+                        <label for="area_notes">หมายเหตุ</label>
+                        <input type="text" id="area_notes" name="area_notes" placeholder="-">
                     </div>
                 </div>
             </div>
@@ -687,13 +691,13 @@
     <template id="wallpaperTpl">
         <div class="item-card wallpaper-item">
              <div class="item-header">
-                <h4 class="item-title">
+                <h3 class="item-title">
                      <span data-item-title></span>:&nbsp;
                      <button type="button" class="item-type-changer" data-act="change-type">
                         <span class="item-type-display">วอลเปเปอร์</span>
                         <i class="ph-bold ph-caret-down"></i>
                     </button>
-                </h4>
+                </h3>
                  <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน" aria-label="ระงับหรือใช้งานรายการนี้"><i class="ph-bold ph-pause-circle"></i></button>
                     <button type="button" class="btn-icon danger" data-act="del-item" title="ลบ" aria-label="ลบรายการวอลเปเปอร์"><i class="ph-bold ph-x"></i></button>
@@ -710,12 +714,12 @@
 
             <div class="item-grid">
                 <div class="form-group">
-                    <label>ราคา/ม้วน</label>
-                    <input type="text" inputmode="numeric" name="wallpaper_price_roll" placeholder="0">
+                    <label for="wallpaper_price_roll">ราคา/ม้วน</label>
+                    <input type="text" id="wallpaper_price_roll" inputmode="numeric" name="wallpaper_price_roll" placeholder="0">
                 </div>
                 <div class="form-group">
-                    <label>สูง (ม.)</label>
-                    <input type="number" step="0.01" inputmode="decimal" name="wallpaper_height_m" placeholder="0.00">
+                    <label for="wallpaper_height_m">สูง (ม.)</label>
+                    <input type="number" id="wallpaper_height_m" step="0.01" inputmode="decimal" name="wallpaper_height_m" placeholder="0.00">
                 </div>
                 <div class="form-group full-width-item">
                     <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
@@ -729,8 +733,8 @@
                 <div class="item-grid">
                     <div class="form-group-with-favorites">
                         <div class="form-group">
-                           <label>รหัสวอลล์เปเปอร์</label>
-                           <input type="text" name="wallpaper_code" placeholder="-" data-favorite-type="wallpaper">
+                           <label for="wallpaper_code">รหัสวอลล์เปเปอร์</label>
+                           <input type="text" id="wallpaper_code" name="wallpaper_code" placeholder="-" data-favorite-type="wallpaper">
                             <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="wallpaper" title="เพิ่ม/ลบ รหัสโปรด" aria-label="เพิ่มหรือลบรหัสวอลเปเปอร์ในรายการโปรด">
                                <i class="ph ph-star"></i>
                            </button>
@@ -738,12 +742,12 @@
                        <div class="favorite-chips-container"></div>
                    </div>
                     <div class="form-group">
-                        <label>ค่าช่าง/ม้วน</label>
-                        <input type="text" inputmode="numeric" name="wallpaper_install_cost" placeholder="300" value="300">
+                        <label for="wallpaper_install_cost">ค่าช่าง/ม้วน</label>
+                        <input type="text" id="wallpaper_install_cost" inputmode="numeric" name="wallpaper_install_cost" placeholder="300" value="300">
                     </div>
                     <div class="form-group full-width-item">
-                        <label>หมายเหตุ</label>
-                        <input type="text" name="wallpaper_notes" placeholder="-">
+                        <label for="wallpaper_notes">หมายเหตุ</label>
+                        <input type="text" id="wallpaper_notes" name="wallpaper_notes" placeholder="-">
                     </div>
                 </div>
             </div>
@@ -754,7 +758,7 @@
 
     <template id="wallTpl">
         <div class="wall-input-row">
-            <input type="number" step="0.01" inputmode="decimal" name="wall_width_m" placeholder="0.00">
+            <input type="number" step="0.01" inputmode="decimal" name="wall_width_m" placeholder="0.00" aria-label="ความกว้างผนัง">
             <button type="button" class="btn-icon btn-icon-small danger" data-act="del-wall" title="ลบผนัง" aria-label="ลบผนัง">
                 <i class="ph-bold ph-x"></i>
             </button>
