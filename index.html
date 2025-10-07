@@ -11,7 +11,8 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://unpkg.com">
     
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;500;700&display=swap">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;500;700&display=swap"></noscript>
     
     <style>
         :root {
@@ -107,8 +108,8 @@
     <noscript></noscript>
 
     <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
-  <script type="module" crossorigin src="./assets/index-CVd2Qfqi.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-lMwI7Em1.css">
+  <script type="module" crossorigin src="./assets/index-CU2wRmXl.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CvoW6AfW.css">
 </head>
 <body>
 
@@ -528,13 +529,13 @@
     <template id="setTpl">
         <div class="item-card set-item">
             <div class="item-header">
-                <h3 class="item-title">
+                <div class="item-title" role="heading" aria-level="3">
                      <span data-item-title></span>:&nbsp;
                      <button type="button" class="item-type-changer" data-act="change-type">
                         <span class="item-type-display">ผ้าม่าน</span>
                         <i class="ph-bold ph-caret-down"></i>
                     </button>
-                </h3>
+                </div>
                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน" aria-label="ระงับหรือใช้งานรายการนี้"><i class="ph-bold ph-pause-circle"></i></button>
                     <button type="button" class="btn-icon danger" data-act="del-item" title="ลบ" aria-label="ลบรายการผ้าม่าน"><i class="ph-bold ph-x"></i></button>
@@ -633,13 +634,13 @@
     <template id="areaBasedTpl">
         <div class="item-card area-based-item">
              <div class="item-header">
-                <h3 class="item-title">
+                <div class="item-title" role="heading" aria-level="3">
                      <span data-item-title></span>:&nbsp;
                      <button type="button" class="item-type-changer" data-act="change-type">
                         <span class="item-type-display">ของตกแต่ง</span>
                         <i class="ph-bold ph-caret-down"></i>
                     </button>
-                </h3>
+                </div>
                 <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน" aria-label="ระงับหรือใช้งานรายการนี้"><i class="ph-bold ph-pause-circle"></i></button>
                     <button type="button" class="btn-icon danger" data-act="del-item" title="ลบ" aria-label="ลบรายการ"><i class="ph-bold ph-x"></i></button>
@@ -690,13 +691,13 @@
     <template id="wallpaperTpl">
         <div class="item-card wallpaper-item">
              <div class="item-header">
-                <h3 class="item-title">
+                <div class="item-title" role="heading" aria-level="3">
                      <span data-item-title></span>:&nbsp;
                      <button type="button" class="item-type-changer" data-act="change-type">
                         <span class="item-type-display">วอลเปเปอร์</span>
                         <i class="ph-bold ph-caret-down"></i>
                     </button>
-                </h3>
+                </div>
                  <div class="item-actions">
                     <button type="button" class="btn-icon" data-act="toggle-suspend" title="ระงับ/ใช้งาน" aria-label="ระงับหรือใช้งานรายการนี้"><i class="ph-bold ph-pause-circle"></i></button>
                     <button type="button" class="btn-icon danger" data-act="del-item" title="ลบ" aria-label="ลบรายการวอลเปเปอร์"><i class="ph-bold ph-x"></i></button>
