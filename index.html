@@ -14,106 +14,16 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;500;700&display=swap"></noscript>
     
-    <style>
-        :root {
-            --font-family: 'Noto Sans Thai', sans-serif;
-            --border-radius-sm: 8px;
-            --border-radius-md: 12px;
-            --border-radius-lg: 16px;
-            --border-radius-xl: 28px;
-            --primary: #4A69E2;
-            --on-primary: #FFFFFF;
-            --primary-container: #DDE2FF;
-            --on-primary-container: #001B3F;
-            --background: #FEFBFF;
-            --surface: #F8F9FC;
-            --surface-container: #F3F4F7;
-            --surface-container-high: #EAEFF9;
-            --on-surface: #1B1B1F;
-            --on-surface-variant: #45464F;
-            --outline: #DDE2E7;
-            --shadow-color: rgba(74, 105, 226, 0.1);
-            --glow-color: rgba(74, 105, 226, 0.15);
-            --shadow-md: 0 4px 15px var(--shadow-color), 0 2px 20px var(--glow-color);
-            --glass-bg: rgba(248, 249, 252, 0.9);
-            --glass-border: rgba(255, 255, 255, 0.6);
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: var(--font-family);
-            background-color: var(--background);
-            color: var(--on-surface);
-            margin: 0;
-            padding-bottom: 100px;
-        }
-        h1, h2, h3, h4 { color: var(--on-surface); font-weight: 700; }
-        i.ph { font-size: 1.25em; vertical-align: middle; }
-        #app-container { max-width: 800px; margin: 0 auto; padding: 1rem; }
-        .main-header {
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 100;
-            border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
-            margin: 0 auto 1rem; max-width: 824px; width: calc(100% - 8px);
-            box-shadow: var(--shadow-md), inset 0 1px 1px var(--glass-border);
-        }
-        .header-title-group { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
-        .main-header h1 { font-size: 1.25rem; color: var(--primary); white-space: nowrap; }
-        .header-actions { display: flex; align-items: center; gap: 0.5rem; }
-        .card {
-            background-color: var(--surface);
-            border-radius: var(--border-radius-lg);
-            border: 1px solid var(--outline);
-            margin-bottom: 1.5rem;
-            box-shadow: var(--shadow-md);
-            overflow: hidden;
-            position: relative;
-        }
-        .card summary {
-            list-style: none; display: flex; justify-content: space-between; align-items: center;
-            padding: 0.5rem 0.5rem 0.5rem 1.25rem; cursor: pointer; background-color: transparent; gap: 0.5rem;
-        }
-        .card summary::-webkit-details-marker { display: none; }
-        .card .expand-icon { transition: transform 0.3s ease; font-size: 1.5rem; color: var(--on-surface-variant); }
-        .card[open] > summary .expand-icon { transform: rotate(180deg); }
-        .card summary h2 { font-size: 1.1rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 0.75rem; flex-grow: 1; }
-        .card-content { padding: 0.25rem 0.50rem 0.50rem 0.50rem; display: flex; flex-direction: column; gap: 1rem; }
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: var(--border-radius-xl); border: none; font-family: var(--font-family); font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; -webkit-tap-highlight-color: transparent; }
-        .btn-secondary { background-color: var(--primary-container); color: var(--on-primary-container); }
-        .header-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: none; border: none; border-radius: 50%; width: 44px; height: 44px; color: var(--on-surface-variant); cursor: pointer; transition: all 0.3s; }
-        .summary-footer {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border-top: 1px solid var(--glass-border);
-            padding: 0.75rem; z-index: 50;
-            box-shadow: 0 -5px 30px var(--shadow-color), inset 0 1px 1px var(--glass-border);
-        }
-        .summary-grid {
-            display: flex; 
-            justify-content: space-between;
-            align-items: center;
-            gap: 0.75rem;
-            max-width: 800px; margin: 0 auto;
-        }
-        .footer-actions { display: flex; align-items: center; gap: 0.25rem; }
-        .footer-totals { text-align: right; flex-shrink: 0; background: none; border: none; font-family: var(--font-family); padding: 0; cursor: pointer; border-radius: var(--border-radius-sm); }
-        .original-total { display: none; font-size: 0.9rem; color: #BA1A1A; text-decoration: line-through; }
-        .grand-total { font-size: 1.3rem; font-weight: 700; color: var(--on-surface); }
-    </style>
-    
     <noscript></noscript>
 
     <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
-  <script type="module" crossorigin src="./assets/index-CU2wRmXl.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-CvoW6AfW.css">
+  <script type="module" crossorigin src="./assets/index-D5WcvUKj.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CGOEfiM9.css">
 </head>
 <body>
 
     <div id="toast-container"></div>
+    <label for="fileImporter" class="visually-hidden">Import quotation data from JSON file</label>
     <input type="file" id="fileImporter" accept=".json" class="hidden">
 
     <header class="main-header">
@@ -162,17 +72,20 @@
                 <div class="card-content" id="customerInfo">
                     <div class="form-grid-2">
                         <div class="form-group">
-                            <label for="customer_name">ชื่อลูกค้า</label>
-                            <input type="text" id="customer_name" name="customer_name" placeholder="ระบุชื่อ">
+                            <label>ชื่อลูกค้า
+                                <input type="text" id="customer_name" name="customer_name" placeholder="ระบุชื่อ">
+                            </label>
                         </div>
                         <div class="form-group">
-                            <label for="customer_phone">เบอร์โทรศัพท์</label>
-                            <input type="tel" id="customer_phone" name="customer_phone" placeholder="ระบุเบอร์โทร">
+                            <label>เบอร์โทรศัพท์
+                                <input type="tel" id="customer_phone" name="customer_phone" placeholder="ระบุเบอร์โทร">
+                            </label>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="customer_address">ที่อยู่</label>
-                        <textarea id="customer_address" name="customer_address" placeholder="ระบุที่อยู่" rows="2"></textarea>
+                        <label>ที่อยู่
+                            <textarea id="customer_address" name="customer_address" placeholder="ระบุที่อยู่" rows="2"></textarea>
+                        </label>
                     </div>
                 </div>
             </details>
@@ -244,11 +157,13 @@
                     <span id="discountSubtotal" class="discount-value">0</span>
                 </div>
                 <div class="discount-row input-row">
-                    <label for="discountPercent" class="discount-label">ส่วนลด (%)</label>
+                    <span class="discount-label">ส่วนลด (%)</span>
+                    <label for="discountPercent" class="visually-hidden">ส่วนลดเป็นเปอร์เซ็นต์</label>
                     <input type="number" id="discountPercent" inputmode="decimal" class="discount-input">
                 </div>
                 <div class="discount-row input-row">
-                    <label for="discountAmount" class="discount-label">ส่วนลด (บาท)</label>
+                    <span class="discount-label">ส่วนลด (บาท)</span>
+                    <label for="discountAmount" class="visually-hidden">ส่วนลดเป็นบาท</label>
                     <input type="text" id="discountAmount" inputmode="decimal" class="discount-input">
                 </div>
                 <hr>
@@ -321,7 +236,7 @@
             <h3>ตัวเลือกใบเสนอราคา</h3>
             
             <div class="form-group" style="margin-top: 1.5rem;">
-                <label style="padding-left: 0;">รูปแบบภาษีมูลค่าเพิ่ม (VAT)</label>
+                <label>รูปแบบภาษีมูลค่าเพิ่ม (VAT)</label>
                 <div class="radio-group">
                     <label>
                         <input type="radio" name="vat_option" value="include" checked>
@@ -335,21 +250,23 @@
             </div>
 
             <div class="form-group" style="margin-top: 1.5rem;">
-                <label for="pageBreakBuffer" style="padding-left: 0;">พื้นที่สำรองท้ายหน้า (บรรทัด)</label>
+                <label>พื้นที่สำรองท้ายหน้า (บรรทัด)
                  <div class="range-slider-group">
                     <input type="range" id="pageBreakBuffer" name="page_break_buffer" min="0" max="10" step="1" value="3">
                     <span id="pageBreakBufferValue" class="range-slider-value">3</span>
                 </div>
+                </label>
                 <small style="text-align: center; margin-top: 4px;">ป้องกันการเหลือรายการเดียวในหน้าสุดท้าย (แนะนำ 2-4)</small>
             </div>
 
             <div class="form-group" style="margin-top: 1.5rem;">
-                <label for="exportMethod" style="padding-left: 0;">วิธีสร้างเอกสาร</label>
-                <select id="exportMethod" class="select-box">
-                    <option value="direct">วิธีที่ 1: ดาวน์โหลด PDF (คมชัดสุด)</option>
-                    <option value="print">วิธีที่ 2: ใช้ Browser พิมพ์ (แนะนำ)</option>
-                    <option value="html">วิธีที่ 3: ดาวน์โหลด HTML (สำรอง)</option>
-                </select>
+                <label>วิธีสร้างเอกสาร
+                    <select id="exportMethod" class="select-box">
+                        <option value="direct">วิธีที่ 1: ดาวน์โหลด PDF (คมชัดสุด)</option>
+                        <option value="print">วิธีที่ 2: ใช้ Browser พิมพ์ (แนะนำ)</option>
+                        <option value="html">วิธีที่ 3: ดาวน์โหลด HTML (สำรอง)</option>
+                    </select>
+                </label>
                 <small class="field-hint">วิธีที่ 1 ให้ผลลัพธ์ดีที่สุด / หากหน้าขาวให้ลองวิธีที่ 2</small>
             </div>
 
@@ -386,12 +303,14 @@
             <h3 id="favAddTitle">เพิ่มรายการโปรด</h3>
             <div id="favAddBody" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
                 <div class="form-group">
-                    <label for="fav_code_add">รหัส</label>
-                    <input type="text" name="fav_code_add" id="fav_code_add" placeholder="รหัสใหม่">
+                    <label>รหัส
+                        <input type="text" name="fav_code_add" placeholder="รหัสใหม่">
+                    </label>
                 </div>
                 <div class="form-group">
-                    <label for="fav_price_add">ราคา</label>
-                    <input type="text" inputmode="numeric" name="fav_price_add" id="fav_price_add" placeholder="ราคา">
+                    <label>ราคา
+                        <input type="text" inputmode="numeric" name="fav_price_add" placeholder="ราคา">
+                    </label>
                 </div>
             </div>
             <div class="modal-actions">
@@ -406,12 +325,14 @@
             <h3 id="favEditTitle">แก้ไขรายการโปรด</h3>
             <div id="favEditBody" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
                 <div class="form-group">
-                    <label for="fav_code_edit">รหัส</label>
-                    <input type="text" name="fav_code_edit" id="fav_code_edit">
+                    <label>รหัส
+                        <input type="text" name="fav_code_edit">
+                    </label>
                 </div>
                 <div class="form-group">
-                    <label for="fav_price_edit">ราคา</label>
-                    <input type="text" inputmode="numeric" name="fav_price_edit" id="fav_price_edit">
+                    <label>ราคา
+                        <input type="text" inputmode="numeric" name="fav_price_edit">
+                    </label>
                 </div>
             </div>
             <div class="modal-actions">
@@ -500,11 +421,22 @@
     <template id="roomTpl">
         <details class="card room-card" data-room>
             <summary>
-                <div class="form-group">
-                    <input type="text" name="room_name" class="room-name-input" placeholder="ห้อง...">
-                </div>
-                <div class="room-summary-controls">
-                    <div class="room-brief" data-room-brief></div>
+                <span class="room-name-display">
+                    <i class="ph-bold ph-map-pin"></i>
+                    <span data-room-name-display>ห้อง</span>
+                </span>
+                <span class="room-summary-controls">
+                    <span class="room-brief" data-room-brief></span>
+                    <i class="ph-bold ph-caret-down expand-icon"></i>
+                </span>
+            </summary>
+            <div class="card-content">
+                <div class="room-header-controls">
+                    <div class="form-group">
+                        <label>ชื่อห้อง
+                            <input type="text" name="room_name" class="room-name-input" placeholder="ห้อง...">
+                        </label>
+                    </div>
                     <div class="room-options-container">
                         <button type="button" class="btn-icon" data-act="toggle-room-menu" title="ตัวเลือกห้อง" aria-label="ตัวเลือกเพิ่มเติมสำหรับห้องนี้">
                             <i class="ph-bold ph-dots-three-vertical"></i>
@@ -516,8 +448,6 @@
                         </div>
                     </div>
                 </div>
-            </summary>
-            <div class="card-content">
                 <div class="items-container" data-all-items></div>
             </div>
             <footer class="card-footer" style="justify-content: center;">
@@ -544,36 +474,42 @@
 
             <div class="item-grid">
                 <div class="form-group">
-                    <label for="width_m">กว้าง (ม.)</label>
-                    <input type="number" id="width_m" step="0.01" inputmode="decimal" name="width_m" placeholder="0.00">
+                    <label>กว้าง (ม.)
+                        <input type="number" step="0.01" inputmode="decimal" name="width_m" placeholder="0.00">
+                    </label>
                 </div>
                 <div class="form-group">
-                    <label for="height_m">สูง (ม.)</label>
-                    <input type="number" id="height_m" step="0.01" inputmode="decimal" name="height_m" placeholder="0.00">
+                    <label>สูง (ม.)
+                        <input type="number" step="0.01" inputmode="decimal" name="height_m" placeholder="0.00">
+                    </label>
                 </div>
                 <div class="form-group">
-                    <label for="set_style">รูปแบบ</label>
-                    <select name="set_style" id="set_style">
-                        <option value="ลอน">ลอน</option>
-                        <option value="ตาไก่">ตาไก่</option>
-                        <option value="จีบ">จีบ</option>
-                    </select>
+                    <label>รูปแบบ
+                        <select name="set_style">
+                            <option value="ลอน">ลอน</option>
+                            <option value="ตาไก่">ตาไก่</option>
+                            <option value="จีบ">จีบ</option>
+                        </select>
+                    </label>
                 </div>
                 <div class="form-group">
-                    <label for="fabric_variant">ชนิดผ้า</label>
-                    <select name="fabric_variant" id="fabric_variant">
-                        <option value="ทึบ">ทึบ</option>
-                        <option value="ทึบ&โปร่ง">ทึบ & โปร่ง</option>
-                        <option value="โปร่ง">โปร่ง</option>
-                    </select>
+                    <label>ชนิดผ้า
+                        <select name="fabric_variant">
+                            <option value="ทึบ">ทึบ</option>
+                            <option value="ทึบ&โปร่ง">ทึบ & โปร่ง</option>
+                            <option value="โปร่ง">โปร่ง</option>
+                        </select>
+                    </label>
                 </div>
                 <div class="form-group">
-                    <label for="set_price_per_m">ราคาผ้าทึบ</label>
-                    <select name="set_price_per_m" id="set_price_per_m"></select>
+                    <label>ราคาผ้าทึบ
+                        <select name="set_price_per_m"></select>
+                    </label>
                 </div>
                 <div class="form-group hidden" data-sheer-wrap>
-                    <label for="sheer_price_per_m">ราคาผ้าโปร่ง</label>
-                    <select name="sheer_price_per_m" id="sheer_price_per_m"></select>
+                    <label>ราคาผ้าโปร่ง
+                        <select name="sheer_price_per_m"></select>
+                    </label>
                 </div>
                 <div class="form-group full-width-item">
                     <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
@@ -587,8 +523,9 @@
                 <div class="item-grid">
                     <div class="form-group-with-favorites">
                         <div class="form-group">
-                            <label for="fabric_code">รหัสผ้าทึบ</label>
-                            <input type="text" id="fabric_code" name="fabric_code" placeholder="-" data-favorite-type="fabric">
+                            <label>รหัสผ้าทึบ
+                                <input type="text" name="fabric_code" placeholder="-" data-favorite-type="fabric">
+                            </label>
                              <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="fabric" title="เพิ่ม/ลบ รหัสโปรด" aria-label="เพิ่มหรือลบรหัสผ้าทึบในรายการโปรด">
                                 <i class="ph ph-star"></i>
                             </button>
@@ -597,8 +534,9 @@
                     </div>
                      <div class="form-group-with-favorites hidden" data-sheer-code-wrap>
                          <div class="form-group">
-                            <label for="sheer_fabric_code">รหัสผ้าโปร่ง</label>
-                            <input type="text" id="sheer_fabric_code" name="sheer_fabric_code" placeholder="-" data-favorite-type="sheer">
+                            <label>รหัสผ้าโปร่ง
+                                <input type="text" name="sheer_fabric_code" placeholder="-" data-favorite-type="sheer">
+                            </label>
                              <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="sheer" title="เพิ่ม/ลบ รหัสโปรด" aria-label="เพิ่มหรือลบรหัสผ้าโปร่งในรายการโปรด">
                                 <i class="ph ph-star"></i>
                             </button>
@@ -606,24 +544,27 @@
                         <div class="favorite-chips-container"></div>
                     </div>
                     <div class="form-group">
-                        <label for="opening_style">รูปแบบเปิด</label>
-                        <select name="opening_style" id="opening_style">
-                            <option value="แยกกลาง">แยกกลาง</option>
-                            <option value="รวบซ้าย">รวบซ้าย</option>
-                            <option value="รวบขวา">รวบขวา</option>
-                        </select>
+                        <label>รูปแบบเปิด
+                            <select name="opening_style">
+                                <option value="แยกกลาง">แยกกลาง</option>
+                                <option value="รวบซ้าย">รวบซ้าย</option>
+                                <option value="รวบขวา">รวบขวา</option>
+                            </select>
+                        </label>
                     </div>
                     <div class="form-group">
-                        <label for="track_color">สีราง</label>
-                        <select name="track_color" id="track_color">
-                            <option value="ขาว" selected>ขาว</option>
-                            <option value="ดำ">ดำ</option>
-                            <option value="น้ำตาล">น้ำตาล</option>
-                        </select>
+                        <label>สีราง
+                            <select name="track_color">
+                                <option value="ขาว" selected>ขาว</option>
+                                <option value="ดำ">ดำ</option>
+                                <option value="น้ำตาล">น้ำตาล</option>
+                            </select>
+                        </label>
                     </div>
                     <div class="form-group full-width-item">
-                        <label for="notes">หมายเหตุ</label>
-                        <input type="text" id="notes" name="notes" placeholder="- ">
+                        <label>หมายเหตุ
+                            <input type="text" name="notes" placeholder="- ">
+                        </label>
                     </div>
                 </div>
             </div>
@@ -648,16 +589,19 @@
             </div>
             <div class="item-grid">
                 <div class="form-group">
-                    <label for="area_width_m">กว้าง (ม.)</label>
-                    <input type="number" id="area_width_m" step="0.01" inputmode="decimal" name="area_width_m" placeholder="0.00">
+                    <label>กว้าง (ม.)
+                        <input type="number" step="0.01" inputmode="decimal" name="area_width_m" placeholder="0.00">
+                    </label>
                 </div>
                  <div class="form-group">
-                    <label for="area_height_m">สูง (ม.)</label>
-                    <input type="number" id="area_height_m" step="0.01" inputmode="decimal" name="area_height_m" placeholder="0.00">
+                    <label>สูง (ม.)
+                        <input type="number" step="0.01" inputmode="decimal" name="area_height_m" placeholder="0.00">
+                    </label>
                 </div>
                 <div class="form-group full-width-item">
-                    <label for="area_price_sqyd">ราคา/ตร.หลา</label>
-                    <input type="text" id="area_price_sqyd" inputmode="numeric" name="area_price_sqyd" placeholder="0">
+                    <label>ราคา/ตร.หลา
+                        <input type="text" inputmode="numeric" name="area_price_sqyd" placeholder="0">
+                    </label>
                 </div>
                 <div class="form-group full-width-item">
                      <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
@@ -670,8 +614,9 @@
                 <div class="item-grid">
                     <div class="form-group-with-favorites full-width-item">
                         <div class="form-group">
-                            <label for="area_code">รหัสสินค้า</label>
-                            <input type="text" id="area_code" name="area_code" placeholder="-" data-favorite-type="deco">
+                            <label>รหัสสินค้า
+                                <input type="text" name="area_code" placeholder="-" data-favorite-type="deco">
+                            </label>
                             <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="deco" title="เพิ่ม/ลบ รหัสโปรด" aria-label="เพิ่มหรือลบรหัสในรายการโปรด">
                                 <i class="ph ph-star"></i>
                             </button>
@@ -679,8 +624,9 @@
                         <div class="favorite-chips-container"></div>
                     </div>
                     <div class="form-group full-width-item">
-                        <label for="area_notes">หมายเหตุ</label>
-                        <input type="text" id="area_notes" name="area_notes" placeholder="-">
+                        <label>หมายเหตุ
+                            <input type="text" name="area_notes" placeholder="-">
+                        </label>
                     </div>
                 </div>
             </div>
@@ -714,12 +660,14 @@
 
             <div class="item-grid">
                 <div class="form-group">
-                    <label for="wallpaper_price_roll">ราคา/ม้วน</label>
-                    <input type="text" id="wallpaper_price_roll" inputmode="numeric" name="wallpaper_price_roll" placeholder="0">
+                    <label>ราคา/ม้วน
+                        <input type="text" inputmode="numeric" name="wallpaper_price_roll" placeholder="0">
+                    </label>
                 </div>
                 <div class="form-group">
-                    <label for="wallpaper_height_m">สูง (ม.)</label>
-                    <input type="number" id="wallpaper_height_m" step="0.01" inputmode="decimal" name="wallpaper_height_m" placeholder="0.00">
+                    <label>สูง (ม.)
+                        <input type="number" step="0.01" inputmode="decimal" name="wallpaper_height_m" placeholder="0.00">
+                    </label>
                 </div>
                 <div class="form-group full-width-item">
                     <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
@@ -733,8 +681,9 @@
                 <div class="item-grid">
                     <div class="form-group-with-favorites">
                         <div class="form-group">
-                           <label for="wallpaper_code">รหัสวอลล์เปเปอร์</label>
-                           <input type="text" id="wallpaper_code" name="wallpaper_code" placeholder="-" data-favorite-type="wallpaper">
+                           <label>รหัสวอลล์เปเปอร์
+                               <input type="text" name="wallpaper_code" placeholder="-" data-favorite-type="wallpaper">
+                           </label>
                             <button type="button" class="btn-icon btn-favorite" data-act="toggle-favorite" data-type="wallpaper" title="เพิ่ม/ลบ รหัสโปรด" aria-label="เพิ่มหรือลบรหัสวอลเปเปอร์ในรายการโปรด">
                                <i class="ph ph-star"></i>
                            </button>
@@ -742,12 +691,14 @@
                        <div class="favorite-chips-container"></div>
                    </div>
                     <div class="form-group">
-                        <label for="wallpaper_install_cost">ค่าช่าง/ม้วน</label>
-                        <input type="text" id="wallpaper_install_cost" inputmode="numeric" name="wallpaper_install_cost" placeholder="300" value="300">
+                        <label>ค่าช่าง/ม้วน
+                            <input type="text" inputmode="numeric" name="wallpaper_install_cost" placeholder="300" value="300">
+                        </label>
                     </div>
                     <div class="form-group full-width-item">
-                        <label for="wallpaper_notes">หมายเหตุ</label>
-                        <input type="text" id="wallpaper_notes" name="wallpaper_notes" placeholder="-">
+                        <label>หมายเหตุ
+                            <input type="text" name="wallpaper_notes" placeholder="-">
+                        </label>
                     </div>
                 </div>
             </div>
@@ -758,7 +709,8 @@
 
     <template id="wallTpl">
         <div class="wall-input-row">
-            <input type="number" step="0.01" inputmode="decimal" name="wall_width_m" placeholder="0.00" aria-label="ความกว้างผนัง">
+            <label for="wall_width_m_tpl" class="visually-hidden">ความกว้างผนัง</label>
+            <input id="wall_width_m_tpl" type="number" step="0.01" inputmode="decimal" name="wall_width_m" placeholder="0.00">
             <button type="button" class="btn-icon btn-icon-small danger" data-act="del-wall" title="ลบผนัง" aria-label="ลบผนัง">
                 <i class="ph-bold ph-x"></i>
             </button>
