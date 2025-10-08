@@ -17,8 +17,8 @@
     <noscript></noscript>
 
     <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
-  <script type="module" crossorigin src="./assets/index-D5WcvUKj.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-CGOEfiM9.css">
+  <script type="module" crossorigin src="./assets/index-DvAdxds7.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-C27XBk26.css">
 </head>
 <body>
 
@@ -421,10 +421,10 @@
     <template id="roomTpl">
         <details class="card room-card" data-room>
             <summary>
-                <span class="room-name-display">
+                <h2>
                     <i class="ph-bold ph-map-pin"></i>
                     <span data-room-name-display>ห้อง</span>
-                </span>
+                </h2>
                 <span class="room-summary-controls">
                     <span class="room-brief" data-room-brief></span>
                     <i class="ph-bold ph-caret-down expand-icon"></i>
@@ -433,13 +433,12 @@
             <div class="card-content">
                 <div class="room-header-controls">
                     <div class="form-group">
-                        <label>ชื่อห้อง
-                            <input type="text" name="room_name" class="room-name-input" placeholder="ห้อง...">
-                        </label>
+                        <label class="visually-hidden">ชื่อห้อง</label>
+                        <input type="text" name="room_name" class="room-name-input" placeholder="ระบุชื่อห้อง...">
                     </div>
                     <div class="room-options-container">
                         <button type="button" class="btn-icon" data-act="toggle-room-menu" title="ตัวเลือกห้อง" aria-label="ตัวเลือกเพิ่มเติมสำหรับห้องนี้">
-                            <i class="ph-bold ph-dots-three-vertical"></i>
+                            <i class="ph-bold ph-gear-six"></i>
                         </button>
                         <div class="room-options-menu">
                             <a href="#" data-act="toggle-suspend-room"><i class="ph ph-pause-circle"></i> <span>ระงับ/ใช้งานห้องนี้</span></a>
@@ -449,10 +448,11 @@
                     </div>
                 </div>
                 <div class="items-container" data-all-items></div>
+                <div class="room-actions-footer">
+                    <button type="button" class="btn btn-secondary" data-act="collapse-room"><i class="ph ph-caret-up"></i><span>ย่อห้อง</span></button>
+                    <button type="button" class="btn btn-primary" data-act="add-item"><i class="ph ph-plus"></i><span>เพิ่มรายการ</span></button>
+                </div>
             </div>
-            <footer class="card-footer" style="justify-content: center;">
-                <button type="button" class="btn btn-secondary" data-act="add-item"><i class="ph ph-plus"></i>เพิ่มรายการ</button>
-            </footer>
         </details>
     </template>
     
