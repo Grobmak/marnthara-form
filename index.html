@@ -510,6 +510,16 @@
                         </select>
                     </label>
                 </div>
+                <div class="form-group">
+                    <label>ราคาผ้าทึบ
+                        <select name="set_price_per_m"></select>
+                    </label>
+                </div>
+                <div class="form-group hidden" data-sheer-wrap>
+                    <label>ราคาผ้าโปร่ง
+                        <select name="sheer_price_per_m"></select>
+                    </label>
+                </div>
                 <div class="form-group full-width-item">
                     <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
                         <i class="ph ph-caret-down"></i>
@@ -520,17 +530,7 @@
 
             <div class="item-details-more">
                 <div class="item-grid">
-                    <div class="form-group">
-                        <label>ราคาผ้าทึบ
-                            <select name="set_price_per_m"></select>
-                        </label>
-                    </div>
-                    <div class="form-group hidden" data-sheer-wrap>
-                        <label>ราคาผ้าโปร่ง
-                            <select name="sheer_price_per_m"></select>
-                        </label>
-                    </div>
-                    <div class="form-group-with-favorites full-width-item">
+                    <div class="form-group-with-favorites">
                         <div class="form-group">
                             <label>รหัสผ้าทึบ
                                 <input type="text" name="fabric_code" placeholder="-" data-favorite-type="fabric">
@@ -541,7 +541,7 @@
                         </div>
                         <div class="favorite-chips-container"></div>
                     </div>
-                     <div class="form-group-with-favorites full-width-item hidden" data-sheer-code-wrap>
+                     <div class="form-group-with-favorites hidden" data-sheer-code-wrap>
                          <div class="form-group">
                             <label>รหัสผ้าโปร่ง
                                 <input type="text" name="sheer_fabric_code" placeholder="-" data-favorite-type="sheer">
@@ -608,6 +608,11 @@
                     </label>
                 </div>
                 <div class="form-group full-width-item">
+                    <label>ราคา/ตร.หลา
+                        <input type="text" inputmode="numeric" name="area_price_sqyd" placeholder="0">
+                    </label>
+                </div>
+                <div class="form-group full-width-item">
                      <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
                         <i class="ph ph-caret-down"></i>
                         <span>เพิ่มเติม</span>
@@ -616,11 +621,6 @@
             </div>
             <div class="item-details-more">
                 <div class="item-grid">
-                    <div class="form-group full-width-item">
-                        <label>ราคา/ตร.หลา
-                            <input type="text" inputmode="numeric" name="area_price_sqyd" placeholder="0">
-                        </label>
-                    </div>
                     <div class="form-group-with-favorites full-width-item">
                         <div class="form-group">
                             <label>รหัสสินค้า
@@ -669,6 +669,11 @@
 
             <div class="item-grid">
                 <div class="form-group">
+                    <label>ราคา/ม้วน
+                        <input type="text" inputmode="numeric" name="wallpaper_price_roll" placeholder="0">
+                    </label>
+                </div>
+                <div class="form-group">
                     <label>สูง (ม.)
                         <input type="number" step="0.01" inputmode="decimal" name="wallpaper_height_m" placeholder="0.00">
                     </label>
@@ -683,12 +688,7 @@
 
             <div class="item-details-more">
                 <div class="item-grid">
-                    <div class="form-group">
-                        <label>ราคา/ม้วน
-                            <input type="text" inputmode="numeric" name="wallpaper_price_roll" placeholder="0">
-                        </label>
-                    </div>
-                    <div class="form-group-with-favorites full-width-item">
+                    <div class="form-group-with-favorites">
                         <div class="form-group">
                            <label>รหัสวอลล์เปเปอร์
                                <input type="text" name="wallpaper_code" placeholder="-" data-favorite-type="wallpaper">
