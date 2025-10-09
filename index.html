@@ -25,8 +25,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
     </noscript>
 
-  <script type="module" crossorigin src="./assets/index-7tKDQigX.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-DPq54UEg.css">
+  <script type="module" crossorigin src="./assets/index-BFpRKz8n.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DWEMEqq1.css">
 </head>
 <body>
 
@@ -38,16 +38,16 @@
 
     <header class="main-header">
         <div class="header-title-group">
-            <h1>Marnthara</h1>
+            <h1><i class="ph ph-github-logo"></i> Marnthara</h1>
         </div>
         <div class="header-actions">
             <button id="undoBtn" class="header-btn unlockable" title="Undo" aria-label="Undo last action" disabled>
-                <i class="ph-bold ph-arrow-u-up-left"></i>
+                <i class="ph ph-arrow-counter-clockwise"></i>
             </button>
             <div class="menu-container">
                 <button id="menuBtn" class="btn btn-secondary unlockable" title="Menu" aria-haspopup="true" aria-expanded="false" aria-label="เปิดเมนูหลัก">
                     <i class="ph-bold ph-list"></i>
-                    <span>เมนู</span>
+                    <span>Menu</span>
                 </button>
                 <div id="menuDropdown" class="menu-dropdown" role="menu" aria-labelledby="menuBtn">
                     <a href="#" id="overviewBtn" role="menuitem"><i class="ph ph-presentation-chart"></i> สรุปภาพรวม</a>
@@ -114,12 +114,12 @@
         <div class="summary-grid">
             <div class="footer-actions">
                 <button id="lockBtn" class="btn-icon unlockable" title="ล็อค/ปลดล็อคฟอร์ม" aria-label="ล็อคหรือปลดล็อคฟอร์ม">
-                    <i class="ph-bold ph-lock-key-open"></i>
+                    <i class="ph ph-paw-print"></i>
                 </button>
                 
                 <div class="menu-container">
                     <button id="quickNavBtn" class="header-btn unlockable" title="ไปยังห้อง" aria-haspopup="true" aria-expanded="false">
-                        <i class="ph-bold ph-list-dashes"></i>
+                        <i class="ph ph-navigation-arrow"></i>
                         <span id="quickNavBtnText">ไปยังห้อง</span>
                     </button>
                     <div id="quickNavDropdown" class="menu-dropdown" role="menu" aria-labelledby="quickNavBtn">
@@ -297,10 +297,10 @@
             <p>ไฟล์ที่นำเข้ามีข้อมูล 'รายการโปรด' อยู่ด้วย โปรดเลือกวิธีจัดการ:</p>
             <div class="radio-card-group" style="margin-top: 1rem;">
                 <label>
-                    <input type="radio" name="fav_conflict_option" value="overwrite" checked>
+                    <input type="radio" name="fav_conflict_option" value="overwrite">
                     <span class="radio-card-content">
                         <strong>เขียนทับ (Overwrite)</strong>
-                        <small>ใช้ 'รายการโปรด' จากไฟล์นี้ และลบของเก่าทั้งหมด (แนะนำ)</small>
+                        <small>ใช้ 'รายการโปรด' จากไฟล์นี้ และลบของเก่าทั้งหมด</small>
                     </span>
                 </label>
                 <label>
@@ -311,7 +311,7 @@
                     </span>
                 </label>
                  <label>
-                    <input type="radio" name="fav_conflict_option" value="skip">
+                    <input type="radio" name="fav_conflict_option" value="skip" checked>
                      <span class="radio-card-content">
                         <strong>ข้าม (Skip)</strong>
                         <small>ไม่ต้องทำอะไรกับ 'รายการโปรด' และใช้ข้อมูลเก่าต่อไป</small>
@@ -418,21 +418,21 @@
                 <label data-item-type="roller_blind">
                     <input type="radio" name="item_type_option" value="roller_blind">
                      <span class="radio-card-content">
-                        <strong><i class="ph-fill ph-blinds"></i> ม่านม้วน</strong>
+                        <strong><i class="ph-fill ph-scroll"></i> ม่านม้วน</strong>
                         <small>Roller Blinds</small>
                     </span>
                 </label>
                 <label data-item-type="vertical_blind">
                     <input type="radio" name="item_type_option" value="vertical_blind">
                      <span class="radio-card-content">
-                        <strong><i class="ph-fill ph-blinds"></i> ม่านปรับแสง</strong>
+                        <strong><i class="ph-fill ph-sidebar-simple"></i> ม่านปรับแสง</strong>
                         <small>Vertical Blinds</small>
                     </span>
                 </label>
                  <label data-item-type="aluminum_blind">
                     <input type="radio" name="item_type_option" value="aluminum_blind">
                      <span class="radio-card-content">
-                        <strong><i class="ph-fill ph-blinds"></i> มู่ลี่อลูมิเนียม</strong>
+                        <strong><i class="ph-fill ph-stack-simple"></i> มู่ลี่อลูมิเนียม</strong>
                         <small>Aluminium</small>
                     </span>
                 </label>
