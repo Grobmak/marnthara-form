@@ -25,7 +25,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
     </noscript>
 
-  <script type="module" crossorigin src="./assets/index-Dd0uZpp1.js"></script>
+  <script type="module" crossorigin src="./assets/index-7tKDQigX.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-DPq54UEg.css">
 </head>
 <body>
@@ -33,6 +33,8 @@
     <div id="toast-container"></div>
     <label for="fileImporter" class="visually-hidden">Import quotation data from JSON file</label>
     <input type="file" id="fileImporter" accept=".json" class="hidden">
+    <label for="favImporter" class="visually-hidden">Import favorites from JSON file</label>
+    <input type="file" id="favImporter" accept=".json" class="hidden">
 
     <header class="main-header">
         <div class="header-title-group">
@@ -58,6 +60,9 @@
                     <hr>
                     <a href="#" id="importBtn" role="menuitem"><i class="ph ph-download-simple"></i> Import (.json)</a>
                     <a href="#" id="exportBtn" role="menuitem"><i class="ph ph-upload-simple"></i> Export (.json)</a>
+                    <hr>
+                    <a href="#" id="importFavsBtn" role="menuitem"><i class="ph ph-star"></i> Import Favorites</a>
+                    <a href="#" id="exportFavsBtn" role="menuitem"><i class="ph ph-star"></i> Export Favorites</a>
                     <hr>
                     <a href="#" id="clearItemsBtn" class="danger" role="menuitem"><i class="ph ph-wind"></i> ล้างทุกรายการ</a>
                     <a href="#" id="clearAllBtn" class="danger" role="menuitem"><i class="ph ph-trash"></i> ลบข้อมูลทั้งหมด</a>
@@ -282,6 +287,40 @@
             <div class="modal-actions">
                 <button id="exportOptionsCancel" class="btn btn-secondary">ยกเลิก</button>
                 <button id="exportOptionsConfirm" class="btn btn-primary">สร้างเอกสาร</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="favoritesConflictModal" class="modal-wrapper">
+        <div class="modal-content">
+            <h3><i class="ph-fill ph-star"></i> จัดการ 'รายการโปรด'</h3>
+            <p>ไฟล์ที่นำเข้ามีข้อมูล 'รายการโปรด' อยู่ด้วย โปรดเลือกวิธีจัดการ:</p>
+            <div class="radio-card-group" style="margin-top: 1rem;">
+                <label>
+                    <input type="radio" name="fav_conflict_option" value="overwrite" checked>
+                    <span class="radio-card-content">
+                        <strong>เขียนทับ (Overwrite)</strong>
+                        <small>ใช้ 'รายการโปรด' จากไฟล์นี้ และลบของเก่าทั้งหมด (แนะนำ)</small>
+                    </span>
+                </label>
+                <label>
+                    <input type="radio" name="fav_conflict_option" value="merge">
+                     <span class="radio-card-content">
+                        <strong>รวมข้อมูล (Merge)</strong>
+                        <small>เพิ่ม 'รายการโปรด' ใหม่จากไฟล์ โดยไม่ลบของเก่า</small>
+                    </span>
+                </label>
+                 <label>
+                    <input type="radio" name="fav_conflict_option" value="skip">
+                     <span class="radio-card-content">
+                        <strong>ข้าม (Skip)</strong>
+                        <small>ไม่ต้องทำอะไรกับ 'รายการโปรด' และใช้ข้อมูลเก่าต่อไป</small>
+                    </span>
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button id="favoritesConflictCancel" class="btn btn-secondary">ยกเลิก</button>
+                <button id="favoritesConflictConfirm" class="btn btn-primary">ตกลง</button>
             </div>
         </div>
     </div>
@@ -688,6 +727,11 @@
                             <input type="text" inputmode="numeric" name="wallpaper_price_roll" placeholder="0">
                         </label>
                     </div>
+                    <div class="form-group">
+                        <label>ค่าช่าง/ม้วน
+                            <input type="text" inputmode="numeric" name="wallpaper_install_cost" placeholder="300" value="300">
+                        </label>
+                    </div>
                     <div class="form-group-with-favorites full-width-item">
                         <div class="form-group">
                            <label>รหัสวอลล์เปเปอร์
@@ -699,11 +743,6 @@
                        </div>
                        <div class="favorite-chips-container"></div>
                    </div>
-                    <div class="form-group">
-                        <label>ค่าช่าง/ม้วน
-                            <input type="text" inputmode="numeric" name="wallpaper_install_cost" placeholder="300" value="300">
-                        </label>
-                    </div>
                     <div class="form-group full-width-item">
                         <label>หมายเหตุ
                             <input type="text" name="wallpaper_notes" placeholder="-">
