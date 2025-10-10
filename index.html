@@ -25,8 +25,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
     </noscript>
 
-  <script type="module" crossorigin src="./assets/index-C5-bzim3.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-BFZskFRN.css">
+  <script type="module" crossorigin src="./assets/index-DZD93-zk.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CM3dln3z.css">
 </head>
 <body>
 
@@ -54,6 +54,7 @@
                     <hr>
                     <a href="#" id="copyTextBtn" role="menuitem"><i class="ph ph-copy-simple"></i> คัดลอกสรุป (LINE)</a>
                     <a href="#" id="exportPdfBtn" role="menuitem"><i class="ph ph-file-pdf"></i> ใบเสนอราคา (PDF)</a>
+                    <a href="#" id="visualReportsBtn" role="menuitem"><i class="ph ph-browsers"></i> รายงานภาพ</a>
                     <a href="#" id="submitBtn" role="menuitem"><i class="ph ph-paper-plane-tilt"></i> ส่งข้อมูล</a>
                     <hr>
                     <a href="#" id="themeToggleBtn" role="menuitem"><i class="ph ph-moon"></i> <span>สลับธีม</span></a>
@@ -114,7 +115,7 @@
         <div class="summary-grid">
             <div class="footer-actions">
                 <button id="lockBtn" class="btn-icon unlockable" title="ล็อค/ปลดล็อคฟอร์ม" aria-label="ล็อคหรือปลดล็อคฟอร์ม">
-                    <i class="ph-bold ph-lock-key-open"></i>
+                    <i class="ph ph-paw-print"></i>
                 </button>
                 
                 <div class="menu-container">
@@ -241,6 +242,46 @@
             <div class="modal-actions">
                 <button id="copyOptionsCancel" class="btn btn-secondary">ยกเลิก</button>
                 <button id="copyOptionsConfirm" class="btn btn-primary">คัดลอก</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="visualReportsModal" class="modal-wrapper">
+        <div class="modal-content">
+            <h3>เลือกรายงานภาพ</h3>
+            <div class="radio-card-group">
+                <label>
+                    <input type="radio" name="report_type_option" value="lookbook" checked>
+                    <span class="radio-card-content">
+                        <strong><i class="ph-fill ph-palette"></i> Client Look Book</strong>
+                        <small>ใบเสนอราคาฉบับดีไซน์สำหรับลูกค้า</small>
+                    </span>
+                </label>
+                <label>
+                    <input type="radio" name="report_type_option" value="jobcards">
+                     <span class="radio-card-content">
+                        <strong><i class="ph-fill ph-note-pencil"></i> Production Job Cards</strong>
+                        <small>ใบสั่งผลิตแยกชิ้นสำหรับช่างเย็บผ้า</small>
+                    </span>
+                </label>
+                 <label>
+                    <input type="radio" name="report_type_option" value="purchase_order">
+                     <span class="radio-card-content">
+                        <strong><i class="ph-fill ph-shopping-cart-simple"></i> Purchase Order</strong>
+                        <small>สรุปรายการวัสดุสำหรับสั่งซื้อ</small>
+                    </span>
+                </label>
+                <label>
+                    <input type="radio" name="report_type_option" value="kanban">
+                     <span class="radio-card-content">
+                        <strong><i class="ph-fill ph-trello-logo"></i> Project Board</strong>
+                        <small>กระดานสรุปภาพรวมสถานะโปรเจกต์</small>
+                    </span>
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button id="visualReportsCancel" class="btn btn-secondary">ยกเลิก</button>
+                <button id="visualReportsConfirm" class="btn btn-primary">สร้างเอกสาร</button>
             </div>
         </div>
     </div>
