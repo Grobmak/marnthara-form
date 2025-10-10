@@ -25,7 +25,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
     </noscript>
 
-  <script type="module" crossorigin src="./assets/index-DYO6ROw2.js"></script>
+  <script type="module" crossorigin src="./assets/index-C5-bzim3.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-BFZskFRN.css">
 </head>
 <body>
@@ -304,14 +304,14 @@
                     </span>
                 </label>
                 <label>
-                    <input type="radio" name="fav_conflict_option" value="merge">
+                    <input type="radio" name="fav_conflict_option" value="merge" checked>
                      <span class="radio-card-content">
                         <strong>รวมข้อมูล (Merge)</strong>
                         <small>เพิ่ม 'รายการโปรด' ใหม่จากไฟล์ โดยไม่ลบของเก่า</small>
                     </span>
                 </label>
                  <label>
-                    <input type="radio" name="fav_conflict_option" value="skip" checked>
+                    <input type="radio" name="fav_conflict_option" value="skip">
                      <span class="radio-card-content">
                         <strong>ข้าม (Skip)</strong>
                         <small>ไม่ต้องทำอะไรกับ 'รายการโปรด' และใช้ข้อมูลเก่าต่อไป</small>
@@ -457,6 +457,64 @@
             </div>
         </div>
     </div>
+    
+    <div id="hardwareModal" class="modal-wrapper">
+        <div class="modal-content">
+            <h3><i class="ph-fill ph-paint-brush"></i> ตั้งค่าอุปกรณ์ม่าน</h3>
+            <div id="hardwareBody" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                <div class="form-group">
+                    <label>สีราง
+                        <select name="modal_track_color">
+                            <option value="ขาว">ขาว</option>
+                            <option value="ดำ">ดำ</option>
+                            <option value="น้ำตาล">น้ำตาล</option>
+                            <option value="เงิน">เงินด้าน</option>
+                            <option value="ทอง">ทองเดคคอร์</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>สีขาจับ
+                        <select name="modal_bracket_color">
+                            <option value="ขาว">ขาว</option>
+                            <option value="ดำ">ดำ</option>
+                            <option value="น้ำตาล">น้ำตาล</option>
+                            <option value="เงิน">เงินด้าน</option>
+                            <option value="ทอง">ทองเดคคอร์</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>สีหัวราง
+                         <select name="modal_finial_color">
+                            <option value="ขาว">ขาว</option>
+                            <option value="ดำ">ดำ</option>
+                            <option value="น้ำตาล">น้ำตาล</option>
+                            <option value="เงิน">เงินด้าน</option>
+                            <option value="ทอง">ทองเดคคอร์</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="form-group" id="grommetColorGroup">
+                    <label>สีห่วงตาไก่
+                        <select name="modal_grommet_color">
+                             <option value="เงิน">เงิน</option>
+                             <option value="ดำ">ดำ</option>
+                             <option value="น้ำตาล">น้ำตาล</option>
+                             <option value="ทอง">ทอง</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-actions" style="flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; row-gap: 0.75rem; margin-top: 1rem;">
+                 <button id="hardwareApplyToRoom" type="button" class="btn btn-secondary" data-act="apply-hardware-to-room"><i class="ph ph-stack"></i> ใช้กับทั้งห้อง</button>
+                 <div style="display: flex; gap: 0.5rem;">
+                    <button id="hardwareCancel" class="btn btn-secondary">ยกเลิก</button>
+                    <button id="hardwareConfirm" class="btn btn-primary">ตกลง</button>
+                 </div>
+            </div>
+        </div>
+    </div>
 
 
     <template id="favManagerItemTpl">
@@ -599,14 +657,8 @@
                             </select>
                         </label>
                     </div>
-                    <div class="form-group">
-                        <label>สีราง
-                            <select name="track_color">
-                                <option value="ขาว" selected>ขาว</option>
-                                <option value="ดำ">ดำ</option>
-                                <option value="น้ำตาล">น้ำตาล</option>
-                            </select>
-                        </label>
+                     <div class="form-group">
+                         <button type="button" class="btn-chip" data-act="open-hardware-modal" style="width: 100%; height: 100%; justify-content: center;"><i class="ph ph-paint-brush"></i>&nbsp;ตั้งค่าอุปกรณ์</button>
                     </div>
                     <div class="form-group full-width-item">
                         <label>หมายเหตุ
@@ -614,6 +666,10 @@
                         </label>
                     </div>
                 </div>
+                <input type="hidden" name="track_color" value="ขาว">
+                <input type="hidden" name="bracket_color" value="ขาว">
+                <input type="hidden" name="finial_color" value="ขาว">
+                <input type="hidden" name="grommet_color" value="เงิน">
             </div>
             <div class="item-summary single-line" data-set-summary>0</div>
         </div>
