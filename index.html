@@ -25,8 +25,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
     </noscript>
 
-  <script type="module" crossorigin src="./assets/index-B5zX3ok1.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-BxKWCAvP.css">
+  <script type="module" crossorigin src="./assets/index-DdaAfN8I.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BXSblfdA.css">
 </head>
 <body>
 
@@ -74,6 +74,7 @@
 
     <main id="app-container">
         <div id="filterStatusBar" class="filter-status-bar" aria-live="polite"></div>
+        <div id="suspendedWarningBar" class="suspended-warning-bar" aria-live="polite"></div>
         <form id="orderForm" novalidate autocomplete="off">
             <details class="card" id="customerDetailsCard" open>
                 <summary>
@@ -456,7 +457,7 @@
                 <label data-item-type="wallpaper">
                     <input type="radio" name="item_type_option" value="wallpaper">
                      <span class="radio-card-content">
-                        <strong><i class="ph-fill ph-paint-roller"></i> วอลเปเปอร์</strong>
+                        <strong><i class="ph-fill ph-paint-roller"></i> วอลล์เปเปอร์</strong>
                         <small>Wallpaper</small>
                     </span>
                 </label>
@@ -659,12 +660,6 @@
                         </select>
                     </label>
                 </div>
-                <div class="form-group full-width-item">
-                    <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
-                        <i class="ph ph-caret-down"></i>
-                        <span>เพิ่มเติม</span>
-                    </button>
-                </div>
             </div>
 
             <div class="item-details-more">
@@ -723,6 +718,14 @@
                 <input type="hidden" name="finial_color" value="ขาว">
                 <input type="hidden" name="grommet_color" value="เงิน">
             </div>
+            <div class="item-grid" style="padding-top: 0; padding-bottom: 0.5rem;">
+                <div class="form-group full-width-item">
+                    <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
+                        <i class="ph ph-caret-down"></i>
+                        <span>เพิ่มเติม</span>
+                    </button>
+                </div>
+            </div>
             <div class="item-summary single-line" data-set-summary>0</div>
         </div>
     </template>
@@ -753,12 +756,6 @@
                         <input type="number" step="0.01" inputmode="decimal" name="area_height_m" placeholder="0.00">
                     </label>
                 </div>
-                <div class="form-group full-width-item">
-                     <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
-                        <i class="ph ph-caret-down"></i>
-                        <span>เพิ่มเติม</span>
-                    </button>
-                </div>
             </div>
             <div class="item-details-more">
                 <div class="item-grid">
@@ -783,6 +780,14 @@
                             <input type="text" name="area_notes" placeholder="-">
                         </label>
                     </div>
+                </div>
+            </div>
+            <div class="item-grid" style="padding-top: 0; padding-bottom: 0.5rem;">
+                <div class="form-group full-width-item">
+                     <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
+                        <i class="ph ph-caret-down"></i>
+                        <span>เพิ่มเติม</span>
+                    </button>
                 </div>
             </div>
             <div class="item-summary single-line" data-area-summary>0</div>
@@ -819,12 +824,6 @@
                         <input type="number" step="0.01" inputmode="decimal" name="wallpaper_height_m" placeholder="0.00">
                     </label>
                 </div>
-                <div class="form-group full-width-item">
-                    <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
-                       <i class="ph ph-caret-down"></i>
-                       <span>เพิ่มเติม</span>
-                   </button>
-               </div>
             </div>
 
             <div class="item-details-more">
@@ -858,6 +857,15 @@
                 </div>
             </div>
             
+            <div class="item-grid" style="padding-top: 0; padding-bottom: 0.5rem;">
+                <div class="form-group full-width-item">
+                    <button type="button" class="btn-chip btn-more" data-act="toggle-more-details">
+                       <i class="ph ph-caret-down"></i>
+                       <span>เพิ่มเติม</span>
+                   </button>
+               </div>
+            </div>
+
              <div class="item-summary single-line" data-wallpaper-summary>0</div>
         </div>
     </template>
@@ -874,3 +882,4 @@
 
 </body>
 </html>
+}
