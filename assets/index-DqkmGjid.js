@@ -81,7 +81,7 @@ ${F.name}
 `),S.notes&&t==="owner"&&(n+=`  📝 หมายเหตุ: ${S.notes}
 `),n+=`
 `}),n+=`--- สรุปยอดรวมรางตาไก่ ---
-`;const h=[];c.forEach(S=>{S.fabric_variant.includes("ทึบ")&&h.push(Number(S.width_m)),S.fabric_variant.includes("โปร่ง")&&h.push(Number(S.width_m))});const b=6;h.sort((S,M)=>M-S);const w=[];for(const S of h){let M=!1;for(let B=0;B<w.length;B++)if(w[B]>=S-.001){w[B]-=S,M=!0;break}M||w.push(b-S)}n+=`ต้องใช้รางเต็ม (6 ม.) ทั้งหมด: *${w.length} เส้น*
+`;const h=[];c.forEach(S=>{S.fabric_variant.includes("ทึบ")&&h.push(Number(S.width_m)),S.fabric_variant.includes("โปร่ง")&&h.push(Number(S.width_m))});const b=6;h.sort((S,M)=>M-S);const w=[];for(const S of h){let M=!1;for(let B=0;B<w.length;B++)if(w[B]>=S-.001){w[B]-=S,M=!0;break}M||w.push(b-S)}n+=`ใช้รางเต็ม (6 ม.) ทั้งหมด: *${w.length} เส้น*
 
 `;const x=h.reduce((S,M)=>{const B=M.toFixed(2);return S[B]=(S[B]||0)+1,S},{}),$=Object.entries(x).sort((S,M)=>parseFloat(M[0])-parseFloat(S[0]));if($.length>0){n+=`*สรุปจำนวนรางที่ต้องตัด:*
 `;for(const[S,M]of $)n+=`  - ขนาด ${S} ม. = ${M} เส้น
@@ -238,15 +238,15 @@ ${F.name}
                         <tr><td>แบบ</td><td>${k(u.style)} (${k(u.fabric_variant)})</td></tr>
                         ${u.fabric_variant.includes("ทึบ")?`<tr><td>ทึบ</td><td>#${k(u.fabric_code)||"-"}</td></tr>`:""}
                         ${u.fabric_variant.includes("โปร่ง")?`<tr><td>โปร่ง</td><td>#${k(u.sheer_fabric_code)||"-"}</td></tr>`:""}
-                        <tr><td>ขนาด</td><td>${y(u.width_m).toFixed(2)} x ${y(u.height_m).toFixed(2)} ม.</td></tr>
+                        <tr><td>ขนาด</td><td>${y(u.width_m).toFixed(2)} x ${y(u.height_m).toFixed(2)} 
                     `;break;case"wallpaper":const _=(u.widths||[]).reduce((f,h)=>f+y(h),0),p=E.wallpaperRolls(_,u.height_m);m=`
                         <tr><td>รหัส</td><td>#${k(u.wallpaper_code)||"-"}</td></tr>
-                        <tr><td>จำนวน</td><td>${p} ม้วน</td></tr>
-                        <tr><td>กว้างรวม</td><td>${_.toFixed(2)} ม.</td></tr>
+                        <tr><td>ใช้</td><td>${p} ม้วน</td></tr>
+                        <tr><td>รวม</td><td>${_.toFixed(2)} ม.</td></tr>
                         <tr><td>สูง</td><td>${y(u.height_m).toFixed(2)} ม.</td></tr>
                     `;break;default:m=`
                         <tr><td>รหัส</td><td>#${k(u.code)||"-"}</td></tr>
-                        <tr><td>ขนาด</td><td>${y(u.width_m).toFixed(2)} x ${y(u.height_m).toFixed(2)} ม.</td></tr>
+                        <tr><td>ขนาด</td><td>${y(u.width_m).toFixed(2)} x ${y(u.height_m).toFixed(2)} 
                     `;break}return m&&(a=!0),`
                  <div class="lookbook-details">
                     <div class="visual-placeholder">
