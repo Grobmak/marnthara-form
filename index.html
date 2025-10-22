@@ -22,8 +22,9 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
     </noscript>
 
-  <script type="module" crossorigin src="./assets/index-ByIWX_YI.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-yLLvwWXl.css">
+
+  <script type="module" crossorigin src="./assets/index-B3Fg31EQ.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-B3Cofpv8.css">
 </head>
 <body>
 
@@ -602,22 +603,293 @@
     </div>
 
 
-    <div id="favoritesModal" class="modal-wrapper">
-        <div class="modal-content fav-selector-modal-content"> <div class="fav-selector-header">
-                <h3 id="favoritesModalTitle">เลือกรายการ</h3>
-                <div class="fav-selector-search-wrapper">
-                    <i class="ph ph-magnifying-glass"></i>
-                    <input type="search" id="favSearchInput" placeholder="ค้นหา..." class="fav-selector-search">
+<div id="favoritesModal" class="modal-wrapper">
+    <div class="modal-content fav-selector-modal-content">
+        <div class="fav-selector-header">
+            <h3 id="favoritesModalTitle">เลือกรายการ</h3>
+            <div class="fav-selector-search-wrapper">
+                <i class="ph ph-magnifying-glass"></i>
+                <input type="search" id="favSearchInput" placeholder="ค้นหา..." class="fav-selector-search">
+            </div>
+        </div>
+        <div id="favoritesModalBody" class="fav-selector-body"></div>
+        <div class="fav-selector-footer">
+            <button type="button" class="btn btn-secondary" data-act="manage-favorites">
+                <i class="ph ph-gear"></i> จัดการ
+            </button>
+            <span style="flex-grow: 1;"></span>
+            <button id="favoritesModalCancel" type="button" class="btn btn-secondary" data-act="close-modal">
+                <i class="ph ph-x"></i> ปิด
+            </button>
+        </div>
+    </div>
+</div>
+
+    <div id="roomDefaultsModal" class="modal-wrapper">
+        <div class="modal-content room-defaults-modal-content">
+            <div class="room-defaults-header">
+                <h3><i class="ph-fill ph-sliders"></i> ตั้งค่าเริ่มต้นสำหรับห้อง</h3>
+                <button type="button" class="btn btn-secondary btn-compact" data-act="open-force-apply-modal" title="บังคับใช้ค่ากับทุกรายการ"><i class="ph ph-warning-circle"></i> บังคับ</button>
+                <button class="btn-icon close-defaults-modal" data-act="close-modal" aria-label="ปิด"><i class="ph ph-x"></i></button>
+            </div>
+
+            <div class="defaults-nav">
+                <button type="button" class="defaults-tab is-active" data-target="set">ผ้าม่าน</button>
+                <button type="button" class="defaults-tab" data-target="wallpaper">วอลล์</button>
+                <button type="button" class="defaults-tab" data-target="wooden_blind">ไม้</button>
+                <button type="button" class="defaults-tab" data-target="roller_blind">ม้วน</button>
+                <button type="button" class="defaults-tab" data-target="vertical_blind">ปรับแสง</button>
+                <button type="button" class="defaults-tab" data-target="partition">ฉาก</button>
+                <button type="button" class="defaults-tab" data-target="pleated_screen">มุ้งจีบ</button>
+                <button type="button" class="defaults-tab" data-target="aluminum_blind">อลูฯ</button>
+            </div>
+
+            <div class="defaults-content-container">
+                <form id="roomDefaultsForm">
+                    <div class="defaults-content is-active" data-type="set">
+                        <div class="defaults-enable-toggle">
+                            <label>
+                                <input type="checkbox" name="enable_defaults_set" value="1">
+                                <span>เปิดใช้งานค่าเริ่มต้นสำหรับผ้าม่าน</span>
+                            </label>
+                        </div>
+                        <div class="defaults-inputs-grid">
+                            <div class="form-group">
+                                <label>ผ้าทึบ (รหัส)
+                                    <input type="text" name="defaults_fabric_code" placeholder="-" disabled>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>ผ้าทึบ (ราคา/ม.)
+                                    <input type="text" inputmode="numeric" name="defaults_fabric_price" placeholder="0" disabled>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>ผ้าโปร่ง (รหัส)
+                                    <input type="text" name="defaults_sheer_code" placeholder="-" disabled>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>ผ้าโปร่ง (ราคา/ม.)
+                                    <input type="text" inputmode="numeric" name="defaults_sheer_price" placeholder="0" disabled>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="defaults-content" data-type="wallpaper">
+                         <div class="defaults-enable-toggle">
+                            <label>
+                                <input type="checkbox" name="enable_defaults_wallpaper" value="1">
+                                <span>เปิดใช้งานค่าเริ่มต้นสำหรับวอลล์เปเปอร์</span>
+                            </label>
+                        </div>
+                        <div class="defaults-inputs-grid">
+                            <div class="form-group">
+                                <label>รหัส
+                                    <input type="text" name="defaults_wallpaper_code" placeholder="-" disabled>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>ราคา/ม้วน
+                                    <input type="text" inputmode="numeric" name="defaults_wallpaper_price_roll" placeholder="0" disabled>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>ค่าช่าง/ม้วน
+                                    <input type="text" inputmode="numeric" name="defaults_wallpaper_install_cost" placeholder="300" disabled>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                     <div class="defaults-content" data-type="wooden_blind">
+                         <div class="defaults-enable-toggle">
+                            <label>
+                                <input type="checkbox" name="enable_defaults_wooden_blind" value="1">
+                                <span>เปิดใช้งานค่าเริ่มต้นสำหรับมู่ลี่ไม้</span>
+                            </label>
+                        </div>
+                        <div class="defaults-inputs-grid">
+                           <div class="form-group">
+                                <label>รหัส
+                                    <input type="text" name="defaults_wooden_blind_code" placeholder="-" disabled>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>ราคา/ตร.หลา
+                                    <input type="text" inputmode="numeric" name="defaults_wooden_blind_price_sqyd" placeholder="0" disabled>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="defaults-content" data-type="roller_blind">
+                         <div class="defaults-enable-toggle">
+                            <label>
+                                <input type="checkbox" name="enable_defaults_roller_blind" value="1">
+                                <span>เปิดใช้งานค่าเริ่มต้นสำหรับม่านม้วน</span>
+                            </label>
+                        </div>
+                        <div class="defaults-inputs-grid">
+                            <div class="form-group">
+                                <label>รหัส
+                                    <input type="text" name="defaults_roller_blind_code" placeholder="-" disabled>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>ราคา/ตร.หลา
+                                    <input type="text" inputmode="numeric" name="defaults_roller_blind_price_sqyd" placeholder="0" disabled>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                     <div class="defaults-content" data-type="vertical_blind">
+                         <div class="defaults-enable-toggle">
+                            <label>
+                                <input type="checkbox" name="enable_defaults_vertical_blind" value="1">
+                                <span>เปิดใช้งานค่าเริ่มต้นสำหรับม่านปรับแสง</span>
+                            </label>
+                        </div>
+                        <div class="defaults-inputs-grid">
+                           <div class="form-group">
+                                <label>รหัส
+                                    <input type="text" name="defaults_vertical_blind_code" placeholder="-" disabled>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>ราคา/ตร.หลา
+                                    <input type="text" inputmode="numeric" name="defaults_vertical_blind_price_sqyd" placeholder="0" disabled>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="defaults-content" data-type="partition">
+                         <div class="defaults-enable-toggle">
+                            <label>
+                                <input type="checkbox" name="enable_defaults_partition" value="1">
+                                <span>เปิดใช้งานค่าเริ่มต้นสำหรับฉากกั้นห้อง</span>
+                            </label>
+                        </div>
+                        <div class="defaults-inputs-grid">
+                             <div class="form-group">
+                                <label>รหัส
+                                    <input type="text" name="defaults_partition_code" placeholder="-" disabled>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>ราคา/ตร.หลา
+                                    <input type="text" inputmode="numeric" name="defaults_partition_price_sqyd" placeholder="0" disabled>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                     <div class="defaults-content" data-type="pleated_screen">
+                         <div class="defaults-enable-toggle">
+                            <label>
+                                <input type="checkbox" name="enable_defaults_pleated_screen" value="1">
+                                <span>เปิดใช้งานค่าเริ่มต้นสำหรับมุ้งจีบ</span>
+                            </label>
+                        </div>
+                        <div class="defaults-inputs-grid">
+                            <div class="form-group">
+                                <label>รหัส
+                                    <input type="text" name="defaults_pleated_screen_code" placeholder="-" disabled>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>ราคา/ตร.หลา
+                                    <input type="text" inputmode="numeric" name="defaults_pleated_screen_price_sqyd" placeholder="0" disabled>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="defaults-content" data-type="aluminum_blind">
+                         <div class="defaults-enable-toggle">
+                            <label>
+                                <input type="checkbox" name="enable_defaults_aluminum_blind" value="1">
+                                <span>เปิดใช้งานค่าเริ่มต้นสำหรับมู่ลี่อลูมิเนียม</span>
+                            </label>
+                        </div>
+                        <div class="defaults-inputs-grid">
+                             <div class="form-group">
+                                <label>รหัส
+                                    <input type="text" name="defaults_aluminum_blind_code" placeholder="-" disabled>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>ราคา/ตร.หลา
+                                    <input type="text" inputmode="numeric" name="defaults_aluminum_blind_price_sqyd" placeholder="0" disabled>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-actions room-defaults-actions">
+                 <button id="roomDefaultsApplyBtn" type="button" class="btn btn-secondary btn-compact" data-act="apply-room-defaults"><i class="ph ph-stack"></i> ใช้กับที่ว่าง</button>
+                 <button id="roomDefaultsConfirmBtn" class="btn btn-primary btn-compact"><i class="ph ph-check-circle"></i> บันทึก</button>
+                 <button type="button" class="btn btn-secondary btn-compact" data-act="manage-favorites-from-defaults"><i class="ph ph-gear"></i> จัดการโปรด</button>
+                 <button id="roomDefaultsCancelBtn" class="btn btn-secondary btn-compact">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="manageFavsTypeModal" class="modal-wrapper">
+        <div class="modal-content" style="max-width: 480px;">
+            <h3 id="manageFavsTypeModalTitle">เลือกประเภทรายการโปรด</h3>
+            <div id="manageFavsTypeBody" class="radio-card-group" style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                </div>
+            <div class="modal-actions">
+                <button id="manageFavsTypeCancel" class="btn btn-secondary">ยกเลิก</button>
+                <button id="manageFavsTypeConfirm" class="btn btn-primary">จัดการ</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="forceApplyModal" class="modal-wrapper">
+        <div class="modal-content" style="max-width: 500px;">
+            <h3><i class="ph ph-warning-circle"></i> บังคับใช้ค่าทั้งหมด</h3>
+            <div id="forceApplyBody" style="margin-top: 1rem;">
+                <p><small>เลือกประเภท, กรอกรหัสและราคา เพื่ออัปเดตทุกรายการที่ตรงกันใน ***ทุกห้อง***</small></p>
+                <div class="force-apply-controls" style="background-color: transparent; border: none; padding: 0.5rem 0 0 0;">
+                    <div class="form-group">
+                        <label>ประเภท
+                            <select name="force_apply_type">
+                                <option value="" hidden>เลือกประเภท</option>
+                                <option value="fabric">ผ้าม่าน (ผ้าทึบ)</option>
+                                <option value="sheer">ผ้าม่าน (ผ้าโปร่ง)</option>
+                                <option value="wallpaper">วอลล์เปเปอร์</option>
+                                <option value="wooden_blind">มู่ลี่ไม้</option>
+                                <option value="roller_blind">ม่านม้วน</option>
+                                <option value="vertical_blind">ม่านปรับแสง</option>
+                                <option value="partition">ฉากกั้นห้อง</option>
+                                <option value="pleated_screen">มุ้งจีบ</option>
+                                <option value="aluminum_blind">มู่ลี่อลูมิเนียม</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>รหัส
+                            <input type="text" name="force_apply_code" placeholder="รหัสที่ต้องการ">
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>ราคา
+                            <input type="text" inputmode="numeric" name="force_apply_price" placeholder="ราคาใหม่">
+                        </label>
+                    </div>
                 </div>
             </div>
-            <div id="favoritesModalBody" class="fav-selector-body"></div>
-            <div class="fav-selector-footer">
-                <button id="favoritesModalManageBtn" type="button" class="btn btn-secondary">
-                    <i class="ph ph-pencil-simple"></i> จัดการรายการโปรด
-                </button>
-                <button id="favoritesModalCancel" type="button" class="btn btn-secondary" data-act="close-modal">
-                    <i class="ph ph-x"></i> ปิด
-                </button>
+            <div class="modal-actions" style="justify-content: space-between; margin-top: 1.5rem;">
+                <button id="forceApplyCancel" class="btn btn-secondary">ยกเลิก</button>
+                <button id="forceApplyConfirm" class="btn btn-danger" data-act="force-apply-defaults"><i class="ph ph-arrow-bend-double-up-right"></i> บังคับใช้</button>
             </div>
         </div>
     </div>
@@ -660,6 +932,8 @@
                             <i class="ph-bold ph-gear-six"></i>
                         </button>
                         <div class="room-options-menu">
+                            <a href="#" data-act="open-room-defaults"><i class="ph ph-sliders"></i> <span>ตั้งค่าเริ่มต้นห้อง</span></a>
+                            <hr>
                             <a href="#" data-act="toggle-suspend-room"><i class="ph ph-pause-circle"></i> <span>ระงับ/ใช้งานห้องนี้</span></a>
                             <a href="#" data-act="clear-room"><i class="ph ph-eraser"></i> ล้างทุกรายการในห้อง</a>
                             <a href="#" data-act="del-room" class="danger"><i class="ph ph-trash"></i> ลบห้องนี้</a>
