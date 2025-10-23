@@ -23,7 +23,7 @@
     </noscript>
 
 
-  <script type="module" crossorigin src="./assets/index-DRoE5f2N.js"></script>
+  <script type="module" crossorigin src="./assets/index-CUbio8VJ.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-jJ0OPFbd.css">
 </head>
 <body>
@@ -153,7 +153,6 @@
 
     <div id="printable-content" aria-hidden="true"></div>
 
-    <!-- New Dimension Entry Modal -->
     <div id="dimensionEntryModal" class="modal-wrapper">
         <div class="modal-content" style="max-width: 350px;">
             <h3><i class="ph ph-ruler"></i> ระบุขนาด (กว้าง x สูง)</h3>
@@ -161,11 +160,11 @@
                 <div class="dimension-input-row">
                     <div class="form-group">
                         <label class="visually-hidden">กว้าง (ม.)</label>
-                        <input type="number" step="0.01" inputmode="decimal" name="modal_width_m" placeholder="กว้าง">
+                        <input type="number" inputmode="numeric" name="modal_width_m" placeholder="กว้าง">
                     </div>
                     <div class="form-group">
                         <label class="visually-hidden">สูง (ม.)</label>
-                        <input type="number" step="0.01" inputmode="decimal" name="modal_height_m" placeholder="สูง">
+                        <input type="number" inputmode="numeric" name="modal_height_m" placeholder="สูง">
                     </div>
                     <button type="button" class="btn-icon btn-icon-small danger btn-remove-dimension-row" data-act="remove-dimension-row" title="ลบขนาด" aria-label="ลบขนาดแถวนี้"><i class="ph-bold ph-x"></i></button>
                 </div>
@@ -1088,12 +1087,12 @@
             <div class="item-grid">
                 <div class="form-group">
                     <label>กว้าง (ม.)
-                        <input type="number" step="0.01" inputmode="decimal" name="width_m" placeholder="0.00">
+                        <input type="number" inputmode="numeric" name="width_m" placeholder="0.00">
                     </label>
                 </div>
                 <div class="form-group">
                     <label>สูง (ม.)
-                        <input type="number" step="0.01" inputmode="decimal" name="height_m" placeholder="0.00">
+                        <input type="number" inputmode="numeric" name="height_m" placeholder="0.00">
                     </label>
                 </div>
                 <div class="form-group">
@@ -1103,6 +1102,7 @@
                             <option value="ตาไก่">ตาไก่</option>
                             <option value="จีบ">จีบ</option>
                             <option value="ม่านพับ">ม่านพับ</option>
+                            <option value="ม่านแป๊บ">ม่านแป๊บ</option>
                             <option value="หลุยส์">หลุยส์</option> </select>
                     </label>
                 </div>
@@ -1208,12 +1208,12 @@
             <div class="item-grid">
                 <div class="form-group">
                     <label>กว้าง (ม.)
-                        <input type="number" step="0.01" inputmode="decimal" name="area_width_m" placeholder="0.00">
+                        <input type="number" inputmode="numeric" name="area_width_m" placeholder="0.00">
                     </label>
                 </div>
                  <div class="form-group">
                     <label>สูง (ม.)
-                        <input type="number" step="0.01" inputmode="decimal" name="area_height_m" placeholder="0.00">
+                        <input type="number" inputmode="numeric" name="area_height_m" placeholder="0.00">
                     </label>
                 </div>
                  <div class="form-group full-width-item">
@@ -1277,7 +1277,7 @@
             <div class="item-grid">
                 <div class="form-group">
                     <label>สูง (ม.)
-                        <input type="number" step="0.01" inputmode="decimal" name="wallpaper_height_m" placeholder="0.00">
+                        <input type="number" inputmode="numeric" name="wallpaper_height_m" placeholder="0.00">
                     </label>
                 </div>
                  <div class="form-group full-width-item">
@@ -1323,14 +1323,13 @@
     <template id="wallTpl">
         <div class="wall-input-row">
             <label for="wall_width_m_tpl" class="visually-hidden">ความกว้างผนัง</label>
-            <input id="wall_width_m_tpl" type="number" step="0.01" inputmode="decimal" name="wall_width_m" placeholder="0.00">
+            <input id="wall_width_m_tpl" type="number" inputmode="numeric" name="wall_width_m" placeholder="0.00">
             <button type="button" class="btn-icon btn-icon-small danger" data-act="del-wall" title="ลบผนัง" aria-label="ลบผนัง">
                 <i class="ph-bold ph-x"></i>
             </button>
         </div>
     </template>
 
-    <!-- New Placeholder Item Template -->
     <template id="placeholderItemTpl">
         <div class="item-card placeholder-item" data-width-m="0" data-height-m="0">
              <div class="item-header">
